@@ -1,13 +1,12 @@
 #include "Core.h"
-
-#include <iostream>
+#include "VulkanAPI/VulkanInit.h"
 
 namespace Core {
 
-	void PrintHelloWorld()
+	void RunEngine(int widht, int height, std::string appName)
 	{
-		std::cout << "Hello World!\n";
-		std::cin.get();
+		VULKAN::VulkanInit window{ widht, height, appName };
+		window.Run();
 	}
 
 }

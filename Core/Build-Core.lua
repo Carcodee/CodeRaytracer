@@ -5,11 +5,26 @@ project "Core"
    targetdir "Binaries/%{cfg.buildcfg}"
    staticruntime "off"
 
-   files { "Source/**.h", "Source/**.cpp" }
+   files { "Source/**.h", "Source/**.cpp", "Source/**.hpp" }
 
    includedirs
    {
-      "Source"
+      "Source",
+      "Source/Libraries/glfw-3.3.9.bin.WIN64/include",
+      "Source/Libraries/glm",
+      "C:/VulkanSDK/1.3.268.0/Include"
+   }
+   libdirs
+   {
+      "Source/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022",
+      "C:/VulkanSDK/1.3.268.0/Lib",
+
+   }
+
+   links
+   {
+      "glfw3",
+      "vulkan-1",
    }
 
    targetdir ("../Binaries/" .. OutputDir .. "/%{prj.name}")

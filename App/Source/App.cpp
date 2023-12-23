@@ -1,6 +1,10 @@
 #include "Core/Core.h"
+#include "iostream"
+
+#include "string"
 
 int main()
 {
-	Core::PrintHelloWorld();
+	Core::RunEngine(800, 600, "AppName");
+
 }
