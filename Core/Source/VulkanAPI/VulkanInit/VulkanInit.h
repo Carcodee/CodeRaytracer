@@ -10,6 +10,8 @@
 #include <iostream>
 #include <string>
 
+#include <direct.h>
+
 namespace VULKAN {
 
 	class VulkanInit
@@ -17,14 +19,22 @@ namespace VULKAN {
 	public: 
 		VulkanInit(int w, int h, std::string name);
 		void InitWindow();
+		VulkanInit(const VulkanInit&) = delete;
+		VulkanInit& operator=(const VulkanInit&) = delete;
+
+		bool ShouldClose() { return glfwWindowShouldClose(window) ; }
 		void Run();
+		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 		~VulkanInit();
+
 
 	private:
 		const int widht;
 		const int height;
 		std::string appName;
 		GLFWwindow* window;
+
+
 	};
 }
 
