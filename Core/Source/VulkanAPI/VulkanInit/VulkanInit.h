@@ -33,6 +33,7 @@ namespace VULKAN {
 		const int height;
 		std::string appName;
 		GLFWwindow* window;
+		VkInstance myInstance;
 
 
 	};

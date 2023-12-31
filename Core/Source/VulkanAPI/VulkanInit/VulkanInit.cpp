@@ -38,6 +38,7 @@ namespace VULKAN {
 		{
 			throw std::runtime_error("Failed to create window surface");
 		}
+		myInstance = instance;
 
 	}
 	VulkanInit::~VulkanInit()
