@@ -23,12 +23,14 @@ namespace VULKAN {
 		VulkanInit& operator=(const VulkanInit&) = delete;
 
 		bool ShouldClose() { return glfwWindowShouldClose(window) ; }
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(widht), static_cast<uint32_t>(height) }; }
 		void Run();
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 		~VulkanInit();
 
 
 	private:
+
 		const int widht;
 		const int height;
 		std::string appName;

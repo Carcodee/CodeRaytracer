@@ -2,8 +2,10 @@
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
+#include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 
-
+#include <memory>
+#include <vector>
 namespace VULKAN {
 
 	class VulkanApp
@@ -13,16 +15,23 @@ namespace VULKAN {
 		static constexpr int HEIGHT = 600;
 
 		void Run();
+		VulkanApp();
+		~VulkanApp();
+		VulkanApp(const VulkanApp&) = delete;
+		VulkanApp& operator=(const VulkanApp&) = delete;
 
 	private:
-		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
-		MyVulkanDevice device{ initWindow };
+		void CreatePipelineLayout();
+		void CreatePipeline();
+		void CreateCommandBuffer();
+		void DrawFrame();
 
-		PipelineReader pipelineReader{ device,
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.vert.spv",
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.frag.spv",
-			PipelineReader::DefaultPipelineDefaultConfigInfo(WIDTH, HEIGHT)};
-		
+		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
+		MyVulkanDevice myDevice{ initWindow };
+		VulkanSwapChain swapChain{ myDevice, initWindow.getExtent() };
+		std::unique_ptr<PipelineReader> pipelineReader;
+		VkPipelineLayout pipelineLayout;
+		std::vector<VkCommandBuffer> commandBuffer;
 
 	};
 

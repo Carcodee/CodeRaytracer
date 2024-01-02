@@ -100,7 +100,7 @@ namespace VULKAN
 
 	std::vector<char> PipelineReader::ReadFile(const std::string& filepath)
 	{
-		std::ifstream file(filepath, std::ios::ate, std::ios::binary);
+		std::ifstream file(filepath, std::ios::ate | std::ios::binary);
 		
 		if (!file.is_open())
 		{
@@ -124,65 +124,66 @@ namespace VULKAN
 
 		CreateShaderModule(vertCode, &vertShaderModule);
 		CreateShaderModule(fragcode, &fragShaderModule);
-		//assert(configInfo.pipelineLayout != VK_NULL_HANDLE &&
-		//	"Cannor create graphics pipeline:: no pipelineLayout provided in configInfo");
 
-		//assert(configInfo.renderPass != VK_NULL_HANDLE &&
-		//	"Cannor create graphics pipeline:: no pipelineLayout provided in configInfo");
+		assert(configInfo.pipelineLayout != VK_NULL_HANDLE &&
+			"Cannor create graphics pipeline:: no pipelineLayout provided in configInfo");
 
-		//VkPipelineShaderStageCreateInfo shaderStage[2];
+		assert(configInfo.renderPass != VK_NULL_HANDLE &&
+			"Cannor create graphics pipeline:: no pipelineLayout provided in configInfo");
 
-		//shaderStage[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		//shaderStage[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		//shaderStage[0].module = vertShaderModule;
-		//shaderStage[0].pName = "main";
-		//shaderStage[0].flags = 0;
-		//shaderStage[0].pNext = nullptr;
-		//shaderStage[0].pSpecializationInfo = nullptr;
+		VkPipelineShaderStageCreateInfo shaderStage[2];
 
-		//shaderStage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		//shaderStage[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		//shaderStage[1].module = fragShaderModule;
-		//shaderStage[1].pName = "main";
-		//shaderStage[1].flags = 0;
-		//shaderStage[1].pNext = nullptr;
-		//shaderStage[1].pSpecializationInfo = nullptr;
+		shaderStage[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+		shaderStage[0].module = vertShaderModule;
+		shaderStage[0].pName = "main";
+		shaderStage[0].flags = 0;
+		shaderStage[0].pNext = nullptr;
+		shaderStage[0].pSpecializationInfo = nullptr;
 
-		//VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		//vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		//vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		//vertexInputInfo.vertexBindingDescriptionCount = 0;
-		//vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-		//vertexInputInfo.pVertexBindingDescriptions = nullptr;
+		shaderStage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		shaderStage[1].module = fragShaderModule;
+		shaderStage[1].pName = "main";
+		shaderStage[1].flags = 0;
+		shaderStage[1].pNext = nullptr;
+		shaderStage[1].pSpecializationInfo = nullptr;
 
-		//VkPipelineViewportStateCreateInfo viewportInfo{};
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.vertexAttributeDescriptionCount = 0;
+		vertexInputInfo.vertexBindingDescriptionCount = 0;
+		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+		vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
-		//viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		//viewportInfo.viewportCount = 1;
-		//viewportInfo.pViewports = &configInfo.viewport;
-		//viewportInfo.scissorCount = 1;
-		//viewportInfo.pScissors = &configInfo.scissor;
+		VkPipelineViewportStateCreateInfo viewportInfo{};
 
-		//VkGraphicsPipelineCreateInfo pipelineInfo{};
-		//pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		//pipelineInfo.stageCount = 2;
-		//pipelineInfo.pStages = shaderStage;
-		//pipelineInfo.pVertexInputState = &vertexInputInfo;
-		//pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-		//pipelineInfo.pViewportState = &viewportInfo;
-		//pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
-		//pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
-		//pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
-		//pipelineInfo.pDynamicState = nullptr;
+		viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		viewportInfo.viewportCount = 1;
+		viewportInfo.pViewports = &configInfo.viewport;
+		viewportInfo.scissorCount = 1;
+		viewportInfo.pScissors = &configInfo.scissor;
 
-		//pipelineInfo.layout = configInfo.pipelineLayout;
-		//pipelineInfo.renderPass = configInfo.renderPass;
-		//pipelineInfo.subpass = configInfo.subpass;
+		VkGraphicsPipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.stageCount = 2;
+		pipelineInfo.pStages = shaderStage;
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
+		pipelineInfo.pViewportState = &viewportInfo;
+		pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
+		pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+		pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
+		pipelineInfo.pDynamicState = nullptr;
 
-		//if (vkCreateGraphicsPipelines(myVulkanDevice.device(), VK_NULL_HANDLE,1, &pipelineInfo, nullptr, &graphicsPipeline)!=VK_SUCCESS)
-		//{
-		//	throw std::runtime_error("Failed to create graphics pipeline");
-		//}
+		pipelineInfo.layout = configInfo.pipelineLayout;
+		pipelineInfo.renderPass = configInfo.renderPass;
+		pipelineInfo.subpass = configInfo.subpass;
+
+		if (vkCreateGraphicsPipelines(myVulkanDevice.device(), VK_NULL_HANDLE,1, &pipelineInfo, nullptr, &graphicsPipeline)!=VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create graphics pipeline");
+		}
 
 
 	}
