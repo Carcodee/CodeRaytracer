@@ -10,6 +10,7 @@ namespace VULKAN{
 
 	VulkanApp::VulkanApp()
 	{
+		LoadModels();
 		CreatePipelineLayout();
 		CreatePipeline();
 		CreateCommandBuffer();
@@ -19,6 +20,16 @@ namespace VULKAN{
 	{
 		vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
 
+	}
+
+	void VulkanApp::LoadModels()
+	{
+		std::vector<MyModel::Vertex> vertices{
+			{{0.0f, -0.5f}},
+			{{-0.5f, -0.5f}},
+			{{0.5f, 0.5f}}
+		};
+		myModel = std::make_unique<MyModel>(myDevice.device(), vertices);
 	}
 
 	void VulkanApp::CreatePipelineLayout()
@@ -42,8 +53,8 @@ namespace VULKAN{
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.vert",
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.frag",
+			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.vert.spv",
+			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.frag.spv",
 			pipelineConfig
 
 		);

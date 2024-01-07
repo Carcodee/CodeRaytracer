@@ -3,7 +3,7 @@
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
 #include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
-
+#include "VulkanAPI/Model/MyModel.h"
 #include <memory>
 #include <vector>
 namespace VULKAN {
@@ -21,6 +21,7 @@ namespace VULKAN {
 		VulkanApp& operator=(const VulkanApp&) = delete;
 
 	private:
+		void LoadModels();
 		void CreatePipelineLayout();
 		void CreatePipeline();
 		void CreateCommandBuffer();
@@ -32,6 +33,7 @@ namespace VULKAN {
 		std::unique_ptr<PipelineReader> pipelineReader;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffer;
+		std::unique_ptr<MyModel> myModel;
 
 	};
 

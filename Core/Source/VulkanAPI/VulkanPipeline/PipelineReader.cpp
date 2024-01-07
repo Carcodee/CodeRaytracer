@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cassert>
 
+
 namespace VULKAN
 {
 	PipelineReader::PipelineReader(	
@@ -101,21 +102,25 @@ namespace VULKAN
 	std::vector<char> PipelineReader::ReadFile(const std::string& filepath)
 	{
 		std::ifstream file(filepath, std::ios::ate | std::ios::binary);
-		
+
 		if (!file.is_open())
 		{
 			throw std::runtime_error("failed to open file: " + filepath);
 		}
+
 		size_t fileSize = static_cast<size_t>(file.tellg());
 		std::vector<char> buffer(fileSize);
-		
+
 		file.seekg(0);
 		file.read(buffer.data(), fileSize);
 
 		file.close();
 
+		std::cout << "Read SPIR-V file of size: " << fileSize << " bytes." << std::endl;
+
 		return buffer;
 	}
+	
 
 	void PipelineReader::CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo configInfo)
 	{
@@ -149,12 +154,17 @@ namespace VULKAN
 		shaderStage[1].pNext = nullptr;
 		shaderStage[1].pSpecializationInfo = nullptr;
 
+
+		auto bindingDescription = MyModel::Vertex::GetBindingDescription();
+		auto attributeDescription = MyModel::Vertex::GetAttributeDescription();
+
+
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
-		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-		vertexInputInfo.pVertexBindingDescriptions = nullptr;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.size());
+		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescription.size());
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescription.data();
+		vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
 
 		VkPipelineViewportStateCreateInfo viewportInfo{};
 
@@ -195,7 +205,7 @@ namespace VULKAN
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 		
-		if (vkCreateShaderModule(myVulkanDevice.device(), &createInfo, nullptr, shaderModule) !=VK_SUCCESS)
+		if (vkCreateShaderModule(myVulkanDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create shader module");
 		}

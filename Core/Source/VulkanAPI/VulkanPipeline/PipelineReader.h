@@ -2,6 +2,7 @@
 
 #include <string>
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
+#include "VulkanAPI/Model/MyModel.h"
 #include <vector>
 
 
