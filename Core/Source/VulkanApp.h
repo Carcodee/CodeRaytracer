@@ -4,16 +4,13 @@
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
 #include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 #include "VulkanAPI/Model/MyModel.h"
+#include "VulkanAPI/Utility/Utility.h"
 #include <memory>
 #include <vector>
 namespace VULKAN {
 
 
-	struct triangle
-	{
-		std::vector<MyModel::Vertex> vertices;
-		
-	};
+
 	class VulkanApp
 	{
 	public:
@@ -32,19 +29,18 @@ namespace VULKAN {
 		void CreatePipeline();
 		void CreateCommandBuffer();
 		void DrawFrame();
-		std::vector<triangle> FindTriangles(std::vector<triangle> myTriangle, int deep);
-		std::vector<triangle> FindTriMidPoint(triangle myTriangle);
-		std::vector<MyModel::Vertex> GetAllVertexFlatten(std::vector<triangle> triangles);
+		void RecreateSwapChain();
+		void RecordCommandBuffer(int imageIndex);
 		
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };
-		VulkanSwapChain swapChain{ myDevice, initWindow.getExtent() };
 		std::unique_ptr<PipelineReader> pipelineReader;
+		std::unique_ptr<VulkanSwapChain> swapChain;
+
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffer;
 		std::unique_ptr<MyModel> myModel;
-		int deepness = 0;
 	};
 
 }

@@ -14,8 +14,16 @@ namespace VULKAN {
 
 		struct Vertex {
 			glm::vec2 position;
+			glm::vec3 color;
+
 			static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
 			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
+
+		};
+		struct triangle
+		{
+			std::vector<Vertex> vertices;
+
 
 		};
 

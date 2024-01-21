@@ -22,17 +22,26 @@ namespace VULKAN {
 		VulkanInit(const VulkanInit&) = delete;
 		VulkanInit& operator=(const VulkanInit&) = delete;
 
-		bool ShouldClose() { return glfwWindowShouldClose(window) ; }
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(widht), static_cast<uint32_t>(height) }; }
+		bool ShouldClose() { return glfwWindowShouldClose(window); }
+		bool WasWindowResized() { return framebufferResized; }
+		void ResetWindowResizedFlag() { framebufferResized = false; }
+
+		
+
 		void Run();
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
 		~VulkanInit();
 
 
 	private:
 
-		const int widht;
-		const int height;
+		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
+		int widht;
+		int height;
+		bool framebufferResized = false;
+
 		std::string appName;
 		GLFWwindow* window;
 		VkInstance myInstance;

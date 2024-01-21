@@ -20,7 +20,7 @@ class VulkanSwapChain {
   ~VulkanSwapChain();
 
   VulkanSwapChain(const VulkanSwapChain &) = delete;
-  void operator=(const VulkanSwapChain &) = delete;
+  VulkanSwapChain& operator=(const VulkanSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
@@ -40,6 +40,7 @@ class VulkanSwapChain {
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+
   void createSwapChain();
   void createImageViews();
   void createDepthResources();

@@ -35,7 +35,7 @@ namespace VULKAN{
 		~PipelineReader();
 
 		PipelineReader(const PipelineReader&) = delete;
-		void operator=(const PipelineReader&) = delete;
+		PipelineReader& operator=(const PipelineReader&) = delete;
 
 		static PipelineConfigInfo DefaultPipelineDefaultConfigInfo(uint32_t width, uint32_t height);
 

@@ -17,7 +17,7 @@ namespace VULKAN{
 	{
 		LoadModels();
 		CreatePipelineLayout();
-		CreatePipeline();
+		RecreateSwapChain();
 		CreateCommandBuffer();
 	}
 
@@ -30,22 +30,14 @@ namespace VULKAN{
 	void VulkanApp::LoadModels()
 	{
 		std::vector<MyModel::Vertex> vertices{
-			{{1.0f, 1.0f}},
-			{{0.0f, -1.0f}},
-			{{-1.0f, 1.0f}},
+			{{1.0f, 1.0f}, {1.0f, 0.0f,0.0f}},
+			{{0.0f, -1.0f}, {0.0f, 1.0f,0.0f}},
+			{{-1.0f, 1.0f}, {0.0f, 0.0f,1.0f}}
 		};
 
-		std::vector<triangle> triangles;
 
-		triangle tri{};
-		tri.vertices = vertices;
-		triangles.push_back(tri);
+		std::vector<MyModel::Vertex> newVertices = GetVertexPosForRecursiveTriangles(vertices, 5);
 
-		triangles = FindTriangles(triangles,5);
-
-		std::vector<MyModel::Vertex> newVertices = GetAllVertexFlatten(triangles);
-
-		std::cout <<"Size of vertices: "<< newVertices.size() << "\n";
 
 		
 		myModel = std::make_unique<MyModel>(myDevice, newVertices);
@@ -70,7 +62,7 @@ namespace VULKAN{
 	void VulkanApp::CreatePipeline()
 	{
 		auto pipelineConfig = PipelineReader::DefaultPipelineDefaultConfigInfo(WIDTH, HEIGHT);
-		pipelineConfig.renderPass = swapChain.getRenderPass();
+		pipelineConfig.renderPass = swapChain->getRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,
@@ -83,7 +75,7 @@ namespace VULKAN{
 
 	void VulkanApp::CreateCommandBuffer()
 	{
-		commandBuffer.resize(swapChain.imageCount());
+		commandBuffer.resize(swapChain->imageCount());
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -94,56 +86,32 @@ namespace VULKAN{
 		{
 			throw std::runtime_error("Failed to allocate command buffers!");
 		}
-		for (int i = 0; i < commandBuffer.size(); i++)
-		{
-			VkCommandBufferBeginInfo beginInfo{};beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			if (vkBeginCommandBuffer(commandBuffer[i], &beginInfo)!= VK_SUCCESS)
-			{
-				throw std::runtime_error("Failed to begin recording command buffer!");
-			}
 
-			VkRenderPassBeginInfo renderPassBeginInfo{};
-			renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			renderPassBeginInfo.renderPass = swapChain.getRenderPass();
-			renderPassBeginInfo.framebuffer = swapChain.getFrameBuffer(i);
-			renderPassBeginInfo.renderArea.offset = { 0,0 };
-			renderPassBeginInfo.renderArea.extent = swapChain.getSwapChainExtent();
-
-			std::array<VkClearValue, 2> clearValues{};
-			clearValues[0].color = { 0.1f, 0.1f, 0.1f, 0.1f };
-			clearValues[1].depthStencil = { 1.0f, 0 };
-			renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-			renderPassBeginInfo.pClearValues = clearValues.data();
-			vkCmdBeginRenderPass(commandBuffer[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-
-			pipelineReader->bind(commandBuffer[i]);
-
-			//vkCmdDraw(commandBuffer[i], 3, 1, 0, 0);
-			myModel->Bind(commandBuffer[i]);
-			myModel->Draw(commandBuffer[i]);
-			
-
-
-			vkCmdEndRenderPass(commandBuffer[i]);
-			if (vkEndCommandBuffer(commandBuffer[i])!= VK_SUCCESS)
-			{
-				throw std::runtime_error("Failed to record command buffer!");
-			}
-		}
 		 
 	}
 
 	void VulkanApp::DrawFrame()
 	{
 		uint32_t imageIndex;
-		auto result = swapChain.acquireNextImage(&imageIndex);
+		auto result = swapChain->acquireNextImage(&imageIndex);
 
+		if (result== VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapChain();
+			return;
+		}
 		if (result!= VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		result = swapChain.submitCommandBuffers(&commandBuffer[imageIndex], &imageIndex);
+		RecordCommandBuffer(imageIndex);
+		result = swapChain->submitCommandBuffers(&commandBuffer[imageIndex], &imageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || initWindow.WasWindowResized()) {
+			initWindow.ResetWindowResizedFlag();
+			RecreateSwapChain();
+			return;
+		}
+
 		if (result!= VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to present swap chain image!");
@@ -152,91 +120,63 @@ namespace VULKAN{
 
 	}
 
-	std::vector<triangle> VulkanApp::FindTriangles(std::vector<triangle>  myTriangle,int deep)
+	void VulkanApp::RecreateSwapChain()
 	{
-		std::vector<triangle> triangles;
-		if (deepness>=deep)
+		auto extend = initWindow.getExtent();
+		while (extend.width == 0 || extend.height == 0)
 		{
-			std::cout << "Deepnesss: " <<deepness << "\n";
-
-			return myTriangle;
+			extend = initWindow.getExtent();
+			glfwWaitEvents();
 		}
-		else
-		{
-			int tris = 0;
-			for (size_t i = 0; i < myTriangle.size(); i++)
+		vkDeviceWaitIdle(myDevice.device());
+		swapChain = nullptr;
+
+		swapChain = std::make_unique<VulkanSwapChain>(myDevice, extend);
+
+		CreatePipeline();
+	}
+
+	void VulkanApp::RecordCommandBuffer(int imageIndex)
+	{
+
+			VkCommandBufferBeginInfo beginInfo{};
+			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			if (vkBeginCommandBuffer(commandBuffer[imageIndex], &beginInfo) != VK_SUCCESS)
 			{
-				std::vector<triangle> newTris = FindTriMidPoint(myTriangle[i]);
-
-				for (size_t j = 0; j < newTris.size(); j++)
-				{
-					triangles.push_back(newTris[j]);
-
-					tris++;
-				}
+				throw std::runtime_error("Failed to begin recording command buffer!");
 			}
-			deepness++;
-			return FindTriangles(triangles, deep);
-		}
 
-	}
+			VkRenderPassBeginInfo renderPassBeginInfo{};
+			renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			renderPassBeginInfo.renderPass = swapChain->getRenderPass();
+			renderPassBeginInfo.framebuffer = swapChain->getFrameBuffer(imageIndex);
+			renderPassBeginInfo.renderArea.offset = { 0,0 };
+			renderPassBeginInfo.renderArea.extent = swapChain->getSwapChainExtent();
 
-	std::vector<triangle> VulkanApp::FindTriMidPoint(triangle myTriangle)
-	{
-		std::vector<triangle> triangles;
+			std::array<VkClearValue, 2> clearValues{};
+			clearValues[0].color = { 0.1f, 0.1f, 0.1f, 0.1f };
+			clearValues[1].depthStencil = { 1.0f, 0 };
+			renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+			renderPassBeginInfo.pClearValues = clearValues.data();
+			vkCmdBeginRenderPass(commandBuffer[imageIndex], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-		MyModel::Vertex vertex3{};
-		MyModel::Vertex vertex4{};
-		MyModel::Vertex vertex5{};
 
-		vertex3.position =((myTriangle.vertices[0].position + myTriangle.vertices[1].position) / 2.0f);
-		vertex4.position = ((myTriangle.vertices[1].position + myTriangle.vertices[2].position) / 2.0f);
-		vertex5.position = ((myTriangle.vertices[2].position + myTriangle.vertices[0].position) / 2.0f);
+			pipelineReader->bind(commandBuffer[imageIndex]);
 
-		// Triangle at the corner 0
-		triangle tri0{};
-		tri0.vertices.push_back(myTriangle.vertices[0]);
-		tri0.vertices.push_back(vertex3);
-		tri0.vertices.push_back(vertex5);
-		triangles.push_back(tri0);
-
-		// Triangle at the corner 1
-		triangle tri1{};
-		tri1.vertices.push_back(vertex3);
-		tri1.vertices.push_back(myTriangle.vertices[1]);
-		tri1.vertices.push_back(vertex4);
-		triangles.push_back(tri1);
-
-		// Triangle at the corner 2
-		triangle tri2{};
-		tri2.vertices.push_back(vertex5);
-		tri2.vertices.push_back(vertex4);
-		tri2.vertices.push_back(myTriangle.vertices[2]);
-		triangles.push_back(tri2);
+			//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
+			myModel->Bind(commandBuffer[imageIndex]);
+			myModel->Draw(commandBuffer[imageIndex]);
 
 
 
-		return triangles;
-	}
-
-	std::vector<MyModel::Vertex> VulkanApp::GetAllVertexFlatten(std::vector<triangle> triangles)
-	{
-		std::vector<MyModel::Vertex> vertices;
-		for (size_t i = 0; i < triangles.size(); i++)
-		{
-			std::cout << "TRIANGLE= " << i << "\n";
-			for (size_t j = 0; j < 3; j++)
+			vkCmdEndRenderPass(commandBuffer[imageIndex]);
+			if (vkEndCommandBuffer(commandBuffer[imageIndex]) != VK_SUCCESS)
 			{
-				vertices.push_back(triangles[i].vertices[j]);
-				
-
+				throw std::runtime_error("Failed to record command buffer!");
 			}
-			std::cout << "\n";
-
-		}
-
-		return vertices;
+		
 	}
+
 
 }
 

@@ -51,11 +51,17 @@ namespace VULKAN {
 
 	std::vector<VkVertexInputAttributeDescription> MyModel::Vertex::GetAttributeDescription()
 	{
-		std::vector<VkVertexInputAttributeDescription>attributeDescription(1);
+		std::vector<VkVertexInputAttributeDescription>attributeDescription(2);
 		attributeDescription[0].binding = 0;
 		attributeDescription[0].location= 0;
 		attributeDescription[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescription[0].offset = 0;
+		attributeDescription[0].offset = offsetof(Vertex, position);
+
+		attributeDescription[1].binding = 0;
+		attributeDescription[1].location = 1;
+		attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescription[1].offset = offsetof(Vertex, color);
+
 		return attributeDescription;
 
 	}
