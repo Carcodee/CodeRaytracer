@@ -38,16 +38,17 @@ namespace VULKAN {
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(myDevice.device(), vertexBufferMemory);
 	}
+
 	std::vector<VkVertexInputBindingDescription> MyModel::Vertex::GetBindingDescription()
 	{
 		 std::vector<VkVertexInputBindingDescription> bindingDescription(1);
 		 bindingDescription[0].binding = 0;
 		 bindingDescription[0].stride= sizeof(Vertex);
-		 bindingDescription[0].binding = VK_VERTEX_INPUT_RATE_VERTEX;
+		 bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		 return bindingDescription;
 
-
 	}
+
 	std::vector<VkVertexInputAttributeDescription> MyModel::Vertex::GetAttributeDescription()
 	{
 		std::vector<VkVertexInputAttributeDescription>attributeDescription(1);

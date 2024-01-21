@@ -38,12 +38,15 @@ namespace VULKAN{
 		void operator=(const PipelineReader&) = delete;
 
 		static PipelineConfigInfo DefaultPipelineDefaultConfigInfo(uint32_t width, uint32_t height);
+
+		void bind(VkCommandBuffer commandBuffer);
+
 	private:
 
 		static std::vector <char> ReadFile(const std::string& filepath);
 
 		void CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo configInfo);
-			
+			 
 		void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
 		MyVulkanDevice& myVulkanDevice;

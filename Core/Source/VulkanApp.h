@@ -8,6 +8,12 @@
 #include <vector>
 namespace VULKAN {
 
+
+	struct triangle
+	{
+		std::vector<MyModel::Vertex> vertices;
+		
+	};
 	class VulkanApp
 	{
 	public:
@@ -26,6 +32,10 @@ namespace VULKAN {
 		void CreatePipeline();
 		void CreateCommandBuffer();
 		void DrawFrame();
+		std::vector<triangle> FindTriangles(std::vector<triangle> myTriangle, int deep);
+		std::vector<triangle> FindTriMidPoint(triangle myTriangle);
+		std::vector<MyModel::Vertex> GetAllVertexFlatten(std::vector<triangle> triangles);
+		
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };
@@ -34,7 +44,7 @@ namespace VULKAN {
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffer;
 		std::unique_ptr<MyModel> myModel;
-
+		int deepness = 0;
 	};
 
 }

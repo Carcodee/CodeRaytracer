@@ -96,7 +96,20 @@ namespace VULKAN
 		configInfo.depthStencilInfo.front = {};  // Optional
 		configInfo.depthStencilInfo.back = {};   // Optional
 
+		VkPipelineDepthStencilStateCreateInfo depthStencil{};
+		configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		configInfo.depthStencilInfo.depthTestEnable = VK_TRUE;  // Enable depth test
+		configInfo.depthStencilInfo.depthWriteEnable = VK_TRUE; // Enable depth write
+		configInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS; // Depth comparison operation
+		configInfo.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;    // Depth bounds test: not used here
+		configInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
+
 		return configInfo;
+	}
+
+	void PipelineReader::bind(VkCommandBuffer commandBuffer)
+	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 	}
 
 	std::vector<char> PipelineReader::ReadFile(const std::string& filepath)
@@ -162,17 +175,19 @@ namespace VULKAN
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.size());
-		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescription.size());
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescription.data();
+		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescription.size());
 		vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
 
 		VkPipelineViewportStateCreateInfo viewportInfo{};
-
 		viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		viewportInfo.viewportCount = 1;
 		viewportInfo.pViewports = &configInfo.viewport;
 		viewportInfo.scissorCount = 1;
 		viewportInfo.pScissors = &configInfo.scissor;
+
+
+
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -185,10 +200,14 @@ namespace VULKAN
 		pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
 		pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
 		pipelineInfo.pDynamicState = nullptr;
+		pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 
 		pipelineInfo.layout = configInfo.pipelineLayout;
 		pipelineInfo.renderPass = configInfo.renderPass;
 		pipelineInfo.subpass = configInfo.subpass;
+
+		pipelineInfo.basePipelineIndex = -1;
+		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 		if (vkCreateGraphicsPipelines(myVulkanDevice.device(), VK_NULL_HANDLE,1, &pipelineInfo, nullptr, &graphicsPipeline)!=VK_SUCCESS)
 		{

@@ -8,7 +8,6 @@
 #include <limits>
 #include <set>
 #include <stdexcept>
-
 namespace VULKAN {
 
 VulkanSwapChain::VulkanSwapChain(MyVulkanDevice &deviceRef, VkExtent2D extent)
@@ -26,7 +25,6 @@ VulkanSwapChain::~VulkanSwapChain() {
     vkDestroyImageView(device.device(), imageView, nullptr);
   }
   swapChainImageViews.clear();
-
   if (swapChain != nullptr) {
     vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
     swapChain = nullptr;

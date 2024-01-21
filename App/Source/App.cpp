@@ -6,5 +6,5 @@
 int main()
 {
 	Core::RunEngine(800, 600, "AppName");
-
+	return 0;
 }
