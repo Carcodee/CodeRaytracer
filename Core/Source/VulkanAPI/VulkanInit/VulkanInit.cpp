@@ -24,7 +24,7 @@ namespace VULKAN {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		window = glfwCreateWindow(widht, height, appName.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
-		glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
 
 	void VulkanInit::Run()
@@ -48,7 +48,7 @@ namespace VULKAN {
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
-	void VulkanInit::FramebufferResizeCallback(GLFWwindow* window, int width, int height)
+	void VulkanInit::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		auto myWindow = reinterpret_cast<VulkanInit*>(glfwGetWindowUserPointer(window));
 		myWindow->framebufferResized = true;

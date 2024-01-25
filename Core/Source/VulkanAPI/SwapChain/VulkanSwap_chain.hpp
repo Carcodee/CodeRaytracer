@@ -8,6 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace VULKAN {
 
@@ -17,6 +18,8 @@ class VulkanSwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   VulkanSwapChain(MyVulkanDevice &deviceRef, VkExtent2D windowExtent);
+  VulkanSwapChain(MyVulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VulkanSwapChain> previous);
+
   ~VulkanSwapChain();
 
   VulkanSwapChain(const VulkanSwapChain &) = delete;
@@ -41,6 +44,7 @@ class VulkanSwapChain {
 
  private:
 
+  void Init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -71,6 +75,7 @@ class VulkanSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  std::shared_ptr<VulkanSwapChain> oldSwapChain;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;

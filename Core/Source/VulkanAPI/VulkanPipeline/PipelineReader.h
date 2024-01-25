@@ -10,14 +10,19 @@
 namespace VULKAN{
 
 	struct PipelineConfigInfo {
-		VkViewport viewport;
-		VkRect2D scissor;
+		PipelineConfigInfo() = default;
+		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+
+		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
 		VkPipelineMultisampleStateCreateInfo multisampleInfo;
 		VkPipelineColorBlendAttachmentState colorBlendAttachment;
 		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+		std::vector<VkDynamicState> dynamicStateEnables;
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkRenderPass renderPass = nullptr;
 		uint32_t subpass = 0;
@@ -30,14 +35,14 @@ namespace VULKAN{
 		PipelineReader(MyVulkanDevice& device,
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
-			const PipelineConfigInfo configInfo);
+			const PipelineConfigInfo& configInfo);
 
 		~PipelineReader();
 
 		PipelineReader(const PipelineReader&) = delete;
 		PipelineReader& operator=(const PipelineReader&) = delete;
 
-		static PipelineConfigInfo DefaultPipelineDefaultConfigInfo(uint32_t width, uint32_t height);
+		static void DefaultPipelineDefaultConfigInfo(PipelineConfigInfo& configInfo);
 
 		void bind(VkCommandBuffer commandBuffer);
 
@@ -45,7 +50,7 @@ namespace VULKAN{
 
 		static std::vector <char> ReadFile(const std::string& filepath);
 
-		void CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo configInfo);
+		void CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 			 
 		void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 

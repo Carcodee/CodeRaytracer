@@ -28,6 +28,7 @@ namespace VULKAN {
 		void CreatePipelineLayout();
 		void CreatePipeline();
 		void CreateCommandBuffer();
+		void FreeCommandBuffers();
 		void DrawFrame();
 		void RecreateSwapChain();
 		void RecordCommandBuffer(int imageIndex);

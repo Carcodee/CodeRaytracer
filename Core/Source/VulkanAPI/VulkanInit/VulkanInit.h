@@ -37,7 +37,7 @@ namespace VULKAN {
 
 	private:
 
-		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		int widht;
 		int height;
 		bool framebufferResized = false;
