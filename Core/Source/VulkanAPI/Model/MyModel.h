@@ -34,7 +34,7 @@ namespace VULKAN {
 
 		void Bind(VkCommandBuffer commandBuffer);
 		void Draw(VkCommandBuffer commandBuffer);
-
+		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
 
 	private:
 		void CreateVertexBuffers(const std::vector<Vertex> &vertices);

@@ -41,6 +41,7 @@ class VulkanSwapChain {
 
   VkResult acquireNextImage(uint32_t *imageIndex);
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
+  size_t currentFrame = 0;
 
  private:
 
@@ -81,7 +82,6 @@ class VulkanSwapChain {
   std::vector<VkSemaphore> renderFinishedSemaphores;
   std::vector<VkFence> inFlightFences;
   std::vector<VkFence> imagesInFlight;
-  size_t currentFrame = 0;
 };
 
 }  // namespace lve

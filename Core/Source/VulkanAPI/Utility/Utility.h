@@ -1,7 +1,7 @@
 #pragma once
 
 
-#ifdef DEBUG
+#ifdef false
 #define LOG() std::cout
 #else
 #define LOG() while(false) std::cout

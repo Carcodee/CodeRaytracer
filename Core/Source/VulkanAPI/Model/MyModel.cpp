@@ -16,6 +16,10 @@ namespace VULKAN {
 	{
 		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
 	}
+	void MyModel::BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet)
+	{
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+	}
 	void MyModel::Bind(VkCommandBuffer commandBuffer)
 	{
 		VkBuffer buffers[] = { vertexBuffer };
