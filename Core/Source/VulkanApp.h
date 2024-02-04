@@ -8,14 +8,15 @@
 #include <memory>
 #include <vector>
 #include <chrono>
+#include "VulkanAPI/DescriptorSetHandler/MyDescriptorSets.h"
 
 namespace VULKAN {
-
-	struct UniformBufferObjectData {
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 projection;
-	};
+	//
+	// struct UniformBufferObjectData {
+	// 	glm::mat4 model;
+	// 	glm::mat4 view;
+	// 	glm::mat4 projection;
+	// };
 
 	class VulkanApp
 	{
@@ -40,28 +41,16 @@ namespace VULKAN {
 		void RecordCommandBuffer(int imageIndex);
 
 		
-		void SetLayoutSetInfo();
-		void CreateUniformBuffers();
-		void updateUniformBuffer(uint32_t currentImage);
-		void CreateDescriptorPool();
-		void CreateDescriptorSets();
+
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };
 		std::unique_ptr<PipelineReader> pipelineReader;
 		std::unique_ptr<VulkanSwapChain> swapChain;
-
+		MyDescriptorSets descriptorSetsHandler {myDevice, *swapChain};
+		
 		VkPipelineLayout pipelineLayout;
 		
-		
-		
-		VkDescriptorSetLayout descriptorSetLayout;
-		std::vector<VkBuffer> uniformBuffers;
-		std::vector<VkDeviceMemory> uniformBuffersMemory;
-		std::vector<void*> uniformBuffersMapped;
-		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
-		int currentFrame;
 
 
 		std::vector<VkCommandBuffer> commandBuffer;

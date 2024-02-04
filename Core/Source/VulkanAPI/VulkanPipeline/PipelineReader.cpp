@@ -12,7 +12,8 @@ namespace VULKAN
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo)
-		: myVulkanDevice{ device } {
+		: myVulkanDevice{ device }
+	{
 		CreateGraphicPipeline(vertFilepath, fragFilepath, configInfo);
 	}
 
