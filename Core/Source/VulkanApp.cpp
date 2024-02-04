@@ -16,17 +16,18 @@ namespace VULKAN{
 	VulkanApp::VulkanApp()
 	{
 		LoadModels();
-		SetLayoutSetInfo();
-		//descriptorSetsHandler.CreateLayoutBinding(0, 1);
+		//SetLayoutSetInfo();
+		descriptorSetsHandler = std::make_unique<MyDescriptorSets>(myDevice);
+		descriptorSetsHandler->CreateLayoutBinding(0, 1);
 		CreatePipelineLayout();
 		RecreateSwapChain();
 
-		CreateUniformBuffers();
-		CreateDescriptorPool();
-		CreateDescriptorSets();
-		//descriptorSetsHandler.CreateUniformBuffers(UniformBufferObjectData{}, 1);
-		//descriptorSetsHandler.CreateDescriptorPool(0, 1);
-		//descriptorSetsHandler.CreateDescriptorSets(0, 1);
+		//CreateUniformBuffers();
+		//CreateDescriptorPool();
+		//CreateDescriptorSets();
+		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
+		descriptorSetsHandler->CreateDescriptorPool(1, 1, swapChain->MAX_FRAMES_IN_FLIGHT);
+		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(1, 1, swapChain->MAX_FRAMES_IN_FLIGHT);
 
 
 		CreateCommandBuffer();
@@ -37,12 +38,12 @@ namespace VULKAN{
 	{
 		vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
 		
-		 for (size_t i = 0; i <swapChain->MAX_FRAMES_IN_FLIGHT; i++) {
-		 	vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
-		 	vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
-		 }    
-		 vkDestroyDescriptorPool(myDevice.device(), descriptorPool, nullptr);
-		 vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
+		 //for (size_t i = 0; i <swapChain->MAX_FRAMES_IN_FLIGHT; i++) {
+		 //	vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
+		 //	vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+		 //}    
+		 //vkDestroyDescriptorPool(myDevice.device(), descriptorPool, nullptr);
+		 //vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
 	}
 
 	void VulkanApp::LoadModels()
@@ -73,7 +74,7 @@ namespace VULKAN{
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+		pipelineLayoutInfo.pSetLayouts = &descriptorSetsHandler->descriptorSetLayout[0];
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 		if (vkCreatePipelineLayout(myDevice.device(),&pipelineLayoutInfo, nullptr, &pipelineLayout)!= VK_SUCCESS)
@@ -137,8 +138,8 @@ namespace VULKAN{
 		{
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
-		//descriptorSetsHandler.UpdateUniformBuffer(swapChain->currentFrame, 1, UniformBufferObjectData{});
-		updateUniformBuffer(swapChain->currentFrame);
+		descriptorSetsHandler->UpdateUniformBuffer<UniformBufferObjectData>(swapChain->currentFrame, 1);
+		//updateUniformBuffer(swapChain->currentFrame);
 
 		RecordCommandBuffer(imageIndex);
 		result = swapChain->submitCommandBuffers(&commandBuffer[imageIndex], &imageIndex);
@@ -224,7 +225,7 @@ namespace VULKAN{
 
 			//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 			myModel->Bind(commandBuffer[imageIndex]);
-			myModel->BindDescriptorSet(commandBuffer[imageIndex], pipelineLayout,descriptorSets[swapChain->currentFrame]);
+			myModel->BindDescriptorSet(commandBuffer[imageIndex], pipelineLayout, descriptorSetsHandler->descriptorData[0].descriptorSets[swapChain->currentFrame]);
 
 			myModel->Draw(commandBuffer[imageIndex]);
 

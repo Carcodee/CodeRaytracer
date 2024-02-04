@@ -53,13 +53,15 @@ namespace VULKAN {
 		std::vector<void*> uniformBuffersMapped;
 		VkDescriptorPool descriptorPool;
 		std::vector<VkDescriptorSet> descriptorSets;
+
 		int currentFrame;
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };
 		std::unique_ptr<PipelineReader> pipelineReader;
 		std::unique_ptr<VulkanSwapChain> swapChain;
-		MyDescriptorSets descriptorSetsHandler {myDevice, *swapChain};
+
+		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
 		
 		VkPipelineLayout pipelineLayout;
 		

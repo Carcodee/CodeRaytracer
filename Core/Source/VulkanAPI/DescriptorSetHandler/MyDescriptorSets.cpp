@@ -5,15 +5,13 @@ namespace VULKAN
 
     MyDescriptorSets::~MyDescriptorSets()
     {
-        for(size_t i = 0; i <descriptorData.size(); i++)
-        {
-            for (size_t j = 0; j <mySwapChain.MAX_FRAMES_IN_FLIGHT; j++) {
+        for (size_t i = 0; i < descriptorData.size(); i++) {
+            for (size_t j = 0; j < 2; j++) {
                 vkDestroyBuffer(myDevice.device(), descriptorData[i].uniformBuffers[j], nullptr);
                 vkFreeMemory(myDevice.device(), descriptorData[i].uniformBuffersMemory[j], nullptr);
-            }    
-            vkDestroyDescriptorPool(myDevice.device(), descriptorData[i].descriptorPool, nullptr);
+            }
+            vkDestroyDescriptorPool(myDevice.device(), descriptorPool, nullptr);
             vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout[i], nullptr);
-            
         }
 
     }
@@ -31,69 +29,35 @@ namespace VULKAN
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = binding;
+        layoutInfo.bindingCount = descriptorCount;
         layoutInfo.pBindings = &layoutBinding;
 
-        if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout[0])!= VK_SUCCESS)
+        if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout[descriptorCount - 1]) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create descriptor set layout!");
-        }  
+        }
     }
 
-    void MyDescriptorSets::CreateDescriptorPool(int descriptorCount, int setSize)
+    void MyDescriptorSets::CreateDescriptorPool(int descriptorCount, int setSize, int maxFramesInFlight)
     {
         VkDescriptorPoolSize poolSize{};
         poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSize.descriptorCount = static_cast<uint32_t>(mySwapChain.MAX_FRAMES_IN_FLIGHT);
-		
+        poolSize.descriptorCount = static_cast<uint32_t>(descriptorCount * maxFramesInFlight);
+
         VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType= VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = setSize;
         poolInfo.pPoolSizes = &poolSize;
 
-        poolInfo.maxSets = static_cast<uint32_t>(mySwapChain.MAX_FRAMES_IN_FLIGHT);
+        poolInfo.maxSets = static_cast<uint32_t>(descriptorCount * maxFramesInFlight);
 
-        if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, & descriptorData[descriptorCount].descriptorPool)!= VK_SUCCESS)
+        if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
 
-    void MyDescriptorSets::CreateDescriptorSets(int descriptorCount, int setSize)
-    {
-        std::vector<VkDescriptorSetLayout> layouts(mySwapChain.MAX_FRAMES_IN_FLIGHT, descriptorSetLayout[descriptorCount]);
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool =descriptorData[descriptorCount].descriptorPool;
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(mySwapChain.MAX_FRAMES_IN_FLIGHT);
-        allocInfo.pSetLayouts = layouts.data();
-		
-        descriptorData[descriptorCount].descriptorSets.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
-        if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, descriptorData[descriptorCount].descriptorSets.data()) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to allocate descriptor sets!");
-        }
-        for (size_t i = 0; i < mySwapChain.MAX_FRAMES_IN_FLIGHT; i++)
-        {
-            VkDescriptorBufferInfo bufferInfo{};
-            bufferInfo.buffer = descriptorData[descriptorCount].uniformBuffers[i];
-            bufferInfo.offset= 0;
-            bufferInfo.range = sizeof(UniformBufferObjectData);
 
-            VkWriteDescriptorSet descriptorWrite{}; 
-            descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrite.dstSet = descriptorData[descriptorCount].descriptorSets[i];
-            descriptorWrite.dstBinding = 0;
-            descriptorWrite.dstArrayElement = 0;
-            descriptorWrite.pBufferInfo = &bufferInfo;
-            descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrite.descriptorCount = 1;
-            descriptorWrite.pImageInfo = nullptr; // Optional
-            descriptorWrite.pTexelBufferView = nullptr; // Optional
-
-            vkUpdateDescriptorSets(myDevice.device(), 1, &descriptorWrite, 0, nullptr);
-        }
-    }
 }
 
 //TODO: Add the following to the MyDescriptorSets class:
