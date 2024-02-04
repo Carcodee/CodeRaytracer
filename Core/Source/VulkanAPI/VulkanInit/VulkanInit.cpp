@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 namespace VULKAN {
 
 	VulkanInit::VulkanInit(int w, int h, std::string name) : widht{w}, height{h}, appName{name}

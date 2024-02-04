@@ -1,6 +1,9 @@
 #include "MyModel.h"
 #include <cassert>
 #include <cstring>
+
+
+
 namespace VULKAN {
 	MyModel::MyModel(MyVulkanDevice &device, const std::vector<Vertex>& vertices): myDevice{device}  {
 		
@@ -19,6 +22,30 @@ namespace VULKAN {
 	void MyModel::BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet)
 	{
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+	}
+	void MyModel::CreateTextureImage()
+	{
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+		if (!pixels) {
+			throw std::runtime_error("failed to load texture image!");
+		}
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+		myDevice.createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+		void* data; 
+		vkMapMemory(myDevice.device(), stagingBufferMemory, 0, imageSize, 0, &data);
+		memcpy(data, pixels, static_cast<size_t>(imageSize));
+		vkUnmapMemory(myDevice.device(), stagingBufferMemory);
+
+		stbi_image_free(pixels);
+
 	}
 	void MyModel::Bind(VkCommandBuffer commandBuffer)
 	{

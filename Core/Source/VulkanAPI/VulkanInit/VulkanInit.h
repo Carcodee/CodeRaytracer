@@ -12,6 +12,7 @@
 #include <string>
 
 #include <direct.h>
+#include "VulkanAPI/Headers/HeadersFiles.h"
 
 namespace VULKAN {
 

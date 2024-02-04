@@ -1,3 +1,4 @@
 #pragma once
 
-#include "../VulkanPipeline/PipelineReader.h"
+
+#include <stb_image.h>

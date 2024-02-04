@@ -7,6 +7,8 @@
 #include "glm/glm.hpp"
 #include <vector>
 
+
+
 namespace VULKAN {
 	class MyModel
 	{
@@ -35,9 +37,11 @@ namespace VULKAN {
 		void Bind(VkCommandBuffer commandBuffer);
 		void Draw(VkCommandBuffer commandBuffer);
 		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
-
+		void CreateTextureImage();
 	private:
 		void CreateVertexBuffers(const std::vector<Vertex> &vertices);
+
+
 		MyVulkanDevice &myDevice;
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
