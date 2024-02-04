@@ -41,7 +41,19 @@ namespace VULKAN {
 		void RecordCommandBuffer(int imageIndex);
 
 		
+		void SetLayoutSetInfo();
+		void CreateUniformBuffers();
+		void updateUniformBuffer(uint32_t currentImage);
+		void CreateDescriptorPool();
+		void CreateDescriptorSets();
 
+		VkDescriptorSetLayout descriptorSetLayout;
+		std::vector<VkBuffer> uniformBuffers;
+		std::vector<VkDeviceMemory> uniformBuffersMemory;
+		std::vector<void*> uniformBuffersMapped;
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
+		int currentFrame;
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };

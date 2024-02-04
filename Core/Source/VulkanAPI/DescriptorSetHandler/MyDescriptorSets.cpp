@@ -34,7 +34,7 @@ namespace VULKAN
         layoutInfo.bindingCount = binding;
         layoutInfo.pBindings = &layoutBinding;
 
-        if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout[descriptorCount])!= VK_SUCCESS)
+        if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout[0])!= VK_SUCCESS)
         {
             throw std::runtime_error("failed to create descriptor set layout!");
         }  

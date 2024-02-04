@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <chrono>
+#include <memory>
 
 namespace VULKAN
 {
@@ -33,7 +34,7 @@ namespace VULKAN
     {
 
     public:
-        MyDescriptorSets(MyVulkanDevice& myVkDevice, VulkanSwapChain& swapChain) :
+        MyDescriptorSets(MyVulkanDevice& myVkDevice,VulkanSwapChain& swapChain) :
         myDevice(myVkDevice), mySwapChain(swapChain)
         {
         }
@@ -71,16 +72,16 @@ namespace VULKAN
 
             VkDeviceSize bufferSize = sizeof(bufferObject);
 
-            descriptorData[descriptorCount].uniformBuffers.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
-            descriptorData[descriptorCount].uniformBuffersMemory.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
-            descriptorData[descriptorCount].uniformBuffersMapped.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
+            descriptorData[0].uniformBuffers.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
+            descriptorData[0].uniformBuffersMemory.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
+            descriptorData[0].uniformBuffersMapped.resize(mySwapChain.MAX_FRAMES_IN_FLIGHT);
 		
             for (size_t j = 0; j < mySwapChain.MAX_FRAMES_IN_FLIGHT ; j++)
             {
                 myDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                    descriptorData[descriptorCount].uniformBuffers[j], descriptorData[descriptorCount].uniformBuffersMemory[j]);
+                    descriptorData[0].uniformBuffers[j], descriptorData[0].uniformBuffersMemory[j]);
 			
-                vkMapMemory(myDevice.device(), descriptorData[descriptorCount].uniformBuffersMemory[j], 0, bufferSize, 0, &descriptorData[descriptorCount].uniformBuffersMapped[j]);
+                vkMapMemory(myDevice.device(), descriptorData[0].uniformBuffersMemory[j], 0, bufferSize, 0, &descriptorData[0].uniformBuffersMapped[j]);
 
             }
         
@@ -105,7 +106,7 @@ namespace VULKAN
         // }
 
 
-        memcpy(descriptorData[descriptorCount].uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+        memcpy(descriptorData[0].uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }
 }
 
