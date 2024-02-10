@@ -1,12 +1,12 @@
 #pragma once
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
+#include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include "glm/glm.hpp"
 #include <vector>
-
 
 
 namespace VULKAN {
@@ -38,14 +38,27 @@ namespace VULKAN {
 		void Draw(VkCommandBuffer commandBuffer);
 		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
 		void CreateTextureImage();
+		
+		void CreateTextureImageView(VulkanSwapChain& swapchain);
+		
+
+		VkImageView CreateImageView(VkImage image, VkFormat format);
+	
 	private:
 		void CreateVertexBuffers(const std::vector<Vertex> &vertices);
-
+		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
+			, VkImage& image, VkDeviceMemory& imageMemory);
+		void CreateTextureSample();
 
 		MyVulkanDevice &myDevice;
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		uint32_t vertexCount;
+
+		VkImageView textureImageView;
+		VkImage textureImage;
+		VkDeviceMemory textureImageMemory;
+		VkSampler textureSampler;
 	};
 }
 

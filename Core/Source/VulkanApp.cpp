@@ -1,6 +1,8 @@
+
 #include "VulkanApp.h"
 #include <stdexcept>
 #include <array>
+
 namespace VULKAN{
 	
 	void VulkanApp::Run()
@@ -18,7 +20,10 @@ namespace VULKAN{
 		LoadModels();
 		//SetLayoutSetInfo();
 		descriptorSetsHandler = std::make_unique<MyDescriptorSets>(myDevice);
-		descriptorSetsHandler->CreateLayoutBinding(0, 1);
+		std::array <VkDescriptorSetLayoutBinding, 1> bindings;
+		bindings[0] = descriptorSetsHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
+		descriptorSetsHandler->CreateLayoutBinding(bindings,1);
+		
 		CreatePipelineLayout();
 		RecreateSwapChain();
 
@@ -26,8 +31,8 @@ namespace VULKAN{
 		//CreateDescriptorPool();
 		//CreateDescriptorSets();
 		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
-		descriptorSetsHandler->CreateDescriptorPool(1, 1, swapChain->MAX_FRAMES_IN_FLIGHT);
-		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(1, 1, swapChain->MAX_FRAMES_IN_FLIGHT);
+		descriptorSetsHandler->CreateDescriptorPool(bindings, swapChain->MAX_FRAMES_IN_FLIGHT);
+		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT);
 
 
 		CreateCommandBuffer();

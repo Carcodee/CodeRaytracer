@@ -51,7 +51,6 @@ class MyVulkanDevice {
   QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(physicalDevice); }
   VkFormat findSupportedFormat(
       const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-
   // Buffer Helper Functions
   void createBuffer(
       VkDeviceSize size,
@@ -70,6 +69,7 @@ class MyVulkanDevice {
       VkMemoryPropertyFlags properties,
       VkImage &image,
       VkDeviceMemory &imageMemory);
+  void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
   VkPhysicalDeviceProperties properties;
 

@@ -16,46 +16,23 @@ namespace VULKAN
 
     }
 
-    void MyDescriptorSets::CreateLayoutBinding(int binding, int descriptorCount)
+    VkDescriptorSetLayoutBinding MyDescriptorSets::CreateDescriptorBinding(VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, int bindingCount, int descriptorCount)
     {
-        descriptorSetLayout.resize(descriptorCount);
-        descriptorData.resize(descriptorCount);
+        if (descriptorCount != descriptorSetLayout.size())
+        {
+            descriptorSetLayout.resize(descriptorCount);
+            descriptorData.resize(descriptorCount);
+        }
         VkDescriptorSetLayoutBinding layoutBinding{};
-        layoutBinding.binding = binding;
-        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        layoutBinding.binding = bindingCount;
+        layoutBinding.descriptorType = descriptorType;
         layoutBinding.descriptorCount = descriptorCount;
-        layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        layoutBinding.stageFlags = stageFlags;
         layoutBinding.pImmutableSamplers = nullptr;
 
-        VkDescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = descriptorCount;
-        layoutInfo.pBindings = &layoutBinding;
-
-        if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout[descriptorCount - 1]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create descriptor set layout!");
-        }
+        return layoutBinding;
     }
 
-    void MyDescriptorSets::CreateDescriptorPool(int descriptorCount, int setSize, int maxFramesInFlight)
-    {
-        VkDescriptorPoolSize poolSize{};
-        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSize.descriptorCount = static_cast<uint32_t>(descriptorCount * maxFramesInFlight);
-
-        VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.poolSizeCount = setSize;
-        poolInfo.pPoolSizes = &poolSize;
-
-        poolInfo.maxSets = static_cast<uint32_t>(descriptorCount * maxFramesInFlight);
-
-        if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create descriptor pool!");
-        }
-    }
 
 
 }
