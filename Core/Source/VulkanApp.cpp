@@ -18,22 +18,27 @@ namespace VULKAN{
 	VulkanApp::VulkanApp()
 	{
 		LoadModels();
+		CreateSwapChain();
 		//SetLayoutSetInfo();
 		descriptorSetsHandler = std::make_unique<MyDescriptorSets>(myDevice);
-		std::array <VkDescriptorSetLayoutBinding, 1> bindings;
+
+		myModel->CreateTextureImage();
+		swapChain->CreateTextureImageView(myModel->textureImageView, myModel->textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+		myModel->CreateTextureSample();
+
+		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
 		bindings[0] = descriptorSetsHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
+		bindings[1] = descriptorSetsHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, 1);
 		descriptorSetsHandler->CreateLayoutBinding(bindings,1);
 		
 		CreatePipelineLayout();
 		RecreateSwapChain();
 
-		//CreateUniformBuffers();
-		//CreateDescriptorPool();
-		//CreateDescriptorSets();
+
 		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
 		descriptorSetsHandler->CreateDescriptorPool(bindings, swapChain->MAX_FRAMES_IN_FLIGHT);
-		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT);
-
+		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, myModel->textureImageView, myModel->textureSampler);
+		//TODO: handle resources::::::::::::::::::::
 
 		CreateCommandBuffer();
 
@@ -42,13 +47,6 @@ namespace VULKAN{
 	VulkanApp::~VulkanApp()
 	{
 		vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
-		
-		 //for (size_t i = 0; i <swapChain->MAX_FRAMES_IN_FLIGHT; i++) {
-		 //	vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
-		 //	vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
-		 //}    
-		 //vkDestroyDescriptorPool(myDevice.device(), descriptorPool, nullptr);
-		 //vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
 	}
 
 	void VulkanApp::LoadModels()
@@ -59,11 +57,11 @@ namespace VULKAN{
 		//	{{-1.0f, 1.0f}, {0.0f, 0.0f,1.0f}}
 		//};
 		const std::vector<MyModel::Vertex> vertices = {
-			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-			};
+			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+		};
 
 		std::vector<MyModel::Vertex> newVertices = GetVertexPosForRecursiveTriangles(vertices, 5);
 
@@ -126,8 +124,12 @@ namespace VULKAN{
 
 	void VulkanApp::FreeCommandBuffers()
 	{
-		vkFreeCommandBuffers(myDevice.device(), myDevice.getCommandPool(),static_cast<uint32_t>(commandBuffer.size()), commandBuffer.data());
-		commandBuffer.clear();
+		if (commandBuffer.size()>0)
+		{
+			vkFreeCommandBuffers(myDevice.device(), myDevice.getCommandPool(), static_cast<uint32_t>(commandBuffer.size()), commandBuffer.data());
+			commandBuffer.clear();
+		}
+
 	}
 
 	void VulkanApp::DrawFrame()
@@ -242,6 +244,19 @@ namespace VULKAN{
 				throw std::runtime_error("Failed to record command buffer!");
 			}
 		
+	}
+	void VulkanApp::CreateSwapChain()
+	{
+		auto extend = initWindow.getExtent();
+		while (extend.width == 0 || extend.height == 0)
+		{
+			extend = initWindow.getExtent();
+			glfwWaitEvents();
+		}
+		vkDeviceWaitIdle(myDevice.device());
+		swapChain = std::make_unique<VulkanSwapChain>(myDevice, extend);
+
+
 	}
 	void VulkanApp::SetLayoutSetInfo()
 	{

@@ -39,7 +39,7 @@ namespace VULKAN {
 		void DrawFrame();
 		void RecreateSwapChain();
 		void RecordCommandBuffer(int imageIndex);
-
+		void CreateSwapChain();
 		
 		void SetLayoutSetInfo();
 		void CreateUniformBuffers();

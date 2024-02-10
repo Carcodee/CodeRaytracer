@@ -60,6 +60,7 @@ namespace VULKAN {
 
 	MyVulkanDevice::~MyVulkanDevice() {
 		vkDestroyCommandPool(device_, commandPool, nullptr);
+
 		vkDestroyDevice(device_, nullptr);
 
 		if (enableValidationLayers) {

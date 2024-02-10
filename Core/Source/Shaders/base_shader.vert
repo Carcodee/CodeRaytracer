@@ -1,9 +1,11 @@
 #version 450
 
-layout (location = 0) in vec2 position;
-layout (location = 1) in vec3 color;
+layout (location = 0) in vec2 inPosition;
+layout (location = 1) in vec3 inColor;
+layout (location = 2) in vec2 inTextCoord;
 
 layout (location = 0) out vec3 myColors;
+layout (location = 1) out vec2 textCoord;
 
 layout (binding = 0) uniform UniformBufferObjectData{
 	mat4 model; 
@@ -13,7 +15,8 @@ layout (binding = 0) uniform UniformBufferObjectData{
  
 
 void main(){
-	gl_Position = ubo.projection * ubo.view * ubo.model *  vec4(position, 0.0, 1.0);
-	myColors= color;
+	gl_Position = ubo.projection * ubo.view * ubo.model *  vec4(inPosition, 0.0, 1.0);
+	myColors= inColor;
+	textCoord= inTextCoord;
 
 }

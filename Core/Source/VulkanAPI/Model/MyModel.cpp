@@ -15,11 +15,12 @@ namespace VULKAN {
 		vkDestroyBuffer(myDevice.device(), vertexBuffer, nullptr);
 		vkFreeMemory(myDevice.device(), vertexBufferMemory, nullptr);
 
-		//vkDestroySampler(myDevice.device(), textureSampler, nullptr);
-		//vkDestroyImageView(myDevice.device(), textureImageView, nullptr);
+		vkDestroySampler(myDevice.device(), textureSampler, nullptr);
+		vkDestroyImageView(myDevice.device(), textureImageView, nullptr);
 
-		//vkDestroyImage(myDevice.device(), textureImage, nullptr);
-		//vkFreeMemory(myDevice.device(), textureImageMemory, nullptr);
+		vkDestroyImage(myDevice.device(), textureImage, nullptr);
+		vkFreeMemory(myDevice.device(), textureImageMemory, nullptr);
+
 	}
 	void MyModel::Draw(VkCommandBuffer commandBuffer)
 	{
@@ -33,7 +34,7 @@ namespace VULKAN {
 	void MyModel::CreateTextureImage()
 	{
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load("Source/Resources/Assets/Images/Lion.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load("C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Lion.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 		if (!pixels) {
@@ -43,8 +44,8 @@ namespace VULKAN {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
-		myDevice.createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		myDevice.createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			stagingBuffer, stagingBufferMemory);
 
 		void* data; 
 		vkMapMemory(myDevice.device(), stagingBufferMemory, 0, imageSize, 0, &data);
@@ -64,39 +65,8 @@ namespace VULKAN {
 
 
 	}
-	void MyModel::CreateTextureImageView(VulkanSwapChain& swapchain)
-	{
-		textureImageView = CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-		swapchain.swapChainImageViews.resize(swapchain.swapChainImages.size());
 
-		for (size_t i = 0; i < swapchain.swapChainImages.size(); i++)
-		{
-			swapchain.swapChainImageViews[i] = CreateImageView(swapchain.swapChainImages[i], swapchain.swapChainImageFormat);
-		}
 
-	}
-	VkImageView MyModel::CreateImageView(VkImage image, VkFormat format)
-	{
-		VkImageViewCreateInfo viewInfo{};
-		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = image;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
-
-		VkImageView imageView;
-
-		if (vkCreateImageView(myDevice.device(), &viewInfo, nullptr, &imageView)!= VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to create texture image view! KEKW");
-		}
-
-		return imageView;
-	}
 	void MyModel::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage,
 		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 	{
@@ -117,7 +87,7 @@ namespace VULKAN {
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0;
 
-		if (vkCreateImage(myDevice.device(), &imageInfo, nullptr, &image)!=VK_SUCCESS);
+		if (vkCreateImage(myDevice.device(), &imageInfo, nullptr, &image)!=VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create image!");
 		}
@@ -125,14 +95,13 @@ namespace VULKAN {
 		vkGetImageMemoryRequirements(myDevice.device(), image, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = myDevice.findMemoryType(memRequirements.memoryTypeBits, properties);
 		if (vkAllocateMemory(myDevice.device(), &allocInfo, nullptr, &imageMemory)!=VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate image memory!");
 		}vkBindImageMemory(myDevice.device(), image, imageMemory, 0);
-
 
 
 	}
@@ -162,7 +131,7 @@ namespace VULKAN {
 		samplerInfo.mipLodBias = 0.0f;
 		samplerInfo.minLod = 0.0f;
 		samplerInfo.maxLod= 0.0f;
-		if (vkCreateSampler(myDevice.device(), &samplerInfo, nullptr, &textureSampler)!= VK_SUCCESS);
+		if (vkCreateSampler(myDevice.device(), &samplerInfo, nullptr, &textureSampler)!= VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create texture sampler :/ ");
 		}
@@ -209,7 +178,7 @@ namespace VULKAN {
 
 	std::vector<VkVertexInputAttributeDescription> MyModel::Vertex::GetAttributeDescription()
 	{
-		std::vector<VkVertexInputAttributeDescription>attributeDescription(2);
+		std::vector<VkVertexInputAttributeDescription>attributeDescription(3);
 		attributeDescription[0].binding = 0;
 		attributeDescription[0].location= 0;
 		attributeDescription[0].format = VK_FORMAT_R32G32_SFLOAT;
@@ -219,6 +188,12 @@ namespace VULKAN {
 		attributeDescription[1].location = 1;
 		attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescription[1].offset = offsetof(Vertex, color);
+
+
+		attributeDescription[2].binding = 0;
+		attributeDescription[2].location = 2;
+		attributeDescription[2].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescription[2].offset = offsetof(Vertex, texCoord);
 
 		return attributeDescription;
 

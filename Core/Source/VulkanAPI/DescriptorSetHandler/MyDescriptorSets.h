@@ -183,18 +183,16 @@ namespace VULKAN
             std::array<VkWriteDescriptorSet, N> descriptorWrite{};
             for (size_t j = 0; j < descriptorWrite.size(); j++)
             {
-                if (bindings[j].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                {
-                    descriptorWrite[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite[j].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
-                    descriptorWrite[j].dstBinding = j;
-                    descriptorWrite[j].dstArrayElement = 0;
-                    descriptorWrite[j].pBufferInfo = &bufferInfo;
-                    descriptorWrite[j].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    descriptorWrite[j].descriptorCount = descriptorCount;
-                    descriptorWrite[j].pImageInfo = nullptr; // Optional
-                    descriptorWrite[j].pTexelBufferView = nullptr; // Optional
-                }
+                descriptorWrite[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                descriptorWrite[j].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
+                descriptorWrite[j].dstBinding = j;
+                descriptorWrite[j].dstArrayElement = 0;
+                descriptorWrite[j].pBufferInfo = &bufferInfo;
+                descriptorWrite[j].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                descriptorWrite[j].descriptorCount = descriptorCount;
+                descriptorWrite[j].pImageInfo = nullptr; // Optional
+                descriptorWrite[j].pTexelBufferView = nullptr; // Optional
+     
 
             }
 

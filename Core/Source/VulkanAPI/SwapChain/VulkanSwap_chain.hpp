@@ -33,8 +33,9 @@ class VulkanSwapChain {
   VkExtent2D getSwapChainExtent() { return swapChainExtent; }
   uint32_t width() { return swapChainExtent.width; }
   uint32_t height() { return swapChainExtent.height; }
-  
-  
+  //change this later to a texture object
+  void CreateTextureImageView(VkImageView& view, VkImage& image, VkFormat format);
+
   float extentAspectRatio() {
     return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
   }
@@ -70,6 +71,8 @@ class VulkanSwapChain {
   VkPresentModeKHR chooseSwapPresentMode(
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+
+  VkImageView CreateImageView(VkImage& image, VkFormat& format);
 
   
   std::vector<VkFramebuffer> swapChainFramebuffers;

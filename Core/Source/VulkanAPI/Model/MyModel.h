@@ -17,6 +17,7 @@ namespace VULKAN {
 		struct Vertex {
 			glm::vec2 position;
 			glm::vec3 color;
+			glm::vec2 texCoord;
 
 			static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
 			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
@@ -39,26 +40,28 @@ namespace VULKAN {
 		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
 		void CreateTextureImage();
 		
-		void CreateTextureImageView(VulkanSwapChain& swapchain);
-		
 
-		VkImageView CreateImageView(VkImage image, VkFormat format);
-	
+		void CreateTextureSample();
+
+
+
+		VkImageView textureImageView;
+		VkImage textureImage;
+		VkDeviceMemory textureImageMemory;
+		VkSampler textureSampler;
 	private:
+
 		void CreateVertexBuffers(const std::vector<Vertex> &vertices);
+
 		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
 			, VkImage& image, VkDeviceMemory& imageMemory);
-		void CreateTextureSample();
+
 
 		MyVulkanDevice &myDevice;
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		uint32_t vertexCount;
 
-		VkImageView textureImageView;
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
-		VkSampler textureSampler;
 	};
 }
 
