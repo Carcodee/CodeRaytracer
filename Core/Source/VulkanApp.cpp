@@ -20,15 +20,17 @@ namespace VULKAN{
 	VulkanApp::VulkanApp()
 	{
 		LoadModels();
+
+
 		CreateSwapChain();
 		//SetLayoutSetInfo();
 		descriptorSetsHandler = std::make_unique<MyDescriptorSets>(myDevice);
 
-		myModel->CreateTextureImage();
-		swapChain->CreateTextureImageView(myModel->textureImageView, myModel->textureImage, VK_FORMAT_R8G8B8A8_SRGB);
-		myModel->CreateTextureSample();
-		const char* path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Lion.jpg";
-		VKTexture lion (path ,swapChain.get(), myDevice);
+		VKTexture* lion;
+
+		lion = new VKTexture("C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Lion.jpg",  myDevice);
+
+
 
 		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
 		bindings[0] = descriptorSetsHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
@@ -41,7 +43,7 @@ namespace VULKAN{
 
 		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
 		descriptorSetsHandler->CreateDescriptorPool(bindings, swapChain->MAX_FRAMES_IN_FLIGHT);
-		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, lion);
+		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, *lion);
 		//TODO: handle resources::::::::::::::::::::
 
 		CreateCommandBuffer();
@@ -56,23 +58,24 @@ namespace VULKAN{
 
 	void VulkanApp::LoadModels()
 	{
-		//std::vector<MyModel::Vertex> vertices{
-		//	{{1.0f, 1.0f}, {1.0f, 0.0f,0.0f}},
-		//	{{0.0f, -1.0f}, {0.0f, 1.0f,0.0f}},
-		//	{{-1.0f, 1.0f}, {0.0f, 0.0f,1.0f}}
-		//};
-		const std::vector<MyModel::Vertex> vertices = {
+
+		const std::vector<Vertex> vertices= {
 			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
 			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 		};
+		const std::vector<uint16_t> indices = {
+			0, 1, 2, 2, 3, 0
+		};
 
-		std::vector<MyModel::Vertex> newVertices = GetVertexPosForRecursiveTriangles(vertices, 5);
-
+		//std::vector<MyModel::Vertex> newVertices = GetVertexPosForRecursiveTriangles(vertices, 5);
+		VKBufferHandler* myBuffer= new VKBufferHandler(myDevice,vertices, indices);
+		
 
 		
-		myModel = std::make_unique<MyModel>(myDevice, vertices);
+		myModel = std::make_unique<MyModel>(myDevice, *myBuffer);
+		
 
 
 	}
@@ -236,10 +239,10 @@ namespace VULKAN{
 			pipelineReader->bind(commandBuffer[imageIndex]);
 
 			//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
-			myModel->Bind(commandBuffer[imageIndex]);
+			myModel->BindVertexBufferIndexed(commandBuffer[imageIndex]);
 			myModel->BindDescriptorSet(commandBuffer[imageIndex], pipelineLayout, descriptorSetsHandler->descriptorData[0].descriptorSets[swapChain->currentFrame]);
 
-			myModel->Draw(commandBuffer[imageIndex]);
+			myModel->DrawIndexed(commandBuffer[imageIndex]);
 
 
 

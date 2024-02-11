@@ -211,6 +211,7 @@ void VulkanSwapChain::createImageViews() {
         VK_SUCCESS) {
       throw std::runtime_error("failed to create texture image view!");
     }
+
   }
 }
 
@@ -439,7 +440,9 @@ VkImageView VulkanSwapChain::CreateImageView(VkImage& image, VkFormat& format)
     {
         throw std::runtime_error("Failed to create texture image view! KEKW");
     }
+    
 
+    
     return imageView;
 }
 
@@ -448,11 +451,13 @@ void VulkanSwapChain::CreateTextureImageView(VkImageView& view, VkImage& image, 
 {
     view = CreateImageView(image, format);
 
-    swapChainImageViews.resize(swapChainImages.size());
-    for (size_t i = 0; i < swapChainImages.size(); i++)
-    {
-        swapChainImageViews[i] = CreateImageView(swapChainImages[i], swapChainImageFormat);
-    }
+    //swapChainImageViews.resize(swapChainImages.size());
+    //for (size_t i = 0; i < swapChainImages.size(); i++)
+    //{
+    //    
+    //    swapChainImageViews[i] = CreateImageView(swapChainImages[i], swapChainImageFormat);
+
+    //}
 
 }
 

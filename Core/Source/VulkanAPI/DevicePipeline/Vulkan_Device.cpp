@@ -61,11 +61,13 @@ namespace VULKAN {
 	MyVulkanDevice::~MyVulkanDevice() {
 		vkDestroyCommandPool(device_, commandPool, nullptr);
 
-		for (size_t i = 0; i < resources.size(); i++)
-		{
-			
-			resources[i]->DestroyResource();
-		}
+		//for (size_t i = 0; i < resources.size(); i++)
+		//{
+		//	std::cout << "Obj destroyed" << "\n";
+		//	resources[i]->DestroyResource();
+
+		//}
+		deletionQueue.flush();
 
 		vkDestroyDevice(device_, nullptr);
 

@@ -3,17 +3,20 @@
 
 namespace VULKAN {
 
-	VKTexture::VKTexture(const char* path, VulkanSwapChain* swapchain, MyVulkanDevice& device) : mySwapChain{ swapchain }, myDevice{device}
+	VKTexture::VKTexture(const char* path, MyVulkanDevice& device) : myDevice{device}
 	{
 		this->path = path;
 		CreateTextureImage();
 		CreateImageViews();
 		CreateTextureSample();
-		myDevice.ResourceToDestroy(this);
-	}
+		myDevice.deletionQueue.push_function([&device, this]() {vkDestroySampler(device.device(), textureSampler, nullptr);});
+		myDevice.deletionQueue.push_function([&device, this]() {vkDestroyImageView(device.device(), textureImageView, nullptr);});
+		myDevice.deletionQueue.push_function([&device, this]() {vkDestroyImage(device.device(), textureImage, nullptr);});
+		myDevice.deletionQueue.push_function([&device, this]() {vkFreeMemory(device.device(), textureImageMemory, nullptr);});
 
-	VKTexture::~VKTexture()
-	{
+		//myDevice.ResourceToDestroy(this);
+
+
 	}
 
 
@@ -124,7 +127,26 @@ namespace VULKAN {
 
 	void VKTexture::CreateImageViews()
 	{
-		mySwapChain->CreateTextureImageView(textureImageView, textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = textureImage;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+
+		if (vkCreateImageView(myDevice.device(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create texture image view! KEKW");
+		}
+
+
+		
 	}
 
 

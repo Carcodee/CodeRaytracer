@@ -69,7 +69,8 @@ namespace VULKAN {
 
 		std::vector<VkCommandBuffer> commandBuffer;
 		std::unique_ptr<MyModel> myModel;
-
+		VKTexture* lion;
+		
 
 	};
 

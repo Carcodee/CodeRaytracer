@@ -11,7 +11,6 @@
 namespace VULKAN {
 
 
-    
 
 struct SwapChainSupportDetails {
   VkSurfaceCapabilitiesKHR capabilities;
@@ -79,6 +78,7 @@ class MyVulkanDevice {
   VkPhysicalDeviceProperties properties;
 
   void ResourceToDestroy(IResource* resourceObject);
+  DeletionQueue deletionQueue;
 
  private:
   void createInstance();
@@ -113,7 +113,6 @@ class MyVulkanDevice {
   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   std::vector<IResource*> resources;
-
 
 
 };

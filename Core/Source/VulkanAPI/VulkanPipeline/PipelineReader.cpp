@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cassert>
-
+#include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
 
 namespace VULKAN
 {
@@ -168,8 +168,8 @@ namespace VULKAN
 		shaderStage[1].pSpecializationInfo = nullptr;
 
 
-		auto bindingDescription = MyModel::Vertex::GetBindingDescription();
-		auto attributeDescription = MyModel::Vertex::GetAttributeDescription();
+		auto bindingDescription = Vertex::GetBindingDescription();
+		auto attributeDescription = Vertex::GetAttributeDescription();
 
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};

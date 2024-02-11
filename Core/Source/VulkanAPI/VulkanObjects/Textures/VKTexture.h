@@ -1,6 +1,6 @@
 #pragma once
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
-#include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
+#include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 
 namespace VULKAN {
 
@@ -9,24 +9,24 @@ namespace VULKAN {
 	{
 	public:
 
-		VKTexture(const char* path, VulkanSwapChain* swapchain, MyVulkanDevice& device);
-		VKTexture(VKTexture& other)=delete;
+		VKTexture(const char* path, MyVulkanDevice& device);
+		//VKTexture(VKTexture& other);
 		//Resources handled by the device;
-		~VKTexture();
 
-		VKTexture& operator=(VKTexture& other) {
+		VKTexture operator=(VKTexture& other) {
 			std::swap(textureImage, other.textureImage);
 			std::swap(textureSampler, other.textureSampler);
 			std::swap(textureImageView, other.textureImageView);
 			std::swap(textureImageMemory, other.textureImageMemory);
+			return other;
 		}
 
 		void DestroyResource() const override{
-
 			vkDestroySampler(myDevice.device(), textureSampler, nullptr);
 			vkDestroyImageView(myDevice.device(), textureImageView, nullptr);
-
 			vkDestroyImage(myDevice.device(), textureImage, nullptr);
+
+
 			vkFreeMemory(myDevice.device(), textureImageMemory, nullptr);
 		}
 
@@ -44,9 +44,8 @@ namespace VULKAN {
 
 		VkDeviceMemory textureImageMemory;
 
-
+		VkFormat format= VK_FORMAT_R8G8B8A8_SRGB;
 		MyVulkanDevice& myDevice;
-		VulkanSwapChain* mySwapChain;
 
 		const char* path;
 

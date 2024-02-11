@@ -1,6 +1,6 @@
 #pragma once
 #include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
-
+#include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
@@ -13,54 +13,27 @@ namespace VULKAN {
 	{
 	public:
 
-		struct Vertex {
-			glm::vec2 position;
-			glm::vec3 color;
-			glm::vec2 texCoord;
 
-			static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
-			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
-
-		};
-		struct triangle
-		{
-			std::vector<Vertex> vertices;
-
-
-		};
-
-		MyModel(MyVulkanDevice &device, const std::vector<Vertex> &vertices);
+		MyModel(MyVulkanDevice &device, VKBufferHandler& buffer);
 		~MyModel();
 		MyModel(const MyModel&) = delete;
 		MyModel& operator=(const MyModel&) = delete;
 
-		void Bind(VkCommandBuffer commandBuffer);
+		void BindVertexBuffer(VkCommandBuffer commandBuffer);
+		void BindVertexBufferIndexed(VkCommandBuffer commandBuffer);
+
 		void Draw(VkCommandBuffer commandBuffer);
+		void DrawIndexed(VkCommandBuffer commandBuffer);
+
 		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
 
-		void CreateTextureImage();
-		
-
-		void CreateTextureSample();
-
-
-
-		VkImageView textureImageView;
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
-		VkSampler textureSampler;
 	private:
 
-		void CreateVertexBuffers(const std::vector<Vertex> &vertices);
 
-		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
-			, VkImage& image, VkDeviceMemory& imageMemory);
-
-
+		VKBufferHandler buffer;
 		MyVulkanDevice &myDevice;
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
-		uint32_t vertexCount;
+		//VkBuffer vertexBuffer;
+		//VkDeviceMemory vertexBufferMemory;
 
 	};
 }
