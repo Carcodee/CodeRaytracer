@@ -1,5 +1,6 @@
 #include "VulkanSwap_chain.hpp"
 
+
 // std
 #include <array>
 #include <cstdlib>
@@ -20,6 +21,7 @@ VulkanSwapChain::VulkanSwapChain(MyVulkanDevice& deviceRef, VkExtent2D extent , 
 
     oldSwapChain = nullptr;
 }
+
 
 VulkanSwapChain::~VulkanSwapChain() {
   for (auto imageView : swapChainImageViews) {

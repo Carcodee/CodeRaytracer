@@ -3,6 +3,7 @@
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
 #include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
+#include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 
 #include <vector>
 #include <chrono>
@@ -60,7 +61,7 @@ namespace VULKAN
         template <typename BufferObject, std::size_t N>
         void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight);
         template <typename BufferObject, std::size_t N>
-        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkImageView textureImageView, VkSampler textureSampler);
+        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture);
 
 
         template<std::size_t N>
@@ -203,7 +204,7 @@ namespace VULKAN
     }
     template <typename BufferObject, std::size_t N>
     void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,
-        VkImageView imageView, VkSampler textureSampler)
+        VKTexture& texture)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -227,8 +228,8 @@ namespace VULKAN
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = imageView;
-            imageInfo.sampler = textureSampler;
+            imageInfo.imageView = texture.textureImageView;
+            imageInfo.sampler = texture.textureSampler;
 
 
             std::array<VkWriteDescriptorSet, N> descriptorWrite{};

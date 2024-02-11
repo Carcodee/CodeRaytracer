@@ -1,5 +1,4 @@
 #pragma once
-#include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 #include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -38,6 +37,7 @@ namespace VULKAN {
 		void Bind(VkCommandBuffer commandBuffer);
 		void Draw(VkCommandBuffer commandBuffer);
 		void BindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,VkDescriptorSet descriptorSet);
+
 		void CreateTextureImage();
 		
 

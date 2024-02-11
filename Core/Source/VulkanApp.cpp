@@ -2,6 +2,8 @@
 #include "VulkanApp.h"
 #include <stdexcept>
 #include <array>
+#include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
+
 
 namespace VULKAN{
 	
@@ -25,6 +27,8 @@ namespace VULKAN{
 		myModel->CreateTextureImage();
 		swapChain->CreateTextureImageView(myModel->textureImageView, myModel->textureImage, VK_FORMAT_R8G8B8A8_SRGB);
 		myModel->CreateTextureSample();
+		const char* path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Lion.jpg";
+		VKTexture lion (path ,swapChain.get(), myDevice);
 
 		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
 		bindings[0] = descriptorSetsHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
@@ -37,7 +41,7 @@ namespace VULKAN{
 
 		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
 		descriptorSetsHandler->CreateDescriptorPool(bindings, swapChain->MAX_FRAMES_IN_FLIGHT);
-		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, myModel->textureImageView, myModel->textureSampler);
+		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, lion);
 		//TODO: handle resources::::::::::::::::::::
 
 		CreateCommandBuffer();
@@ -46,6 +50,7 @@ namespace VULKAN{
 
 	VulkanApp::~VulkanApp()
 	{
+
 		vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
 	}
 

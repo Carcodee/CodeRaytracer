@@ -61,6 +61,12 @@ namespace VULKAN {
 	MyVulkanDevice::~MyVulkanDevice() {
 		vkDestroyCommandPool(device_, commandPool, nullptr);
 
+		for (size_t i = 0; i < resources.size(); i++)
+		{
+			
+			resources[i]->DestroyResource();
+		}
+
 		vkDestroyDevice(device_, nullptr);
 
 		if (enableValidationLayers) {
@@ -69,6 +75,12 @@ namespace VULKAN {
 
 		vkDestroySurfaceKHR(instance, surface_, nullptr);
 		vkDestroyInstance(instance, nullptr);
+	}
+
+
+	void MyVulkanDevice::ResourceToDestroy(IResource* resourceObject)
+	{
+		resources.push_back(resourceObject);
 	}
 
 	void MyVulkanDevice::createInstance() {
