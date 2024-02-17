@@ -8,7 +8,7 @@ namespace VULKAN {
 		CreateVertexBuffers(vertices);
 	}
 
-	VKBufferHandler::VKBufferHandler(MyVulkanDevice& device,const std::vector<Vertex>& vertices, const std::vector<uint16_t>& indices):myDevice{ device }
+	VKBufferHandler::VKBufferHandler(MyVulkanDevice& device,const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices):myDevice{ device }
 	{
 		CreateVertexBuffers(vertices);
 		this->indices = indices;
@@ -43,7 +43,7 @@ namespace VULKAN {
 
 	}
 
-	void VKBufferHandler::CreateIndexBuffers(const std::vector<uint16_t>& indices)
+	void VKBufferHandler::CreateIndexBuffers(const std::vector<uint32_t>& indices)
 	{
 		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
@@ -85,7 +85,7 @@ namespace VULKAN {
 		std::vector<VkVertexInputAttributeDescription>attributeDescription(3);
 		attributeDescription[0].binding = 0;
 		attributeDescription[0].location = 0;
-		attributeDescription[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescription[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescription[0].offset = offsetof(Vertex, position);
 
 		attributeDescription[1].binding = 0;

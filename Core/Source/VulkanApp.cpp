@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <array>
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
-
+#include <string>
 
 namespace VULKAN{
 	
@@ -19,17 +19,16 @@ namespace VULKAN{
 
 	VulkanApp::VulkanApp()
 	{
+		modelLoader = new ModelLoaderHandler(myDevice);
+
 		LoadModels();
 
 
 		CreateSwapChain();
-		//SetLayoutSetInfo();
 		descriptorSetsHandler = std::make_unique<MyDescriptorSets>(myDevice);
 
-		VKTexture* lion;
 
-		lion = new VKTexture("C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Lion.jpg",  myDevice);
-
+		VKTexture * lion= new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", myDevice);
 
 
 		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
@@ -44,7 +43,6 @@ namespace VULKAN{
 		descriptorSetsHandler->CreateUniformBuffers<UniformBufferObjectData>(1, swapChain->MAX_FRAMES_IN_FLIGHT);
 		descriptorSetsHandler->CreateDescriptorPool(bindings, swapChain->MAX_FRAMES_IN_FLIGHT);
 		descriptorSetsHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings , 1, swapChain->MAX_FRAMES_IN_FLIGHT, *lion);
-		//TODO: handle resources::::::::::::::::::::
 
 		CreateCommandBuffer();
 
@@ -59,20 +57,23 @@ namespace VULKAN{
 	void VulkanApp::LoadModels()
 	{
 
-		const std::vector<Vertex> vertices= {
-			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-		};
-		const std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0
-		};
+		//const std::vector<Vertex> vertices= {
+		//	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		//	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		//	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+		//	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
-		//std::vector<MyModel::Vertex> newVertices = GetVertexPosForRecursiveTriangles(vertices, 5);
-		VKBufferHandler* myBuffer= new VKBufferHandler(myDevice,vertices, indices);
-		
-
+		//	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+		//	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+		//	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+		//	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
+		//};
+		//const std::vector<uint16_t> indices = {
+		//		0, 1, 2, 2, 3, 0,
+		//		4, 5, 6, 6, 7, 4
+		//};
+		std::string path = "C:/Users/carlo/Downloads/VikingRoom.fbx";
+		VKBufferHandler* myBuffer= modelLoader->LoadModelTinyObject(path);
 		
 		myModel = std::make_unique<MyModel>(myDevice, *myBuffer);
 		

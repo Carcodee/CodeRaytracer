@@ -9,6 +9,7 @@
 #include <vector>
 #include <chrono>
 #include "VulkanAPI/DescriptorSetHandler/MyDescriptorSets.h"
+#include "VulkanAPI/ObjectLoader/ModelLoaderHandler.h"
 
 namespace VULKAN {
 	//
@@ -60,16 +61,15 @@ namespace VULKAN {
 		MyVulkanDevice myDevice{ initWindow };
 		std::unique_ptr<PipelineReader> pipelineReader;
 		std::unique_ptr<VulkanSwapChain> swapChain;
+		ModelLoaderHandler* modelLoader;
+
 
 		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
 		
 		VkPipelineLayout pipelineLayout;
-		
-
-
 		std::vector<VkCommandBuffer> commandBuffer;
 		std::unique_ptr<MyModel> myModel;
-		VKTexture* lion;
+		
 		
 
 	};
