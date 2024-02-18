@@ -16,6 +16,7 @@
 #include "functional"
 #include <deque>
 
+
 namespace VULKAN {
 
 	struct DeletionQueue

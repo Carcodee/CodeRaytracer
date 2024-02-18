@@ -2,7 +2,6 @@
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
 #include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
-#include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 #include "VulkanAPI/Model/MyModel.h"
 #include "VulkanAPI/Utility/Utility.h"
 #include <memory>
@@ -10,6 +9,9 @@
 #include <chrono>
 #include "VulkanAPI/DescriptorSetHandler/MyDescriptorSets.h"
 #include "VulkanAPI/ObjectLoader/ModelLoaderHandler.h"
+
+#include "VulkanAPI/Renderer/VulkanRenderer.h"
+#include <functional>
 
 namespace VULKAN {
 	//
@@ -31,45 +33,36 @@ namespace VULKAN {
 		VulkanApp(const VulkanApp&) = delete;
 		VulkanApp& operator=(const VulkanApp&) = delete;
 
+#ifdef IS_EDITOR
+
+		template <typename Lambda>
+		void RunEditorFunction(Lambda myLambda) {
+			myLambda();
+		};
+
+#endif
+
 	private:
 		void LoadModels();
 		void CreatePipelineLayout();
 		void CreatePipeline();
-		void CreateCommandBuffer();
-		void FreeCommandBuffers();
-		void DrawFrame();
-		void RecreateSwapChain();
-		void RecordCommandBuffer(int imageIndex);
-		void CreateSwapChain();
-		
-		void SetLayoutSetInfo();
-		void CreateUniformBuffers();
-		void updateUniformBuffer(uint32_t currentImage);
-		void CreateDescriptorPool();
-		void CreateDescriptorSets();
 
-		VkDescriptorSetLayout descriptorSetLayout;
-		std::vector<VkBuffer> uniformBuffers;
-		std::vector<VkDeviceMemory> uniformBuffersMemory;
-		std::vector<void*> uniformBuffersMapped;
-		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
+
+
 
 		int currentFrame;
 
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
 		MyVulkanDevice myDevice{ initWindow };
 		std::unique_ptr<PipelineReader> pipelineReader;
-		std::unique_ptr<VulkanSwapChain> swapChain;
-		ModelLoaderHandler* modelLoader;
-
-
 		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
+		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
+		VulkanRenderer renderer {initWindow , myDevice };
 		
 		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffer;
 		std::unique_ptr<MyModel> myModel;
-		
+
+
 		
 
 	};

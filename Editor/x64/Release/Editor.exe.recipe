@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Binaries\windows-x86_64\Release\App\App.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\x64\Release\Editor.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Core\Source\Shaders\base_shader.vert</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Core\Source\Shaders\base_shader.vert.spv</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Core\Source\VulkanAPI\compile.bat</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

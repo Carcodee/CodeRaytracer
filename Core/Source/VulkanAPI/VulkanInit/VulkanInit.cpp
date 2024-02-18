@@ -48,6 +48,7 @@ namespace VULKAN {
 	}
 	VulkanInit::~VulkanInit()
 	{
+
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
