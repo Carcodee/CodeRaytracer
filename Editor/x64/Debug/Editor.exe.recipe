@@ -2,9 +2,6 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Binaries\windows-x86_64\Debug\App\App.exe</FullPath>
-    </ProjectOutput>
-    <ProjectOutput>
       <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\x64\Debug\Editor.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
@@ -17,6 +14,18 @@
     </ContentFile>
     <ContentFile>
       <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Core\Source\VulkanAPI\compile.bat</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Editor\Source\Libraries\imgui-docking\imgui_impl_glfw.cpp</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Editor\Source\Libraries\imgui-docking\imgui_impl_vulkan.cpp</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Editor\Source\Libraries\imgui-docking\imgui_impl_glfw.h</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\carlo\Documents\GitHub\CodeRT\Editor\Source\Libraries\imgui-docking\imgui_impl_vulkan.h</FullPath>
     </ContentFile>
   </ContentFiles>
   <SatelliteDlls />

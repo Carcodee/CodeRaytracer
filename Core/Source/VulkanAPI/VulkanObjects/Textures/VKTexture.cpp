@@ -1,5 +1,5 @@
 #include "VKTexture.h"
-
+#include <stb_image.h>
 
 namespace VULKAN {
 

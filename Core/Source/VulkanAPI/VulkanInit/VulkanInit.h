@@ -12,8 +12,8 @@
 #include <string>
 
 #include <direct.h>
-#include "VulkanAPI/Headers/HeadersFiles.h"
 #include "functional"
+//#include "VulkanAPI/Headers/HeadersFiles.h"
 #include <deque>
 
 
@@ -48,8 +48,7 @@ namespace VULKAN {
 		bool ShouldClose() { return glfwWindowShouldClose(window); }
 		bool WasWindowResized() { return framebufferResized; }
 		void ResetWindowResizedFlag() { framebufferResized = false; }
-
-		
+		GLFWwindow* GetWindow() { return window; }
 
 		void Run();
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);

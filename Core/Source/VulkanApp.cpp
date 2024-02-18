@@ -27,16 +27,39 @@ namespace VULKAN{
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}
-
-#ifdef IS_EDITOR
-			
-			
-
-#endif
-
 		}
 		vkDeviceWaitIdle(myDevice.device());
 	}
+//#ifdef IS_EDITOR
+
+	void VulkanApp::RunEngine_EDITOR(std::function<void()>&& editorContext)
+	{
+		while (!initWindow.ShouldClose())
+		{
+			glfwPollEvents();
+
+			if (auto commandBuffer = renderer.BeginFrame())
+			{
+				renderer.BeginSwapChainRenderPass(commandBuffer);
+				pipelineReader->bind(commandBuffer);
+				descriptorSetsHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1);
+
+				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
+				myModel->BindVertexBufferIndexed(commandBuffer);
+				myModel->BindDescriptorSet(commandBuffer, pipelineLayout, descriptorSetsHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
+				myModel->DrawIndexed(commandBuffer);
+
+
+				renderer.EndSwapChainRenderPass(commandBuffer);
+				renderer.EndFrame();
+			}
+			//new context
+			editorContext();
+
+		}
+	}
+
+//#endif
 
 	VulkanApp::VulkanApp()
 	{

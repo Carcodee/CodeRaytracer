@@ -32,15 +32,24 @@ namespace VULKAN {
 		~VulkanApp();
 		VulkanApp(const VulkanApp&) = delete;
 		VulkanApp& operator=(const VulkanApp&) = delete;
+		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp" };
 
-#ifdef IS_EDITOR
 
-		template <typename Lambda>
-		void RunEditorFunction(Lambda myLambda) {
-			myLambda();
-		};
+//#ifdef IS_EDITOR
 
-#endif
+		void RunEngine_EDITOR(std::function<void()>&& editorContext);
+
+//
+//#endif
+		MyVulkanDevice myDevice{ initWindow };
+		std::unique_ptr<PipelineReader> pipelineReader;
+		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
+		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
+		VulkanRenderer renderer{ initWindow , myDevice };
+
+		VkPipelineLayout pipelineLayout;
+		std::unique_ptr<MyModel> myModel;
+		int currentFrame;
 
 	private:
 		void LoadModels();
@@ -50,22 +59,14 @@ namespace VULKAN {
 
 
 
-		int currentFrame;
 
-		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp"};
-		MyVulkanDevice myDevice{ initWindow };
-		std::unique_ptr<PipelineReader> pipelineReader;
-		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
-		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
-		VulkanRenderer renderer {initWindow , myDevice };
-		
-		VkPipelineLayout pipelineLayout;
-		std::unique_ptr<MyModel> myModel;
+
 
 
 		
 
 	};
+
 
 }
 

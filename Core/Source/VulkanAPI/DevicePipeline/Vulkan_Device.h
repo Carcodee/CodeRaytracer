@@ -1,7 +1,6 @@
 #pragma once
 
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
-
 // std lib headers
 #include <string>
 #include <vector>
@@ -78,7 +77,16 @@ class MyVulkanDevice {
   VkPhysicalDeviceProperties properties;
 
   DeletionQueue deletionQueue;
+  VkInstance instance;
+  VkDebugUtilsMessengerEXT debugMessenger;
+  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+  VulkanInit& myWindow;
+  VkCommandPool commandPool;
 
+  VkDevice device_;
+  VkSurfaceKHR surface_;
+  VkQueue graphicsQueue_;
+  VkQueue presentQueue_;
  private:
   void createInstance();
   void setupDebugMessenger();
@@ -97,16 +105,7 @@ class MyVulkanDevice {
   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
   SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
-  VkInstance instance;
-  VkDebugUtilsMessengerEXT debugMessenger;
-  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-  VulkanInit &myWindow;
-  VkCommandPool commandPool;
 
-  VkDevice device_;
-  VkSurfaceKHR surface_;
-  VkQueue graphicsQueue_;
-  VkQueue presentQueue_;
 
   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
