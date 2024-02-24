@@ -37,11 +37,14 @@ namespace VULKAN{
 			int GetCurrentFrame() { return swapChain->currentFrame;}
 			int GetMaxRenderInFlight() { return swapChain->MAX_FRAMES_IN_FLIGHT; }
 			int GetImageCount() { return swapChain->imageCount(); }
+
+
 		private:
 			void CreateCommandBuffer();
 			void FreeCommandBuffers();
 			void RecreateSwapChain();
 			void CreateSwapChain();
+			friend class RayTracing_RS;
 
 
 			VkDescriptorSetLayout descriptorSetLayout;

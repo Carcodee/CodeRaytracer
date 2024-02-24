@@ -52,7 +52,6 @@ public:
 
 
 
-
   VkFormat swapChainImageFormat;
   VkExtent2D swapChainExtent;
   std::vector<VkImage> swapChainImages;

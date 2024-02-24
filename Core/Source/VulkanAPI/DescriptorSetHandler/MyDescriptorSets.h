@@ -23,13 +23,6 @@ namespace VULKAN
         std::vector<void*> uniformBuffersMapped;
         std::vector<VkDescriptorSet> descriptorSets;
 
-        // Consider adding a destructor for clean-up of Vulkan resources
-        // ~DescriptorSetGroup()
-        // {
-        //     
-        // }
-
-
     };
 
 
@@ -41,8 +34,6 @@ namespace VULKAN
             myDevice(myVkDevice)
         {
         }
-        //MyDescriptorSets(const MyDescriptorSets&) = delete;
-        //MyDescriptorSets& operator=(const MyDescriptorSets&) = delete;
         ~MyDescriptorSets();
 
 

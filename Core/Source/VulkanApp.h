@@ -9,7 +9,7 @@
 #include <chrono>
 #include "VulkanAPI/DescriptorSetHandler/MyDescriptorSets.h"
 #include "VulkanAPI/ObjectLoader/ModelLoaderHandler.h"
-
+#include "VulkanAPI/RenderSystems/Forward_RS.h"
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include <functional>
 
@@ -42,19 +42,14 @@ namespace VULKAN {
 //
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
-		std::unique_ptr<PipelineReader> pipelineReader;
-		std::unique_ptr<MyDescriptorSets> descriptorSetsHandler;
 		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
 		VulkanRenderer renderer{ initWindow , myDevice };
-
-		VkPipelineLayout pipelineLayout;
+		Forward_RS forward_RS{renderer, myDevice};
 		std::unique_ptr<MyModel> myModel;
 		int currentFrame;
 
 	private:
 		void LoadModels();
-		void CreatePipelineLayout();
-		void CreatePipeline();
 
 
 
