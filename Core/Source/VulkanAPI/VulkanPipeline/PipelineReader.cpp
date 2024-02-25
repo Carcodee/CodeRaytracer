@@ -251,6 +251,7 @@ namespace VULKAN
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.stage = usage;
 		shaderStage.pName = "main";
+		return shaderStage;
 
 	}
 }

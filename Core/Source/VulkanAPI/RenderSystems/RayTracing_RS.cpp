@@ -107,7 +107,7 @@ namespace VULKAN {
 		bufferDeviceAI.buffer = buffer;
 		return vkGetBufferDeviceAddressKHR(myDevice.device(), &bufferDeviceAI);
 	}
-
+	//TODO: Create the storage image of the raytracing
 	void RayTracing_RS::CreateStorageImage()
 	{
 		
@@ -528,23 +528,135 @@ namespace VULKAN {
 			ubo.memory);
 		VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		ubo.map();
-		memcpy(&uniformData, ubo.mapped, sizeof(uniformData));
+		memcpy(ubo.mapped,&uniformData,sizeof(uniformData));
 		if ((memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0){
 			ubo.flush();
 		}
-
+		UpdateUniformbuffers();
 	}
 
-	void RayTracing_RS::BuildCommandBuffers()
+	void RayTracing_RS::BuildCommandBuffers(VkCommandBuffer& currentBuffer)
 	{
-		VkCommandBufferBeginInfo cmdBufInfo = INITIALIZERS::commandBufferBeginInfo();
-		VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		const uint32_t handleSizeAligned = alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
 
-		//for (int32_t i = 0; i < drawCmdBuffers.size(); ++i)
-		//{
+		VkStridedDeviceAddressRegionKHR raygenShaderSbtEntry{};
+		raygenShaderSbtEntry.deviceAddress = getBufferDeviceAddress(raygenShaderBindingTable.buffer);
+		raygenShaderSbtEntry.stride = handleSizeAligned;
+		raygenShaderSbtEntry.size = handleSizeAligned;
 
-		//}
+		VkStridedDeviceAddressRegionKHR missShaderSbtEntry{};
+		missShaderSbtEntry.deviceAddress = getBufferDeviceAddress(missShaderBindingTable.buffer);
+		missShaderSbtEntry.stride = handleSizeAligned;
+		missShaderSbtEntry.size = handleSizeAligned;
+
+		VkStridedDeviceAddressRegionKHR hitShaderSbtEntry{};
+		hitShaderSbtEntry.deviceAddress = getBufferDeviceAddress(hitShaderBindingTable.buffer);
+		hitShaderSbtEntry.stride = handleSizeAligned;
+		hitShaderSbtEntry.size = handleSizeAligned;
+
+		VkStridedDeviceAddressRegionKHR callableShaderSbtEntry{};
+
+		/*
+			Dispatch the ray tracing commands
+		*/
+		vkCmdBindPipeline(currentBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline);
+		vkCmdBindDescriptorSets(currentBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
+
+		vkCmdTraceRaysKHR(
+			currentBuffer,
+			&raygenShaderSbtEntry,
+			&missShaderSbtEntry,
+			&hitShaderSbtEntry,
+			&callableShaderSbtEntry,
+			myRenderer.swapChain->width(),
+			myRenderer.swapChain->height(),
+			1);
+
+
+		//TODO::
+		//vks::tools::setImageLayout(
+		//	drawCmdBuffers[i],
+		//	swapChain.images[i],
+		//	VK_IMAGE_LAYOUT_UNDEFINED,
+		//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		//	subresourceRange);
+
+		//// Prepare ray tracing output image as transfer source
+		//vks::tools::setImageLayout(
+		//	drawCmdBuffers[i],
+		//	storageImage.image,
+		//	VK_IMAGE_LAYOUT_GENERAL,
+		//	VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		//	subresourceRange);
+
+		//VkImageCopy copyRegion{};
+		//copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		//copyRegion.srcOffset = { 0, 0, 0 };
+		//copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		//copyRegion.dstOffset = { 0, 0, 0 };
+		//copyRegion.extent = { width, height, 1 };
+		//vkCmdCopyImage(drawCmdBuffers[i], storageImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, swapChain.images[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+		//// Transition swap chain image back for presentation
+		//vks::tools::setImageLayout(
+		//	drawCmdBuffers[i],
+		//	swapChain.images[i],
+		//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		//	VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		//	subresourceRange);
+
+		//// Transition ray tracing output image back to general layout
+		//vks::tools::setImageLayout(
+		//	drawCmdBuffers[i],
+		//	storageImage.image,
+		//	VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		//	VK_IMAGE_LAYOUT_GENERAL,
+		//	subresourceRange);
+
 	}
+
+	void RayTracing_RS::Create_RT_RenderSystem()
+	{
+		// Get ray tracing pipeline properties, which will be used later on in the sample
+		rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+		VkPhysicalDeviceProperties2 deviceProperties2{};
+		deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+		deviceProperties2.pNext = &rayTracingPipelineProperties;
+		vkGetPhysicalDeviceProperties2(myDevice.physicalDevice, &deviceProperties2);
+
+		// Get acceleration structure properties, which will be used later on in the sample
+		accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		VkPhysicalDeviceFeatures2 deviceFeatures2{};
+		deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		deviceFeatures2.pNext = &accelerationStructureFeatures;
+		vkGetPhysicalDeviceFeatures2(myDevice.physicalDevice, &deviceFeatures2);
+		LoadFunctionsPointers();
+
+
+		CreateStorageImage();
+		CreateUniformBuffer();
+		CreateRTPipeline();
+		CreateShaderBindingTable();
+		CreateDescriptorSets();
+		for (size_t i = 0; i < myRenderer.commandBuffer.size(); i++)
+		{
+			BuildCommandBuffers(myRenderer.commandBuffer[i]);
+		}
+		readyToDraw = true;
+
+
+	}
+
+	void RayTracing_RS::UpdateUniformbuffers()
+	{
+		uniformData.projInverse = glm::perspective(glm::radians(45.0f), 800 / (float)600, 0.1f, 10.0f);
+		uniformData.viewInverse = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		uniformData.projInverse[1][1] *= -1;
+
+		memcpy(ubo.mapped, &uniformData,sizeof(UniformData));
+	}
+
+
 
 }
 

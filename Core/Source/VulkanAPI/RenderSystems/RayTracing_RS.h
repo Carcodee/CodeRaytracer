@@ -40,6 +40,7 @@ namespace VULKAN {
 		PFN_vkGetRayTracingShaderGroupHandlesKHR vkGetRayTracingShaderGroupHandlesKHR;
 		PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR;
 
+		bool readyToDraw = false;
 
 	private:
 		struct StorageImage {
@@ -67,7 +68,9 @@ namespace VULKAN {
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
 		void CreateUniformBuffer();
-		void BuildCommandBuffers();
+		void BuildCommandBuffers(VkCommandBuffer& currentBuffer);
+		void Create_RT_RenderSystem();
+		void UpdateUniformbuffers();
 
 		VulkanRenderer& myRenderer;
 		MyDescriptorSets descriptorSetHandler_RT;
@@ -78,6 +81,7 @@ namespace VULKAN {
 		
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
 		VkPhysicalDeviceRayTracingPipelinePropertiesKHR  rayTracingPipelineProperties{};
+		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
 
 
 		VkPipeline pipeline;
