@@ -519,5 +519,32 @@ namespace VULKAN {
 		}
 	}
 
+	void RayTracing_RS::CreateUniformBuffer()
+	{
+		myDevice.createBuffer(sizeof(uniformData),
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			ubo.buffer,
+			ubo.memory);
+		VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		ubo.map();
+		memcpy(&uniformData, ubo.mapped, sizeof(uniformData));
+		if ((memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0){
+			ubo.flush();
+		}
+
+	}
+
+	void RayTracing_RS::BuildCommandBuffers()
+	{
+		VkCommandBufferBeginInfo cmdBufInfo = INITIALIZERS::commandBufferBeginInfo();
+		VkImageSubresourceRange subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+
+		//for (int32_t i = 0; i < drawCmdBuffers.size(); ++i)
+		//{
+
+		//}
+	}
+
 }
 

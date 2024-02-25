@@ -66,6 +66,8 @@ namespace VULKAN {
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
+		void CreateUniformBuffer();
+		void BuildCommandBuffers();
 
 		VulkanRenderer& myRenderer;
 		MyDescriptorSets descriptorSetHandler_RT;
