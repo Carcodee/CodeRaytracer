@@ -46,18 +46,28 @@ namespace VULKAN{
 
 		void bind(VkCommandBuffer commandBuffer);
 
+		//RT//////////////////////////
+		static VkPipelineShaderStageCreateInfo CreateShaderStageModule(VkShaderModule& module, MyVulkanDevice& device ,VkShaderStageFlagBits usage, const std::string& shaderPath);
+	
+	
+	
 	private:
 
 		static std::vector <char> ReadFile(const std::string& filepath);
 
 		void CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+
+
 			 
 		void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		static void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule, MyVulkanDevice& device);
+
 
 		MyVulkanDevice& myVulkanDevice;
 		VkPipeline graphicsPipeline;
 		VkShaderModule fragShaderModule;
 		VkShaderModule vertShaderModule;
+
 
 	};
 

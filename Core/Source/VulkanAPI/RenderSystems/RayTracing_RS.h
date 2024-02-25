@@ -4,6 +4,8 @@
 #include "VulkanAPI/DescriptorSetHandler/MyDescriptorSets.h"
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
+#include "VulkanAPI/VulkanPipeline/PipelineReader.h"
+#include "VulkanAPI/Utility/Utility.h"
 namespace VULKAN {
 	// Holds data for a ray tracing scratch buffer that is used as a temporary storage
 	struct RayTracingScratchBuffer
@@ -56,11 +58,14 @@ namespace VULKAN {
 		void LoadFunctionsPointers();
 		RayTracingScratchBuffer CreateScratchBuffer(VkDeviceSize size);
 		void DeleteScratchBuffer(RayTracingScratchBuffer& scratchBuffer);
-		void createAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
+		void CreateAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
-		void createStorageImage();
-		void createBottomLevelAccelerationStructure();
-		void createTopLevelAccelerationStructure();
+		void CreateStorageImage();
+		void CreateBottomLevelAccelerationStructure();
+		void CreateTopLevelAccelerationStructure();
+		void CreateShaderBindingTable();
+		void CreateDescriptorSets();
+		void CreateRTPipeline();
 
 		VulkanRenderer& myRenderer;
 		MyDescriptorSets descriptorSetHandler_RT;
@@ -70,7 +75,14 @@ namespace VULKAN {
 		AccelerationStructure topLevelAS{};
 		
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
-		
+		VkPhysicalDeviceRayTracingPipelinePropertiesKHR  rayTracingPipelineProperties{};
+
+
+		VkPipeline pipeline;
+		VkPipelineLayout pipelineLayout;
+		VkDescriptorPool descriptorPool;
+		VkDescriptorSetLayout descriptorSetLayout;
+		VkDescriptorSet descriptorSet;
 		uint32_t indexCount;
 
 		Buffer vertexBuffer;
@@ -79,6 +91,12 @@ namespace VULKAN {
 		Buffer raygenShaderBindingTable;
 		Buffer missShaderBindingTable;
 		Buffer hitShaderBindingTable;
+		Buffer ubo;
+
+
+		VkShaderModule rHitShaderModule;
+		VkShaderModule rMissShaderModule;
+		VkShaderModule rGenShaderModule;
 
 	};
 
