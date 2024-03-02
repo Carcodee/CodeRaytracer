@@ -18,7 +18,7 @@ namespace VULKAN {
 	void Forward_RS::CreateDescriptorSets()
 	{
 		renderSystemDescriptorSetHandler = std::make_unique<MyDescriptorSets>(myDevice);
-		VKTexture* lion = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", myDevice);
+		VKTexture* lion = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", renderer.GetSwapchain());
 		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
 		bindings[0] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
 		bindings[1] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, 1);
@@ -51,6 +51,7 @@ namespace VULKAN {
 
 		pipelineConfig.renderPass = renderer.GetSwapchainRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
+		pipelineConfig.multisampleInfo.rasterizationSamples = myDevice.msaaSamples;
 
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,

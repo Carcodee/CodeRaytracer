@@ -1,6 +1,6 @@
 #pragma once
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
-#include "VulkanAPI/DevicePipeline/Vulkan_Device.h"
+#include "VulkanAPI/SwapChain/VulkanSwap_chain.hpp"
 
 namespace VULKAN {
 
@@ -9,9 +9,11 @@ namespace VULKAN {
 	{
 	public:
 
-		VKTexture(const char* path, MyVulkanDevice& device);
+		VKTexture(const char* path, VulkanSwapChain& swapchain);
 		//VKTexture(VKTexture& other);
-		//Resources handled by the device;
+		//Resources handled by the swapchain;
+		VKTexture(const char* path, VulkanSwapChain& swapchain, uint32_t mipLevels);
+		VKTexture(VulkanSwapChain& swapchain);
 
 		VKTexture operator=(VKTexture& other) {
 			std::swap(textureImage, other.textureImage);
@@ -22,32 +24,31 @@ namespace VULKAN {
 		}
 
 		void DestroyResource() const override{
-			vkDestroySampler(myDevice.device(), textureSampler, nullptr);
-			vkDestroyImageView(myDevice.device(), textureImageView, nullptr);
-			vkDestroyImage(myDevice.device(), textureImage, nullptr);
+			vkDestroySampler(mySwapChain.device.device(), textureSampler, nullptr);
+			vkDestroyImageView(mySwapChain.device.device(), textureImageView, nullptr);
+			vkDestroyImage(mySwapChain.device.device(), textureImage, nullptr);
 
 
-			vkFreeMemory(myDevice.device(), textureImageMemory, nullptr);
+			vkFreeMemory(mySwapChain.device.device(), textureImageMemory, nullptr);
 		}
 
-		VkImage textureImage;
-		VkSampler textureSampler;
-		VkImageView textureImageView;
+		VkImage textureImage=nullptr;
+		VkSampler textureSampler= nullptr;
+		VkImageView textureImageView= nullptr;
+		VkDeviceMemory textureImageMemory=nullptr;
+		uint32_t mipLevels=0;
 
 	private:
 		void CreateTextureImage();
-
 		void CreateTextureSample();
-		void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
-			, VkImage& image, VkDeviceMemory& imageMemory);
 		void CreateImageViews();
 
-		VkDeviceMemory textureImageMemory;
-
+		
 		VkFormat format= VK_FORMAT_R8G8B8A8_SRGB;
-		MyVulkanDevice& myDevice;
+		VulkanSwapChain& mySwapChain;
+		MyVulkanDevice& device;
 
-		const char* path;
+		const char* path=nullptr;
 
 	};
 

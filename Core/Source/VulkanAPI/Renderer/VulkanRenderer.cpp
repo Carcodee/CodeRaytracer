@@ -9,7 +9,6 @@ namespace VULKAN {
 		VulkanRenderer::VulkanRenderer(VulkanInit& window, MyVulkanDevice& device) : initWindow{window}, myDevice{device}
 		{
 			CreateSwapChain();
-			VKTexture* lion = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", myDevice);
 			RecreateSwapChain();
 			CreateCommandBuffer();
 		}

@@ -37,6 +37,7 @@ namespace VULKAN{
 			int GetCurrentFrame() { return swapChain->currentFrame;}
 			int GetMaxRenderInFlight() { return swapChain->MAX_FRAMES_IN_FLIGHT; }
 			int GetImageCount() { return swapChain->imageCount(); }
+			VulkanSwapChain& GetSwapchain(){ return *swapChain;}
 
 
 		private:

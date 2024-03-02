@@ -72,8 +72,9 @@ class MyVulkanDevice {
       VkMemoryPropertyFlags properties,
       VkImage &image,
       VkDeviceMemory &imageMemory);
-  void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-
+  void TransitionImageLayout(VkImage image, VkFormat format, uint32_t mipLevels, VkImageLayout oldLayout, VkImageLayout newLayout);
+  void GenerateMipmaps(VkImage image,VkFormat format, int32_t texWidht, int32_t texHeight, uint32_t mipLevels);
+  VkSampleCountFlagBits GetMaxUsableSampleCount();
 
   VkPhysicalDeviceProperties properties;
 
@@ -83,6 +84,7 @@ class MyVulkanDevice {
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
   VulkanInit& myWindow;
   VkCommandPool commandPool;
+  VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
   VkDevice device_;
   VkSurfaceKHR surface_;

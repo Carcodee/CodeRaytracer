@@ -4,7 +4,6 @@
 
 // vulkan headers
 #include <vulkan/vulkan.h>
-
 // std lib headers
 #include <string>
 #include <vector>
@@ -37,7 +36,7 @@ public:
   uint32_t width() { return swapChainExtent.width; }
   uint32_t height() { return swapChainExtent.height; }
   //change this later to a texture object
-  void CreateTextureImageView(VkImageView& view, VkImage& image, VkFormat format);
+  void CreateTextureImageView(VkImageView& view, VkImage& image,uint32_t mipLevels, VkFormat format);
 
   float extentAspectRatio() {
     return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
@@ -46,6 +45,8 @@ public:
 
   VkResult acquireNextImage(uint32_t *imageIndex);
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
+  void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
+      , VkImage& image, VkDeviceMemory& imageMemory);
   size_t currentFrame = 0;
   
   //imageviews
@@ -56,6 +57,7 @@ public:
   VkExtent2D swapChainExtent;
   std::vector<VkImage> swapChainImages;
   std::vector<VkImageView> swapChainImageViews;
+  friend class VKTexture;
 
  private:
 
@@ -66,6 +68,7 @@ public:
   void createRenderPass();
   void createFramebuffers();
   void createSyncObjects();
+  void CreateColorResources();
 
   // Helper functions
   VkSurfaceFormatKHR chooseSwapSurfaceFormat(
@@ -74,9 +77,8 @@ public:
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
-  VkImageView CreateImageView(VkImage& image, VkFormat& format);
+  VkImageView CreateImageView(VkImage& image, VkFormat& format, VkImageAspectFlagBits aspectFlags, uint32_t mipLevels);
 
-  
   std::vector<VkFramebuffer> swapChainFramebuffers;
   VkRenderPass renderPass;
 
@@ -84,6 +86,9 @@ public:
   std::vector<VkDeviceMemory> depthImageMemorys;
   std::vector<VkImageView> depthImageViews;
 
+  VkImage colorImage;
+  VkDeviceMemory colorImageMemory;
+  VkImageView colorImageView;
 
   MyVulkanDevice &device;
   VkExtent2D windowExtent;
