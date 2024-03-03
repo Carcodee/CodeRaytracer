@@ -16,17 +16,23 @@ namespace VULKAN
 		void CreatePipelineLayout();
 		void CreatePipeline();
 		void CheckRenderPassCompatibility();
-
+		void CreateComputePipeline();
 
 		std::unique_ptr<PipelineReader> pipelineReader;
-		std::unique_ptr < MyDescriptorSets> renderSystemDescriptorSetHandler;
+		std::unique_ptr <MyDescriptorSets> renderSystemDescriptorSetHandler;
 		VkPipelineLayout pipelineLayout;
+		std::vector<VkBuffer> shaderStorageBuffers;
+		std::vector<VkDeviceMemory> shaderStorageBuffersMemory;
+
 
 	private:
 
 		MyVulkanDevice& myDevice;
 		VulkanRenderer& renderer;
-		
+		VkShaderModule computeModule;
+		VkPipeline computePipeline;
+
+
 	};
 }
 

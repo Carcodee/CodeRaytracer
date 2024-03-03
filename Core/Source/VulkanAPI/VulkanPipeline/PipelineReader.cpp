@@ -237,10 +237,30 @@ namespace VULKAN
 
 	}
 
+	//COMUPUTE PIPELINE/////////////////////////
+
+
+	VkPipelineShaderStageCreateInfo PipelineReader::CreateComputeStageModule(VkShaderModule& module,
+		MyVulkanDevice& device, const std::string& shaderPath)
+	{
+		auto code = ReadFile(shaderPath);
+
+		CreateShaderModule(code, &module, device);
+
+		VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+		computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+		computeShaderStageInfo.module = module;
+		computeShaderStageInfo.pName = "main";
+
+		return computeShaderStageInfo;
+	}
 
 
 	//RT//////////////////////////////
-	VkPipelineShaderStageCreateInfo PipelineReader::CreateShaderStageModule(VkShaderModule& module,MyVulkanDevice& device ,VkShaderStageFlagBits usage, const std::string& shaderPath) {
+
+	VkPipelineShaderStageCreateInfo PipelineReader::CreateShaderStageModule(VkShaderModule& module,MyVulkanDevice& device ,
+		VkShaderStageFlagBits usage, const std::string& shaderPath) {
 
 		auto code = ReadFile(shaderPath);
 
@@ -254,4 +274,7 @@ namespace VULKAN
 		return shaderStage;
 
 	}
+
+
+
 }

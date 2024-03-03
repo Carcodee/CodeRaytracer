@@ -1,5 +1,5 @@
 #include "Forward_RS.h"
-
+#include "VulkanAPI/Utility/ComputeShadersUtils.h"
 
 namespace VULKAN {
 
@@ -67,5 +67,30 @@ namespace VULKAN {
 
 	}
 
+	void Forward_RS::CreateComputePipeline()
+	{
+		VkDeviceSize bufferSize= sizeof(Particle);
+
+		for (uint32_t i= 0; i<shaderStorageBuffers.size(); i++)
+		{
+			myDevice.createBuffer(bufferSize,
+				VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+				shaderStorageBuffers[i],
+				shaderStorageBuffersMemory[i]);
+		}
+
+		std::string path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/ComputeShaders/compute.comp";
+		VkPipelineShaderStageCreateInfo pipelineConfigInfo = PipelineReader::CreateComputeStageModule(computeModule, myDevice, path);
+
+		VkComputePipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		pipelineInfo.layout = 0;
+		pipelineInfo.stage = pipelineConfigInfo;
+
+		if (vkCreateComputePipelines(myDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &computePipeline) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create compute pipeline!");
+		}
+	}
 }
 

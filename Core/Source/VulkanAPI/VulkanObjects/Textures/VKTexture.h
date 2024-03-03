@@ -16,20 +16,22 @@ namespace VULKAN {
 		VKTexture(VulkanSwapChain& swapchain);
 
 		VKTexture operator=(VKTexture& other) {
+		
 			std::swap(textureImage, other.textureImage);
 			std::swap(textureSampler, other.textureSampler);
 			std::swap(textureImageView, other.textureImageView);
 			std::swap(textureImageMemory, other.textureImageMemory);
 			return other;
+		
 		}
 
 		void DestroyResource() const override{
+			
 			vkDestroySampler(mySwapChain.device.device(), textureSampler, nullptr);
 			vkDestroyImageView(mySwapChain.device.device(), textureImageView, nullptr);
 			vkDestroyImage(mySwapChain.device.device(), textureImage, nullptr);
-
-
 			vkFreeMemory(mySwapChain.device.device(), textureImageMemory, nullptr);
+		
 		}
 
 		VkImage textureImage=nullptr;

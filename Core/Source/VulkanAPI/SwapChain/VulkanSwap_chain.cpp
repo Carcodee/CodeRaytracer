@@ -198,9 +198,9 @@ void VulkanSwapChain::createSwapChain() {
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
   QueueFamilyIndices indices = device.findPhysicalQueueFamilies();
-  uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
+  uint32_t queueFamilyIndices[] = {indices.graphicsAndComputeFamily, indices.presentFamily};
 
-  if (indices.graphicsFamily != indices.presentFamily) {
+  if (indices.graphicsAndComputeFamily != indices.presentFamily) {
     createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
     createInfo.pQueueFamilyIndices = queueFamilyIndices;

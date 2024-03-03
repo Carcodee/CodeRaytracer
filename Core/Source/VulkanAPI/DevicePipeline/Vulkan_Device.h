@@ -18,6 +18,7 @@ struct SwapChainSupportDetails {
 };
 
 struct QueueFamilyIndices {
+  uint32_t graphicsAndComputeFamily;
   uint32_t graphicsFamily;
   uint32_t presentFamily;
   bool graphicsFamilyHasValue = false;
@@ -90,6 +91,8 @@ class MyVulkanDevice {
   VkSurfaceKHR surface_;
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
+  VkQueue computeQueue_;
+
  private:
   void createInstance();
   void setupDebugMessenger();
