@@ -11,6 +11,9 @@ namespace VULKAN {
 			CreateSwapChain();
 			RecreateSwapChain();
 			CreateCommandBuffer();
+
+
+
 		}
 
 		VulkanRenderer::~VulkanRenderer()
@@ -20,8 +23,9 @@ namespace VULKAN {
 
 		void VulkanRenderer::CreateCommandBuffer()
 		{
-			commandBuffer.resize(swapChain->imageCount());
 			VkCommandBufferAllocateInfo allocInfo{};
+		
+			commandBuffer.resize(swapChain->imageCount());
 			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			allocInfo.commandPool = myDevice.getCommandPool();
@@ -32,6 +36,36 @@ namespace VULKAN {
 				throw std::runtime_error("Failed to allocate command buffers!");
 			}
 
+			allocInfo={};
+			computeCommandBuffers.resize(swapChain->imageCount());
+			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			allocInfo.commandPool = myDevice.getCommandPool();
+			allocInfo.commandBufferCount = static_cast<uint32_t>(computeCommandBuffers.size());
+
+			if (vkAllocateCommandBuffers(myDevice.device(), &allocInfo, computeCommandBuffers.data()) != VK_SUCCESS)
+			{
+				throw std::runtime_error("Failed to allocate command buffers!");
+			}
+		
+
+		}
+
+		void VulkanRenderer::CreateComputeCommandBuffer()
+		{
+
+
+			computeCommandBuffers.resize(swapChain->imageCount());
+
+			VkCommandBufferAllocateInfo allocInfo{};
+			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			allocInfo.commandPool = myDevice.getCommandPool();
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			allocInfo.commandBufferCount = (uint32_t)computeCommandBuffers.size();
+
+			if (vkAllocateCommandBuffers(myDevice.device(), &allocInfo, computeCommandBuffers.data()) != VK_SUCCESS) {
+				throw std::runtime_error("failed to allocate compute command buffers!");
+			}
 		}
 
 		void VulkanRenderer::FreeCommandBuffers()
@@ -67,6 +101,7 @@ namespace VULKAN {
 				{
 					FreeCommandBuffers();
 					CreateCommandBuffer();
+
 				}
 			}
 
@@ -89,7 +124,7 @@ namespace VULKAN {
 		VkCommandBuffer VulkanRenderer::BeginFrame() {
 
 			assert(!isFrameStarted && "Cant call beginframe while alredy in progress");
-			uint32_t imageIndex;
+
 			auto result = swapChain->acquireNextImage(&currentImageIndex);
 			if (result == VK_ERROR_OUT_OF_DATE_KHR)
 			{
@@ -115,20 +150,39 @@ namespace VULKAN {
 			return commandBuffer;
 
 		}
+
+		VkCommandBuffer VulkanRenderer::BeginComputeFrame()
+		{
+			swapChain->WaitForComputeFence();
+
+			auto commandBuffer = GetCurrentComputeCommandBuffer();
+
+
+			VkCommandBufferBeginInfo beginInfo{};
+			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+			{
+				throw std::runtime_error("Failed to begin recording command buffer!");
+			}
+
+			return commandBuffer;
+		}
+
 		void VulkanRenderer::EndFrame() {
 			assert(isFrameStarted && "Cant call beginframe while is not in progress");
 			auto commandBuffer = GetCurrentCommandBuffer();
 
+			//graphics queue
 			if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			{
 				throw std::runtime_error("Failed to record command buffer!");
 			}
+
 			auto result = swapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || initWindow.WasWindowResized()) {
 				initWindow.ResetWindowResizedFlag();
 				RecreateSwapChain();
 			}
-
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
 				initWindow.WasWindowResized()) {
 				initWindow.ResetWindowResizedFlag();
@@ -140,6 +194,34 @@ namespace VULKAN {
 			isFrameStarted = false;
 
 		}
+
+		void VulkanRenderer::EndComputeFrame()
+		{
+			//compute queue
+			auto computeCommandBuffer = GetCurrentComputeCommandBuffer();
+
+
+			if (vkEndCommandBuffer(computeCommandBuffer) != VK_SUCCESS)
+			{
+				throw std::runtime_error("Failed to record command buffer!");
+			}
+			auto result = swapChain->submitComputeCommandBuffers(&computeCommandBuffer, &currentImageIndex);
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || initWindow.WasWindowResized()) {
+				initWindow.ResetWindowResizedFlag();
+				RecreateSwapChain();
+			}
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+				initWindow.WasWindowResized()) {
+				initWindow.ResetWindowResizedFlag();
+				RecreateSwapChain();
+			}
+			else if (result != VK_SUCCESS) {
+				throw std::runtime_error("failed to present swap chain image!");
+			}
+
+
+		}
+
 		void VulkanRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
 			assert(isFrameStarted && "Cant call beginframe while is not in progress");
 			assert(commandBuffer==GetCurrentCommandBuffer() && "Cant begin render pass on command buffer from a different frame");

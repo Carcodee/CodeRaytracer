@@ -82,26 +82,30 @@ VkResult VulkanSwapChain::submitCommandBuffers(
   imagesInFlight[*imageIndex] = inFlightFences[currentFrame];
 
   VkSubmitInfo submitInfo = {};
+
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-  VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
-  VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-  submitInfo.waitSemaphoreCount = 1;
+  VkSemaphore waitSemaphores[] = {computeRenderFinishedSemaphores[currentFrame] , imageAvailableSemaphores[currentFrame] };
+  VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT , VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+  submitInfo.waitSemaphoreCount = 2;
   submitInfo.pWaitSemaphores = waitSemaphores;
   submitInfo.pWaitDstStageMask = waitStages;
-
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = buffers;
 
-  VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
+
+  VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
   submitInfo.signalSemaphoreCount = 1;
   submitInfo.pSignalSemaphores = signalSemaphores;
+
 
   vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
   if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to submit draw command buffer!");
   }
+  
+
 
   VkPresentInfoKHR presentInfo = {};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -122,8 +126,25 @@ VkResult VulkanSwapChain::submitCommandBuffers(
   return result;
 }
 
+VkResult VulkanSwapChain::submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
+{
+    // Compute submission
+
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = buffers;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &computeRenderFinishedSemaphores[currentFrame];
+
+    if (vkQueueSubmit(device.computeQueue_, 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit compute command buffer!");
+    };
+    return VK_SUCCESS;
+}
+
 void VulkanSwapChain::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples,
-    VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+                                  VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
     VkImageCreateInfo imageInfo{};
 
@@ -417,6 +438,9 @@ void VulkanSwapChain::createSyncObjects() {
   inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
   imagesInFlight.resize(imageCount(), VK_NULL_HANDLE);
 
+  computeRenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+  computeInFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
   VkSemaphoreCreateInfo semaphoreInfo = {};
   semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -432,6 +456,14 @@ void VulkanSwapChain::createSyncObjects() {
         vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
       throw std::runtime_error("failed to create synchronization objects for a frame!");
     }
+    if (vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &computeRenderFinishedSemaphores[i]) !=
+        VK_SUCCESS ||
+        vkCreateFence(device.device(), &fenceInfo, nullptr, &computeInFlightFences[i]) != 
+        VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create synchronization objects for a frame!");
+    }
+
   }
 }
 
@@ -532,6 +564,12 @@ void VulkanSwapChain::CreateTextureImageView(VkImageView& view, VkImage& image, 
 
     }
 
+}
+
+void VulkanSwapChain::WaitForComputeFence()
+{
+    vkWaitForFences(device.device(), 1, &computeInFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(device.device(), 1, &computeInFlightFences[currentFrame]);
 }
 
 VkFormat VulkanSwapChain::findDepthFormat() {

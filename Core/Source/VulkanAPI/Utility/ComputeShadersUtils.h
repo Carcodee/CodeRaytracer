@@ -36,6 +36,19 @@ namespace VULKAN {
         }
 	};
 
+    void InitParticles(std::vector<Particle>& particles)
+    {
+		for (auto& particle : particles)
+		{
+			particle.position = glm::vec2(0.0f, 0.0f);
+            int xV = rand() / RAND_MAX;
+            int yV = rand() / RAND_MAX;
+
+			particle.velocity = glm::vec2(xV, yV);
+			particle.color = glm::vec4(rand() / RAND_MAX, rand() / RAND_MAX, rand() / RAND_MAX, 1.0f);
+		}
+    }
+
 
 
 }

@@ -50,20 +50,21 @@ namespace VULKAN
         void UpdateUniformBuffer(uint32_t currentImage, int descriptorCount);
 
         template <typename BufferObject, std::size_t N>
-        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight);
+        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
         template <typename BufferObject, std::size_t N>
-        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture);
+        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture, VkDescriptorType descriptorType);
 
+    	void CreateDescriptorSets(int descriptorCount, int maxFramesInFlight);
 
         template<std::size_t N>
-        void CreateDescriptorPool(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int maxFramesInFlight);
+        void CreateDescriptorPool(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int maxFramesInFlight, VkStructureType type);
 
 
         MyVulkanDevice& myDevice;
         std::vector<DescriptorSetGroup> descriptorData;
         std::vector <VkDescriptorSetLayout> descriptorSetLayout;
         VkDescriptorPool descriptorPool;
-
+        std::vector<VkWriteDescriptorSet>descriptorWrite{};
 
     };
 
@@ -85,7 +86,7 @@ namespace VULKAN
     }
 
     template<std::size_t N>
-    inline void MyDescriptorSets::CreateDescriptorPool(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int maxFramesInFlight)
+    inline void MyDescriptorSets::CreateDescriptorPool(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int maxFramesInFlight, VkStructureType type)
     {
         std::array<VkDescriptorPoolSize, N> poolSize{};
         for (size_t i = 0; i < N; i++)
@@ -95,7 +96,7 @@ namespace VULKAN
         }
 
         VkDescriptorPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.sType = type;
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
         poolInfo.pPoolSizes = poolSize.data();
@@ -129,6 +130,8 @@ namespace VULKAN
 
     }
 
+
+
     template <typename BufferObject>
     void MyDescriptorSets::UpdateUniformBuffer(uint32_t currentImage, int descriptorCount)
     {
@@ -152,7 +155,7 @@ namespace VULKAN
     }
 
     template <typename BufferObject, std::size_t N>
-    void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight)
+    void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -181,11 +184,10 @@ namespace VULKAN
                 descriptorWrite[j].dstBinding = j;
                 descriptorWrite[j].dstArrayElement = 0;
                 descriptorWrite[j].pBufferInfo = &bufferInfo;
-                descriptorWrite[j].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                descriptorWrite[j].descriptorType = descriptorType;
                 descriptorWrite[j].descriptorCount = descriptorCount;
                 descriptorWrite[j].pImageInfo = nullptr; // Optional
                 descriptorWrite[j].pTexelBufferView = nullptr; // Optional
-     
 
             }
 
@@ -194,9 +196,12 @@ namespace VULKAN
         }
 
     }
+
+
+
     template <typename BufferObject, std::size_t N>
     void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,
-        VKTexture& texture)
+        VKTexture& texture, VkDescriptorType descriptorType)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -210,6 +215,7 @@ namespace VULKAN
         {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
+        std::array<VkWriteDescriptorSet, N> descriptorWrite{};
         for (size_t i = 0; i < maxFramesInFlight; i++)
         {
             VkDescriptorBufferInfo bufferInfo{};
@@ -224,7 +230,7 @@ namespace VULKAN
             imageInfo.sampler = texture.textureSampler;
 
 
-            std::array<VkWriteDescriptorSet, N> descriptorWrite{};
+
             for (size_t j = 0; j < descriptorWrite.size(); j++)
             {
                 if (bindings[j].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
@@ -258,7 +264,8 @@ namespace VULKAN
             vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
         }
 
-
     }
+
+
 }
 

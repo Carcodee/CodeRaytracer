@@ -12,7 +12,16 @@ namespace VULKAN{
 		while (!initWindow.ShouldClose())
 		{
 			glfwPollEvents();
+			int currentTime = glfwGetTime();
 
+
+
+			if (auto commandBuffer = renderer.BeginComputeFrame())
+			{
+				forward_RS.CreateComputeWorkGroups(renderer.GetCurrentFrame(), commandBuffer);
+				forward_RS.UpdateUBO(renderer.GetCurrentFrame(), deltaTime);
+				renderer.EndComputeFrame();
+			}
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
 				renderer.BeginSwapChainRenderPass(commandBuffer);
@@ -27,6 +36,8 @@ namespace VULKAN{
 				renderer.EndSwapChainRenderPass(commandBuffer);
 				renderer.EndFrame();
 			}
+			deltaTime = (currentTime - lastDeltaTime) * 1000.0;
+			lastDeltaTime = currentTime;
 		}
 		vkDeviceWaitIdle(myDevice.device());
 	}
@@ -36,7 +47,9 @@ namespace VULKAN{
 	{
 		while (!initWindow.ShouldClose())
 		{
+
 			glfwPollEvents();
+
 
 			if (auto commandBuffer = renderer.BeginFrame())
 			{

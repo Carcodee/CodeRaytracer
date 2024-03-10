@@ -49,6 +49,9 @@ namespace VULKAN {
 		int currentFrame;
 
 	private:
+		float deltaTime = 0.0f;
+		double lastDeltaTime = 0.0f;
+
 		void LoadModels();
 
 

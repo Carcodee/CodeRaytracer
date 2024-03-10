@@ -37,6 +37,7 @@ public:
   uint32_t height() { return swapChainExtent.height; }
   //change this later to a texture object
   void CreateTextureImageView(VkImageView& view, VkImage& image,uint32_t mipLevels, VkFormat format);
+  void WaitForComputeFence();
 
   float extentAspectRatio() {
     return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
@@ -45,6 +46,8 @@ public:
 
   VkResult acquireNextImage(uint32_t *imageIndex);
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
+  VkResult submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+
   void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
       , VkImage& image, VkDeviceMemory& imageMemory);
   size_t currentFrame = 0;
@@ -100,6 +103,10 @@ public:
   std::vector<VkSemaphore> renderFinishedSemaphores;
   std::vector<VkFence> inFlightFences;
   std::vector<VkFence> imagesInFlight;
+
+  std::vector<VkSemaphore> computeRenderFinishedSemaphores;
+  std::vector<VkFence> computeInFlightFences;
+
 };
 
 }  // namespace lve

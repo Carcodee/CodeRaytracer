@@ -14,6 +14,12 @@
 
 namespace VULKAN{
 
+		enum PipelineType
+		{
+			GRAPHICS = 0,
+			COMPUTE = 1
+		};
+
 		class VulkanRenderer
 		{
 		public:
@@ -24,7 +30,11 @@ namespace VULKAN{
 			VulkanRenderer& operator=(const VulkanRenderer&) = delete;
 
 			VkCommandBuffer BeginFrame();
+			VkCommandBuffer BeginComputeFrame();
+
 			void EndFrame();
+			void EndComputeFrame();
+
 			void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 			void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 			VkRenderPass GetSwapchainRenderPass() const { return swapChain->getRenderPass(); }
@@ -34,6 +44,9 @@ namespace VULKAN{
 				assert(isFrameStarted && "Cannot get the command buffer when the frame is not in progress");
 				return commandBuffer[currentImageIndex];
 			}
+			VkCommandBuffer GetCurrentComputeCommandBuffer() const {
+				return computeCommandBuffers[currentImageIndex];
+			}
 			int GetCurrentFrame() { return swapChain->currentFrame;}
 			int GetMaxRenderInFlight() { return swapChain->MAX_FRAMES_IN_FLIGHT; }
 			int GetImageCount() { return swapChain->imageCount(); }
@@ -42,26 +55,22 @@ namespace VULKAN{
 
 		private:
 			void CreateCommandBuffer();
+			void CreateComputeCommandBuffer();
 			void FreeCommandBuffers();
 			void RecreateSwapChain();
 			void CreateSwapChain();
 			friend class RayTracing_RS;
 
 
-			VkDescriptorSetLayout descriptorSetLayout;
-			std::vector<VkBuffer> uniformBuffers;
-			std::vector<VkDeviceMemory> uniformBuffersMemory;
-			std::vector<void*> uniformBuffersMapped;
-			VkDescriptorPool descriptorPool;
-			std::vector<VkDescriptorSet> descriptorSets;
-
-			uint32_t currentImageIndex;
+			uint32_t currentImageIndex=0;
 			bool isFrameStarted=false;
 
 			VulkanInit& initWindow;
 			MyVulkanDevice& myDevice;
 			std::unique_ptr<VulkanSwapChain> swapChain;
 			std::vector<VkCommandBuffer> commandBuffer;
+			std::vector<VkCommandBuffer> computeCommandBuffers;
+
 
 
 		};
