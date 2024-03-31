@@ -51,22 +51,7 @@ namespace VULKAN {
 
 		}
 
-		void VulkanRenderer::CreateComputeCommandBuffer()
-		{
 
-
-			computeCommandBuffers.resize(swapChain->imageCount());
-
-			VkCommandBufferAllocateInfo allocInfo{};
-			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			allocInfo.commandPool = myDevice.getCommandPool();
-			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			allocInfo.commandBufferCount = (uint32_t)computeCommandBuffers.size();
-
-			if (vkAllocateCommandBuffers(myDevice.device(), &allocInfo, computeCommandBuffers.data()) != VK_SUCCESS) {
-				throw std::runtime_error("failed to allocate compute command buffers!");
-			}
-		}
 
 		void VulkanRenderer::FreeCommandBuffers()
 		{
@@ -74,6 +59,7 @@ namespace VULKAN {
 			{
 				vkFreeCommandBuffers(myDevice.device(), myDevice.getCommandPool(), static_cast<uint32_t>(commandBuffer.size()), commandBuffer.data());
 				commandBuffer.clear();
+				computeCommandBuffers.clear();
 			}
 
 		}
@@ -153,13 +139,18 @@ namespace VULKAN {
 
 		VkCommandBuffer VulkanRenderer::BeginComputeFrame()
 		{
+
 			swapChain->WaitForComputeFence();
 
 			auto commandBuffer = GetCurrentComputeCommandBuffer();
 
+			vkResetCommandBuffer(commandBuffer, /*VkCommandBufferResetFlagBits*/ 0);
 
 			VkCommandBufferBeginInfo beginInfo{};
 			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+
 			if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			{
 				throw std::runtime_error("Failed to begin recording command buffer!");
@@ -206,16 +197,7 @@ namespace VULKAN {
 				throw std::runtime_error("Failed to record command buffer!");
 			}
 			auto result = swapChain->submitComputeCommandBuffers(&computeCommandBuffer, &currentImageIndex);
-			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || initWindow.WasWindowResized()) {
-				initWindow.ResetWindowResizedFlag();
-				RecreateSwapChain();
-			}
-			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-				initWindow.WasWindowResized()) {
-				initWindow.ResetWindowResizedFlag();
-				RecreateSwapChain();
-			}
-			else if (result != VK_SUCCESS) {
+			if (result != VK_SUCCESS) {
 				throw std::runtime_error("failed to present swap chain image!");
 			}
 

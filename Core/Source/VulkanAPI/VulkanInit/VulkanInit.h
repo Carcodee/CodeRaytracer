@@ -39,6 +39,7 @@ namespace VULKAN {
 	class VulkanInit
 	{
 	public: 
+		GLFWwindow* window;
 		VulkanInit(int w, int h, std::string name);
 		void InitWindow();
 		VulkanInit(const VulkanInit&) = delete;
@@ -64,7 +65,6 @@ namespace VULKAN {
 		bool framebufferResized = false;
 
 		std::string appName;
-		GLFWwindow* window;
 		VkInstance myInstance;
 
 

@@ -5,10 +5,16 @@
 #include <string>
 #include <vector>
 #include "VulkanAPI/VulkanObjects/ResourceInterface/IResource.h"
-
-
+#include <stdlib.h>
+static void check_vk_result(VkResult err)
+{
+    if (err == 0)
+        return;
+    fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+    if (err < 0)
+        abort();
+}
 namespace VULKAN {
-
 
 
 struct SwapChainSupportDetails {
@@ -38,6 +44,19 @@ class MyVulkanDevice {
   ~MyVulkanDevice();
 
   // Not copyable or movable
+
+	inline static VkAllocationCallbacks*   g_Allocator = nullptr;
+	inline static VkInstance               g_Instance = VK_NULL_HANDLE;
+	inline static VkPhysicalDevice         g_PhysicalDevice = VK_NULL_HANDLE;
+	inline static VkDevice                 g_Device = VK_NULL_HANDLE;
+	inline static uint32_t                 g_QueueFamily = (uint32_t)-1;
+	inline static VkQueue                  g_Queue = VK_NULL_HANDLE;
+	inline static VkDebugReportCallbackEXT g_DebugReport = VK_NULL_HANDLE;
+	inline static VkPipelineCache          g_PipelineCache = VK_NULL_HANDLE;
+	inline static VkDescriptorPool         g_DescriptorPool = VK_NULL_HANDLE;
+
+	inline static int                      g_MinImageCount = 2;
+	inline static bool                     g_SwapChainRebuild = false;
 
   MyVulkanDevice(const MyVulkanDevice &) = delete;
   MyVulkanDevice& operator=(const MyVulkanDevice &) = delete;
@@ -93,7 +112,7 @@ class MyVulkanDevice {
   VkQueue presentQueue_;
   VkQueue computeQueue_;
 
- private:
+	 private:
   void createInstance();
   void setupDebugMessenger();
   void createSurface();
@@ -114,14 +133,15 @@ class MyVulkanDevice {
 
 
   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-  const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+  const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME,
                                                       VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
                                                       VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
                                                       VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
                                                       VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
                                                       VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-                                                      VK_KHR_SPIRV_1_4_EXTENSION_NAME, 
-                                                       VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME};
+                                                      VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+                                                       VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME };
+  														
 
 
 

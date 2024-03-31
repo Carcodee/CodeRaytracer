@@ -41,11 +41,16 @@ namespace VULKAN {
 		for (auto& particle : particles)
 		{
 			particle.position = glm::vec2(0.0f, 0.0f);
-            int xV = rand() / RAND_MAX;
-            int yV = rand() / RAND_MAX;
 
-			particle.velocity = glm::vec2(xV, yV);
-			particle.color = glm::vec4(rand() / RAND_MAX, rand() / RAND_MAX, rand() / RAND_MAX, 1.0f);
+            float xV = static_cast<float>(rand()) / RAND_MAX;
+            float yV = static_cast<float>(rand()) / RAND_MAX;
+
+            particle.velocity = glm::vec2(xV*1000, yV*1000);
+            particle.color = glm::vec4(
+                static_cast<float>(rand()) / RAND_MAX, // Red
+                static_cast<float>(rand()) / RAND_MAX, // Green
+                static_cast<float>(rand()) / RAND_MAX, // Blue
+                1.0f); // Alpha
 		}
     }
 

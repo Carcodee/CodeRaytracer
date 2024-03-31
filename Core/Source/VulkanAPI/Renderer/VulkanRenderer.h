@@ -45,7 +45,7 @@ namespace VULKAN{
 				return commandBuffer[currentImageIndex];
 			}
 			VkCommandBuffer GetCurrentComputeCommandBuffer() const {
-				return computeCommandBuffers[currentImageIndex];
+				return computeCommandBuffers[swapChain->currentFrame];
 			}
 			int GetCurrentFrame() { return swapChain->currentFrame;}
 			int GetMaxRenderInFlight() { return swapChain->MAX_FRAMES_IN_FLIGHT; }
@@ -55,7 +55,6 @@ namespace VULKAN{
 
 		private:
 			void CreateCommandBuffer();
-			void CreateComputeCommandBuffer();
 			void FreeCommandBuffers();
 			void RecreateSwapChain();
 			void CreateSwapChain();

@@ -52,7 +52,7 @@ namespace VULKAN
         template <typename BufferObject, std::size_t N>
         void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
         template <typename BufferObject, std::size_t N>
-        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture, VkDescriptorType descriptorType);
+        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture,VKTexture& texture2, VkDescriptorType descriptorType);
 
     	void CreateDescriptorSets(int descriptorCount, int maxFramesInFlight);
 
@@ -92,7 +92,12 @@ namespace VULKAN
         for (size_t i = 0; i < N; i++)
         {
             poolSize[i].type = bindings[i].descriptorType;
-            poolSize[i].descriptorCount = static_cast<uint32_t>(maxFramesInFlight)*2;
+            if (poolSize[i].type==VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+            {
+				poolSize[i].descriptorCount = static_cast<uint32_t>(maxFramesInFlight)*2;
+                continue;   
+            }
+            poolSize[i].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
         }
 
         VkDescriptorPoolCreateInfo poolInfo{};
@@ -101,7 +106,7 @@ namespace VULKAN
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
         poolInfo.pPoolSizes = poolSize.data();
 
-        poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight);
+        poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight)*2;
 
         if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
         {
@@ -201,7 +206,7 @@ namespace VULKAN
 
     template <typename BufferObject, std::size_t N>
     void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,
-        VKTexture& texture, VkDescriptorType descriptorType)
+        VKTexture& texture,VKTexture& texture2, VkDescriptorType descriptorType)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -215,9 +220,10 @@ namespace VULKAN
         {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
-        std::array<VkWriteDescriptorSet, N> descriptorWrite{};
         for (size_t i = 0; i < maxFramesInFlight; i++)
         {
+        	std::array<VkWriteDescriptorSet, N> descriptorWrite{};
+
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = descriptorData[descriptorCount - 1].uniformBuffers[i];
             bufferInfo.offset = 0;
@@ -227,38 +233,48 @@ namespace VULKAN
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             imageInfo.imageView = texture.textureImageView;
-            imageInfo.sampler = texture.textureSampler;
+			imageInfo.sampler = texture.textureSampler;
+
+            VkDescriptorImageInfo imageInfo2{};
+            imageInfo2.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo2.imageView = texture2.textureImageView;
+            imageInfo2.sampler = texture2.textureSampler;
 
 
 
-            for (size_t j = 0; j < descriptorWrite.size(); j++)
-            {
-                if (bindings[j].descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-                {
-                    descriptorWrite[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite[j].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
-                    descriptorWrite[j].dstBinding = j;
-                    descriptorWrite[j].dstArrayElement = 0;
-                    descriptorWrite[j].pBufferInfo = &bufferInfo;
-                    descriptorWrite[j].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    descriptorWrite[j].descriptorCount = descriptorCount;
-                    descriptorWrite[j].pImageInfo = nullptr; // Optional
-                    descriptorWrite[j].pTexelBufferView = nullptr; // Optional
-                }
-                if (bindings[j].descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                {
-                    descriptorWrite[j].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite[j].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
-                    descriptorWrite[j].dstBinding = j;
-                    descriptorWrite[j].dstArrayElement = 0;
-                    descriptorWrite[j].pBufferInfo = &bufferInfo;
-                    descriptorWrite[j].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    descriptorWrite[j].descriptorCount = descriptorCount;
-                    descriptorWrite[j].pImageInfo = &imageInfo;
-                    descriptorWrite[j].pTexelBufferView = nullptr; // Optional
-                }
+            descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite[0].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
+            descriptorWrite[0].dstBinding = 0;
+            descriptorWrite[0].dstArrayElement = 0;
+            descriptorWrite[0].pBufferInfo = &bufferInfo;
+            descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrite[0].descriptorCount = descriptorCount;
+            descriptorWrite[0].pImageInfo = nullptr; // Optional
+            descriptorWrite[0].pTexelBufferView = nullptr; // Optional
 
-            }
+
+            descriptorWrite[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite[1].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
+            descriptorWrite[1].dstBinding = 1;
+            descriptorWrite[1].dstArrayElement = 0;
+            descriptorWrite[1].pBufferInfo = &bufferInfo;
+            descriptorWrite[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrite[1].descriptorCount = descriptorCount;
+            descriptorWrite[1].pImageInfo = &imageInfo;
+            descriptorWrite[1].pTexelBufferView = nullptr; // Optional
+
+            descriptorWrite[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite[2].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
+            descriptorWrite[2].dstBinding = 2;
+            descriptorWrite[2].dstArrayElement = 0;
+            descriptorWrite[2].pBufferInfo = &bufferInfo;
+            descriptorWrite[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrite[2].descriptorCount = descriptorCount;
+            descriptorWrite[2].pImageInfo = &imageInfo2;
+            descriptorWrite[2].pTexelBufferView = nullptr; // Optional
+                       
+
+            
 
 
             vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);

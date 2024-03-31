@@ -12,6 +12,11 @@
 #include "VulkanAPI/RenderSystems/Forward_RS.h"
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include <functional>
+#include <imgui.h>
+#include <imgui_impl_vulkan.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_internal.h>
+
 
 namespace VULKAN {
 	//
@@ -30,6 +35,9 @@ namespace VULKAN {
 		void Run();
 		VulkanApp();
 		~VulkanApp();
+
+		void InitConfigsCache();
+	
 		VulkanApp(const VulkanApp&) = delete;
 		VulkanApp& operator=(const VulkanApp&) = delete;
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp" };
@@ -37,8 +45,8 @@ namespace VULKAN {
 
 //#ifdef IS_EDITOR
 
-		void RunEngine_EDITOR(std::function<void()>&& editorContext);
-
+		void RunEngine_EDITOR(std::function<void(bool& showDemoWindow, VkCommandBuffer currentCommandBuffer)>&& editorContext);
+		VkDescriptorPool imguiDescriptorPool;
 //
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
@@ -53,8 +61,9 @@ namespace VULKAN {
 		double lastDeltaTime = 0.0f;
 
 		void LoadModels();
+		void SetUpImgui();
 
-
+       
 
 
 

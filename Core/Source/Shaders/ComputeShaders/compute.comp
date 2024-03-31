@@ -18,6 +18,9 @@ layout(std140, binding = 2) buffer ParticleSSBOOut {
    Particle particlesOut[ ];
 };
 
+layout (binding = 3, rgba8) uniform readonly image2D inputImage;
+layout (binding = 4, rgba8) uniform image2D outputImage;
+
 layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
 void main() 
@@ -36,5 +39,8 @@ void main()
     if ((particlesOut[index].position.y <= -1.0) || (particlesOut[index].position.y >= 1.0)) {
         particlesOut[index].velocity.y = -particlesOut[index].velocity.y;
     }
+    vec3 pixel = imageLoad(inputImage, ivec2(gl_GlobalInvocationID.xy)).rgb;
+    vec4 emptyCol= vec4(0.0, 0.0, 0.0, 1.0);
+    imageStore(outputImage, ivec2(particlesOut[index].position.xy * 0.5 + 0.5), particleIn.color);
 
 }

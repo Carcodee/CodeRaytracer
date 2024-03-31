@@ -4,68 +4,54 @@
 #include <functional>
 #include<imgui_impl_vulkan.h>
 #include<imgui_impl_glfw.h>
+#include <imgui_internal.h>
+
 #include "../../Core/Source/VulkanApp.h"
 
 
-void ImguiContext(bool& show_demo_window, bool& show_another_window, const ImGuiIO& io) {
+
+void ImguiContext(bool& show_demo_window, VkCommandBuffer commandBuffer) {
 
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-    if (show_demo_window)
+    if (true)
         ImGui::ShowDemoWindow(&show_demo_window);
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-    }
-
-    // Rendering
     ImGui::Render();
-    ImDrawData* main_draw_data = ImGui::GetDrawData();
-    const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer, 0);
+    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 
-    // Update and Render additional Platform Windows
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-    }
-
-
-    // Update and Render additional Platform Windows
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-    }
 
 }
 
-int main() {
-    VULKAN::VulkanApp app;
+void SetUpImgui(VULKAN::VulkanApp& app)
+{
 
+    VkDescriptorPoolSize pool_sizes[] =
+    {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
 
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000;
+    pool_info.poolSizeCount = std::size(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
 
+    VkDescriptorPool imguiPool;
+    (vkCreateDescriptorPool(app.myDevice.device(), &pool_info, nullptr, &imguiPool));
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -74,7 +60,8 @@ int main() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+
     //io.ConfigViewportsNoAutoMerge = true;
     //io.ConfigViewportsNoTaskBarIcon = true;
     ImGuiStyle& style = ImGui::GetStyle();
@@ -92,38 +79,42 @@ int main() {
 
     io.DisplaySize = ImVec2(800 , 600); // Set to actual window size
     ImGui::StyleColorsDark();
-     auto ImguiRender = [&show_demo_window ,&show_another_window, &io]() -> void {
-        ImguiContext(show_demo_window, show_another_window, io);
-
-     };
 
      // Setup Platform/Renderer backends
-     ImGui_ImplGlfw_InitForVulkan(app.initWindow.GetWindow(), true);
+     bool result=ImGui_ImplGlfw_InitForVulkan(app.initWindow.window, true);
+	 if (result)
+	 {
+         std::cout << "Imgui window init success" << "\n";
+	 }
      ImGui_ImplVulkan_InitInfo init_info = {};
-     init_info.Instance = app.myDevice.instance;
-     init_info.PhysicalDevice = app.myDevice.physicalDevice;
-     init_info.Device = app.myDevice.device();
-     init_info.QueueFamily = app.myDevice.findPhysicalQueueFamilies().graphicsFamily;
-     init_info.Queue = app.myDevice.graphicsQueue();
-     init_info.PipelineCache = VK_NULL_HANDLE;
-     init_info.DescriptorPool = app.descriptorSetsHandler->descriptorPool;
+     init_info.Instance = VULKAN::MyVulkanDevice::g_Instance;
+     init_info.PhysicalDevice = VULKAN::MyVulkanDevice::g_PhysicalDevice;
+     init_info.Device = VULKAN::MyVulkanDevice::g_Device;
+     init_info.QueueFamily = VULKAN::MyVulkanDevice::g_QueueFamily;
+     init_info.Queue = VULKAN::MyVulkanDevice::g_Queue;
+     init_info.PipelineCache = VULKAN::MyVulkanDevice::g_PipelineCache;
+     init_info.DescriptorPool =imguiPool;
      init_info.RenderPass = app.renderer.GetSwapchainRenderPass();
      init_info.Subpass = 0;
-     init_info.MinImageCount =2;
+     init_info.MinImageCount = VULKAN::MyVulkanDevice::g_MinImageCount;
      init_info.ImageCount = app.renderer.GetImageCount();
-     init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-     init_info.Allocator = VK_NULL_HANDLE;
-     init_info.CheckVkResultFn = VK_NULL_HANDLE;
+     init_info.MSAASamples = app.myDevice.msaaSamples;
+     init_info.Allocator = VULKAN::MyVulkanDevice::g_Allocator;
+     init_info.CheckVkResultFn = check_vk_result;
      ImGui_ImplVulkan_Init(&init_info);
 	std::cout << "Hello Editor" << std::endl;
-
-    VkCommandBuffer commandBuffer = app.myDevice.beginSingleTimeCommands();
     ImGui_ImplVulkan_CreateFontsTexture();
-    app.myDevice.endSingleTimeCommands(commandBuffer);
+  
+}
 
+int main() {
+    VULKAN::VulkanApp app;
+    app.InitConfigsCache();
 
+	SetUpImgui(app);
+   
 
-    app.RunEngine_EDITOR(ImguiRender);
+    app.RunEngine_EDITOR(ImguiContext);
     
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplGlfw_Shutdown();

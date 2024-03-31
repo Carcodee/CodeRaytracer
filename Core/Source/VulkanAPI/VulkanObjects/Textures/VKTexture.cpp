@@ -19,18 +19,12 @@ namespace VULKAN {
 
 	}
 
-	VKTexture::VKTexture(const char* path, VulkanSwapChain& swapchain, uint32_t mipLevels) : mySwapChain{ swapchain }, device{ swapchain.device }
+
+	VKTexture::VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t height, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat format) : mySwapChain{ swapchain }, device{ swapchain.device }
 	{
-		this->mipLevels = mipLevels;
-
-
-
-
-	}
-
-	VKTexture::VKTexture(VulkanSwapChain& swapchain) : mySwapChain{ swapchain }, device{ swapchain.device }
-	{
-
+		CreateStorageImage(width, height, oldLayout, newLayout, format);
+		CreateTextureSample();
+		CreateImageViews();
 	}
 
 
@@ -69,9 +63,20 @@ namespace VULKAN {
 		vkDestroyBuffer(mySwapChain.device.device(), stagingBuffer, nullptr);
 		vkFreeMemory(mySwapChain.device.device(), stagingBufferMemory, nullptr);
 		mySwapChain.device.GenerateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+		currentLayout= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	}
+	void VKTexture::CreateStorageImage(uint32_t width, uint32_t height, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat format)
+	{
 
+		mySwapChain.CreateImage(width, height, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT ,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			textureImage, textureImageMemory);
+			mySwapChain.device.TransitionImageLayout(textureImage, format, 1, oldLayout, newLayout);
+			currentLayout = newLayout;
+
+	}
 	void VKTexture::CreateTextureSample()
 	{
 		VkSamplerCreateInfo samplerInfo{};
@@ -107,15 +112,15 @@ namespace VULKAN {
 
 	void VKTexture::CreateImageViews()
 	{
-
+		//compute image view
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = textureImage;
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = format;
+		viewInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = mipLevels;
+		viewInfo.subresourceRange.levelCount = 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
@@ -124,8 +129,6 @@ namespace VULKAN {
 		{
 			throw std::runtime_error("Failed to create texture image view! KEKW");
 		}
-
-
 		
 	}
 

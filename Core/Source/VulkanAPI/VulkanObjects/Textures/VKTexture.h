@@ -12,8 +12,7 @@ namespace VULKAN {
 		VKTexture(const char* path, VulkanSwapChain& swapchain);
 		//VKTexture(VKTexture& other);
 		//Resources handled by the swapchain;
-		VKTexture(const char* path, VulkanSwapChain& swapchain, uint32_t mipLevels);
-		VKTexture(VulkanSwapChain& swapchain);
+		VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t heigh, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat formatt);
 
 		VKTexture operator=(VKTexture& other) {
 		
@@ -38,13 +37,14 @@ namespace VULKAN {
 		VkSampler textureSampler= nullptr;
 		VkImageView textureImageView= nullptr;
 		VkDeviceMemory textureImageMemory=nullptr;
+		VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 		uint32_t mipLevels=0;
 
 	private:
 		void CreateTextureImage();
 		void CreateTextureSample();
 		void CreateImageViews();
-
+		void CreateStorageImage(uint32_t width, uint32_t height, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat format);
 		
 		VkFormat format= VK_FORMAT_R8G8B8A8_SRGB;
 		VulkanSwapChain& mySwapChain;

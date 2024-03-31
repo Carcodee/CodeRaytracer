@@ -28,6 +28,10 @@ namespace VULKAN {
 		window = glfwCreateWindow(widht, height, appName.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+		if (window!=nullptr)
+		{
+			std::cout << "GLFW initialized" << std::endl;
+		}
 	}
 
 	void VulkanInit::Run()

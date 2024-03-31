@@ -5,7 +5,7 @@
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 
 
-#define MAX_PARTICLES 5000
+#define MAX_PARTICLES 15001 
 
 namespace VULKAN
 {
@@ -30,7 +30,8 @@ namespace VULKAN
 		void CreateComputeWorkGroups(int currentFrame, VkCommandBuffer& command_buffer);
 		void CreateUBOBuffers();
 		void UpdateUBO(uint32_t currentImage, float deltaTime);
-
+		void TransitionBeforeComputeRender(uint32_t currentImage);
+		void TransitionBeforeForwardRender(uint32_t currentImage);
 		std::unique_ptr<PipelineReader> pipelineReader;
 		std::unique_ptr <MyDescriptorSets> renderSystemDescriptorSetHandler;
 		std::unique_ptr <MyDescriptorSets> computeRenderSystemDescriptorSetHandler;
@@ -40,11 +41,14 @@ namespace VULKAN
 		//compute
 		std::vector<VkBuffer> shaderStorageBuffers;
 		std::vector<VkDeviceMemory> shaderStorageBuffersMemory;
-
 		std::vector<VkBuffer> uboBuffers;
 		std::vector<VkDeviceMemory> uboBuffersMemory;
 		std::vector<void*> uboBuffersMapped;
 		VkPipelineLayout computePipelineLayout;
+		VKTexture* storageImage;
+		VKTexture* outputStorageImage;
+
+
 
 
 	private:

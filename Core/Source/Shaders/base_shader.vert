@@ -18,5 +18,4 @@ void main(){
 	gl_Position = ubo.projection * ubo.view * ubo.model *  vec4(inPosition, 1.0);
 	myColors= inColor;
 	textCoord= inTextCoord;
-
 }

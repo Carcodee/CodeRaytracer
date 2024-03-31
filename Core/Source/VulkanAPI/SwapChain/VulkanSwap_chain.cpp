@@ -136,11 +136,11 @@ VkResult VulkanSwapChain::submitComputeCommandBuffers(const VkCommandBuffer* buf
     submitInfo.pCommandBuffers = buffers;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &computeRenderFinishedSemaphores[currentFrame];
-
-    if (vkQueueSubmit(device.computeQueue_, 1, &submitInfo, computeInFlightFences[currentFrame]) != VK_SUCCESS) {
+    auto result = vkQueueSubmit(device.computeQueue_, 1, &submitInfo, computeInFlightFences[currentFrame]);
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to submit compute command buffer!");
     };
-    return VK_SUCCESS;
+    return result;
 }
 
 void VulkanSwapChain::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples,

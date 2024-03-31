@@ -6,14 +6,16 @@ namespace VULKAN {
 
 	Forward_RS::Forward_RS(VulkanRenderer& currentRenderer, MyVulkanDevice& device): renderer{ currentRenderer } , myDevice{device}
 	{
-		CreateDescriptorSets();
-		CreatePipelineLayout();
-		CreatePipeline();
-
 		//compute
 		CreateUBOBuffers();
 		CreateComputeDescriptorSets();
 		CreateComputePipeline();
+
+
+		CreateDescriptorSets();
+		CreatePipelineLayout();
+		CreatePipeline();
+
 
 
 	}
@@ -25,15 +27,21 @@ namespace VULKAN {
 	{
 		renderSystemDescriptorSetHandler = std::make_unique<MyDescriptorSets>(myDevice);
 		VKTexture* lion = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", renderer.GetSwapchain());
-		std::array <VkDescriptorSetLayoutBinding, 2> bindings;
+
+		myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_SRGB , 1, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+
+		std::array <VkDescriptorSetLayoutBinding, 3> bindings;
 		bindings[0] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
 		bindings[1] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, 1);
+		bindings[2] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 2, 1);
 		renderSystemDescriptorSetHandler->CreateLayoutBinding(bindings, 1);
 
 
 		renderSystemDescriptorSetHandler->CreateUniformBuffers<UniformBufferObjectData>(1, renderer.GetMaxRenderInFlight());
 		renderSystemDescriptorSetHandler->CreateDescriptorPool(bindings, renderer.GetMaxRenderInFlight(), VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
-		renderSystemDescriptorSetHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings, 1, renderer.GetMaxRenderInFlight(), *lion, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		renderSystemDescriptorSetHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings, 1, renderer.GetMaxRenderInFlight(), *lion, *outputStorageImage,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	}
 	void Forward_RS::CreatePipelineLayout()
@@ -62,8 +70,8 @@ namespace VULKAN {
 
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.vert.spv",
-			"C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/base_shader.frag.spv",
+			"../Core/Source/Shaders/base_shader.vert.spv",
+			"../Core/Source/Shaders/base_shader.frag.spv",
 			pipelineConfig
 
 		);
@@ -76,7 +84,6 @@ namespace VULKAN {
 
 	void Forward_RS::CreateComputePipeline()
 	{
-
 		
 		std::string path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/ComputeShaders/compute.comp.spv";
 		VkPipelineShaderStageCreateInfo pipelineConfigInfo = PipelineReader::CreateComputeStageModule(computeModule, myDevice, path);
@@ -106,11 +113,19 @@ namespace VULKAN {
 
 	void Forward_RS::CreateComputeDescriptorSets()
 	{
+
+		storageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
+		outputStorageImage =  new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
+
+
+
 		computeRenderSystemDescriptorSetHandler = std::make_unique<MyDescriptorSets>(myDevice);
-		std::array <VkDescriptorSetLayoutBinding, 3> bindings;
+		std::array <VkDescriptorSetLayoutBinding,5> bindings;
 		bindings[0] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 0, 1);
 		bindings[1] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 1, 1);
 		bindings[2] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT, 2, 1);
+		bindings[3] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 3, 1);
+		bindings[4] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 4, 1);
 
 		computeRenderSystemDescriptorSetHandler->CreateLayoutBinding(bindings, 1);
 		computeRenderSystemDescriptorSetHandler->CreateDescriptorPool(bindings, renderer.GetMaxRenderInFlight(), VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
@@ -199,7 +214,33 @@ namespace VULKAN {
 			descriptorWrites[2].descriptorCount = 1;
 			descriptorWrites[2].pBufferInfo = &storageBufferInfoCurrentFrame;
 
-			vkUpdateDescriptorSets(myDevice.device(), 3, descriptorWrites.data(), 0, nullptr);
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			imageInfo.imageView = storageImage->textureImageView;
+			imageInfo.sampler = storageImage->textureSampler;
+
+			descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[3].dstSet = computeRenderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[i];
+			descriptorWrites[3].dstBinding = 3;
+			descriptorWrites[3].dstArrayElement = 0;
+			descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			descriptorWrites[3].descriptorCount = 1;
+			descriptorWrites[3].pImageInfo = &imageInfo;
+
+			VkDescriptorImageInfo outputImageInfo{};
+			outputImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			outputImageInfo.imageView = outputStorageImage->textureImageView;
+			outputImageInfo.sampler = outputStorageImage->textureSampler;
+
+			descriptorWrites[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[4].dstSet = computeRenderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[i];
+			descriptorWrites[4].dstBinding = 4;
+			descriptorWrites[4].dstArrayElement = 0;
+			descriptorWrites[4].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			descriptorWrites[4].descriptorCount = 1;
+			descriptorWrites[4].pImageInfo = &outputImageInfo;
+
+			vkUpdateDescriptorSets(myDevice.device(),static_cast<int>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 
 
@@ -235,5 +276,25 @@ namespace VULKAN {
 		ubo.deltaTime = deltaTime;
 		memcpy(uboBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
+
+	void Forward_RS::TransitionBeforeComputeRender(uint32_t currentImage)
+	{
+		if (outputStorageImage->currentLayout!=VK_IMAGE_LAYOUT_GENERAL)
+		{
+			myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_UNORM , 1, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+			outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_GENERAL;
+		}
+	}
+
+	void Forward_RS::TransitionBeforeForwardRender(uint32_t currentImage)
+	{
+		if (outputStorageImage->currentLayout!=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		{
+			myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_SRGB , 1, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+	}
+	
+
 }
 
