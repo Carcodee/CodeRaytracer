@@ -52,7 +52,7 @@ public:
 	void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
 	, VkImage& image, VkDeviceMemory& imageMemory);
 	size_t currentFrame = 0;
-
+	void CreateImageSamples(VkSampler& sampler, float mipLevels);
 	//imageviews
 
 
@@ -67,7 +67,10 @@ public:
 	//VkDeviceMemory colorUIImagesMemory;
 	std::vector<VkImageView> colorUIImageView;
 	std::vector<VkFramebuffer> UIframebuffers;
-
+//Imgui Images
+	VkDeviceMemory colorImageMemory;
+	VkImage colorImage;
+	VkImageView colorImageView;
 private:
 
 	void Init();
@@ -100,9 +103,6 @@ private:
 
 
 
-	VkImage colorImage;
-	VkDeviceMemory colorImageMemory;
-	VkImageView colorImageView;
 
 	MyVulkanDevice &device;
 	VkExtent2D windowExtent;

@@ -34,6 +34,8 @@ namespace VULKAN
 		void BeginFrame();
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
+		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView);
+
 
 		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
@@ -60,7 +62,12 @@ namespace VULKAN
 		Buffer indexBuffer;
 		int32_t vertexCount = 0;
 		int32_t indexCount = 0;
-
+		//Viewport
+		VkSampler viewportSampler;
+		VkDescriptorSet vpDescriptorSet;
+		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
+		VkDescriptorSetLayout vpDescriptorSetLayout;
+		VkDescriptorPool vpImguiPool;
 	};
 
 

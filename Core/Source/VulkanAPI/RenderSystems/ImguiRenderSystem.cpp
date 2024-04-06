@@ -18,6 +18,8 @@ namespace VULKAN
 
 	ImguiRenderSystem::~ImguiRenderSystem()
 	{
+
+
 	}
 
 	void ImguiRenderSystem::CreatePipeline()
@@ -28,7 +30,7 @@ namespace VULKAN
 		PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = myRenderer.GetSwapchain().UIRenderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		pipelineConfig.multisampleInfo.rasterizationSamples = myDevice.msaaSamples;
+		pipelineConfig.multisampleInfo.rasterizationSamples =VK_SAMPLE_COUNT_1_BIT ;
 		pipelineReader = std::make_unique<PipelineReader>(myDevice);
 		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
 			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
@@ -164,7 +166,9 @@ namespace VULKAN
 		ImGuiIO& io = ImGui::GetIO();
 		io.FontGlobalScale = 1.0f;
 		ImGuiStyle& style = ImGui::GetStyle();
-		style.ScaleAllSizes(2.0f);
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		style.ScaleAllSizes(1.0f);
+
 
 
 	}
@@ -298,15 +302,23 @@ namespace VULKAN
 	{
 		ImGui::NewFrame();
 
-		// Init imGui windows and elements
+		// Start the Dear ImGui frame
+		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImGui::End(); // End DockSpace Demo window
+		// Make the window full-screen and set the dock space
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+		
+		//ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y));
+		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
-		// Debug window
-		//ImGui::SetWindowPos(ImVec2(20 * 1.0f, 20 * 1));
-		//ImGui::SetWindowSize(ImVec2(300 * 1, 300 *1));
-		//ImGui::TextUnformatted(myDevice.properties.deviceName);
-
-		//SRS - ShowDemoWindow() sets its own initial position and size, cannot override here
-		//ImGui::ShowDemoWindow(&show_demo_window);
+		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+		// and handle the pass-thru hole, so we ask Begin() to not render a background.
+		if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))
+		{
+			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
+		}
+		ImGui::End(); 
 
 
 	}
@@ -325,7 +337,100 @@ namespace VULKAN
 
 
 		CreatePipelineLayout();
+		//myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
+		//CreateImguiImage(viewportSampler, myRenderer.GetSwapchain().colorImageView);
 		CreatePipeline();
+
+	}
+
+	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView)
+	{
+		VkDescriptorSetLayoutBinding layoutBinding{};
+		layoutBinding.binding = 0;
+		layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		layoutBinding.descriptorCount = 1;
+		layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		layoutBinding.pImmutableSamplers = nullptr;
+
+		vpDescriptorSetLayoutBindings.push_back(layoutBinding);
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = static_cast<uint32_t>(vpDescriptorSetLayoutBindings.size());;
+		layoutInfo.pBindings = vpDescriptorSetLayoutBindings.data();
+
+		if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &vpDescriptorSetLayout) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor set layout!");
+		}
+
+		std::array<VkDescriptorPoolSize, 1> poolSize{};
+		for (size_t i = 0; i < vpDescriptorSetLayoutBindings.size(); i++)
+		{
+			poolSize[i].type = vpDescriptorSetLayoutBindings[i].descriptorType;
+			if (poolSize[i].type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
+				continue;
+			}
+			poolSize[i].descriptorCount = static_cast<uint32_t>((myRenderer.GetMaxRenderInFlight()));
+		}
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
+		poolInfo.pPoolSizes = poolSize.data();
+
+		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
+
+		if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &vpImguiPool) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor pool!");
+		}
+
+		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), vpDescriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = vpImguiPool;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
+		allocInfo.pSetLayouts = layouts.data();
+
+		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to allocate descriptor sets!");
+		}
+
+		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		{
+
+			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
+
+
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = uniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UIVertex);
+
+
+			VkDescriptorImageInfo imageInfo{};
+
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = myImageView;
+			imageInfo.sampler = imageSampler;
+
+			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite[0].dstSet = vpDescriptorSet;
+			descriptorWrite[0].dstBinding = 0;
+			descriptorWrite[0].dstArrayElement = 0;
+			descriptorWrite[0].pBufferInfo = &bufferInfo;
+			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite[0].descriptorCount = 1;
+			descriptorWrite[0].pImageInfo = &imageInfo;
+			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
+		}
 
 	}
 

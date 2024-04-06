@@ -131,7 +131,7 @@ namespace VULKAN {
 		for (const auto& device : devices) {
 			if (isDeviceSuitable(device)) {
 				physicalDevice = device;
-				maxSamples = GetMaxUsableSampleCount();
+				 maxSamples= GetMaxUsableSampleCount();
 				break;
 			}
 		}
