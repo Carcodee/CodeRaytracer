@@ -37,6 +37,9 @@ namespace VULKAN{
 
 			void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 			void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+			void BeginUIRenderPass(VkCommandBuffer commandBuffer);
+			void EndUIRenderPass(VkCommandBuffer commandBuffer);
 			VkRenderPass GetSwapchainRenderPass() const { return swapChain->getRenderPass(); }
 			bool isFrameInProgress()const { return isFrameStarted; }
 

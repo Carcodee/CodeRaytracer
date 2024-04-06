@@ -53,18 +53,6 @@ namespace VULKAN{
 				myModel->BindVertexBufferIndexed(commandBuffer);
 				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout,forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
 				myModel->DrawIndexed(commandBuffer);
-				//TEST----
-
-
-				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
-				bool showDemoWindow = true;
-				if (true)
-				    ImGui::ShowDemoWindow(&showDemoWindow);
-
-				ImGui::Render();
-				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer, 0);
 
 				//TEST---------------------
 
@@ -86,7 +74,7 @@ namespace VULKAN{
 	}
 //#ifdef IS_EDITOR
 
-	void VulkanApp::RunEngine_EDITOR(std::function<void(bool& showDemoWindow,VkCommandBuffer currentCommandBuffer)>&& editorContext)
+	void VulkanApp::RunEngine_EDITOR(std::function<void()>&& editorContext)
 	{
 
 
@@ -108,15 +96,15 @@ namespace VULKAN{
 
 				if (cicles==3)
 				{
-					//VkImageSubresourceRange imageSubresourceRange = {};
-					//imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					//imageSubresourceRange.baseMipLevel = 0;
-					//imageSubresourceRange.levelCount = 1; // Clear only one mip level
-					//imageSubresourceRange.baseArrayLayer = 0;
-					//imageSubresourceRange.layerCount = 1; // Assuming the image is not an array
-					//const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
-					//vkCmdClearColorImage(commandBuffer, forward_RS.outputStorageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
-					//cicles = 0;
+					VkImageSubresourceRange imageSubresourceRange = {};
+					imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					imageSubresourceRange.baseMipLevel = 0;
+					imageSubresourceRange.levelCount = 1; // Clear only one mip level
+					imageSubresourceRange.baseArrayLayer = 0;
+					imageSubresourceRange.layerCount = 1; // Assuming the image is not an array
+					const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
+					vkCmdClearColorImage(commandBuffer, forward_RS.outputStorageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+					cicles = 0;
 				}
 				forward_RS.CreateComputeWorkGroups(renderer.GetCurrentFrame(), commandBuffer);
 				forward_RS.UpdateUBO(renderer.GetCurrentFrame(), time);
@@ -125,6 +113,8 @@ namespace VULKAN{
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
 				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());	
+
+
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1);
@@ -134,9 +124,30 @@ namespace VULKAN{
 				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout,forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
 				myModel->DrawIndexed(commandBuffer);
 
-				bool showDemoWindow = true;	
-				editorContext(showDemoWindow,commandBuffer);
 				renderer.EndSwapChainRenderPass(commandBuffer);
+
+				VkMemoryBarrier barrier = {};
+				barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+				barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT; // Adjust based on your needs
+				barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;  // Adjust based on your needs
+
+				vkCmdPipelineBarrier(
+					commandBuffer,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, // Source stage
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,         // Destination stage
+					0,                                             // No flags
+					1, &barrier,                                   // Memory barriers
+					0, nullptr,                                    // Buffer barriers
+					0, nullptr                                     // Image barriers
+				);
+
+				renderer.BeginUIRenderPass(commandBuffer);
+				imgui_RS.BeginFrame();
+				editorContext();
+				imgui_RS.EndFrame();
+				imgui_RS.UpdateBuffers();
+				imgui_RS.DrawFrame(commandBuffer);
+				renderer.EndUIRenderPass(commandBuffer);
 
 				renderer.EndFrame();
 			}
@@ -157,6 +168,8 @@ namespace VULKAN{
 		InitConfigsCache();
 
 		SetUpImgui();
+
+		imgui_RS.SetUpSystem(initWindow.window);
 	}
 
 	VulkanApp::~VulkanApp()

@@ -36,20 +36,22 @@ namespace VULKAN{
 			const std::string& vertFilepath,
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo);
-
+		PipelineReader(MyVulkanDevice& device);
 		~PipelineReader();
 
 		PipelineReader(const PipelineReader&) = delete;
 		PipelineReader& operator=(const PipelineReader&) = delete;
 
 		static void DefaultPipelineDefaultConfigInfo(PipelineConfigInfo& configInfo);
-
+		static void UIPipelineDefaultConfigInfo(PipelineConfigInfo& configInfo);
 		void bind(VkCommandBuffer commandBuffer);
 
 		//RT//////////////////////////
 		static VkPipelineShaderStageCreateInfo CreateShaderStageModule(VkShaderModule& module, MyVulkanDevice& device ,VkShaderStageFlagBits usage, const std::string& shaderPath);
 		static VkPipelineShaderStageCreateInfo CreateComputeStageModule(VkShaderModule& module, MyVulkanDevice& device, const std::string& shaderPath);
 
+		template <typename VertexData>
+		void CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 	
 	
 	private:
@@ -58,9 +60,6 @@ namespace VULKAN{
 
 		void CreateGraphicPipeline(const std::string& vertFilepath,const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 
-		template <typename VertexData>
-		void CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo, VertexData vertexData);
-		
 			 
 		void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 		static void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule, MyVulkanDevice& device);
@@ -71,13 +70,20 @@ namespace VULKAN{
 		VkShaderModule fragShaderModule;
 		VkShaderModule vertShaderModule;
 
-
+		// Pipeline cache
+	    VkPipelineCache pipelineCache;
 	};
 
 	template <typename VertexData>
 	void PipelineReader::CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath,
-		const PipelineConfigInfo& configInfo, VertexData vertexData)
+		const PipelineConfigInfo& configInfo)
 	{
+
+
+		// Pipeline cache
+		VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+		pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+		vkCreatePipelineCache(myVulkanDevice.device(), &pipelineCacheCreateInfo, nullptr, &pipelineCache);
 		auto vertCode = ReadFile(vertFilepath);
 		auto fragcode = ReadFile(fragFilepath);
 
@@ -142,7 +148,7 @@ namespace VULKAN{
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(myVulkanDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(myVulkanDevice.device(), pipelineCache, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create graphics pipeline");
 		}

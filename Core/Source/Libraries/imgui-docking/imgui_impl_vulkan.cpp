@@ -931,7 +931,7 @@ static void ImGui_ImplVulkan_CreatePipeline(VkDevice device, const VkAllocationC
     VkPipelineRasterizationStateCreateInfo raster_info = {};
     raster_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     raster_info.polygonMode = VK_POLYGON_MODE_FILL;
-    raster_info.cullMode = VK_CULL_MODE_NONE;
+    raster_info.cullMode = VK_CULL_MODE_FRONT_AND_BACK;
     raster_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     raster_info.lineWidth = 1.0f;
 

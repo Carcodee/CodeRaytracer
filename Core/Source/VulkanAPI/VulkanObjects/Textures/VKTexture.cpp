@@ -27,6 +27,10 @@ namespace VULKAN {
 		CreateImageViews();
 	}
 
+	VKTexture::VKTexture(VulkanSwapChain& swapchain) : mySwapChain{ swapchain }, device{ swapchain.device }
+	{
+
+	}
 
 
 	void VKTexture::CreateTextureImage()
@@ -66,6 +70,36 @@ namespace VULKAN {
 		currentLayout= VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	}
+
+	void VKTexture::CreateImageFromSize(VkDeviceSize size,unsigned char* fontsData, uint32_t width, uint32_t height, VkFormat format)
+	{
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+		mipLevels = 1;
+		mySwapChain.device.createBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer, stagingBufferMemory);
+
+		void* data;
+		vkMapMemory(mySwapChain.device.device(), stagingBufferMemory, 0, size, 0, &data);
+		memcpy(data, fontsData, static_cast<size_t>(size));
+		vkUnmapMemory(mySwapChain.device.device(), stagingBufferMemory);
+
+
+		mySwapChain.CreateImage(width, height, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			textureImage, textureImageMemory);
+		mySwapChain.device.TransitionImageLayout(textureImage, format, mipLevels, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		mySwapChain.device.copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1);
+		mySwapChain.device.TransitionImageLayout(textureImage, format, mipLevels, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		vkDestroyBuffer(mySwapChain.device.device(), stagingBuffer, nullptr);
+		vkFreeMemory(mySwapChain.device.device(), stagingBufferMemory, nullptr);
+		currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	}
+
 	void VKTexture::CreateStorageImage(uint32_t width, uint32_t height, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat format)
 	{
 
@@ -106,6 +140,27 @@ namespace VULKAN {
 		if (vkCreateSampler(mySwapChain.device.device(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create texture sampler :/ ");
+		}
+	}
+
+	void VKTexture::CreateImageViews(VkFormat format)
+	{
+		//compute image view
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = textureImage;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+
+		if (vkCreateImageView(mySwapChain.device.device(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create texture image view! KEKW");
 		}
 	}
 

@@ -36,11 +36,17 @@ VulkanSwapChain::~VulkanSwapChain() {
   for (int i = 0; i < depthImages.size(); i++) {
     vkDestroyImageView(device.device(), depthImageViews[i], nullptr);
     vkDestroyImage(device.device(), depthImages[i], nullptr);
+    vkDestroyImage(device.device(), colorUIImages[i], nullptr);
+    vkDestroyImageView(device.device(),colorUIImageView[i], nullptr);
     vkFreeMemory(device.device(), depthImageMemorys[i], nullptr);
   }
     vkDestroyImageView(device.device(),colorImageView, nullptr);
     vkDestroyImage(device.device(), colorImage, nullptr);
     vkFreeMemory(device.device(), colorImageMemory, nullptr);
+	
+    //vkFreeMemory(device.device(), colorUIImagesMemory, nullptr);
+
+
   for (auto framebuffer : swapChainFramebuffers) {
     vkDestroyFramebuffer(device.device(), framebuffer, nullptr);
   }
@@ -191,6 +197,9 @@ void VulkanSwapChain::Init()
     CreateColorResources();
     createDepthResources();
     createFramebuffers();
+    createUIImageViews();
+    CreateUIRenderPass();
+    CreateUIFramebuffers();
     createSyncObjects();
 }
 
@@ -249,7 +258,11 @@ void VulkanSwapChain::createSwapChain() {
   // retrieve the handles.
   vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, nullptr);
   swapChainImages.resize(imageCount);
+  colorUIImages.resize(imageCount);
   vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, swapChainImages.data());
+  vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, colorUIImages.data());
+
+
 
   swapChainImageFormat = surfaceFormat.format;
   swapChainExtent = extent;
@@ -290,7 +303,11 @@ void VulkanSwapChain::createRenderPass() {
   colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
   colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  if (device.msaaSamples!=VK_SAMPLE_COUNT_1_BIT)
+  {
+	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  }
 
   VkAttachmentDescription depthAttachment{};
   depthAttachment.format = findDepthFormat();
@@ -329,20 +346,27 @@ void VulkanSwapChain::createRenderPass() {
   subpass.colorAttachmentCount = 1;
   subpass.pColorAttachments = &colorAttachmentRef;
   subpass.pDepthStencilAttachment = &depthAttachmentRef;
-  subpass.pResolveAttachments = &colorAttachmentResolveRef;
+  if (device.msaaSamples != VK_SAMPLE_COUNT_1_BIT)
+  {
+	  subpass.pResolveAttachments = &colorAttachmentResolveRef;
+  }
 
   VkSubpassDependency dependency = {};
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.srcAccessMask = 0;
-  dependency.srcStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  dependency.dstSubpass = 0;
-  dependency.dstStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  dependency.dstAccessMask =
-      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+  dependency.srcStageMask =VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
-  std::array<VkAttachmentDescription, 3> attachments = { colorAttachment ,depthAttachment, colorAttachmentResolve};
+  dependency.dstSubpass = 0;
+  dependency.dstStageMask =VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+  dependency.dstAccessMask =VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+
+  std::vector<VkAttachmentDescription> attachments = { colorAttachment ,depthAttachment};
+  if (device.msaaSamples!= VK_SAMPLE_COUNT_1_BIT)
+  {
+
+	 attachments = { colorAttachment ,depthAttachment, colorAttachmentResolve};
+  }
   VkRenderPassCreateInfo renderPassInfo = {};
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -361,7 +385,13 @@ void VulkanSwapChain::createRenderPass() {
 void VulkanSwapChain::createFramebuffers() {
   swapChainFramebuffers.resize(imageCount());
   for (size_t i = 0; i < imageCount(); i++) {
-    std::array<VkImageView, 3> attachments = { colorImageView, depthImageViews[i], swapChainImageViews[i] };
+
+    std::vector<VkImageView> attachments = { swapChainImageViews[i] , depthImageViews[i]};
+    if (device.msaaSamples!=VK_SAMPLE_COUNT_1_BIT)
+    {
+	   attachments = { colorImageView, depthImageViews[i], swapChainImageViews[i] };
+    }
+
 
     VkExtent2D swapChainExtent = getSwapChainExtent();
     VkFramebufferCreateInfo framebufferInfo = {};
@@ -381,6 +411,76 @@ void VulkanSwapChain::createFramebuffers() {
       throw std::runtime_error("failed to create framebuffer!");
     }
   }
+
+}
+
+void VulkanSwapChain::createUIImageViews()
+{
+}
+
+void VulkanSwapChain::CreateUIRenderPass()
+{
+
+    VkAttachmentDescription attachment = {};
+    attachment.format = VK_FORMAT_B8G8R8A8_SRGB;
+    attachment.samples = device.msaaSamples;
+    attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference color_attachment = {};
+    color_attachment.attachment = 0;
+    color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass = {};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &color_attachment;
+    VkSubpassDependency dependency = {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    VkRenderPassCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    info.attachmentCount = 1;
+    info.pAttachments = &attachment;
+    info.subpassCount = 1;
+    info.pSubpasses = &subpass;
+    info.dependencyCount = 1;
+    info.pDependencies = &dependency;
+    if (vkCreateRenderPass(device.device(), &info, nullptr, &UIRenderPass) != VK_SUCCESS)
+    {
+
+        throw std::runtime_error("Error at UI renderpass creation");
+    }
+}
+
+void VulkanSwapChain::CreateUIFramebuffers()
+{
+	VkExtent2D swapChainExtent = getSwapChainExtent();
+	UIframebuffers.resize(imageCount());
+	for (size_t i = 0; i < imageCount(); i++)
+	{
+	std::array<VkImageView, 1>attachments = { colorUIImageView[i]};
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = UIRenderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.width = swapChainExtent.width;
+		framebufferInfo.height = swapChainExtent.height;
+		framebufferInfo.layers = 1;
+		if (vkCreateFramebuffer(device.device(), &framebufferInfo, nullptr, &UIframebuffers[i]) != VK_SUCCESS)
+		{
+						throw std::runtime_error("Error at UI framebuffer creation");
+		}
+	}
 
 }
 
@@ -476,6 +576,20 @@ void VulkanSwapChain::CreateColorResources()
         colorImage, colorImageMemory);
 
     colorImageView = CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+    VkFormat UIFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    //CreateImage(swapChainExtent.width, swapChainExtent.height, 1, device.msaaSamples, UIFormat,
+    //    VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    //    colorUIImages, colorUIImagesMemory);
+
+    //device.TransitionImageLayout(colorUIImages, UIFormat, 1, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    colorUIImageView.resize(colorUIImages.size());
+    for (int i = 0; i < colorUIImages.size(); i++)
+    {
+		colorUIImageView[i] = CreateImageView(colorUIImages[i], colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+	}
+
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(
@@ -560,7 +674,7 @@ void VulkanSwapChain::CreateTextureImageView(VkImageView& view, VkImage& image, 
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
         
-        swapChainImageViews[i] = CreateImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT,mipLevels);
+        swapChainImageViews[i] = CreateImageView(swapChainImages[i], format, VK_IMAGE_ASPECT_COLOR_BIT,mipLevels);
 
     }
 

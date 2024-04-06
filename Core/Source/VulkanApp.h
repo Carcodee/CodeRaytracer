@@ -12,10 +12,7 @@
 #include "VulkanAPI/RenderSystems/Forward_RS.h"
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include <functional>
-#include <imgui.h>
-#include <imgui_impl_vulkan.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_internal.h>
+#include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 
 
 namespace VULKAN {
@@ -45,7 +42,7 @@ namespace VULKAN {
 
 //#ifdef IS_EDITOR
 
-		void RunEngine_EDITOR(std::function<void(bool& showDemoWindow, VkCommandBuffer currentCommandBuffer)>&& editorContext);
+		void RunEngine_EDITOR(std::function<void()>&& editorContext);
 		VkDescriptorPool imguiDescriptorPool;
 //
 //#endif
@@ -53,6 +50,7 @@ namespace VULKAN {
 		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
 		VulkanRenderer renderer{ initWindow , myDevice };
 		Forward_RS forward_RS{renderer, myDevice};
+		ImguiRenderSystem imgui_RS{ renderer, myDevice };
 		std::unique_ptr<MyModel> myModel;
 		int currentFrame;
 

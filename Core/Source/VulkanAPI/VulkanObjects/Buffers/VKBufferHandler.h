@@ -5,6 +5,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
+#include "imgui.h"
+
 namespace VULKAN {
 
 
@@ -23,17 +25,16 @@ namespace VULKAN {
 		
 
 	};
+
+
 	struct UIVertex {
-		glm::vec3 position;
-		glm::vec2 UVPos;
-		glm::vec3 color;
+		ImVec2  pos;
+		ImVec2  uv;
+		ImU32   col;
 
-		static std::vector<VkVertexInputBindingDescription> GetUIBindingDescription();
-		static std::vector<VkVertexInputAttributeDescription> GetAttributeUIDescription();
 
-		bool operator==(const Vertex& other) const {
-			return position == other.position && color == other.color && UVPos == other.texCoord;
-		}
+		static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
+		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
 
 
 	};

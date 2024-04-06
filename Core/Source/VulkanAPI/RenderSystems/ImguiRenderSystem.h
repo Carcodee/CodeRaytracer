@@ -8,6 +8,9 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_internal.h>
+//#include <WinUser.h>
+
+#include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
 
 
 namespace VULKAN
@@ -15,10 +18,24 @@ namespace VULKAN
 	class ImguiRenderSystem
 	{
 	public:
-		ImguiRenderSystem (MyVulkanDevice& myDevice, VulkanRenderer renderer);
+		struct MyPushConstBlock {
+			glm::vec2 scale;
+			glm::vec2 translate;
+		} myPushConstBlock;
+
+		ImguiRenderSystem ( VulkanRenderer& renderer, MyVulkanDevice& myDevice);
 		~ImguiRenderSystem();
 		void CreatePipeline();
 		void CreatePipelineLayout();
+		void InitImgui();
+		void SetImgui(GLFWwindow* window);
+		void CreateFonts();
+		void UpdateBuffers();
+		void BeginFrame();
+		void EndFrame();
+		void SetUpSystem(GLFWwindow* window);
+
+		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
 		VkPipelineLayout pipelineLayout;
 		MyVulkanDevice& myDevice;
@@ -27,7 +44,26 @@ namespace VULKAN
 		VKTexture* fontTexture;
 		std::unique_ptr<MyDescriptorSets> imguiDescriptorSetHandler;
 
+		bool show_demo_window = true;
+	private:
+		void SetStyle(uint32_t index);
+
+		VkDescriptorSetLayout descriptorSetLayout;
+		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		VkDescriptorSet descriptorSets;
+		VkDescriptorPool imguiPool;
+		std::vector<VkBuffer> uniformBuffers;
+		std::vector<VkDeviceMemory> uniformBuffersMemory;
+		std::vector<void*> uniformBuffersMapped;
+		ImGuiStyle vulkanStyle;
+		Buffer vertexBuffer;
+		Buffer indexBuffer;
+		int32_t vertexCount = 0;
+		int32_t indexCount = 0;
+
 	};
+
+
 	
 }
 
