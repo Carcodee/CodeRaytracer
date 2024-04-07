@@ -44,14 +44,13 @@ namespace VULKAN
 		VulkanRenderer& myRenderer;
 
 		VKTexture* fontTexture;
-		std::unique_ptr<MyDescriptorSets> imguiDescriptorSetHandler;
 
 		bool show_demo_window = true;
 	private:
 		void SetStyle(uint32_t index);
 
-		VkDescriptorSetLayout descriptorSetLayout;
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		VkDescriptorSetLayout descriptorSetLayout;
 		VkDescriptorSet descriptorSets;
 		VkDescriptorPool imguiPool;
 		std::vector<VkBuffer> uniformBuffers;
@@ -62,10 +61,12 @@ namespace VULKAN
 		Buffer indexBuffer;
 		int32_t vertexCount = 0;
 		int32_t indexCount = 0;
+
+
 		//Viewport
+		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
 		VkSampler viewportSampler;
 		VkDescriptorSet vpDescriptorSet;
-		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
 		VkDescriptorSetLayout vpDescriptorSetLayout;
 		VkDescriptorPool vpImguiPool;
 	};

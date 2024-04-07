@@ -19,24 +19,33 @@ namespace VULKAN
 	ImguiRenderSystem::~ImguiRenderSystem()
 	{
 
+		//vkDestroySampler(myDevice.device(),viewportSampler, nullptr);
+		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
+		vkDeviceWaitIdle(myDevice.device());
+		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		{
+			vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
+			vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+		}
+		vkDeviceWaitIdle(myDevice.device());
 
 	}
 
-	void ImguiRenderSystem::CreatePipeline()
+	void ImguiRenderSystem::SetUpSystem(GLFWwindow* window)
 	{
-		assert(pipelineLayout != nullptr && "Cannot create pipeline before swapchain");
-		PipelineConfigInfo pipelineConfig{};
+		InitImgui();
+		CreateFonts();
+		SetImgui(window);
+		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
 
-		PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = myRenderer.GetSwapchain().UIRenderPass;
-		pipelineConfig.pipelineLayout = pipelineLayout;
-		pipelineConfig.multisampleInfo.rasterizationSamples =VK_SAMPLE_COUNT_1_BIT ;
-		pipelineReader = std::make_unique<PipelineReader>(myDevice);
-		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
-			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
-			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
-			pipelineConfig);
+
+		CreatePipelineLayout();
+		//CreateImguiImage(viewportSampler, myRenderer.GetSwapchain().colorImageView);
+		CreatePipeline();
+
 	}
+
+
 
 	void ImguiRenderSystem::CreatePipelineLayout()
 	{
@@ -74,6 +83,7 @@ namespace VULKAN
 
 		}
 
+
 		std::array<VkDescriptorPoolSize, 1> poolSize{};
 		for (size_t i = 0; i < descriptorSetLayoutBindings.size(); i++)
 		{
@@ -84,20 +94,15 @@ namespace VULKAN
 				continue;
 			}
 			poolSize[i].descriptorCount = static_cast<uint32_t>((myRenderer.GetMaxRenderInFlight()));
-		}
 
+		}
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
 		poolInfo.pPoolSizes = poolSize.data();
-
-		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
-
-		if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &imguiPool) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create descriptor pool!");
-		}
+		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()*2);
+		vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &imguiPool);
 
 		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -105,23 +110,24 @@ namespace VULKAN
 		allocInfo.descriptorPool = imguiPool;
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
 		allocInfo.pSetLayouts = layouts.data();
-
+		VkDescriptorSetAllocateInfo vpAllocInfo{};
+		vpAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		vpAllocInfo.descriptorPool = imguiPool;
+		vpAllocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
+		vpAllocInfo.pSetLayouts = layouts.data();
 		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
-
+		if (vkAllocateDescriptorSets(myDevice.device(), &vpAllocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to allocate descriptor sets!");
+		}
 		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
 		{
 			
 			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
 			
-
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = uniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UIVertex);
-
 
 			VkDescriptorImageInfo imageInfo{};
 			
@@ -133,7 +139,6 @@ namespace VULKAN
 			descriptorWrite[0].dstSet = descriptorSets;
 			descriptorWrite[0].dstBinding = 0;
 			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].pBufferInfo = &bufferInfo;
 			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			descriptorWrite[0].descriptorCount =1;
 			descriptorWrite[0].pImageInfo = &imageInfo;
@@ -141,12 +146,17 @@ namespace VULKAN
 
             vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
 		}
+		
 
+
+	}
+	void ImguiRenderSystem::CreatePipeline()
+	{
 		VkPushConstantRange pushConstantRange = {};
 
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // The pipeline shader stages that will access the push constant range.
 		pushConstantRange.offset = 0; // The start offset, in bytes, used to access the push constants in the specified stages.
-		pushConstantRange.size = sizeof(MyPushConstBlock); 
+		pushConstantRange.size = sizeof(MyPushConstBlock);
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -158,6 +168,59 @@ namespace VULKAN
 		{
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
+
+		assert(pipelineLayout != nullptr && "Cannot create pipeline before swapchain");
+		PipelineConfigInfo pipelineConfig{};
+
+		PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
+		pipelineConfig.renderPass = myRenderer.GetSwapchain().UIRenderPass;
+		pipelineConfig.pipelineLayout = pipelineLayout;
+		pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		pipelineReader = std::make_unique<PipelineReader>(myDevice);
+		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
+			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
+			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
+			pipelineConfig);
+	}
+	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView)
+	{
+
+
+		//std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
+		//VkDescriptorSetAllocateInfo allocInfo{};
+		//allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		//allocInfo.descriptorPool = imguiPool;
+		//allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
+		//allocInfo.pSetLayouts = layouts.data();
+
+		//if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		//{
+		//	throw std::runtime_error("failed to allocate descriptor sets!");
+		//}
+
+		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		{
+
+			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
+
+			VkDescriptorImageInfo imageInfo{};
+
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = myImageView;
+			imageInfo.sampler = imageSampler;
+
+			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite[0].dstSet = vpDescriptorSet;
+			descriptorWrite[0].dstBinding = 0;
+			descriptorWrite[0].dstArrayElement = 0;
+			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrite[0].descriptorCount = 1;
+			descriptorWrite[0].pImageInfo = &imageInfo;
+			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
+		}
+
 	}
 
 	void ImguiRenderSystem::InitImgui()
@@ -212,18 +275,18 @@ namespace VULKAN
 
 	void ImguiRenderSystem::DrawFrame(VkCommandBuffer commandBuffer)
 	{
+
 		ImGuiIO& io = ImGui::GetIO();
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
 		pipelineReader->bind(commandBuffer);
-
 		VkViewport viewport = INITIALIZERS::viewport(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y, 0.0f, 1.0f);
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
 		myPushConstBlock.scale = glm::vec2(2.0f / io.DisplaySize.x, 2.0f / io.DisplaySize.y);
 		myPushConstBlock.translate = glm::vec2( - 1.0f);
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MyPushConstBlock), &myPushConstBlock);
-
 		ImDrawData* imDrawData = ImGui::GetDrawData();
+
 		int32_t vertexOffset = 0;
 		int32_t indexOffset = 0;
 
@@ -244,13 +307,12 @@ namespace VULKAN
 					scissorRect.offset.y =std::max((int32_t)(pcmd->ClipRect.y), 0);
 					scissorRect.extent.width = (uint32_t)(pcmd->ClipRect.z - pcmd->ClipRect.x);
 					scissorRect.extent.height = (uint32_t)(pcmd->ClipRect.w - pcmd->ClipRect.y);
-					//scissorRect.offset.x = 100;
-					//scissorRect.offset.y = 100;
-					//scissorRect.extent.width = 400;
-					//scissorRect.extent.height = 400;
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissorRect);
 					vkCmdDrawIndexed(commandBuffer, pcmd->ElemCount, 1, indexOffset, vertexOffset, 0);
 					indexOffset += pcmd->ElemCount;
+
+					VkDescriptorSet currentSet= static_cast<VkDescriptorSet>(pcmd->TextureId);
+
 				}
 				vertexOffset += cmd_list->VtxBuffer.Size;
 			}
@@ -302,23 +364,23 @@ namespace VULKAN
 	{
 		ImGui::NewFrame();
 
-		// Start the Dear ImGui frame
-		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
-		ImGui::End(); // End DockSpace Demo window
-		// Make the window full-screen and set the dock space
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-		
-		//ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y));
-		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+		//// Start the Dear ImGui frame
+		//ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		//ImGui::End(); // End DockSpace Demo window
+		//// Make the window full-screen and set the dock space
+		//ImGui::SetNextWindowPos(ImVec2(0, 0));
+		//ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+		//
+		//ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+		ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(200, 200));
 
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
 		// and handle the pass-thru hole, so we ask Begin() to not render a background.
-		if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))
-		{
-			ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
-		}
-		ImGui::End(); 
+		//if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))
+		//{
+		//	ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
+		//}
+		//	ImGui::End(); 
 
 
 	}
@@ -329,110 +391,6 @@ namespace VULKAN
 
 	}
 
-	void ImguiRenderSystem::SetUpSystem(GLFWwindow* window)
-	{
-		InitImgui();
-		CreateFonts();
-		SetImgui(window);
-
-
-		CreatePipelineLayout();
-		//myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
-		//CreateImguiImage(viewportSampler, myRenderer.GetSwapchain().colorImageView);
-		CreatePipeline();
-
-	}
-
-	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView)
-	{
-		VkDescriptorSetLayoutBinding layoutBinding{};
-		layoutBinding.binding = 0;
-		layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		layoutBinding.descriptorCount = 1;
-		layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		layoutBinding.pImmutableSamplers = nullptr;
-
-		vpDescriptorSetLayoutBindings.push_back(layoutBinding);
-
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = static_cast<uint32_t>(vpDescriptorSetLayoutBindings.size());;
-		layoutInfo.pBindings = vpDescriptorSetLayoutBindings.data();
-
-		if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &vpDescriptorSetLayout) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create descriptor set layout!");
-		}
-
-		std::array<VkDescriptorPoolSize, 1> poolSize{};
-		for (size_t i = 0; i < vpDescriptorSetLayoutBindings.size(); i++)
-		{
-			poolSize[i].type = vpDescriptorSetLayoutBindings[i].descriptorType;
-			if (poolSize[i].type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			{
-				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
-				continue;
-			}
-			poolSize[i].descriptorCount = static_cast<uint32_t>((myRenderer.GetMaxRenderInFlight()));
-		}
-
-		VkDescriptorPoolCreateInfo poolInfo{};
-		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
-		poolInfo.pPoolSizes = poolSize.data();
-
-		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
-
-		if (vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &vpImguiPool) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create descriptor pool!");
-		}
-
-		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), vpDescriptorSetLayout);
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = vpImguiPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-		allocInfo.pSetLayouts = layouts.data();
-
-		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate descriptor sets!");
-		}
-
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
-		{
-
-			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
-
-
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = uniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UIVertex);
-
-
-			VkDescriptorImageInfo imageInfo{};
-
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = myImageView;
-			imageInfo.sampler = imageSampler;
-
-			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = vpDescriptorSet;
-			descriptorWrite[0].dstBinding = 0;
-			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].pBufferInfo = &bufferInfo;
-			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite[0].descriptorCount = 1;
-			descriptorWrite[0].pImageInfo = &imageInfo;
-			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
-
-			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
-		}
-
-	}
 
 	void ImguiRenderSystem::SetImgui(GLFWwindow* window)
 	{
