@@ -129,7 +129,7 @@ VkResult VulkanSwapChain::submitCommandBuffers(
 
   currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
-  return result;
+  return VK_SUCCESS;
 }
 
 VkResult VulkanSwapChain::submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
@@ -335,11 +335,8 @@ void VulkanSwapChain::createRenderPass() {
   colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
   colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-  if (device.msaaSamples!=VK_SAMPLE_COUNT_1_BIT || !activateMsaa)
-  {
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-  }
+  colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  
 
   VkAttachmentDescription depthAttachment{};
   depthAttachment.format = findDepthFormat();
@@ -378,7 +375,7 @@ void VulkanSwapChain::createRenderPass() {
   subpass.colorAttachmentCount = 1;
   subpass.pColorAttachments = &colorAttachmentRef;
   subpass.pDepthStencilAttachment = &depthAttachmentRef;
-  if (device.msaaSamples != VK_SAMPLE_COUNT_1_BIT ||!activateMsaa)
+  if(activateMsaa)
   {
 	  subpass.pResolveAttachments = &colorAttachmentResolveRef;
   }
@@ -394,7 +391,7 @@ void VulkanSwapChain::createRenderPass() {
 
 
   std::vector<VkAttachmentDescription> attachments = { colorAttachment ,depthAttachment};
-  if (device.msaaSamples!= VK_SAMPLE_COUNT_1_BIT || !activateMsaa)
+  if (activateMsaa)
   {
 
 	 attachments = {  colorAttachment,depthAttachment,colorAttachmentResolve};
@@ -418,8 +415,8 @@ void VulkanSwapChain::createFramebuffers() {
   swapChainFramebuffers.resize(imageCount());
   for (size_t i = 0; i < imageCount(); i++) {
 
-    std::vector<VkImageView> attachments = { swapChainImageViews[i] , depthImageViews[i]};
-    if (device.msaaSamples!=VK_SAMPLE_COUNT_1_BIT ||!activateMsaa)
+    std::vector<VkImageView> attachments = { colorImageView, depthImageViews[i]};
+    if (activateMsaa)
     {
 	   attachments = { colorImageView , depthImageViews[i], swapChainImageViews[i] };
     }
@@ -456,7 +453,7 @@ void VulkanSwapChain::CreateUIRenderPass()
     VkAttachmentDescription attachment = {};
     attachment.format = VK_FORMAT_B8G8R8A8_SRGB;
     attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -606,7 +603,6 @@ void VulkanSwapChain::CreateColorResources()
     CreateImage(swapChainExtent.width, swapChainExtent.height, 1, device.msaaSamples, colorFormat, 
         VK_IMAGE_TILING_OPTIMAL,VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         colorImage, colorImageMemory);
-
     colorImageView = CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
     VkFormat UIFormat = VK_FORMAT_R8G8B8A8_UNORM;

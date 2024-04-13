@@ -32,7 +32,6 @@ namespace VULKAN {
 		void Run();
 		VulkanApp();
 		~VulkanApp();
-
 		void InitConfigsCache();
 	
 		VulkanApp(const VulkanApp&) = delete;

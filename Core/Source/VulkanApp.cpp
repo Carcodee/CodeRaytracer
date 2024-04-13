@@ -47,7 +47,7 @@ namespace VULKAN{
 				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());	
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1);
+				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
 
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 				myModel->BindVertexBufferIndexed(commandBuffer);
@@ -117,7 +117,7 @@ namespace VULKAN{
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1);
+				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
 
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 				myModel->BindVertexBufferIndexed(commandBuffer);
@@ -125,6 +125,7 @@ namespace VULKAN{
 				myModel->DrawIndexed(commandBuffer);
 
 				renderer.EndSwapChainRenderPass(commandBuffer);
+
 
 				VkMemoryBarrier barrier = {};
 				barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -141,6 +142,7 @@ namespace VULKAN{
 					0, nullptr                                     // Image barriers
 				);
 
+				imgui_RS.WasWindowResized();
 				renderer.BeginUIRenderPass(commandBuffer);
 				imgui_RS.BeginFrame();
 				editorContext();

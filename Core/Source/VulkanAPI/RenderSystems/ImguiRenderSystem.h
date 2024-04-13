@@ -22,7 +22,31 @@ namespace VULKAN
 			glm::vec2 scale;
 			glm::vec2 translate;
 		} myPushConstBlock;
-
+		ImguiRenderSystem& operator=(ImguiRenderSystem& other)
+		{
+			this->pipelineLayout = other.pipelineLayout;
+			this->transitionImage= other.transitionImage;
+			this->descriptorSetLayoutBindings= std::move(other.descriptorSetLayoutBindings);
+			this->descriptorSetLayout= other.descriptorSetLayout;
+			this->descriptorSets= other.descriptorSets;
+			this->imguiPool= other.imguiPool;
+			this->uniformBuffers= std::move(other.uniformBuffers);
+			this->uniformBuffersMemory= std::move(other.uniformBuffersMemory);
+			this->uniformBuffersMapped= std::move(other.uniformBuffersMapped);
+			this->vulkanStyle= other.vulkanStyle;
+			this->vertexBuffer= std::move(other.vertexBuffer);
+			this->indexBuffer= std::move(other.indexBuffer);
+			this->vertexCount= other.vertexCount;
+			this->indexCount= other.indexCount;
+			this->myWindow= other.myWindow;
+			this->vpDescriptorSetLayoutBindings= std::move(other.vpDescriptorSetLayoutBindings);
+			this->viewportSampler= other.viewportSampler;
+			this->vpDescriptorSet= other.vpDescriptorSet;
+			this->vpDescriptorSetLayout= other.vpDescriptorSetLayout;
+			this->vpImguiPool= other.vpImguiPool;
+			this->pipelineReader= std::move(other.pipelineReader);
+			return *this;
+		}
 		ImguiRenderSystem ( VulkanRenderer& renderer, MyVulkanDevice& myDevice);
 		~ImguiRenderSystem();
 		void CreatePipeline();
@@ -32,9 +56,12 @@ namespace VULKAN
 		void CreateFonts();
 		void UpdateBuffers();
 		void BeginFrame();
+		void WasWindowResized();
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
 		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView);
+		void DeleteImages();
+		bool transitionImage= false;
 
 
 		void DrawFrame(VkCommandBuffer commandBuffer);
@@ -46,6 +73,7 @@ namespace VULKAN
 		VKTexture* fontTexture;
 
 		bool show_demo_window = true;
+		float RotationSpeed=1.0f;
 	private:
 		void SetStyle(uint32_t index);
 
@@ -61,14 +89,19 @@ namespace VULKAN
 		Buffer indexBuffer;
 		int32_t vertexCount = 0;
 		int32_t indexCount = 0;
+		GLFWwindow* myWindow;
 
+		VkImage vpImage;
+		VkImageView vpImageView;
+		VkSampler viewportSampler;
+		
 
 		//Viewport
 		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
-		VkSampler viewportSampler;
 		VkDescriptorSet vpDescriptorSet;
 		VkDescriptorSetLayout vpDescriptorSetLayout;
 		VkDescriptorPool vpImguiPool;
+		
 	};
 
 

@@ -101,7 +101,7 @@ private:
 	std::vector<VkDeviceMemory> depthImageMemorys;
 	std::vector<VkImageView> depthImageViews;
 
-	bool activateMsaa=false;
+	bool activateMsaa=true;
 
 
 	MyVulkanDevice &device;

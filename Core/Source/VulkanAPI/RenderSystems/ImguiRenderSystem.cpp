@@ -12,8 +12,7 @@ namespace VULKAN
 		//TODO: Fonts texture
 		//TODO: Vertex buffer
 		//TODO: Push constants
-		vertexBuffer.device = myDevice.device();
-		indexBuffer.device = myDevice.device();
+
 	}
 
 	ImguiRenderSystem::~ImguiRenderSystem()
@@ -21,11 +20,14 @@ namespace VULKAN
 
 		//vkDestroySampler(myDevice.device(),viewportSampler, nullptr);
 		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
-		vkDeviceWaitIdle(myDevice.device());
 		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
 		{
-			vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
-			vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+			if (uniformBuffers.size()>0)
+			{
+				vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
+				vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+				
+			}
 		}
 		vkDeviceWaitIdle(myDevice.device());
 
@@ -33,16 +35,20 @@ namespace VULKAN
 
 	void ImguiRenderSystem::SetUpSystem(GLFWwindow* window)
 	{
+		this->myWindow= window;
+		
+		vertexBuffer.device = myDevice.device();
+		indexBuffer.device = myDevice.device();
 		InitImgui();
 		CreateFonts();
 		SetImgui(window);
-		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
 
+		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
+		vpImageView= myRenderer.GetSwapchain().colorImageView;
 
 		CreatePipelineLayout();
-		//CreateImguiImage(viewportSampler, myRenderer.GetSwapchain().colorImageView);
+		CreateImguiImage(viewportSampler, vpImageView);
 		CreatePipeline();
-
 	}
 
 
@@ -56,7 +62,7 @@ namespace VULKAN
 		layoutBinding.descriptorCount = 1;
 		layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		layoutBinding.pImmutableSamplers = nullptr;
-
+		descriptorSetLayoutBindings.clear();
 		descriptorSetLayoutBindings.push_back(layoutBinding);
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -223,6 +229,26 @@ namespace VULKAN
 
 	}
 
+	void ImguiRenderSystem::DeleteImages()
+	{
+		ImDrawData* imDrawData = ImGui::GetDrawData();
+
+		if (imDrawData->CmdListsCount > 0) {
+
+			VkDeviceSize offsets[1] = { 0 };
+
+			for (int32_t i = 0; i < imDrawData->CmdListsCount; i++)
+			{
+				const ImDrawList* cmd_list = imDrawData->CmdLists[i];
+				for (int32_t j = 0; j < cmd_list->CmdBuffer.Size; j++)
+				{
+					
+
+				}
+			}
+		}
+	}
+
 	void ImguiRenderSystem::InitImgui()
 	{
 		ImGui::CreateContext();
@@ -276,9 +302,8 @@ namespace VULKAN
 	void ImguiRenderSystem::DrawFrame(VkCommandBuffer commandBuffer)
 	{
 
-		ImGuiIO& io = ImGui::GetIO();
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
 		pipelineReader->bind(commandBuffer);
+		ImGuiIO& io = ImGui::GetIO();
 		VkViewport viewport = INITIALIZERS::viewport(ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y, 0.0f, 1.0f);
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
@@ -308,10 +333,23 @@ namespace VULKAN
 					scissorRect.extent.width = (uint32_t)(pcmd->ClipRect.z - pcmd->ClipRect.x);
 					scissorRect.extent.height = (uint32_t)(pcmd->ClipRect.w - pcmd->ClipRect.y);
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissorRect);
-					vkCmdDrawIndexed(commandBuffer, pcmd->ElemCount, 1, indexOffset, vertexOffset, 0);
-					indexOffset += pcmd->ElemCount;
+	
+					//myDevice.TransitionImageLayout(myRenderer.GetSwapchain().colorImage, myRenderer.GetSwapchain().getSwapChainImageFormat(), 1,
+					//	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 					VkDescriptorSet currentSet= static_cast<VkDescriptorSet>(pcmd->TextureId);
+					
+					if (currentSet != nullptr)
+					{
+						
+						vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &currentSet, 0, nullptr);
+					}
+					else
+					{
+						vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets, 0, nullptr);
+					}
+					vkCmdDrawIndexed(commandBuffer, pcmd->ElemCount, 1, indexOffset, vertexOffset, 0);
+					indexOffset += pcmd->ElemCount;
 
 				}
 				vertexOffset += cmd_list->VtxBuffer.Size;
@@ -364,15 +402,22 @@ namespace VULKAN
 	{
 		ImGui::NewFrame();
 
-		//// Start the Dear ImGui frame
-		//ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
-		//ImGui::End(); // End DockSpace Demo window
-		//// Make the window full-screen and set the dock space
-		//ImGui::SetNextWindowPos(ImVec2(0, 0));
-		//ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-		//
-		//ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-		ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(200, 200));
+		// Start the Dear ImGui frame
+		int width = 0;
+		int height = 0;
+		glfwGetWindowSize(myWindow,&width,&height);
+		ImGui::SetWindowSize(ImVec2(width, height));
+		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
+		ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
+
+		ImGui::End(); // End DockSpace Demo window
+		// Make the window full-screen and set the dock space
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
+		
+		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
 		// and handle the pass-thru hole, so we ask Begin() to not render a background.
@@ -383,6 +428,15 @@ namespace VULKAN
 		//	ImGui::End(); 
 
 
+	}
+
+	void ImguiRenderSystem::WasWindowResized()
+	{
+		if (myRenderer.GetSwapchain().colorImageView!=vpImageView)
+		{
+			SetUpSystem(myWindow);
+			
+		}
 	}
 
 	void ImguiRenderSystem::EndFrame()

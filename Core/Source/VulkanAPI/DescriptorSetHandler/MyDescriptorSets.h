@@ -24,6 +24,13 @@ namespace VULKAN
         std::vector<VkDescriptorSet> descriptorSets;
 
     };
+    struct Desc_SetGroup
+    {
+	    std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		VkDescriptorSetLayout descriptorSetLayout;  
+		VkDescriptorPool descriptorPool;
+		std::vector<VkWriteDescriptorSet> descriptorWrite;
+	};
 
 
     class MyDescriptorSets
@@ -37,17 +44,28 @@ namespace VULKAN
         ~MyDescriptorSets();
 
 
-        VkDescriptorSetLayoutBinding CreateDescriptorBinding(VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, int bindingCount, int descriptorCount);
-
+//NEW ABSTRACTED FUNCTIONS
         template<std::size_t N>
         void CreateLayoutBinding(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int DescriptorSetCount);
 
+        VkDescriptorSetLayoutBinding CreateDescriptorBinding(VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, int bindingCount, int descriptorCount);
 
+    	//VkDescriptorSetLayout CreateDescriptorSetLayout(int descriptorCount);
+
+     //   VkDescriptorPool CreateDescriptorPool(int descriptorCount, int maxFramesInFlight);
+
+     //   VkDescriptorSet CreateDescriptorSetsTrue(int descriptorCount, int maxFramesInFlight, VkDescriptorPool pool);
+
+    	//VkDescriptorBufferInfo CreateBufferInfo(int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
+
+     //   VkDescriptorImageInfo CreateImageInfo(int descriptorCount, int maxFramesInFlight, VKTexture& texture);
+
+//OLD ABSTRACTED FUNCTIONS
         template<typename BufferObject>
         void CreateUniformBuffers(int descriptorCount, int  MaxFramesInFlight);
 
         template<typename BufferObject>
-        void UpdateUniformBuffer(uint32_t currentImage, int descriptorCount);
+        void UpdateUniformBuffer(uint32_t currentImage, int descriptorCount, float speed);
 
         template <typename BufferObject, std::size_t N>
         void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
@@ -138,7 +156,7 @@ namespace VULKAN
 
 
     template <typename BufferObject>
-    void MyDescriptorSets::UpdateUniformBuffer(uint32_t currentImage, int descriptorCount)
+    void MyDescriptorSets::UpdateUniformBuffer(uint32_t currentImage, int descriptorCount, float speed)
     {
 
         static auto startTime = std::chrono::high_resolution_clock::now();
@@ -149,7 +167,7 @@ namespace VULKAN
         // if (typeid(BufferObject)==typeid(UniformBufferObjectData))
         // {
         BufferObject ubo{};
-        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f)* speed, glm::vec3(0.0f, 0.0f, 1.0f));
         ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ubo.projection = glm::perspective(glm::radians(45.0f), 800 / (float)600, 0.1f, 10.0f);
         ubo.projection[1][1] *= -1;

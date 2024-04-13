@@ -54,7 +54,7 @@ namespace VULKAN{
 			int GetMaxRenderInFlight() { return swapChain->MAX_FRAMES_IN_FLIGHT; }
 			int GetImageCount() { return swapChain->imageCount(); }
 			VulkanSwapChain& GetSwapchain(){ return *swapChain;}
-
+            
 
 		private:
 			void CreateCommandBuffer();
@@ -72,6 +72,7 @@ namespace VULKAN{
 			std::unique_ptr<VulkanSwapChain> swapChain;
 			std::vector<VkCommandBuffer> commandBuffer;
 			std::vector<VkCommandBuffer> computeCommandBuffers;
+
 
 
 
