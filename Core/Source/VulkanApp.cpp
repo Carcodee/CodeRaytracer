@@ -90,8 +90,7 @@ namespace VULKAN{
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
-
-
+				rayTracing_RS.DrawRT(commandBuffer);
 				forward_RS.TransitionBeforeComputeRender(renderer.GetCurrentFrame());
 
 				if (cicles==3)
@@ -114,6 +113,7 @@ namespace VULKAN{
 			{
 				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());	
 
+				rayTracing_RS.TransitionStorageImage();
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
@@ -166,12 +166,15 @@ namespace VULKAN{
 
 	VulkanApp::VulkanApp()
 	{
+
+		rayTracing_RS.Create_RT_RenderSystem();
+		forward_RS.raytracingImage = rayTracing_RS.storageImage;
+		forward_RS.InitForwardSystem();
 		LoadModels();
 		InitConfigsCache();
-
 		SetUpImgui();
-
 		imgui_RS.SetUpSystem(initWindow.window);
+		
 	}
 
 	VulkanApp::~VulkanApp()

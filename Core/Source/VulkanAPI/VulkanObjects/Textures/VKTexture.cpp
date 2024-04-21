@@ -9,10 +9,15 @@ namespace VULKAN {
 		CreateTextureImage();
 		textureImageView = mySwapChain.CreateImageView(textureImage, format, VK_IMAGE_ASPECT_COLOR_BIT,mipLevels);
 		CreateTextureSample();
-		mySwapChain.device.deletionQueue.push_function([this]() {vkDestroySampler(device.device(), textureSampler, nullptr);});
-		mySwapChain.device.deletionQueue.push_function([this]() {vkDestroyImageView(device.device(), textureImageView, nullptr);});
-		mySwapChain.device.deletionQueue.push_function([this]() {vkDestroyImage(device.device(), textureImage, nullptr);});
-		mySwapChain.device.deletionQueue.push_function([this]() {vkFreeMemory(device.device(), textureImageMemory, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+		vkDestroySampler(device.device(), textureSampler, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImageView(device.device(), textureImageView, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImage(device.device(), textureImage, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this](){
+			vkFreeMemory(device.device(), textureImageMemory, nullptr);
+		});
 
 		//myDevice.ResourceToDestroy(this);
 
@@ -25,11 +30,28 @@ namespace VULKAN {
 		CreateStorageImage(width, height, oldLayout, newLayout, format);
 		CreateTextureSample();
 		CreateImageViews();
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroySampler(device.device(), textureSampler, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImageView(device.device(), textureImageView, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImage(device.device(), textureImage, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkFreeMemory(device.device(), textureImageMemory, nullptr);
+			});
 	}
 
 	VKTexture::VKTexture(VulkanSwapChain& swapchain) : mySwapChain{ swapchain }, device{ swapchain.device }
 	{
-
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroySampler(device.device(), textureSampler, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImageView(device.device(), textureImageView, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkDestroyImage(device.device(), textureImage, nullptr);});
+		mySwapChain.device.deletionQueue.push_function([this]() {
+			vkFreeMemory(device.device(), textureImageMemory, nullptr);
+			});
 	}
 
 

@@ -12,24 +12,10 @@ namespace VULKAN
 		//TODO: Fonts texture
 		//TODO: Vertex buffer
 		//TODO: Push constants
-
 	}
 
 	ImguiRenderSystem::~ImguiRenderSystem()
 	{
-
-		//vkDestroySampler(myDevice.device(),viewportSampler, nullptr);
-		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
-		{
-			if (uniformBuffers.size()>0)
-			{
-				vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
-				vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
-				
-			}
-		}
-		vkDeviceWaitIdle(myDevice.device());
 
 	}
 
@@ -49,6 +35,36 @@ namespace VULKAN
 		CreatePipelineLayout();
 		CreateImguiImage(viewportSampler, vpImageView);
 		CreatePipeline();
+
+		myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
+		myDevice.deletionQueue.push_function([this]() {indexBuffer.destroy();});
+        
+		//for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		//{
+		//	if (uniformBuffers.size()>0)
+		//	{
+		//		myDevice.deletionQueue.push_function([this, i]()
+		//			{
+		//				vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
+		//			});
+		//		myDevice.deletionQueue.push_function([this, i]()
+		//			{
+		//				vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+		//			});
+		//	}
+		//}
+		myDevice.deletionQueue.push_function([this]()
+			{
+				vkDestroyDescriptorSetLayout(myDevice.device(), vpDescriptorSetLayout, nullptr);
+			});
+		myDevice.deletionQueue.push_function([this]()
+			{
+				vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
+			});
+		myDevice.deletionQueue.push_function([this]()
+			{
+				vkDestroySampler(myDevice.device(), viewportSampler, nullptr);
+			});
 	}
 
 
@@ -227,26 +243,6 @@ namespace VULKAN
 			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
 		}
 
-	}
-
-	void ImguiRenderSystem::DeleteImages()
-	{
-		ImDrawData* imDrawData = ImGui::GetDrawData();
-
-		if (imDrawData->CmdListsCount > 0) {
-
-			VkDeviceSize offsets[1] = { 0 };
-
-			for (int32_t i = 0; i < imDrawData->CmdListsCount; i++)
-			{
-				const ImDrawList* cmd_list = imDrawData->CmdLists[i];
-				for (int32_t j = 0; j < cmd_list->CmdBuffer.Size; j++)
-				{
-					
-
-				}
-			}
-		}
 	}
 
 	void ImguiRenderSystem::InitImgui()

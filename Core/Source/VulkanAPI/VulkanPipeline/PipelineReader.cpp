@@ -349,13 +349,14 @@ namespace VULKAN
 		VkShaderStageFlagBits usage, const std::string& shaderPath) {
 
 		auto code = ReadFile(shaderPath);
-
+	
 		CreateShaderModule(code, &module, device);
 
 		VkPipelineShaderStageCreateInfo shaderStage{};
 
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.stage = usage;
+		shaderStage.module = module;
 		shaderStage.pName = "main";
 		return shaderStage;
 

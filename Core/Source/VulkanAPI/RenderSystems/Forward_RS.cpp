@@ -6,21 +6,13 @@ namespace VULKAN {
 
 	Forward_RS::Forward_RS(VulkanRenderer& currentRenderer, MyVulkanDevice& device): renderer{ currentRenderer } , myDevice{device}
 	{
-		//compute
-		CreateUBOBuffers();
-		CreateComputeDescriptorSets();
-		CreateComputePipeline();
-
-
-		CreateDescriptorSets();
-		CreatePipelineLayout();
-		CreatePipeline();
-
-
 
 	}
 	Forward_RS::~Forward_RS(){
 
+		vkDestroyPipeline(myDevice.device(), computePipeline, nullptr);
+		vkDestroyPipelineLayout(myDevice.device(), computePipelineLayout, nullptr);
+		vkDestroyShaderModule(myDevice.device(), computeModule, nullptr);
 		vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
 	}
 	void Forward_RS::CreateDescriptorSets()
@@ -32,16 +24,17 @@ namespace VULKAN {
 		outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
-		std::array <VkDescriptorSetLayoutBinding, 3> bindings;
+		std::array <VkDescriptorSetLayoutBinding, 4> bindings;
 		bindings[0] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
 		bindings[1] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1, 1);
 		bindings[2] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 2, 1);
+		bindings[3] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, 1);
 		renderSystemDescriptorSetHandler->CreateLayoutBinding(bindings, 1);
 
 
 		renderSystemDescriptorSetHandler->CreateUniformBuffers<UniformBufferObjectData>(1, renderer.GetMaxRenderInFlight());
 		renderSystemDescriptorSetHandler->CreateDescriptorPool(bindings, renderer.GetMaxRenderInFlight(), VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
-		renderSystemDescriptorSetHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings, 1, renderer.GetMaxRenderInFlight(), *lion, *outputStorageImage,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+		renderSystemDescriptorSetHandler->CreateDescriptorSets<UniformBufferObjectData>(bindings, 1, renderer.GetMaxRenderInFlight(), *lion, *outputStorageImage,*raytracingImage,VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	}
 	void Forward_RS::CreatePipelineLayout()
@@ -294,7 +287,39 @@ namespace VULKAN {
 			outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 	}
-	
 
+	void Forward_RS::InitForwardSystem()
+	{
+		//compute
+		CreateUBOBuffers();
+		CreateComputeDescriptorSets();
+		CreateComputePipeline();
+
+
+		CreateDescriptorSets();
+		CreatePipelineLayout();
+		CreatePipeline();
+			myDevice.deletionQueue.push_function([this]()
+			{
+				if (computePipeline == nullptr)return;
+				vkDestroyPipeline(myDevice.device(), computePipeline, nullptr);
+			});
+		myDevice.deletionQueue.push_function([this]()
+			{
+				if (computePipelineLayout == nullptr)return;
+				vkDestroyPipelineLayout(myDevice.device(), computePipelineLayout, nullptr);
+			});
+		myDevice.deletionQueue.push_function([this]()
+			{
+				if (computeModule == nullptr)return;
+				vkDestroyShaderModule(myDevice.device(), computeModule, nullptr);
+			});
+		myDevice.deletionQueue.push_function([this]()
+			{
+				if (pipelineLayout == nullptr)return;
+				vkDestroyPipelineLayout(myDevice.device(), pipelineLayout, nullptr);
+			});
+
+	}
 }
 

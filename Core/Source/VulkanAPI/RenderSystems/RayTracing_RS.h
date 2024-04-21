@@ -28,6 +28,7 @@ namespace VULKAN {
 	{
 	public:
 
+		RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer);
 
 		PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR;
 		PFN_vkCreateAccelerationStructureKHR vkCreateAccelerationStructureKHR;
@@ -42,18 +43,16 @@ namespace VULKAN {
 
 		bool readyToDraw = false;
 
+		VKTexture* storageImage;
+		void Create_RT_RenderSystem();
+		void DrawRT(VkCommandBuffer& currentBuffer);
+		void TransitionStorageImage();
 	private:
-		struct StorageImage {
-			VkDeviceMemory memory;
-			VkImage image;
-			VkImageView view;
-			VkFormat format;
-		} storageImage;
-
 		struct UniformData {
 			glm::mat4 viewInverse;
 			glm::mat4 projInverse;
 		} uniformData;
+
 
 		//helpers
 		void LoadFunctionsPointers();
@@ -68,12 +67,9 @@ namespace VULKAN {
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
 		void CreateUniformBuffer();
-		void BuildCommandBuffers(VkCommandBuffer& currentBuffer);
-		void Create_RT_RenderSystem();
 		void UpdateUniformbuffers();
 
 		VulkanRenderer& myRenderer;
-		MyDescriptorSets descriptorSetHandler_RT;
 		MyVulkanDevice& myDevice;
 
 		AccelerationStructure bottomLevelAS{};

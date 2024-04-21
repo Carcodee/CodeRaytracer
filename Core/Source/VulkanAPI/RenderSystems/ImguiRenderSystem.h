@@ -18,10 +18,12 @@ namespace VULKAN
 	class ImguiRenderSystem
 	{
 	public:
+
 		struct MyPushConstBlock {
 			glm::vec2 scale;
 			glm::vec2 translate;
 		} myPushConstBlock;
+
 		ImguiRenderSystem& operator=(ImguiRenderSystem& other)
 		{
 			this->pipelineLayout = other.pipelineLayout;
@@ -43,7 +45,6 @@ namespace VULKAN
 			this->viewportSampler= other.viewportSampler;
 			this->vpDescriptorSet= other.vpDescriptorSet;
 			this->vpDescriptorSetLayout= other.vpDescriptorSetLayout;
-			this->vpImguiPool= other.vpImguiPool;
 			this->pipelineReader= std::move(other.pipelineReader);
 			return *this;
 		}
@@ -60,7 +61,6 @@ namespace VULKAN
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
 		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView);
-		void DeleteImages();
 		bool transitionImage= false;
 
 
@@ -69,7 +69,6 @@ namespace VULKAN
 		VkPipelineLayout pipelineLayout;
 		MyVulkanDevice& myDevice;
 		VulkanRenderer& myRenderer;
-
 		VKTexture* fontTexture;
 
 		bool show_demo_window = true;
@@ -91,7 +90,6 @@ namespace VULKAN
 		int32_t indexCount = 0;
 		GLFWwindow* myWindow;
 
-		VkImage vpImage;
 		VkImageView vpImageView;
 		VkSampler viewportSampler;
 		
@@ -100,7 +98,6 @@ namespace VULKAN
 		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
 		VkDescriptorSet vpDescriptorSet;
 		VkDescriptorSetLayout vpDescriptorSetLayout;
-		VkDescriptorPool vpImguiPool;
 		
 	};
 

@@ -80,7 +80,9 @@ class MyVulkanDevice {
       VkBufferUsageFlags usage,
       VkMemoryPropertyFlags properties,
       VkBuffer &buffer,
-      VkDeviceMemory &bufferMemory);
+      VkDeviceMemory &bufferMemory,
+      VkMemoryAllocateFlagBits allocateFlags=  VK_MEMORY_ALLOCATE_FLAG_BITS_MAX_ENUM);
+
   VkCommandBuffer beginSingleTimeCommands();
   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
@@ -133,15 +135,15 @@ class MyVulkanDevice {
 
 
 
-  const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
+  const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"/*,"VK_EXT_debug_utils"*/};
   const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-/*                                                      VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+                                                      VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
                                                       VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
                                                       VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
                                                       VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
                                                       VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
                                                       VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-                                                       VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME */};
+                                                      VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME };
   														
 
 

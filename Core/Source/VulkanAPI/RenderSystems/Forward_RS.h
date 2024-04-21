@@ -32,6 +32,7 @@ namespace VULKAN
 		void UpdateUBO(uint32_t currentImage, float deltaTime);
 		void TransitionBeforeComputeRender(uint32_t currentImage);
 		void TransitionBeforeForwardRender(uint32_t currentImage);
+		void InitForwardSystem();
 		std::unique_ptr<PipelineReader> pipelineReader;
 		std::unique_ptr <MyDescriptorSets> renderSystemDescriptorSetHandler;
 		std::unique_ptr <MyDescriptorSets> computeRenderSystemDescriptorSetHandler;
@@ -48,6 +49,7 @@ namespace VULKAN
 		VKTexture* storageImage;
 		VKTexture* outputStorageImage;
 
+		VKTexture* raytracingImage;
 
 
 

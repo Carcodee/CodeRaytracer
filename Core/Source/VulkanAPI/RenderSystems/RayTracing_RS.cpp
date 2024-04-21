@@ -2,7 +2,9 @@
 
 
 namespace VULKAN {
-
+	RayTracing_RS::RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer):myDevice(device), myRenderer(renderer)
+	{
+	}
 
 	void RayTracing_RS::LoadFunctionsPointers()
 	{
@@ -110,6 +112,8 @@ namespace VULKAN {
 	//TODO: Create the storage image of the raytracing
 	void RayTracing_RS::CreateStorageImage()
 	{
+
+		storageImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
 		
 	}
 
@@ -134,24 +138,27 @@ namespace VULKAN {
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f
 		};
-		myDevice.createBuffer(vertexBuffer.size*sizeof(Vertex),
+		myDevice.createBuffer(vertices.size()*sizeof(Vertex),
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			vertexBuffer.buffer,
-			vertexBuffer.memory);
+			vertexBuffer.memory,
+			VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT);
 		// Index buffer
-		myDevice.createBuffer(indexBuffer.size * sizeof(uint32_t),
+		myDevice.createBuffer(indices.size()*sizeof(uint32_t),
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			indexBuffer.buffer,
-			indexBuffer.memory);
+			indexBuffer.memory,
+			VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
 
 		// Transform buffer
-		myDevice.createBuffer(transformBuffer.size * sizeof(VkTransformMatrixKHR),
+		myDevice.createBuffer(sizeof(VkTransformMatrixKHR),
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			transformBuffer.buffer,
-			transformBuffer.memory);
+			transformBuffer.memory,
+			VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
 
 		VkDeviceOrHostAddressConstKHR vertexBufferDeviceAddress{};
 		VkDeviceOrHostAddressConstKHR indexBufferDeviceAddress{};
@@ -257,11 +264,12 @@ namespace VULKAN {
 
 		Buffer instancesBuffer;
 
-		myDevice.createBuffer(instancesBuffer.size * sizeof(VkAccelerationStructureInstanceKHR),
+		myDevice.createBuffer(sizeof(VkAccelerationStructureInstanceKHR),
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			transformBuffer.buffer,
-			transformBuffer.memory);
+			instancesBuffer.buffer,
+			instancesBuffer.memory,
+			VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
 
 		VkDeviceOrHostAddressConstKHR instanceDataDeviceAddress{};
 		instanceDataDeviceAddress.deviceAddress = getBufferDeviceAddress(instancesBuffer.buffer);
@@ -336,6 +344,7 @@ namespace VULKAN {
 		topLevelAS.deviceAddress = vkGetAccelerationStructureDeviceAddressKHR(myDevice.device(), &accelerationDeviceAddressInfo);
 
 		DeleteScratchBuffer(scratchBuffer);
+		instancesBuffer.device = myDevice.device();
 		instancesBuffer.destroy();
 	}
 
@@ -351,11 +360,15 @@ namespace VULKAN {
 
 		const VkBufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		const VkMemoryPropertyFlags memoryUsageFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		myDevice.createBuffer(handleSize, memoryUsageFlags, memoryUsageFlags,raygenShaderBindingTable.buffer, raygenShaderBindingTable.memory);
-		myDevice.createBuffer(handleSize, memoryUsageFlags, memoryUsageFlags,missShaderBindingTable.buffer, missShaderBindingTable.memory);
-		myDevice.createBuffer(handleSize, memoryUsageFlags, memoryUsageFlags,hitShaderBindingTable.buffer, hitShaderBindingTable.memory);
+		myDevice.createBuffer(handleSize, bufferUsageFlags, memoryUsageFlags,raygenShaderBindingTable.buffer, raygenShaderBindingTable.memory,VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
+		myDevice.createBuffer(handleSize, bufferUsageFlags, memoryUsageFlags,missShaderBindingTable.buffer, missShaderBindingTable.memory, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
+		myDevice.createBuffer(handleSize, bufferUsageFlags, memoryUsageFlags,hitShaderBindingTable.buffer, hitShaderBindingTable.memory, VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR);
 
 		// Copy handles
+		raygenShaderBindingTable.device = myDevice.device();
+		missShaderBindingTable.device = myDevice.device();
+		hitShaderBindingTable.device = myDevice.device();
+
 		raygenShaderBindingTable.map();
 		missShaderBindingTable.map();
 		hitShaderBindingTable.map();
@@ -400,9 +413,13 @@ namespace VULKAN {
 		accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 
 		VkDescriptorImageInfo storageImageDescriptor{};
-		storageImageDescriptor.imageView = storageImage.view;
+		storageImageDescriptor.imageView = storageImage->textureImageView;
 		storageImageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
+		ubo.descriptor.buffer = ubo.buffer;
+		ubo.descriptor.offset = 0;
+		ubo.descriptor.range = sizeof(UniformData);
+		 
 		VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
 
@@ -464,7 +481,8 @@ namespace VULKAN {
 
 		// Ray generation group
 		{
-			path = "raytracingbasic/raygen.rgen.spv";
+			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
+			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rGenShaderModule,myDevice,VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
@@ -478,8 +496,9 @@ namespace VULKAN {
 
 		// Miss group
 		{
-			path = "raytracingbasic/miss.rmiss.spv";
-			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rMissShaderModule, myDevice, VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
+			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv";
+			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
+			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rMissShaderModule, myDevice, VK_SHADER_STAGE_MISS_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
 			shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
@@ -492,8 +511,9 @@ namespace VULKAN {
 
 		// Closest hit group
 		{
-			path = "raytracingbasic/closesthit.rchit.spv";
-			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
+			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv";
+			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
+			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
 			shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
@@ -527,6 +547,7 @@ namespace VULKAN {
 			ubo.buffer,
 			ubo.memory);
 		VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+		ubo.device = myDevice.device();
 		ubo.map();
 		memcpy(ubo.mapped,&uniformData,sizeof(uniformData));
 		if ((memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0){
@@ -535,8 +556,46 @@ namespace VULKAN {
 		UpdateUniformbuffers();
 	}
 
-	void RayTracing_RS::BuildCommandBuffers(VkCommandBuffer& currentBuffer)
+	void RayTracing_RS::DrawRT(VkCommandBuffer& currentBuffer)
 	{
+		if (storageImage->currentLayout!= VK_IMAGE_LAYOUT_GENERAL)
+		{
+				VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
+			VkImageMemoryBarrier barrier{};
+
+			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.image = storageImage->textureImage;
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			barrier.subresourceRange.baseMipLevel = 0;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
+
+			VkPipelineStageFlags sourceStage;
+			VkPipelineStageFlags destinationStage;
+			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
+
+			vkCmdPipelineBarrier(
+				commandBuffer,
+				sourceStage, destinationStage,
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier);
+
+			myDevice.endSingleTimeCommands(commandBuffer);
+			storageImage->currentLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+		}
 		const uint32_t handleSizeAligned = alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
 
 		VkStridedDeviceAddressRegionKHR raygenShaderSbtEntry{};
@@ -572,47 +631,8 @@ namespace VULKAN {
 			myRenderer.swapChain->height(),
 			1);
 
-
 		//TODO::
-		//vks::tools::setImageLayout(
-		//	drawCmdBuffers[i],
-		//	swapChain.images[i],
-		//	VK_IMAGE_LAYOUT_UNDEFINED,
-		//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		//	subresourceRange);
-
-		//// Prepare ray tracing output image as transfer source
-		//vks::tools::setImageLayout(
-		//	drawCmdBuffers[i],
-		//	storageImage.image,
-		//	VK_IMAGE_LAYOUT_GENERAL,
-		//	VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		//	subresourceRange);
-
-		//VkImageCopy copyRegion{};
-		//copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		//copyRegion.srcOffset = { 0, 0, 0 };
-		//copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		//copyRegion.dstOffset = { 0, 0, 0 };
-		//copyRegion.extent = { width, height, 1 };
-		//vkCmdCopyImage(drawCmdBuffers[i], storageImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, swapChain.images[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
-
-		//// Transition swap chain image back for presentation
-		//vks::tools::setImageLayout(
-		//	drawCmdBuffers[i],
-		//	swapChain.images[i],
-		//	VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		//	VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		//	subresourceRange);
-
-		//// Transition ray tracing output image back to general layout
-		//vks::tools::setImageLayout(
-		//	drawCmdBuffers[i],
-		//	storageImage.image,
-		//	VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		//	VK_IMAGE_LAYOUT_GENERAL,
-		//	subresourceRange);
-
+	
 	}
 
 	void RayTracing_RS::Create_RT_RenderSystem()
@@ -633,15 +653,14 @@ namespace VULKAN {
 		LoadFunctionsPointers();
 
 
+		CreateBottomLevelAccelerationStructure();
+		CreateTopLevelAccelerationStructure();
+
 		CreateStorageImage();
 		CreateUniformBuffer();
 		CreateRTPipeline();
 		CreateShaderBindingTable();
 		CreateDescriptorSets();
-		for (size_t i = 0; i < myRenderer.commandBuffer.size(); i++)
-		{
-			BuildCommandBuffers(myRenderer.commandBuffer[i]);
-		}
 		readyToDraw = true;
 
 
@@ -656,7 +675,44 @@ namespace VULKAN {
 		memcpy(ubo.mapped, &uniformData,sizeof(UniformData));
 	}
 
+	void RayTracing_RS::TransitionStorageImage()
+	{
+		VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
+			VkImageMemoryBarrier barrier{};
+
+			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.image = storageImage->textureImage;
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			barrier.subresourceRange.baseMipLevel = 0;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
+
+			VkPipelineStageFlags sourceStage;
+			VkPipelineStageFlags destinationStage;
+			barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+			vkCmdPipelineBarrier(
+				commandBuffer,
+				sourceStage, destinationStage,
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier);
+
+			myDevice.endSingleTimeCommands(commandBuffer);
+			storageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
+	}
 }
 

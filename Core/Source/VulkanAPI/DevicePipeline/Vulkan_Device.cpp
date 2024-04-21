@@ -54,8 +54,10 @@ namespace VULKAN {
 		createSurface();
 		pickPhysicalDevice();
 		createLogicalDevice();
+		createLogicalDeviceRT();
+
 		createCommandPool();
-		//initRayTracing();
+		initRayTracing();
 		
 	}
 
@@ -63,7 +65,7 @@ namespace VULKAN {
 		vkDestroyCommandPool(device_, commandPool, nullptr);
 
 		deletionQueue.flush();
-
+		vkDeviceWaitIdle(device_);
 		vkDestroyDevice(device_, nullptr);
 
 		if (enableValidationLayers) {
@@ -427,7 +429,8 @@ namespace VULKAN {
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags properties,
 		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory) {
+		VkDeviceMemory& bufferMemory,
+		VkMemoryAllocateFlagBits allocateFlags) {
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = size;
@@ -441,9 +444,17 @@ namespace VULKAN {
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device_, buffer, &memRequirements);
 
+		VkMemoryAllocateFlagsInfo memoryAllocateFlagsInfo{};
+		memoryAllocateFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		memoryAllocateFlagsInfo.flags = allocateFlags;
+
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
+		if (allocateFlags!= VK_MEMORY_ALLOCATE_FLAG_BITS_MAX_ENUM)
+		{
+			allocInfo.pNext = &memoryAllocateFlagsInfo;
+		}
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
 		if (vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
@@ -778,7 +789,7 @@ namespace VULKAN {
 		QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily, indices.presentFamily };
+		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsAndComputeFamily, indices.presentFamily };
 
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies) {
@@ -790,6 +801,7 @@ namespace VULKAN {
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
+	
 		VkPhysicalDeviceFeatures deviceFeatures = {};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -804,13 +816,22 @@ namespace VULKAN {
 		// Link feature structures
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelFeature = {
 			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR,
-			nullptr
+			nullptr,
+			VK_TRUE,
 		};
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR rtPipelineFeature = {
 			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR,
 			&accelFeature,
+			VK_TRUE
 		};
-		createInfo.pNext = &rtPipelineFeature;
+		VkPhysicalDeviceBufferAddressFeaturesEXT bufferDeviceAddressFeature = {
+			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES,
+			&rtPipelineFeature,
+			VK_TRUE,
+		};
+
+		
+		createInfo.pNext = &bufferDeviceAddressFeature;
 		
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
@@ -829,7 +850,8 @@ namespace VULKAN {
 			throw std::runtime_error("failed to create logical device!");
 		}
 
-		vkGetDeviceQueue(device_, indices.graphicsFamily, 0, &graphicsQueue_);
+		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &graphicsQueue_);
+		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &computeQueue_);
 		vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
 	}
 

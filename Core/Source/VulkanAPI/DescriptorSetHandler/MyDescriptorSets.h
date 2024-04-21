@@ -41,10 +41,38 @@ namespace VULKAN
             myDevice(myVkDevice)
         {
         }
-        ~MyDescriptorSets();
+        //~MyDescriptorSets()=delete;
 
 
 //NEW ABSTRACTED FUNCTIONS
+    	void CreateDeletors()
+        {
+            for (size_t i = 0; i < descriptorData.size(); i++) {
+                for (size_t j = 0; j < 2; j++) {
+                    if (descriptorData[i].uniformBuffers.size() != 0)
+                    {
+                        myDevice.deletionQueue.push_function([this, i, j]()
+                            {
+                                vkDestroyBuffer(myDevice.device(), descriptorData[i].uniformBuffers[j], nullptr);
+                            });
+                        myDevice.deletionQueue.push_function([this, i, j]()
+                            {
+                                vkFreeMemory(myDevice.device(), descriptorData[i].uniformBuffersMemory[j], nullptr);
+                            });
+                    }
+                }
+            }
+          //  myDevice.deletionQueue.push_function([this]() {vkDestroyDescriptorPool(myDevice.device(), descriptorPool, nullptr);});
+            for (size_t i = 0; i < descriptorSetLayout.size(); i++)
+            {
+                myDevice.deletionQueue.push_function([this, i]()
+                    {
+                        if (descriptorSetLayout[i] == nullptr)return;
+                        vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout[i], nullptr);
+                    });
+            }
+
+        }
         template<std::size_t N>
         void CreateLayoutBinding(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int DescriptorSetCount);
 
@@ -70,7 +98,7 @@ namespace VULKAN
         template <typename BufferObject, std::size_t N>
         void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
         template <typename BufferObject, std::size_t N>
-        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture,VKTexture& texture2, VkDescriptorType descriptorType);
+        void CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,VKTexture& texture,VKTexture& texture2,VKTexture& texture3, VkDescriptorType descriptorType);
 
     	void CreateDescriptorSets(int descriptorCount, int maxFramesInFlight);
 
@@ -217,14 +245,14 @@ namespace VULKAN
 
             vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
         }
-
+        CreateDeletors();
     }
 
 
 
     template <typename BufferObject, std::size_t N>
     void MyDescriptorSets::CreateDescriptorSets(std::array<VkDescriptorSetLayoutBinding, N> bindings, int descriptorCount, int maxFramesInFlight,
-        VKTexture& texture,VKTexture& texture2, VkDescriptorType descriptorType)
+        VKTexture& texture,VKTexture& texture2,VKTexture& texture3, VkDescriptorType descriptorType)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
         VkDescriptorSetAllocateInfo allocInfo{};
@@ -258,6 +286,10 @@ namespace VULKAN
             imageInfo2.imageView = texture2.textureImageView;
             imageInfo2.sampler = texture2.textureSampler;
 
+            VkDescriptorImageInfo imageInfo3{};
+            imageInfo3.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo3.imageView = texture3.textureImageView;
+            imageInfo3.sampler = texture3.textureSampler;
 
 
             descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -291,6 +323,17 @@ namespace VULKAN
             descriptorWrite[2].pImageInfo = &imageInfo2;
             descriptorWrite[2].pTexelBufferView = nullptr; // Optional
                        
+            descriptorWrite[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite[3].dstSet = descriptorData[descriptorCount - 1].descriptorSets[i];
+            descriptorWrite[3].dstBinding = 3;
+            descriptorWrite[3].dstArrayElement = 0;
+            descriptorWrite[3].pBufferInfo = &bufferInfo;
+            descriptorWrite[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrite[3].descriptorCount = descriptorCount;
+            descriptorWrite[3].pImageInfo = &imageInfo3;
+            descriptorWrite[3].pTexelBufferView = nullptr; // Optional
+                       
+
 
             
 

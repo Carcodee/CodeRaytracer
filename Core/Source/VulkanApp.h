@@ -13,6 +13,7 @@
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include <functional>
 #include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
+#include "VulkanAPI/RenderSystems/RayTracing_RS.h"
 
 
 namespace VULKAN {
@@ -50,6 +51,7 @@ namespace VULKAN {
 		VulkanRenderer renderer{ initWindow , myDevice };
 		Forward_RS forward_RS{renderer, myDevice};
 		ImguiRenderSystem imgui_RS{ renderer, myDevice };
+		RayTracing_RS rayTracing_RS{ myDevice, renderer};
 		std::unique_ptr<MyModel> myModel;
 		int currentFrame;
 
