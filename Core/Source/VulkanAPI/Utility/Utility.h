@@ -16,17 +16,29 @@
 namespace VULKAN{
 
 
-		//std::vector<MyModel::Vertex> GetVertexPosForRecursiveTriangles(std::vector<MyModel::Vertex> vertices,int maxDeepness);
-
-		//std::vector<MyModel::triangle> FindTriangles(std::vector<MyModel::triangle> myTriangle, int deep, int& currentDeppness);
-		//std::vector<MyModel::triangle> FindTriMidPoint(MyModel::triangle myTriangle);
-		//std::vector<MyModel::Vertex> GetAllVertexFlatten(std::vector<MyModel::triangle> triangles);
-
+		struct SimpleVertex
+		{
+			glm::vec3 pos;
+			glm::vec2 textCoord;
+		};
+		struct VerticesAndIndices 
+		{
+			std::vector <Vertex> vertices;
+			std::vector<uint32_t> indices;
+		};
 		uint32_t alignedSize(uint32_t value, uint32_t alignment);
 		size_t alignedSize(size_t value, size_t alignment);
 		VkDeviceSize alignedVkSize(VkDeviceSize value, VkDeviceSize alignment);
 
+		struct DescriptorData
+		{
+			VkDescriptorSet descriptor;
+			VkDescriptorSetLayout descriptorSetLayout;
+			std::vector<VkDescriptorPoolSize>poolSizes;
+		};
+
 		//FROM SASCHA WILLEMS INITIALIZERS LIBRARY
+
 
 
 		namespace INITIALIZERS {

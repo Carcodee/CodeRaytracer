@@ -121,6 +121,7 @@ namespace VULKAN {
 		bindings[4] = computeRenderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, 4, 1);
 
 		computeRenderSystemDescriptorSetHandler->CreateLayoutBinding(bindings, 1);
+
 		computeRenderSystemDescriptorSetHandler->CreateDescriptorPool(bindings, renderer.GetMaxRenderInFlight(), VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
 		computeRenderSystemDescriptorSetHandler->CreateDescriptorSets(1, renderer.GetMaxRenderInFlight());
 

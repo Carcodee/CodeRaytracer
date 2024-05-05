@@ -33,7 +33,13 @@ namespace VULKAN
 		vpImageView= myRenderer.GetSwapchain().colorImageView;
 
 		CreatePipelineLayout();
-		CreateImguiImage(viewportSampler, vpImageView);
+
+		CreateImguiImage(viewportSampler, vpImageView, vpDescriptorSet);
+
+		for (auto& image : imagesToCreate)
+		{
+			AddImage(image.sampler, image.imageView, image.descriptor);
+		}
 		CreatePipeline();
 
 		myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
@@ -53,10 +59,6 @@ namespace VULKAN
 		//			});
 		//	}
 		//}
-		myDevice.deletionQueue.push_function([this]()
-			{
-				vkDestroyDescriptorSetLayout(myDevice.device(), vpDescriptorSetLayout, nullptr);
-			});
 		myDevice.deletionQueue.push_function([this]()
 			{
 				vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
@@ -112,10 +114,10 @@ namespace VULKAN
 			poolSize[i].type = descriptorSetLayoutBindings[i].descriptorType;
 			if (poolSize[i].type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			{
-				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()) * 2;
+				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
 				continue;
 			}
-			poolSize[i].descriptorCount = static_cast<uint32_t>((myRenderer.GetMaxRenderInFlight()));
+			poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
 
 		}
 		VkDescriptorPoolCreateInfo poolInfo{};
@@ -123,7 +125,7 @@ namespace VULKAN
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
 		poolInfo.pPoolSizes = poolSize.data();
-		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()*2);
+		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()*(imagesToCreate.size()+2));
 		vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &imguiPool);
 
 		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
@@ -132,18 +134,20 @@ namespace VULKAN
 		allocInfo.descriptorPool = imguiPool;
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
 		allocInfo.pSetLayouts = layouts.data();
-		VkDescriptorSetAllocateInfo vpAllocInfo{};
-		vpAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		vpAllocInfo.descriptorPool = imguiPool;
-		vpAllocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-		vpAllocInfo.pSetLayouts = layouts.data();
 		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
-		if (vkAllocateDescriptorSets(myDevice.device(), &vpAllocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
+		}
+		for (auto& descriptor : imagesToCreate)
+		{
+			if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptor.descriptor) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to allocate descriptor sets!");
+			}
 		}
 		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
 		{
@@ -204,21 +208,8 @@ namespace VULKAN
 			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
 			pipelineConfig);
 	}
-	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView)
+	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor)
 	{
-
-
-		//std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
-		//VkDescriptorSetAllocateInfo allocInfo{};
-		//allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		//allocInfo.descriptorPool = imguiPool;
-		//allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-		//allocInfo.pSetLayouts = layouts.data();
-
-		//if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
-		//{
-		//	throw std::runtime_error("failed to allocate descriptor sets!");
-		//}
 
 		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
 		{
@@ -232,7 +223,7 @@ namespace VULKAN
 			imageInfo.sampler = imageSampler;
 
 			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = vpDescriptorSet;
+			descriptorWrite[0].dstSet = descriptor;
 			descriptorWrite[0].dstBinding = 0;
 			descriptorWrite[0].dstArrayElement = 0;
 			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -293,6 +284,19 @@ namespace VULKAN
 		fontTexture->CreateImageFromSize(uploadSize, fontData, texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateImageViews(VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateTextureSample();
+	}
+
+	void ImguiRenderSystem::AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor)
+	{
+		CreateImguiImage(sampler, image, descriptor);
+	}
+
+	void ImguiRenderSystem::AddSamplerAndViewForImage(VkSampler sampler, VkImageView view)
+	{
+		VkDescriptorSet newSet{};
+		ImguiImageInfo image{sampler,view, newSet};
+		
+		imagesToCreate.push_back(image);	
 	}
 
 	void ImguiRenderSystem::DrawFrame(VkCommandBuffer commandBuffer)
@@ -406,6 +410,10 @@ namespace VULKAN
 		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 		ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
+		for (auto& imageDescriptorSet : imagesToCreate)
+		{
+			ImGui::Image((ImTextureID)imageDescriptorSet.descriptor, ImVec2(viewportSize.x, viewportSize.y));
+		}
 
 		ImGui::End(); // End DockSpace Demo window
 		// Make the window full-screen and set the dock space
@@ -413,6 +421,8 @@ namespace VULKAN
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
 		
+		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
+		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, 0.0f, 10.0f, "%.3f");
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background

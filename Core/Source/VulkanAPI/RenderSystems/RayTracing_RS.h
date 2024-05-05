@@ -6,6 +6,7 @@
 #include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
 #include "VulkanAPI/Utility/Utility.h"
+#include "VulkanAPI/Camera/Camera.h"
 namespace VULKAN {
 	// Holds data for a ray tracing scratch buffer that is used as a temporary storage
 	struct RayTracingScratchBuffer
@@ -27,7 +28,12 @@ namespace VULKAN {
 	class RayTracing_RS
 	{
 	public:
-
+		struct BottomLevelObj
+		{
+			std::vector<Vertex>vertices;
+			std::vector<uint32_t>indices;
+			VkTransformMatrixKHR matrix;
+		}bottomLevelObj;
 		RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer);
 
 		PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR;
@@ -44,9 +50,11 @@ namespace VULKAN {
 		bool readyToDraw = false;
 
 		VKTexture* storageImage;
+		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
 		void TransitionStorageImage();
+
 	private:
 		struct UniformData {
 			glm::mat4 viewInverse;
@@ -54,23 +62,28 @@ namespace VULKAN {
 		} uniformData;
 
 
+
 		//helpers
+		void SetupBottomLevelObj();
 		void LoadFunctionsPointers();
+		void UpdateUniformbuffers();
 		RayTracingScratchBuffer CreateScratchBuffer(VkDeviceSize size);
 		void DeleteScratchBuffer(RayTracingScratchBuffer& scratchBuffer);
 		void CreateAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
 		void CreateStorageImage();
 		void CreateBottomLevelAccelerationStructure();
+		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
 		void CreateTopLevelAccelerationStructure();
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
 		void CreateUniformBuffer();
-		void UpdateUniformbuffers();
+		uint32_t GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset, uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride);
 
 		VulkanRenderer& myRenderer;
 		MyVulkanDevice& myDevice;
+		ModelLoaderHandler modelLoader{ myDevice };
 
 		AccelerationStructure bottomLevelAS{};
 		AccelerationStructure topLevelAS{};

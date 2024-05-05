@@ -6,6 +6,8 @@
 #include <vector>
 #include "VulkanAPI/VulkanObjects/ResourceInterface/IResource.h"
 #include <stdlib.h>
+#include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
+#include "VulkanAPI/Utility/Globals.h"
 static void check_vk_result(VkResult err)
 {
     if (err == 0)
@@ -83,6 +85,8 @@ class MyVulkanDevice {
       VkDeviceMemory &bufferMemory,
       VkMemoryAllocateFlagBits allocateFlags=  VK_MEMORY_ALLOCATE_FLAG_BITS_MAX_ENUM);
 
+    //sasha buffer creation
+  void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, Buffer* buffer, VkDeviceSize size, void* data=nullptr);
   VkCommandBuffer beginSingleTimeCommands();
   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);

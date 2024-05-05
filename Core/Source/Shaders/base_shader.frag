@@ -18,7 +18,8 @@ void main() {
 	vec4 raytracingTex= texture(raytracingImage, textCoord);
 	//outColor = particles + modelTex;
 
-	outColor = raytracingTex+ modelTex;
+//	outColor = raytracingTex+ modelTex;
 	//outColor= texture(texSampler, textCoord);
 
+	outColor = vec4(textCoord,0.0,1.0);
 }

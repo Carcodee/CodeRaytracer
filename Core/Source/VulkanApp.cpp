@@ -86,11 +86,21 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
+			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
+			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
+			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			rayTracing_RS.cam.UpdateCamera();
 
+
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
+
 				rayTracing_RS.DrawRT(commandBuffer);
+				
 				forward_RS.TransitionBeforeComputeRender(renderer.GetCurrentFrame());
 
 				if (cicles==3)
@@ -173,7 +183,9 @@ namespace VULKAN{
 		LoadModels();
 		InitConfigsCache();
 		SetUpImgui();
+		imgui_RS.AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
 		imgui_RS.SetUpSystem(initWindow.window);
+
 		
 	}
 

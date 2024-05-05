@@ -5,6 +5,7 @@
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
 #include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
 #include <unordered_map>
+#include "VulkanAPI/Utility/Utility.h"
 
 #include <vector>
 #include <string>
@@ -18,6 +19,7 @@ namespace VULKAN{
 
 
 		VKBufferHandler* LoadModelTinyObject(std::string path);
+		VerticesAndIndices GetModelVertexAndIndicesTinyObject(std::string path);
 		MyVulkanDevice& myDevice;
 
 

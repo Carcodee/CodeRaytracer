@@ -17,6 +17,12 @@ namespace VULKAN
 {
 	class ImguiRenderSystem
 	{
+		struct ImguiImageInfo 
+		{
+			VkSampler sampler;
+			VkImageView imageView;
+			VkDescriptorSet descriptor;
+		};
 	public:
 
 		struct MyPushConstBlock {
@@ -41,10 +47,8 @@ namespace VULKAN
 			this->vertexCount= other.vertexCount;
 			this->indexCount= other.indexCount;
 			this->myWindow= other.myWindow;
-			this->vpDescriptorSetLayoutBindings= std::move(other.vpDescriptorSetLayoutBindings);
 			this->viewportSampler= other.viewportSampler;
 			this->vpDescriptorSet= other.vpDescriptorSet;
-			this->vpDescriptorSetLayout= other.vpDescriptorSetLayout;
 			this->pipelineReader= std::move(other.pipelineReader);
 			return *this;
 		}
@@ -60,9 +64,11 @@ namespace VULKAN
 		void WasWindowResized();
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
-		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView);
+		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor);
 		bool transitionImage= false;
 
+		void AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor);
+		void AddSamplerAndViewForImage(VkSampler sampler, VkImageView view);
 
 		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
@@ -73,11 +79,15 @@ namespace VULKAN
 
 		bool show_demo_window = true;
 		float RotationSpeed=1.0f;
+		float camPos[3] = { 0.0f, 4.0f, 0.0f };
+		float modelCamPos[3] = { 1.0f, 1.0f, 1.5f };
 	private:
 		void SetStyle(uint32_t index);
 
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		std::vector<ImguiImageInfo> imagesToCreate;
 		VkDescriptorSetLayout descriptorSetLayout;
+		VkDescriptorSet vpDescriptorSet;
 		VkDescriptorSet descriptorSets;
 		VkDescriptorPool imguiPool;
 		std::vector<VkBuffer> uniformBuffers;
@@ -95,10 +105,9 @@ namespace VULKAN
 		
 
 		//Viewport
-		std::vector<VkDescriptorSetLayoutBinding> vpDescriptorSetLayoutBindings;
-		VkDescriptorSet vpDescriptorSet;
-		VkDescriptorSetLayout vpDescriptorSetLayout;
 		
+
+
 	};
 
 

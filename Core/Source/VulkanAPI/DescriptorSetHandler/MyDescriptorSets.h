@@ -10,6 +10,8 @@
 #include <memory>
 #include <array>
 
+#include "VulkanAPI/Camera/Camera.h"
+
 namespace VULKAN
 {
     struct UniformBufferObjectData {
@@ -77,17 +79,6 @@ namespace VULKAN
         void CreateLayoutBinding(std::array<VkDescriptorSetLayoutBinding, N>& bindings, int DescriptorSetCount);
 
         VkDescriptorSetLayoutBinding CreateDescriptorBinding(VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, int bindingCount, int descriptorCount);
-
-    	//VkDescriptorSetLayout CreateDescriptorSetLayout(int descriptorCount);
-
-     //   VkDescriptorPool CreateDescriptorPool(int descriptorCount, int maxFramesInFlight);
-
-     //   VkDescriptorSet CreateDescriptorSetsTrue(int descriptorCount, int maxFramesInFlight, VkDescriptorPool pool);
-
-    	//VkDescriptorBufferInfo CreateBufferInfo(int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType);
-
-     //   VkDescriptorImageInfo CreateImageInfo(int descriptorCount, int maxFramesInFlight, VKTexture& texture);
-
 //OLD ABSTRACTED FUNCTIONS
         template<typename BufferObject>
         void CreateUniformBuffers(int descriptorCount, int  MaxFramesInFlight);
@@ -111,7 +102,7 @@ namespace VULKAN
         std::vector <VkDescriptorSetLayout> descriptorSetLayout;
         VkDescriptorPool descriptorPool;
         std::vector<VkWriteDescriptorSet>descriptorWrite{};
-
+        Camera cam{ glm::vec3(2.0f, 2.0f, 2.0f) };
     };
 
 
@@ -190,17 +181,22 @@ namespace VULKAN
         static auto startTime = std::chrono::high_resolution_clock::now();
         auto currentTime = std::chrono::high_resolution_clock::now();
         float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-
         // if (typeid(BufferObject)==typeid(UniformBufferObjectData))
         // {
         BufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f)* speed, glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.projection = glm::perspective(glm::radians(45.0f), 800 / (float)600, 0.1f, 10.0f);
+        ubo.projection[1][1] *= -1;
+
+  
+        cam.currentMode = CameraMode::E_Free;
+        cam.SetPerspective(45.0f, (float)800 / (float)600, 0.1f, 512.0f);
+        //cam.position = (glm::vec3(1.5f, 1.5f, 1.0f));
+
+        cam.SetLookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+        ubo.view = cam.matrices.view;
+        ubo.projection = cam.matrices.perspective;
         ubo.projection[1][1] *= -1;
         // }
-
 
         memcpy(descriptorData[descriptorCount - 1].uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
     }

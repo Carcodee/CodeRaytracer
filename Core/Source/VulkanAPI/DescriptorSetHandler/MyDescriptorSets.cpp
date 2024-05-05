@@ -20,30 +20,6 @@ namespace VULKAN
         return layoutBinding;
     }
 
-    //VkDescriptorSetLayout MyDescriptorSets::CreateDescriptorSetLayout(int descriptorCount)
-    //{
-    //}
-
-    //VkDescriptorPool MyDescriptorSets::CreateDescriptorPool(int descriptorCount, int maxFramesInFlight)
-    //{
-    //}
-
-    //VkDescriptorSet MyDescriptorSets::CreateDescriptorSetsTrue(int descriptorCount, int maxFramesInFlight,
-	   // VkDescriptorPool pool)
-    //{
-    //}
-
-
-    //VkDescriptorBufferInfo MyDescriptorSets::CreateBufferInfo(int descriptorCount, int maxFramesInFlight, VkDescriptorType descriptorType)
-    //{
-    //}
-
-    //VkDescriptorImageInfo MyDescriptorSets::CreateImageInfo(int descriptorCount, int maxFramesInFlight,
-	   // VKTexture& texture)
-    //{
-
-    //}
-
     void MyDescriptorSets::CreateDescriptorSets(int descriptorCount, int maxFramesInFlight)
     {
         std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout[descriptorCount - 1]);
