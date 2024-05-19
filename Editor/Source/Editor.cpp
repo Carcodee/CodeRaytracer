@@ -18,9 +18,8 @@ void ImguiContext() {
 
 }
 int main() {
-    VULKAN::VulkanApp app;
-
-    app.RunEngine_EDITOR(ImguiContext);
+    VULKAN::VulkanApp app(true);
+    app.RunDynamicRendering(ImguiContext);
 
 	return 0;
 } 

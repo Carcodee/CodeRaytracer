@@ -7,6 +7,8 @@
 #include "VulkanAPI/VulkanPipeline/PipelineReader.h"
 #include "VulkanAPI/Utility/Utility.h"
 #include "VulkanAPI/Camera/Camera.h"
+#include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
+#include <random>
 namespace VULKAN {
 	// Holds data for a ray tracing scratch buffer that is used as a temporary storage
 	struct RayTracingScratchBuffer
@@ -33,7 +35,45 @@ namespace VULKAN {
 			std::vector<Vertex>vertices;
 			std::vector<uint32_t>indices;
 			VkTransformMatrixKHR matrix;
+			std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
+			AccelerationStructure BottomLevelAs;
+
+			glm::vec3 pos;
+			glm::vec3 rot;
+			glm::vec3 scale;
+			void UpdateMatrix(){
+				matrix = {
+			scale.x, 0.0f, 0.0f, pos.x,
+			0.0f, scale.y, 0.0f, pos.y,
+			0.0f, 0.0f, -scale.z,pos.z};
+			}
+
+			int bottomLevelId=0;
 		}bottomLevelObj;
+
+		struct TopLevelObj
+		{
+			std::vector<Vertex>vertices;
+			std::vector<uint32_t>indices;
+
+			VkTransformMatrixKHR matrix;
+			AccelerationStructure TopLevelAsData;
+			std::vector < BottomLevelObj*> bottomLevelObjRef;
+			
+			glm::vec3 pos;
+			glm::vec3 rot;
+			glm::vec3 scale;
+			int topLevelInstanceCount = 1;
+			int TLASID = 0;
+			void UpdateMatrix(){
+				matrix = {
+			scale.x, 0.0f, 0.0f, pos.x,
+			0.0f, scale.y, 0.0f, pos.y,
+			0.0f, 0.0f, -scale.z,pos.z};
+			}
+		}topLevelObjBase;
+
+
 		RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer);
 
 		PFN_vkGetBufferDeviceAddressKHR vkGetBufferDeviceAddressKHR;
@@ -72,9 +112,8 @@ namespace VULKAN {
 		void CreateAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
 		void CreateStorageImage();
-		void CreateBottomLevelAccelerationStructure();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
-		void CreateTopLevelAccelerationStructure();
+		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
@@ -85,8 +124,8 @@ namespace VULKAN {
 		MyVulkanDevice& myDevice;
 		ModelLoaderHandler modelLoader{ myDevice };
 
-		AccelerationStructure bottomLevelAS{};
-		AccelerationStructure topLevelAS{};
+		//AccelerationStructure bottomLevelAS{};
+		//AccelerationStructure topLevelAS{};
 		
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
 		VkPhysicalDeviceRayTracingPipelinePropertiesKHR  rayTracingPipelineProperties{};

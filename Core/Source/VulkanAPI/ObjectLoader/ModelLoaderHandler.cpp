@@ -3,6 +3,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 
 namespace VULKAN {
+
 	ModelLoaderHandler::ModelLoaderHandler(MyVulkanDevice& device) : myDevice{device}
 	{
 	}

@@ -49,6 +49,7 @@ public:
 	VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 	VkResult submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
+	void HandleColorImage(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer, VkPipelineStageFlagBits sourceStageFlags,VkPipelineStageFlagBits dstStageFlags,VkAccessFlagBits accessMask,VkAccessFlagBits dstAccessMask=VK_ACCESS_NONE);
 	void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
 	, VkImage& image, VkDeviceMemory& imageMemory);
 	size_t currentFrame = 0;
@@ -101,7 +102,7 @@ private:
 	std::vector<VkDeviceMemory> depthImageMemorys;
 	std::vector<VkImageView> depthImageViews;
 
-	bool activateMsaa=true;
+	bool activateMsaa=false;
 
 
 	MyVulkanDevice &device;

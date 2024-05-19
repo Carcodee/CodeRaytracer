@@ -92,7 +92,7 @@ namespace VULKAN {
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "No Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_0;
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -146,6 +146,8 @@ namespace VULKAN {
 
 		vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 		std::cout << "physical device: " << properties.deviceName << std::endl;
+		std::cout << "physical version: " << properties.apiVersion << std::endl;
+		
 	}
 
 	void MyVulkanDevice::createLogicalDevice() {
@@ -647,6 +649,24 @@ namespace VULKAN {
 			destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ) {
+
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+		}
 		else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
 
 			barrier.srcAccessMask = 0;
@@ -879,9 +899,19 @@ namespace VULKAN {
 			&rtPipelineFeature,
 			VK_TRUE,
 		};
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature={
+			 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+             &bufferDeviceAddressFeature,
+			 VK_TRUE,
+		};
+		VkPhysicalDeviceScalarBlockLayoutFeatures scalarBlockLayoutFeatures = {
+			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES,
+			&dynamic_rendering_feature,
+			VK_TRUE,
+		};
 
 		
-		createInfo.pNext = &bufferDeviceAddressFeature;
+		createInfo.pNext = &scalarBlockLayoutFeatures;
 		
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
@@ -911,6 +941,7 @@ namespace VULKAN {
 		VkPhysicalDeviceProperties2 prop2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
 		prop2.pNext = &m_rtProperties;
 		vkGetPhysicalDeviceProperties2(physicalDevice, &prop2);
+
 	}
 
 

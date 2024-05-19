@@ -6,9 +6,9 @@ layout (location = 0) in vec3 myColors;
 layout (location = 1) in vec2 textCoord;
 
 
-layout(set=0 , binding = 1) uniform sampler2D texSampler;
-layout(set=0 , binding = 2) uniform sampler2D particles;
-layout(set=0 , binding = 3) uniform sampler2D raytracingImage;
+layout(set=0, binding = 1) uniform sampler2D texSampler;
+layout(set=0, binding = 2) uniform sampler2D particles;
+layout(set=0, binding = 3) uniform sampler2D raytracingImage;
 
 void main() {
 
@@ -21,5 +21,5 @@ void main() {
 //	outColor = raytracingTex+ modelTex;
 	//outColor= texture(texSampler, textCoord);
 
-	outColor = vec4(textCoord,0.0,1.0);
+	outColor = modelTex;
 }

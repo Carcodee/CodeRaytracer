@@ -12,6 +12,7 @@
 #include "VulkanAPI/RenderSystems/Forward_RS.h"
 #include "VulkanAPI/Renderer/VulkanRenderer.h"
 #include <functional>
+
 #include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 #include "VulkanAPI/RenderSystems/RayTracing_RS.h"
 
@@ -31,7 +32,7 @@ namespace VULKAN {
 		static constexpr int HEIGHT = 600;
 
 		void Run();
-		VulkanApp();
+		VulkanApp(bool DynamicRendering= false);
 		~VulkanApp();
 		void InitConfigsCache();
 	
@@ -43,6 +44,7 @@ namespace VULKAN {
 //#ifdef IS_EDITOR
 
 		void RunEngine_EDITOR(std::function<void()>&& editorContext);
+		void RunDynamicRendering(std::function<void()>&& editorContext);
 		VkDescriptorPool imguiDescriptorPool;
 //
 //#endif
@@ -54,7 +56,7 @@ namespace VULKAN {
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
 		std::unique_ptr<MyModel> myModel;
 		int currentFrame;
-
+	    
 	private:
 		float deltaTime = 0.0f;
 		double lastDeltaTime = 0.0f;

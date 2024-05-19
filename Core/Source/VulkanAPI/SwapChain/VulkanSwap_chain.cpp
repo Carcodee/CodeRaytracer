@@ -122,8 +122,6 @@ namespace VULKAN {
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 
-
-
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
@@ -160,8 +158,40 @@ namespace VULKAN {
 		return result;
 	}
 
+	void VulkanSwapChain::HandleColorImage(VkImage image, 
+		VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer, 
+		VkPipelineStageFlagBits srcStageFlags,VkPipelineStageFlagBits dstStageFlags,
+		VkAccessFlagBits accessMask,VkAccessFlagBits dstAccessMask)
+	{
+		
+		VkImageMemoryBarrier newBarrier = {};
+		newBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		newBarrier.srcAccessMask = accessMask;
+		newBarrier.dstAccessMask = dstAccessMask;
+		newBarrier.oldLayout = oldLayout;
+		newBarrier.newLayout = newLayout;
+		newBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		newBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		newBarrier.image = image;
+		newBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		newBarrier.subresourceRange.baseMipLevel = 0;
+		newBarrier.subresourceRange.levelCount = 1;
+		newBarrier.subresourceRange.baseArrayLayer = 0;
+		newBarrier.subresourceRange.layerCount = 1;
+
+		vkCmdPipelineBarrier(
+			commandBuffer,
+			srcStageFlags,
+			dstStageFlags,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &newBarrier
+		);
+	}
+
 	void VulkanSwapChain::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples,
-		VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+	                                  VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 	{
 		VkImageCreateInfo imageInfo{};
 
@@ -349,7 +379,6 @@ namespace VULKAN {
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = findDepthFormat();
 		depthAttachment.samples = device.msaaSamples;
@@ -398,14 +427,13 @@ namespace VULKAN {
 		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
 		dependency.dstSubpass = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
 
 		std::vector<VkAttachmentDescription> attachments = { colorAttachment ,depthAttachment };
 		if (activateMsaa)
 		{
-
 			attachments = { colorAttachment,depthAttachment,colorAttachmentResolve };
 		}
 		VkRenderPassCreateInfo renderPassInfo = {};
@@ -618,12 +646,6 @@ namespace VULKAN {
 		colorImageView = CreateImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
 		VkFormat UIFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		//CreateImage(swapChainExtent.width, swapChainExtent.height, 1, device.msaaSamples, UIFormat,
-		//    VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		//    colorUIImages, colorUIImagesMemory);
-
-		//device.TransitionImageLayout(colorUIImages, UIFormat, 1, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
 		colorUIImageView.resize(colorUIImages.size());
 		for (int i = 0; i < colorUIImages.size(); i++)
 		{

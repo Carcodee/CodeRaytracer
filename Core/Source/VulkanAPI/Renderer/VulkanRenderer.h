@@ -40,6 +40,9 @@ namespace VULKAN{
 
 			void BeginUIRenderPass(VkCommandBuffer commandBuffer);
 			void EndUIRenderPass(VkCommandBuffer commandBuffer);
+
+			void BeginDynamicRenderPass(VkCommandBuffer commandBuffer, VkRenderingInfo& renderPass);
+			void EndDynamicRenderPass(VkCommandBuffer commandBuffer);
 			VkRenderPass GetSwapchainRenderPass() const { return swapChain->getRenderPass(); }
 			bool isFrameInProgress()const { return isFrameStarted; }
 
@@ -56,6 +59,7 @@ namespace VULKAN{
 			VulkanSwapChain& GetSwapchain(){ return *swapChain;}
             
 
+			uint32_t currentImageIndex=0;
 		private:
 			void CreateCommandBuffer();
 			void FreeCommandBuffers();
@@ -64,7 +68,6 @@ namespace VULKAN{
 			friend class RayTracing_RS;
 
 
-			uint32_t currentImageIndex=0;
 			bool isFrameStarted=false;
 
 			VulkanInit& initWindow;

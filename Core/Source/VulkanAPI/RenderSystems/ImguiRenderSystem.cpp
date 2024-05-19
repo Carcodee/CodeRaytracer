@@ -9,9 +9,6 @@ namespace VULKAN
 	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer& renderer, MyVulkanDevice& device ) : myRenderer(renderer) ,myDevice(device) 
 	{
 
-		//TODO: Fonts texture
-		//TODO: Vertex buffer
-		//TODO: Push constants
 	}
 
 	ImguiRenderSystem::~ImguiRenderSystem()
@@ -25,6 +22,7 @@ namespace VULKAN
 		
 		vertexBuffer.device = myDevice.device();
 		indexBuffer.device = myDevice.device();
+
 		InitImgui();
 		CreateFonts();
 		SetImgui(window);
@@ -178,6 +176,12 @@ namespace VULKAN
 	}
 	void ImguiRenderSystem::CreatePipeline()
 	{
+		 VkFormat format = myRenderer.GetSwapchain().getSwapChainImageFormat();
+		const VkPipelineRenderingCreateInfoKHR pipeline_rendering_create_info{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+			.colorAttachmentCount = 1,
+			.pColorAttachmentFormats =&format,
+		};
 		VkPushConstantRange pushConstantRange = {};
 
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // The pipeline shader stages that will access the push constant range.
@@ -206,7 +210,8 @@ namespace VULKAN
 		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
 			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
 			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
-			pipelineConfig);
+			pipelineConfig, UseDynamicRendering, pipeline_rendering_create_info);
+		std::cout << "You are using dynamic rendering" << "\n";
 	}
 	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor)
 	{

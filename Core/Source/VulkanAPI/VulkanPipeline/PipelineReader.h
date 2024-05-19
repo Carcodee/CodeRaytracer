@@ -51,7 +51,7 @@ namespace VULKAN{
 		static VkPipelineShaderStageCreateInfo CreateComputeStageModule(VkShaderModule& module, MyVulkanDevice& device, const std::string& shaderPath);
 
 		template <typename VertexData>
-		void CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+		void CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo, bool DynamicRendering= false, VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo = {});
 	
 	
 	private:
@@ -76,7 +76,7 @@ namespace VULKAN{
 
 	template <typename VertexData>
 	void PipelineReader::CreateFlexibleGraphicPipeline(const std::string& vertFilepath, const std::string& fragFilepath,
-		const PipelineConfigInfo& configInfo)
+		const PipelineConfigInfo& configInfo, bool DynamicRendering, VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo)
 	{
 
 
@@ -143,6 +143,11 @@ namespace VULKAN{
 
 		pipelineInfo.layout = configInfo.pipelineLayout;
 		pipelineInfo.renderPass = configInfo.renderPass;
+		if (DynamicRendering)
+		{
+			pipelineInfo.renderPass = VK_NULL_HANDLE;
+			pipelineInfo.pNext = &pipelineRenderingInfo;
+		}
 		pipelineInfo.subpass = configInfo.subpass;
 
 		pipelineInfo.basePipelineIndex = -1;

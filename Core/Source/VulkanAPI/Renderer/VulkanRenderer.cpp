@@ -269,4 +269,16 @@ namespace VULKAN {
 		{
 			vkCmdEndRenderPass(commandBuffer);
 		}
+
+		void VulkanRenderer::BeginDynamicRenderPass(VkCommandBuffer commandBuffer, VkRenderingInfo& renderPass)
+		{
+
+			vkCmdBeginRendering(commandBuffer, &renderPass);
+		}
+
+		void VulkanRenderer::EndDynamicRenderPass(VkCommandBuffer commandBuffer)
+		{
+
+			vkCmdEndRendering(commandBuffer);
+		}
 }
