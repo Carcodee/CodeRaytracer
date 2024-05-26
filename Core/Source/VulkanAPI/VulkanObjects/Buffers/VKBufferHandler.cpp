@@ -81,7 +81,7 @@ namespace VULKAN {
 	}
 	std::vector<VkVertexInputAttributeDescription> Vertex::GetAttributeDescription()
 	{
-		std::vector<VkVertexInputAttributeDescription>attributeDescription(3);
+		std::vector<VkVertexInputAttributeDescription>attributeDescription(4);
 		attributeDescription[0].binding = 0;
 		attributeDescription[0].location = 0;
 		attributeDescription[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -92,15 +92,57 @@ namespace VULKAN {
 		attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescription[1].offset = offsetof(Vertex, color);
 
-
 		attributeDescription[2].binding = 0;
 		attributeDescription[2].location = 2;
-		attributeDescription[2].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescription[2].offset = offsetof(Vertex, texCoord);
+		attributeDescription[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescription[2].offset = offsetof(Vertex, normal);
+
+		attributeDescription[3].binding = 0;
+		attributeDescription[3].location = 3;
+		attributeDescription[3].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescription[3].offset = offsetof(Vertex, texCoord);
 
 		return attributeDescription;
 
 	}
+
+	std::vector<VkVertexInputBindingDescription> GLTFVertex::GetBindingDescription()
+	{
+		std::vector<VkVertexInputBindingDescription> bindingDescription(1);
+		bindingDescription[0].binding = 0;
+		bindingDescription[0].stride = sizeof(GLTFVertex);
+		bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		return bindingDescription;
+	}
+
+	std::vector<VkVertexInputAttributeDescription> GLTFVertex::GetAttributeDescription()
+	{
+		std::vector<VkVertexInputAttributeDescription>attributeDescription(4);
+		attributeDescription[0].binding = 0;
+		attributeDescription[0].location = 0;
+		attributeDescription[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescription[0].offset = offsetof(GLTFVertex, position);
+
+		attributeDescription[1].binding = 0;
+		attributeDescription[1].location = 1;
+		attributeDescription[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescription[1].offset = offsetof(GLTFVertex, normal);
+
+		attributeDescription[1].binding = 0;
+		attributeDescription[1].location = 2;
+		attributeDescription[1].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescription[1].offset = offsetof(GLTFVertex, uv);
+
+		attributeDescription[2].binding = 0;
+		attributeDescription[2].location = 3;
+		attributeDescription[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescription[2].offset = offsetof(GLTFVertex, color);
+
+		return attributeDescription;
+
+
+	}
+
 	std::vector<VkVertexInputBindingDescription> UIVertex::GetBindingDescription()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescription(1);

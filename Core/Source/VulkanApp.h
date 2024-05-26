@@ -32,7 +32,7 @@ namespace VULKAN {
 		static constexpr int HEIGHT = 600;
 
 		void Run();
-		VulkanApp(bool DynamicRendering= false);
+		VulkanApp(bool DynamicRendering, bool editor);
 		~VulkanApp();
 		void InitConfigsCache();
 	

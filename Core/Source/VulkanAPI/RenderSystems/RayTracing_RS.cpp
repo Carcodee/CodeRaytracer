@@ -237,16 +237,21 @@ namespace VULKAN {
 
 	void RayTracing_RS::CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj)
 	{
-		std::vector<VkAccelerationStructureInstanceKHR> instaces;
-			
+		std::vector<VkAccelerationStructureInstanceKHR> instances;
 
-		VkAccelerationStructureInstanceKHR instance{};
-		instance.transform = topLevelObj.matrix;
-		instance.instanceCustomIndex = topLevelObj.topLevelInstanceCount;
-		instance.mask = 0xFF;
-		instance.instanceShaderBindingTableRecordOffset = 0;
-		instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-		instance.accelerationStructureReference = ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, 0).BottomLevelAs.deviceAddress;
+
+		for (int i= 0;i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObj).size(); i++)
+		{
+			BottomLevelObj objRef = ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObj, i);
+			VkAccelerationStructureInstanceKHR instance{};
+		    instance.transform = objRef.instanceMatrix;
+		    instance.instanceCustomIndex = 0;
+			instance.mask = 0xFF;	
+			instance.instanceShaderBindingTableRecordOffset = 0;
+			instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+			instance.accelerationStructureReference = objRef.BottomLevelAs.deviceAddress;
+			instances.push_back(instance);
+		}
 
 		Buffer instancesBuffer;
 
@@ -254,8 +259,8 @@ namespace VULKAN {
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			&instancesBuffer,
-			sizeof(VkAccelerationStructureInstanceKHR),
-			&instance);
+			sizeof(VkAccelerationStructureInstanceKHR) *instances.size(),
+			instances.data());
 
 		VkDeviceOrHostAddressConstKHR instanceDataDeviceAddress{};
 		instanceDataDeviceAddress.deviceAddress = getBufferDeviceAddress(instancesBuffer.buffer);
@@ -275,7 +280,7 @@ namespace VULKAN {
 		accelerationStructureBuildGeometryInfo.geometryCount = 1;
 		accelerationStructureBuildGeometryInfo.pGeometries = &accelerationStructureGeometry;
 
-		uint32_t primitive_count = 1;
+		uint32_t primitive_count = static_cast<uint32_t>(instances.size());
 
 		VkAccelerationStructureBuildSizesInfoKHR accelerationStructureBuildSizesInfo{};
 		accelerationStructureBuildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
@@ -372,7 +377,8 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 }
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
 		};
 
 		VKTexture* texture = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", myRenderer.GetSwapchain());
@@ -418,6 +424,10 @@ namespace VULKAN {
 		ubo.descriptor.offset = 0;
 		ubo.descriptor.range = sizeof(UniformData);
 		 
+		lightBuffer.descriptor.buffer = lightBuffer.buffer;
+		lightBuffer.descriptor.offset = 0;
+		lightBuffer.descriptor.range = sizeof(Light);
+		 
 		vertexBuffer.descriptor.buffer = vertexBuffer.buffer;
 		vertexBuffer.descriptor.offset = 0;
 		vertexBuffer.descriptor.range = sizeof(Vertex) * ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase,0).vertices.size();
@@ -432,6 +442,7 @@ namespace VULKAN {
 		VkWriteDescriptorSet textWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3, &roomText);
 		VkWriteDescriptorSet vertexBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4, &vertexBuffer.descriptor);
 		VkWriteDescriptorSet indexBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5, &indexBuffer.descriptor);
+		VkWriteDescriptorSet lightBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6, &lightBuffer.descriptor);
 
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
 			accelerationStructureWrite,
@@ -439,7 +450,8 @@ namespace VULKAN {
 			uniformBufferWrite,
 			textWrite,
 			vertexBufferWrite,
-			indexBufferWrite
+			indexBufferWrite,
+			lightBufferWrite
 		};
 
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
@@ -483,6 +495,13 @@ namespace VULKAN {
 		indexBinding.descriptorCount = 1;
 		indexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
+		VkDescriptorSetLayoutBinding lightBinding{};
+		lightBinding.binding = 6;
+		lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		lightBinding.descriptorCount = 1;
+		lightBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+
+
 
 
 		std::vector<VkDescriptorSetLayoutBinding> bindings({
@@ -491,7 +510,8 @@ namespace VULKAN {
 			uniformBufferBinding,
 			TextureBinding,
 			vertexBinding,
-			indexBinding
+			indexBinding,
+			lightBinding
 			});
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetlayoutCI{};
@@ -584,6 +604,13 @@ namespace VULKAN {
 			sizeof(uniformData),
 			&uniformData);
 		ubo.map();
+		myDevice.createBuffer(
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&lightBuffer,
+			sizeof(light),
+			&light);
+		lightBuffer.map();
 		UpdateUniformbuffers();
 	}
 
@@ -702,7 +729,11 @@ namespace VULKAN {
 
 
 		SetupBottomLevelObj();
-		CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->bottomLevelObjects.at(topLevelObjBase.TLASID)[0]);
+
+		for (int i= 0 ; i <ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
+		{
+			CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
+		}
 		CreateTopLevelAccelerationStructure(topLevelObjBase);
 
 		CreateStorageImage();
@@ -721,6 +752,7 @@ namespace VULKAN {
 		uniformData.viewInverse = glm::inverse(cam.matrices.view);
 
 		memcpy(ubo.mapped, &uniformData,sizeof(UniformData));
+		memcpy(lightBuffer.mapped, &light,sizeof(Light));
 	}
 
 	void RayTracing_RS::TransitionStorageImage()
@@ -774,14 +806,14 @@ namespace VULKAN {
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<>dis(0, 4);
 		topLevelObjBase.pos = glm::vec3(0.0f);
-		topLevelObjBase.scale = glm::vec3(1.0f, 1.0f, -1.0f);
+		topLevelObjBase.scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		topLevelObjBase.UpdateMatrix();
 		ModelHandler::GetInstance()->AddTLAS(topLevelObjBase);
 		for (int i=0; i<3; i++)
 		{
 			float randomPos = dis(gen);
-			positions[i] = glm::vec3(0);
-			rots[i] = glm::vec3(rand() / RAND_MAX);
+			positions[i] = glm::vec3(.0f, i, i);
+			rots[i] = glm::vec3(0);
 			scales[i] = glm::vec3(1.0f);
 			ModelHandler::GetInstance()->CreateBLAS(positions[i], rots[i], scales[i],verticesAndIndices.vertices, verticesAndIndices.indices, topLevelObjBase);
 		}

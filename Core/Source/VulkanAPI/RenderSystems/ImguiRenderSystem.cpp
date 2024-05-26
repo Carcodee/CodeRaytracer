@@ -426,8 +426,14 @@ namespace VULKAN
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
 		
-		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
 		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, 0.0f, 10.0f, "%.3f");
+		ImGui::LabelText("Raytracing", "");
+		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
+		ImGui::LabelText("Light", "");
+		ImGui::SliderFloat3("light Pos", lightPos, -10.0f, 10.0f, "%.3f");
+		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
+		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
+
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background

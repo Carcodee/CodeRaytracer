@@ -8,9 +8,11 @@ hitAttributeEXT vec2 attribs;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
 
+
 struct Vertex {
     vec3 position; 
     vec3 col;
+    vec3 normal;
     vec2 texCoords; 
 };
 
@@ -26,11 +28,26 @@ layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
     Indices indices[];
 };
 
+layout(binding=6) uniform light{
+    vec3 pos;
+    vec3 col;
+    float intensity;
+}myLight;
+
+
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
     float idNormalized = float(primitiveId) / primitiveCount; 
     vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
     return debugColor;
+}
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
+    
+    vec3 dir= fragPos-lightPos; 
+    dir= normalize(dir);
+    float colorShading=max(dot(dir, normal),0.0);
+    return colorShading;
+
 }
 
 void main()
@@ -47,8 +64,15 @@ void main()
   const vec3 barycentricCoords = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
 
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
+  vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
+  vec3 normal= normalize(barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal);
+  
+  float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
 
   vec4 textSample=texture(mySampler,uv);
   vec3 debuging=GetDebugCol(gl_PrimitiveID,  3828.0);
-  hitValue = textSample.xyz;
+  
+
+
+  hitValue = (textSample.xyz * myLight.col) * shadingIntensity * myLight.intensity;
 }

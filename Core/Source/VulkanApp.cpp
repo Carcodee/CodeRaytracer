@@ -10,6 +10,7 @@ namespace VULKAN{
 	
 	void VulkanApp::Run()
 	{
+
 		while (!initWindow.ShouldClose())
 		{
 			glfwPollEvents();
@@ -18,15 +19,24 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
+			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
+			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
+			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			rayTracing_RS.cam.UpdateCamera();
 
+
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
 
+				rayTracing_RS.DrawRT(commandBuffer);
 
 				forward_RS.TransitionBeforeComputeRender(renderer.GetCurrentFrame());
 
-				if (cicles==3)
+				if (cicles == 3)
 				{
 					VkImageSubresourceRange imageSubresourceRange = {};
 					imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -35,7 +45,7 @@ namespace VULKAN{
 					imageSubresourceRange.baseArrayLayer = 0;
 					imageSubresourceRange.layerCount = 1; // Assuming the image is not an array
 					const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
-					vkCmdClearColorImage(commandBuffer, forward_RS.outputStorageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+					vkCmdClearColorImage(commandBuffer, forward_RS.outputStorageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &imageSubresourceRange);
 					cicles = 0;
 				}
 				forward_RS.CreateComputeWorkGroups(renderer.GetCurrentFrame(), commandBuffer);
@@ -44,32 +54,28 @@ namespace VULKAN{
 			}
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
-				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());	
+				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());
+
+				rayTracing_RS.TransitionStorageImage();
+
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
 
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 				myModel->BindVertexBufferIndexed(commandBuffer);
-				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout,forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
+				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout, forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
 				myModel->DrawIndexed(commandBuffer);
 
-				//TEST---------------------
-
 				renderer.EndSwapChainRenderPass(commandBuffer);
+
 				renderer.EndFrame();
 			}
 			deltaTime = (currentTime - lastDeltaTime) * 100.0;
 			lastDeltaTime = currentTime;
 			cicles++;
+
 		}
-
-		//TEST
-		ImGui_ImplVulkan_Shutdown();
-
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-
 		vkDeviceWaitIdle(myDevice.device());
 	}
 //#ifdef IS_EDITOR
@@ -185,6 +191,9 @@ namespace VULKAN{
 			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
 			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
 			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			rayTracing_RS.light.color = glm::make_vec3(imgui_RS.lightCol);
+			rayTracing_RS.light.pos = glm::make_vec3(imgui_RS.lightPos);
+			rayTracing_RS.light.intensity = imgui_RS.lightIntensity;
 			rayTracing_RS.cam.UpdateCamera();
 
 
@@ -303,7 +312,7 @@ namespace VULKAN{
 
 	//#endif
 
-	VulkanApp::VulkanApp(bool DynamicRendering)
+	VulkanApp::VulkanApp(bool DynamicRendering, bool editor)
 	{
 
 		rayTracing_RS.Create_RT_RenderSystem();
@@ -311,10 +320,13 @@ namespace VULKAN{
 		forward_RS.InitForwardSystem();
 		LoadModels();
 		InitConfigsCache();
-		SetUpImgui();
-		imgui_RS.UseDynamicRendering = DynamicRendering;
-		imgui_RS.AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
-		imgui_RS.SetUpSystem(initWindow.window);
+		if (editor)
+		{
+			SetUpImgui();
+			imgui_RS.UseDynamicRendering = DynamicRendering;
+			imgui_RS.AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
+			imgui_RS.SetUpSystem(initWindow.window);
+		}
 
 		
 	}

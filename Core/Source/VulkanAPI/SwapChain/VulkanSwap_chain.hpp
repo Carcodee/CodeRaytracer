@@ -72,6 +72,8 @@ public:
 	VkDeviceMemory colorImageMemory;
 	VkImage colorImage;
 	VkImageView colorImageView;
+
+	bool activateMsaa=false;
 private:
 
 	void Init();
@@ -102,7 +104,6 @@ private:
 	std::vector<VkDeviceMemory> depthImageMemorys;
 	std::vector<VkImageView> depthImageViews;
 
-	bool activateMsaa=false;
 
 
 	MyVulkanDevice &device;

@@ -19,15 +19,20 @@ namespace VULKAN
 		return instance;
 	}
 
-	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,std::vector<Vertex>vertices,std::vector<uint32_t> indices, RayTracing_RS::TopLevelObj TLAS)
+	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,std::vector<Vertex>vertices,std::vector<uint32_t> indices, RayTracing_RS::TopLevelObj& TLAS)
 	{
+			VkTransformMatrixKHR matrix = {
+			1.0f, 0.0f, 0.0f, pos.x,
+			0.0f, 1.0f, 0.0f, pos.y,
+			0.0f, 0.0f, -1.0,pos.z};
 		RayTracing_RS::BottomLevelObj bottomLevelObj{};
 		bottomLevelObj.vertices = vertices;
 		bottomLevelObj.indices = indices;
 		bottomLevelObj.pos = pos;
 		bottomLevelObj.rot = rot;
 		bottomLevelObj.scale = scale;
-		bottomLevelObj.bottomLevelId = bottomLevelObjects.at(TLAS.TLASID).size();
+		bottomLevelObj.matrix = matrix;
+		bottomLevelObj.bottomLevelId = static_cast<int>(bottomLevelObjects.at(TLAS.TLASID).size());
 		bottomLevelObj.UpdateMatrix();
 		bottomLevelObjects.at(TLAS.TLASID).push_back(bottomLevelObj);
 		

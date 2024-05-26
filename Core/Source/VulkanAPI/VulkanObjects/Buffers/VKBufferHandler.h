@@ -14,16 +14,29 @@ namespace VULKAN {
 	struct Vertex {
 		glm::vec3 position;
 		glm::vec3 color;
+		glm::vec3 normal;
 		glm::vec2 texCoord;
 
 		static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
 		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
 
 		bool operator==(const Vertex& other) const {
-			return position == other.position && color == other.color && texCoord == other.texCoord;
+			return position == other.position && color == other.color && texCoord == other.texCoord && normal == other.normal;
 		}
 	};
+	struct GLTFVertex {
+		glm::vec3 position;
+		glm::vec3 normal;
+		glm::vec2 uv;
+		glm::vec3 color;
 
+		static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
+		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
+
+		bool operator==(const GLTFVertex& other) const {
+			return position == other.position && color == other.color && uv == other.uv && normal==other.normal;
+		}
+	};
 
 	struct UIVertex {
 		ImVec2  pos;
@@ -65,9 +78,19 @@ namespace VULKAN {
 namespace std {
 	template<> struct hash<VULKAN::Vertex> {
 		size_t operator()(VULKAN::Vertex const& vertex) const {
-			return ((hash<glm::vec3>()(vertex.position) ^
-				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-				(hash<glm::vec2>()(vertex.texCoord) << 1);
+			// Hash the position, color, normal, and texCoord
+			size_t hash1 = hash<glm::vec3>()(vertex.position);
+			size_t hash2 = hash<glm::vec3>()(vertex.color);
+			size_t hash3 = hash<glm::vec3>()(vertex.normal);
+			size_t hash4 = hash<glm::vec2>()(vertex.texCoord);
+
+			// Combine the hashes using bitwise operations
+			size_t result = hash1;
+			result = (result * 31) + hash2;
+			result = (result * 31) + hash3;
+			result = (result * 31) + hash4;
+
+			return result;
 		}
 	};
 }

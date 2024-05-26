@@ -26,6 +26,23 @@ namespace VULKAN {
 		VkBuffer buffer;
 	};
 
+	struct Material
+	{
+		bool AlbedoOn;
+		bool nornalOn;
+		bool specularOn;
+		float albedoIntensity;
+		float normalIntensity;
+		float specularIntensity;
+	};
+
+	struct Light 
+	{
+		alignas(16)glm::vec3 pos;
+		alignas(16)glm::vec3 color;
+		alignas(4)float intensity;
+		alignas(4)float padding[3];
+	};
 
 	class RayTracing_RS
 	{
@@ -34,18 +51,20 @@ namespace VULKAN {
 		{
 			std::vector<Vertex>vertices;
 			std::vector<uint32_t>indices;
+			VkTransformMatrixKHR instanceMatrix;
 			VkTransformMatrixKHR matrix;
 			std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
 			AccelerationStructure BottomLevelAs;
+			std::vector<Material> materialsData;
 
 			glm::vec3 pos;
 			glm::vec3 rot;
 			glm::vec3 scale;
 			void UpdateMatrix(){
-				matrix = {
+				instanceMatrix = {
 			scale.x, 0.0f, 0.0f, pos.x,
 			0.0f, scale.y, 0.0f, pos.y,
-			0.0f, 0.0f, -scale.z,pos.z};
+			0.0f, 0.0f, scale.z,pos.z};
 			}
 
 			int bottomLevelId=0;
@@ -91,6 +110,8 @@ namespace VULKAN {
 
 		VKTexture* storageImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
+		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
+
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
 		void TransitionStorageImage();
@@ -146,6 +167,7 @@ namespace VULKAN {
 		Buffer missShaderBindingTable;
 		Buffer hitShaderBindingTable;
 		Buffer ubo;
+		Buffer lightBuffer;
 
 
 		VkShaderModule rHitShaderModule;
