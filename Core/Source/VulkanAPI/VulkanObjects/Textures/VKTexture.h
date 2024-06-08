@@ -48,6 +48,7 @@ namespace VULKAN {
 		VkDeviceMemory textureImageMemory=nullptr;
 		VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 		uint32_t mipLevels=0;
+		VkDescriptorSet descriptor;
 
 	private:
 		

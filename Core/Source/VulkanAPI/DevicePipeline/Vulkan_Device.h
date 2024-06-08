@@ -151,7 +151,8 @@ class MyVulkanDevice {
                                                       VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
                                                       VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
                                                       VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-                                                      VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME};
+                                                      VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME,
+                                                      VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
   														
 
 

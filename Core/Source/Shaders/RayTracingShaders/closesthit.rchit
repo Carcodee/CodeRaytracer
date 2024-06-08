@@ -2,12 +2,23 @@
 #extension GL_EXT_ray_tracing : enable
 #extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_scalar_block_layout :enable
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
 
 layout(location = 0) rayPayloadInEXT vec3 hitValue;
 hitAttributeEXT vec2 attribs;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
 
+
+
+struct MaterialData {
+	float albedoIntensity;
+	float normalIntensity;
+	float specularIntensity;
+	int textureIndex; 
+};
 
 struct Vertex {
     vec3 position; 
@@ -34,6 +45,7 @@ layout(binding=6) uniform light{
     float intensity;
 }myLight;
 
+layout(binding = 7, set = 0) uniform sampler2D textures[];
 
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
@@ -69,10 +81,14 @@ void main()
   
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
 
-  vec4 textSample=texture(mySampler,uv);
+  vec4 textSample=texture(textures[0],uv);
   vec3 debuging=GetDebugCol(gl_PrimitiveID,  3828.0);
+
+
+  vec3 debugGeometryIndex=GetDebugCol(gl_GeometryIndexEXT,  6);
   
 
 
   hitValue = (textSample.xyz * myLight.col) * shadingIntensity * myLight.intensity;
-}
+  //hitValue = debugGeometryIndex;
+  }

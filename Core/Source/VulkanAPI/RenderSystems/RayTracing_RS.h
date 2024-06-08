@@ -26,14 +26,11 @@ namespace VULKAN {
 		VkBuffer buffer;
 	};
 
-	struct Material
+
+	struct RxTexture
 	{
-		bool AlbedoOn;
-		bool nornalOn;
-		bool specularOn;
-		float albedoIntensity;
-		float normalIntensity;
-		float specularIntensity;
+		Material mat;
+		VkDescriptorSet descriptorSet;
 	};
 
 	struct Light 
@@ -47,15 +44,22 @@ namespace VULKAN {
 	class RayTracing_RS
 	{
 	public:
+		struct GeometryData
+		{
+			uint64_t vertexBufferDeviceAddress;
+			uint64_t indexBufferDeviceAddress;
+			int textureIndexBaseColor;
+			int textureIndexOcclusion;
+		};
 		struct BottomLevelObj
 		{
-			std::vector<Vertex>vertices;
-			std::vector<uint32_t>indices;
+			std::vector<GeometryData> geometryData;
+			ModelData combinedMesh;
 			VkTransformMatrixKHR instanceMatrix;
 			VkTransformMatrixKHR matrix;
 			std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
 			AccelerationStructure BottomLevelAs;
-			std::vector<Material> materialsData;
+			std::vector<RxTexture> materialsData;
 
 			glm::vec3 pos;
 			glm::vec3 rot;
@@ -124,6 +128,7 @@ namespace VULKAN {
 
 
 
+		std::vector<ModelData>modelDatas;
 		//helpers
 		void SetupBottomLevelObj();
 		void LoadFunctionsPointers();
@@ -161,6 +166,7 @@ namespace VULKAN {
 		uint32_t indexCount;
 
 		Buffer vertexBuffer;
+		Buffer combinedMeshBuffer;
 		Buffer indexBuffer;
 		Buffer transformBuffer;
 		Buffer raygenShaderBindingTable;

@@ -16,7 +16,7 @@
 //#include "VulkanAPI/Headers/HeadersFiles.h"
 #include <deque>
 
-
+#define PRINTLVK(x) std::cout << #x << std::endl;
 namespace VULKAN {
 
 	struct DeletionQueue

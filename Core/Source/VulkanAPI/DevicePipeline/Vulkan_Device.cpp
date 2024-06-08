@@ -909,9 +909,14 @@ namespace VULKAN {
 			&dynamic_rendering_feature,
 			VK_TRUE,
 		};
+		VkPhysicalDeviceDescriptorIndexingFeaturesEXT device_descriptor_indexing = {
+			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
+			&scalarBlockLayoutFeatures,
+			VK_TRUE,
+		};
 
 		
-		createInfo.pNext = &scalarBlockLayoutFeatures;
+		createInfo.pNext = &device_descriptor_indexing;
 		
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();

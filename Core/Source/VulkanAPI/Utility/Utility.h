@@ -8,9 +8,11 @@
 #endif
 
 
-
+#include <filesystem>
+#include <map>
 
 #include "VulkanAPI/Model/MyModel.h"
+#include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 
 
 namespace VULKAN{
@@ -21,11 +23,55 @@ namespace VULKAN{
 			glm::vec3 pos;
 			glm::vec2 textCoord;
 		};
-		struct VerticesAndIndices 
+
+		struct MaterialUniformData
+		{
+			alignas(4)float albedoIntensity;
+			alignas(4)float normalIntensity;
+			alignas(4)float specularIntensity;
+			alignas(4)int textureIndex = -1;
+		
+		};
+		struct Material
+		{
+			MaterialUniformData materialUniform;
+			std::vector<std::string> paths;
+			std::vector<VKTexture> modelTextures;
+			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures)
+			{
+				for (int i = 0; i < paths.size(); ++i)
+				{
+					VKTexture texture(paths[i].c_str(), swap_chain);
+					
+					modelTextures.push_back(texture);
+					allTextures.push_back(texture);
+				}
+			}
+		};
+
+		struct ModelData 
 		{
 			std::vector <Vertex> vertices;
 			std::vector<uint32_t> indices;
+			std::vector<uint32_t> firstMeshIndex;
+			std::vector<uint32_t> firstMeshVertex;
+			std::vector<std::vector<int>> materialIds;
+			std::vector<uint32_t> meshIndexCount;
+			std::vector<uint32_t> meshVertexCount;
+			std::map<int,Material>materialDataPerMesh;
+			std::vector<VKTexture>allTextures;
+			int textureSizes;
+			int meshCount;
+			void CreateAllTextures(VulkanSwapChain& swap_chain)
+			{
+				for (int i = 0; i < materialDataPerMesh.size(); ++i)
+				{
+					materialDataPerMesh.at(i).CreateTextures(swap_chain, allTextures);
+				}
+			}
 		};
+		
+
 		uint32_t alignedSize(uint32_t value, uint32_t alignment);
 		size_t alignedSize(size_t value, size_t alignment);
 		VkDeviceSize alignedVkSize(VkDeviceSize value, VkDeviceSize alignment);
