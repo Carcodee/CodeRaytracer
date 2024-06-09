@@ -144,15 +144,12 @@ class MyVulkanDevice {
                                                       VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
                                                       VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
                                                       VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-                                                      VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
                                                       VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
                                                       VK_KHR_SPIRV_1_4_EXTENSION_NAME,
                                                       VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
                                                       VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
                                                       VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
-                                                      VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-                                                      VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME,
-                                                      VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
+                                                      VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME};
   														
 
 

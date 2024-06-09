@@ -202,6 +202,7 @@ namespace VULKAN {
 		{
 			
 			Material materialData{};
+
 			if (!material.diffuse_texname.empty()) {
 				unique_texturePaths.insert(material.diffuse_texname);
 				texturesSizes++;
@@ -224,8 +225,9 @@ namespace VULKAN {
 			}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
-			materialData.materialUniform.textureIndex = matCount;
+			materialData.materialUniform.meshIndex = matCount;
 			materialsDatas.try_emplace(matCount, materialData);
+			unique_texturePaths.clear();
 			matCount++;
 		}
 		

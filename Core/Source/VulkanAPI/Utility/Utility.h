@@ -26,23 +26,27 @@ namespace VULKAN{
 
 		struct MaterialUniformData
 		{
-			alignas(4)float albedoIntensity;
-			alignas(4)float normalIntensity;
-			alignas(4)float specularIntensity;
-			alignas(4)int textureIndex = -1;
-		
+			float albedoIntensity;
+			float normalIntensity;
+			float specularIntensity;
+			float padding1;
+			int textureIndexStart = -1;
+			int texturesSizes = 0;
+			int meshIndex = -1;
+			int padding2;
 		};
 		struct Material
 		{
-			MaterialUniformData materialUniform;
+			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
 			std::vector<VKTexture> modelTextures;
 			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures)
 			{
+				materialUniform.textureIndexStart = allTextures.size();
 				for (int i = 0; i < paths.size(); ++i)
 				{
+					materialUniform.texturesSizes++;
 					VKTexture texture(paths[i].c_str(), swap_chain);
-					
 					modelTextures.push_back(texture);
 					allTextures.push_back(texture);
 				}

@@ -386,6 +386,11 @@ namespace VULKAN {
 	{
 
 		uint32_t imageCount = static_cast<uint32_t>(modelDatas[0].textureSizes);
+		uint32_t materialCount =0;
+		for (auto model : modelDatas)
+		{
+			materialCount += static_cast<uint32_t>(model.meshCount);
+		}
 		std::vector<VkDescriptorPoolSize> poolSizes = {
 			{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
 			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
@@ -396,6 +401,7 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount},
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 		};
 
 		VKTexture* texture = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", myRenderer.GetSwapchain());
@@ -407,7 +413,7 @@ namespace VULKAN {
 			throw std::runtime_error("Unable to create descriptorPools");
 		}
 		VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
-		uint32_t variableDescCounts [] = {imageCount};
+		uint32_t variableDescCounts [] = {1,1,1,1,1,1,1,imageCount, 1};
 		variableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
 		variableDescriptorCountAllocInfo.descriptorSetCount = 1;
 		variableDescriptorCountAllocInfo.pDescriptorCounts = variableDescCounts;
@@ -462,6 +468,9 @@ namespace VULKAN {
 		indexBuffer.descriptor.offset = 0;
 		indexBuffer.descriptor.range = sizeof(uint32_t) *  ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase,0).combinedMesh.indices.size();
 
+		allMaterialsBuffer.descriptor.buffer = allMaterialsBuffer.buffer;
+		allMaterialsBuffer.descriptor.offset = 0;
+		allMaterialsBuffer.descriptor.range = sizeof(MaterialUniformData) * materialCount;
 
 		VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
@@ -470,15 +479,6 @@ namespace VULKAN {
 		VkWriteDescriptorSet indexBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5, &indexBuffer.descriptor);
 		VkWriteDescriptorSet lightBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6, &lightBuffer.descriptor);
 
-		std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
-			accelerationStructureWrite,
-			resultImageWrite,
-			uniformBufferWrite,
-			textWrite,
-			vertexBufferWrite,
-			indexBufferWrite,
-			lightBufferWrite
-		};
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		for (auto texture :modelDatas[0].allTextures)
@@ -497,7 +497,21 @@ namespace VULKAN {
 		writeDescriptorImgArray.descriptorCount = imageCount;
 		writeDescriptorImgArray.dstSet = descriptorSet;
 		writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
-		writeDescriptorSets.push_back(writeDescriptorImgArray);
+
+		VkWriteDescriptorSet allMaterialsBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allMaterialsBuffer.descriptor);
+
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets = {
+			accelerationStructureWrite,
+			resultImageWrite,
+			uniformBufferWrite,
+			textWrite,
+			vertexBufferWrite,
+			indexBufferWrite,
+			lightBufferWrite,
+			writeDescriptorImgArray,
+			allMaterialsBufferWrite
+
+		};
 
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 	}
@@ -505,8 +519,8 @@ namespace VULKAN {
 	void RayTracing_RS::CreateRTPipeline()
 	{
 
-		uint32_t imageCount = 1;
 
+		uint32_t imageCount = { static_cast<uint32_t>(modelDatas[0].textureSizes)};
 
 		VkDescriptorSetLayoutBinding accelerationStructureLayoutBinding{};
 		accelerationStructureLayoutBinding.binding = 0;
@@ -520,6 +534,7 @@ namespace VULKAN {
 		resultImageLayoutBinding.descriptorCount = 1;
 		resultImageLayoutBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 
+
 		VkDescriptorSetLayoutBinding uniformBufferBinding{};
 		uniformBufferBinding.binding = 2;
 		uniformBufferBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -529,7 +544,7 @@ namespace VULKAN {
 		VkDescriptorSetLayoutBinding TextureBinding{};
 		TextureBinding.binding = 3;
 		TextureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		TextureBinding.descriptorCount = imageCount;
+		TextureBinding.descriptorCount =1;
 		TextureBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding vertexBinding{};
@@ -553,8 +568,16 @@ namespace VULKAN {
 		VkDescriptorSetLayoutBinding texturesBinding{};
 		texturesBinding.binding = 7;
 		texturesBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		texturesBinding.descriptorCount = 1;
+		texturesBinding.descriptorCount = imageCount;
 		texturesBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+		//todo
+		VkDescriptorSetLayoutBinding materialBinding{};
+		materialBinding.binding = 8;
+		materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		materialBinding.descriptorCount = 1;
+		materialBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+
+
 
 
 
@@ -567,8 +590,25 @@ namespace VULKAN {
 			vertexBinding,
 			indexBinding,
 			lightBinding,
-			texturesBinding
+			texturesBinding,
+			materialBinding
 			});
+
+		//VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
+		//setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+		//setLayoutBindingFlags.bindingCount = 6;
+		//std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
+		//	0,
+		//	0,
+		//	0,
+		//	0,
+		//	0,
+		//	0,
+		//	0,
+		//	VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT,
+		//	0
+		//};
+		//setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetlayoutCI{};
 		descriptorSetlayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -670,8 +710,29 @@ namespace VULKAN {
 		UpdateUniformbuffers();
 	}
 
+	void RayTracing_RS::CreateMaterialsBuffer()
+	{
+		std::vector<MaterialUniformData> materialDatas;
+
+		for (int i = 0; i < modelDatas.size(); ++i)
+		{
+			for (auto material_data : modelDatas[i].materialDataPerMesh)
+			{
+				materialDatas.insert(materialDatas.begin(),material_data.second.materialUniform);
+			}
+		}
+		myDevice.createBuffer(
+		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		&allMaterialsBuffer,
+		materialDatas.size() * sizeof(MaterialUniformData),
+		materialDatas.data());
+
+
+	}
+
 	uint32_t RayTracing_RS::GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset,
-		uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride)
+	                                            uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride)
 	{
 		return hitGroupStart + start * (offset + stbRecordOffset + (geometryIndex + stbRecordStride));
 	}
@@ -680,7 +741,7 @@ namespace VULKAN {
 	{
 		if (storageImage->currentLayout!= VK_IMAGE_LAYOUT_GENERAL)
 		{
-				VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
+			VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
 			VkImageMemoryBarrier barrier{};
 
 			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -785,6 +846,7 @@ namespace VULKAN {
 
 
 		SetupBottomLevelObj();
+		CreateMaterialsBuffer();
 
 		for (int i= 0 ; i <ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
 		{
@@ -854,8 +916,8 @@ namespace VULKAN {
 	void RayTracing_RS::SetupBottomLevelObj()
 	{
 
-		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/cubeSigned.obj");
-		ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
+		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/Car.obj");
+		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain());
 
 

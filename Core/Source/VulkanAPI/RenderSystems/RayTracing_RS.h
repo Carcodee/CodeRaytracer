@@ -144,6 +144,7 @@ namespace VULKAN {
 		void CreateDescriptorSets();
 		void CreateRTPipeline();
 		void CreateUniformBuffer();
+		void CreateMaterialsBuffer();
 		uint32_t GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset, uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride);
 
 		VulkanRenderer& myRenderer;
@@ -174,6 +175,7 @@ namespace VULKAN {
 		Buffer hitShaderBindingTable;
 		Buffer ubo;
 		Buffer lightBuffer;
+		Buffer allMaterialsBuffer;
 
 
 		VkShaderModule rHitShaderModule;

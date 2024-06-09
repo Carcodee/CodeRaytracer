@@ -871,16 +871,14 @@ namespace VULKAN {
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-	
 		VkPhysicalDeviceFeatures deviceFeatures = {};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
 		// Link feature structures
@@ -894,29 +892,24 @@ namespace VULKAN {
 			&accelFeature,
 			VK_TRUE
 		};
-		VkPhysicalDeviceBufferAddressFeaturesEXT bufferDeviceAddressFeature = {
-			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES,
-			&rtPipelineFeature,
-			VK_TRUE,
-		};
-		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature={
+
+		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
 			 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-             &bufferDeviceAddressFeature,
+			 &rtPipelineFeature,
 			 VK_TRUE,
 		};
-		VkPhysicalDeviceScalarBlockLayoutFeatures scalarBlockLayoutFeatures = {
-			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES,
-			&dynamic_rendering_feature,
-			VK_TRUE,
-		};
-		VkPhysicalDeviceDescriptorIndexingFeaturesEXT device_descriptor_indexing = {
-			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT,
-			&scalarBlockLayoutFeatures,
-			VK_TRUE,
-		};
+		VkPhysicalDeviceVulkan12Features vulkan12Features{};
+		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vulkan12Features.runtimeDescriptorArray = VK_TRUE; 
+		vulkan12Features.descriptorIndexing = VK_TRUE;
+		vulkan12Features.scalarBlockLayout = VK_TRUE;
+		vulkan12Features.bufferDeviceAddress = VK_TRUE;
+		VkPhysicalDeviceVulkan13Features features{};
+		vulkan12Features.pNext = &dynamic_rendering_feature;
+
 
 		
-		createInfo.pNext = &device_descriptor_indexing;
+		createInfo.pNext = &vulkan12Features;
 		
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();

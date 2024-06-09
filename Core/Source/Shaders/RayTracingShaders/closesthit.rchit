@@ -17,7 +17,11 @@ struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
 	float specularIntensity;
-	int textureIndex; 
+    float padding1;
+	int texturesIndexStart; 
+	int textureSizes; 
+	int meshIndex; 
+    int padding2;
 };
 
 struct Vertex {
@@ -47,6 +51,10 @@ layout(binding=6) uniform light{
 
 layout(binding = 7, set = 0) uniform sampler2D textures[];
 
+layout(set = 0, binding = 8, scalar) buffer Materials {
+    MaterialData materials[];
+};
+
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
     float idNormalized = float(primitiveId) / primitiveCount; 
@@ -62,6 +70,14 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
 
 }
 
+#define MAX_TEXTURES 5
+
+vec4 CurrentMaterialTextures[MAX_TEXTURES];
+int texturesOnMaterialCount = 0;
+
+void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
+vec4 GetColorOrDiffuseTex(vec2 uv);
+
 void main()
 {
 
@@ -72,23 +88,49 @@ void main()
   Vertex v1 = vertices[index1];
   Vertex v2 = vertices[index2];
   Vertex v3 = vertices[index3];
-
+  
   const vec3 barycentricCoords = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
 
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
   vec3 normal= normalize(barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal);
-  
-  float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
 
-  vec4 textSample=texture(textures[0],uv);
+  FillTexturesFromMaterial(materials[gl_GeometryIndexEXT].texturesIndexStart,materials[gl_GeometryIndexEXT].textureSizes, uv); 
+  
+  vec4 diffuse=GetColorOrDiffuseTex(uv);
+
   vec3 debuging=GetDebugCol(gl_PrimitiveID,  3828.0);
-
-
   vec3 debugGeometryIndex=GetDebugCol(gl_GeometryIndexEXT,  6);
-  
 
 
-  hitValue = (textSample.xyz * myLight.col) * shadingIntensity * myLight.intensity;
+  float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
+  hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
   //hitValue = debugGeometryIndex;
   }
+
+void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
+
+    int textureFinishSize = texturesIndexStart + textureSizes;
+    int allTexturesIndex= 0;
+    texturesOnMaterialCount= allTexturesIndex;
+    for(int i = texturesIndexStart; i < textureFinishSize; i++){
+
+        if(allTexturesIndex>MAX_TEXTURES){
+            return;
+        }
+        CurrentMaterialTextures[allTexturesIndex] = texture(textures[i],uv); 
+        allTexturesIndex++;
+        texturesOnMaterialCount= allTexturesIndex;
+    }
+
+}
+vec4 GetColorOrDiffuseTex(vec2 uv){
+    if(texturesOnMaterialCount>0){
+        vec4 diffuseText = CurrentMaterialTextures[0];
+        return diffuseText;
+    }else{
+        return vec4(1.0f);
+    }
+
+
+}
