@@ -30,25 +30,34 @@ namespace VULKAN{
 			float normalIntensity;
 			float specularIntensity;
 			float padding1;
+			glm::vec3 diffuseColor;
+			float padding2;
 			int textureIndexStart = -1;
 			int texturesSizes = 0;
 			int meshIndex = -1;
-			int padding2;
+			int padding3;
+		};
+
+		struct ModelDataUniformBuffer 
+		{
+			uint32_t materialIndex;
 		};
 		struct Material
 		{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
 			std::vector<VKTexture> modelTextures;
-			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures)
+			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures, int& textureSizes)
 			{
 				materialUniform.textureIndexStart = allTextures.size();
 				for (int i = 0; i < paths.size(); ++i)
 				{
+					if (!std::filesystem::exists(paths[i].c_str()))continue;
 					materialUniform.texturesSizes++;
 					VKTexture texture(paths[i].c_str(), swap_chain);
 					modelTextures.push_back(texture);
 					allTextures.push_back(texture);
+					textureSizes++;
 				}
 			}
 		};
@@ -59,7 +68,7 @@ namespace VULKAN{
 			std::vector<uint32_t> indices;
 			std::vector<uint32_t> firstMeshIndex;
 			std::vector<uint32_t> firstMeshVertex;
-			std::vector<std::vector<int>> materialIds;
+			std::vector<int> materialIds;
 			std::vector<uint32_t> meshIndexCount;
 			std::vector<uint32_t> meshVertexCount;
 			std::map<int,Material>materialDataPerMesh;
@@ -70,7 +79,7 @@ namespace VULKAN{
 			{
 				for (int i = 0; i < materialDataPerMesh.size(); ++i)
 				{
-					materialDataPerMesh.at(i).CreateTextures(swap_chain, allTextures);
+					materialDataPerMesh.at(i).CreateTextures(swap_chain, allTextures, textureSizes);
 				}
 			}
 		};

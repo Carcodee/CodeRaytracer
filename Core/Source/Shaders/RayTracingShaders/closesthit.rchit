@@ -6,23 +6,24 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
 
-layout(location = 0) rayPayloadInEXT vec3 hitValue;
-hitAttributeEXT vec2 attribs;
-
-layout(set=0, binding=3) uniform sampler2D mySampler;
-
-
 
 struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
 	float specularIntensity;
     float padding1;
+    vec3 diffuseColor;
+    float padding2;
 	int texturesIndexStart; 
 	int textureSizes; 
 	int meshIndex; 
-    int padding2;
+    int padding3;
 };
+
+struct MeshData {
+    int materialIndexOnShape;
+};
+
 
 struct Vertex {
     vec3 position; 
@@ -35,6 +36,19 @@ struct Indices {
     uint index;
 };
 
+layout(binding=6) uniform light{
+    vec3 pos;
+    vec3 col;
+    float intensity;
+}myLight;
+
+
+layout(location = 0) rayPayloadInEXT vec3 hitValue;
+hitAttributeEXT vec2 attribs;
+
+layout(set=0, binding=3) uniform sampler2D mySampler;
+
+
 layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
     Vertex vertices[];
 };
@@ -43,17 +57,16 @@ layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
     Indices indices[];
 };
 
-layout(binding=6) uniform light{
-    vec3 pos;
-    vec3 col;
-    float intensity;
-}myLight;
 
-layout(binding = 7, set = 0) uniform sampler2D textures[];
-
-layout(set = 0, binding = 8, scalar) buffer Materials {
+layout(set = 0, binding = 7, std140) buffer Materials {
     MaterialData materials[];
 };
+
+layout(set = 0, binding = 8, scalar) buffer MeshesData {
+    MeshData meshesData[];
+};
+
+layout(set = 0,binding = 9) uniform sampler2D textures[];
 
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
@@ -65,7 +78,7 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
     
     vec3 dir= fragPos-lightPos; 
     dir= normalize(dir);
-    float colorShading=max(dot(dir, normal),0.0);
+    float colorShading=max(dot(dir, normal),0.2);
     return colorShading;
 
 }
@@ -75,6 +88,7 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
 vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
 
+vec3 GetDiffuseColor(int materialIndex);
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
 vec4 GetColorOrDiffuseTex(vec2 uv);
 
@@ -93,18 +107,25 @@ void main()
 
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
-  vec3 normal= normalize(barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal);
+  vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
+  normal=normalize(normal);
 
-  FillTexturesFromMaterial(materials[gl_GeometryIndexEXT].texturesIndexStart,materials[gl_GeometryIndexEXT].textureSizes, uv); 
+  int materialIndex= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
+  int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
+  int materialTextureSizes =materials[materialIndex].textureSizes;
+
+  FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
   
   vec4 diffuse=GetColorOrDiffuseTex(uv);
 
   vec3 debuging=GetDebugCol(gl_PrimitiveID,  3828.0);
-  vec3 debugGeometryIndex=GetDebugCol(gl_GeometryIndexEXT,  6);
+  vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
 
 
+  
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
+  hitValue = diffuse.xyz;
   //hitValue = debugGeometryIndex;
   }
 
@@ -124,12 +145,21 @@ void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv)
     }
 
 }
+
+vec3 GetDiffuseColor(int materialIndex){
+
+   vec3 diffuse= materials[materialIndex].diffuseColor;
+   return diffuse;
+}
 vec4 GetColorOrDiffuseTex(vec2 uv){
     if(texturesOnMaterialCount>0){
         vec4 diffuseText = CurrentMaterialTextures[0];
         return diffuseText;
     }else{
-        return vec4(1.0f);
+
+        int index= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
+        vec3 diffuseCol=GetDiffuseColor(index); 
+        return vec4(diffuseCol, 1.0);
     }
 
 

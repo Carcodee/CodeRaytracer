@@ -30,9 +30,10 @@ namespace VULKAN
 		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
 		vpImageView= myRenderer.GetSwapchain().colorImageView;
 
+		//AddSamplerAndViewForImage(viewportSampler,vpImageView);
 		CreatePipelineLayout();
 
-		CreateImguiImage(viewportSampler, vpImageView, vpDescriptorSet);
+		//CreateImguiImage(viewportSampler, vpImageView, vpDescriptorSet);
 
 		for (auto& image : imagesToCreate)
 		{
@@ -136,10 +137,11 @@ namespace VULKAN
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
-		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate descriptor sets!");
-		}
+		//normalRenderingVP
+		//if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		//{
+		//	throw std::runtime_error("failed to allocate descriptor sets!");
+		//}
 		for (auto& descriptor : imagesToCreate)
 		{
 			if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptor.descriptor) != VK_SUCCESS)
@@ -414,7 +416,7 @@ namespace VULKAN
 		ImGui::SetWindowSize(ImVec2(width, height));
 		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
-		ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
+		//ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
 		for (auto& imageDescriptorSet : imagesToCreate)
 		{
 			ImGui::Image((ImTextureID)imageDescriptorSet.descriptor, ImVec2(viewportSize.x, viewportSize.y));
@@ -426,7 +428,7 @@ namespace VULKAN
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
 		
-		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, 0.0f, 10.0f, "%.3f");
+		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
 		ImGui::LabelText("Raytracing", "");
 		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
 		ImGui::LabelText("Light", "");

@@ -62,6 +62,23 @@ namespace VULKAN {
 
 	ModelData ModelLoaderHandler::GetModelVertexAndIndicesTinyObject(std::string path)
 	{
+		tinyobj::ObjReader reader;
+		tinyobj::ObjReaderConfig objConfig;
+
+		if (!reader.ParseFromFile(path, objConfig))
+		{
+			if (!reader.Error().empty())
+			{
+				PRINTLVK("Error from reader": )
+				PRINTLVK(reader.Error())
+			}
+			
+		}
+		if (!reader.Warning().empty()) {
+			std::cout << "TinyObjReader: " << reader.Warning();
+		}
+
+
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
@@ -74,20 +91,26 @@ namespace VULKAN {
 		std::vector<uint32_t> meshVertexCount;
 		std::map<int,Material> materialsDatas;
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-		std::vector<std::vector<int>> materialIdsOnObject;
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str()))
-		{
-			throw std::runtime_error(warn + err);
-		}
+		std::vector<int> materialIdsOnObject;
+
+		attrib = reader.GetAttrib();
+		shapes = reader.GetShapes();
+		materials = reader.GetMaterials();
 		ModelData modelData={};
 		int meshCount = shapes.size();
 		int indexStartCounter = 0;
 		int vertexStartCouner= 0;
 		for (const auto& shape: shapes)
 		{
-
-			std::vector<int> materialIds = shape.mesh.material_ids;
-			materialIdsOnObject.push_back(materialIds);
+			if (shape.mesh.material_ids[0]<0)
+			{
+				
+				materialIdsOnObject.push_back(0);
+			}
+			else
+			{
+				materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0]));
+			}
 			bool firstIndexAddedPerMesh = false;
 			bool firstVertexFinded = false;
 			int indexCount = 0;
@@ -138,6 +161,7 @@ namespace VULKAN {
 		}
 
 		int textureTotalSize = 0;
+
 		materialsDatas = LoadMaterialsFromObject(path, textureTotalSize);
 
 		std::vector<VKTexture>allTextures;
@@ -202,26 +226,21 @@ namespace VULKAN {
 		{
 			
 			Material materialData{};
-
+			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
 			if (!material.diffuse_texname.empty()) {
 				unique_texturePaths.insert(material.diffuse_texname);
-				texturesSizes++;
 			}
 			if (!material.specular_texname.empty()) {
 				unique_texturePaths.insert(material.specular_texname);
-				texturesSizes++;
 			}
 			if (!material.bump_texname.empty()) {
 				unique_texturePaths.insert(material.bump_texname);
-				texturesSizes++;
 			}
 			if (!material.bump_texname.empty()) {
 				unique_texturePaths.insert(material.normal_texname);
-				texturesSizes++;
 			}
 			if (!material.bump_texname.empty()) {
 				unique_texturePaths.insert(material.ambient_texname);
-				texturesSizes++;
 			}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());

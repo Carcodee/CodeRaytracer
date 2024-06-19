@@ -17,7 +17,6 @@ namespace VULKAN {
 		VkBuffer handle = VK_NULL_HANDLE;
 		VkDeviceMemory memory = VK_NULL_HANDLE;
 	};
-
 	// Ray tracing acceleration structure
 	struct AccelerationStructure {
 		VkAccelerationStructureKHR handle;
@@ -25,14 +24,11 @@ namespace VULKAN {
 		VkDeviceMemory memory;
 		VkBuffer buffer;
 	};
-
-
 	struct RxTexture
 	{
 		Material mat;
 		VkDescriptorSet descriptorSet;
 	};
-
 	struct Light 
 	{
 		alignas(16)glm::vec3 pos;
@@ -40,7 +36,6 @@ namespace VULKAN {
 		alignas(4)float intensity;
 		alignas(4)float padding[3];
 	};
-
 	class RayTracing_RS
 	{
 	public:
@@ -145,14 +140,13 @@ namespace VULKAN {
 		void CreateRTPipeline();
 		void CreateUniformBuffer();
 		void CreateMaterialsBuffer();
+		void CreateAllModelsBuffer();
 		uint32_t GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset, uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride);
 
 		VulkanRenderer& myRenderer;
 		MyVulkanDevice& myDevice;
 		ModelLoaderHandler modelLoader{ myDevice };
 
-		//AccelerationStructure bottomLevelAS{};
-		//AccelerationStructure topLevelAS{};
 		
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
 		VkPhysicalDeviceRayTracingPipelinePropertiesKHR  rayTracingPipelineProperties{};
@@ -176,6 +170,7 @@ namespace VULKAN {
 		Buffer ubo;
 		Buffer lightBuffer;
 		Buffer allMaterialsBuffer;
+		Buffer allModelDataBuffer;
 
 
 		VkShaderModule rHitShaderModule;
