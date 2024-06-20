@@ -5,6 +5,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <stb_image.h>
+
+#include "VulkanAPI/Utility/InputSystem/InputHandler.h"
+
 namespace VULKAN {
 
 	VulkanInit::VulkanInit(int w, int h, std::string name) : widht{w}, height{h}, appName{name}
@@ -15,13 +18,6 @@ namespace VULKAN {
 
 	void VulkanInit::InitWindow()
 	{
-		char buffer[_MAX_PATH];
-		if (_getcwd(buffer, sizeof(buffer)) != NULL) {
-			std::cout << "Current Working Directory: " << buffer << std::endl;
-		}
-		else {
-			std::cerr << "Error getting current working directory" << std::endl;
-		}
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -32,6 +28,9 @@ namespace VULKAN {
 		{
 			std::cout << "GLFW initialized" << std::endl;
 		}
+		InputHandler* instanceSingleton = InputHandler::GetInstance(window);
+
+
 	}
 
 	void VulkanInit::Run()
@@ -56,6 +55,7 @@ namespace VULKAN {
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
+
 	void VulkanInit::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		auto myWindow = reinterpret_cast<VulkanInit*>(glfwGetWindowUserPointer(window));

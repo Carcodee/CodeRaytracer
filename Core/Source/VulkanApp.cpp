@@ -5,6 +5,8 @@
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 #include <string>
 
+#include "VulkanAPI/Utility/InputSystem/InputHandler.h"
+
 int cicles=0;
 namespace VULKAN{
 	
@@ -183,23 +185,25 @@ namespace VULKAN{
 		while (!initWindow.ShouldClose())
 		{
 			glfwPollEvents();
-			int currentTime = glfwGetTime();
+			float currentTime = glfwGetTime();
 
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
-			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
-			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			//rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
+			//rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
+			//rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
 			rayTracing_RS.light.color = glm::make_vec3(imgui_RS.lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(imgui_RS.lightPos);
 			rayTracing_RS.light.intensity = imgui_RS.lightIntensity;
+			InputHandler* instanceSingleton = InputHandler::GetInstance();
+			rayTracing_RS.cam.Move(instanceSingleton->GetCutomInput(InputHandler::CUSTOM_INPUT::x), instanceSingleton->GetCutomInput(InputHandler::CUSTOM_INPUT::y), 0, deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
 
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
+			//forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
+			//forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
+			//forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{

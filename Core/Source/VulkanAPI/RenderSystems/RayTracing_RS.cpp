@@ -1,5 +1,6 @@
 #include "RayTracing_RS.h"
 
+#include "FileSystem/FileHandler.h"
 #include "VulkanAPI/Model/ModelHandler.h"
 
 
@@ -8,6 +9,7 @@ namespace VULKAN {
 	{
 		cam.SetPerspective(100.0f, (float)800 / (float)600, 0.1f, 512.0f);
 		cam.position=(glm::vec3(0.0f, 4.0f, 0.0f));
+		cam.currentMode = CameraMode::E_Free;
         cam.SetLookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 	
@@ -388,6 +390,10 @@ namespace VULKAN {
 		uint32_t imageCount = static_cast<uint32_t>(modelDatas[0].textureSizes);
 		uint32_t materialCount =0;
 		uint32_t meshCount =0;
+		if (imageCount<=0)
+		{
+			imageCount = 1;
+		}
 		for (auto model : modelDatas)
 		{
 			materialCount += static_cast<uint32_t>(model.materialDataPerMesh.size());
@@ -981,7 +987,8 @@ namespace VULKAN {
 	void RayTracing_RS::SetupBottomLevelObj()
 	{
 
-		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/House.obj");
+		std::string assetPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath();
+		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject(assetPath+"/Models/House/House.obj");
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain());
 		modelDatas.push_back(combinedMesh);

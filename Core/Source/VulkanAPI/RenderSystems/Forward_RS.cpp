@@ -1,4 +1,6 @@
 #include "Forward_RS.h"
+
+#include "FileSystem/FileHandler.h"
 #include "VulkanAPI/Utility/ComputeShadersUtils.h"
 
 namespace VULKAN {
@@ -61,10 +63,11 @@ namespace VULKAN {
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineConfig.multisampleInfo.rasterizationSamples = myDevice.msaaSamples;
 
+		std::string baseFragShaderPath = HELPERS::FileHandler::GetInstance()->GetShadersPath();
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,
-			"../Core/Source/Shaders/base_shader.vert.spv",
-			"../Core/Source/Shaders/base_shader.frag.spv",
+ baseFragShaderPath+"/base_shader.vert.spv",
+			baseFragShaderPath+"/base_shader.frag.spv",
 			pipelineConfig
 
 		);

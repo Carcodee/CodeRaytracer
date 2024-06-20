@@ -102,9 +102,8 @@ namespace VULKAN {
 		int vertexStartCouner= 0;
 		for (const auto& shape: shapes)
 		{
-			if (shape.mesh.material_ids[0]<0)
+			if (shape.mesh.material_ids.size()<=0||shape.mesh.material_ids[0]<=0)
 			{
-				
 				materialIdsOnObject.push_back(0);
 			}
 			else
@@ -129,10 +128,21 @@ namespace VULKAN {
 					attrib.normals[3 * index.normal_index + 1],
 					attrib.normals[3 * index.normal_index + 2]
 				};
-				vertex.texCoord = {
-					attrib.texcoords[2 * index.texcoord_index + 0],
-					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
-				};
+				if (index.texcoord_index==-1)
+				{
+					vertex.texCoord = {
+						0,
+						0	
+					};
+				}
+				else
+				{
+					vertex.texCoord = {
+						attrib.texcoords[2 * index.texcoord_index + 0],
+						1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+					};
+				}
+				
 			if (uniqueVertices.count(vertex)==0){
 					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 					vertices.push_back(vertex);
@@ -203,6 +213,7 @@ namespace VULKAN {
 		tinyobj::ObjReader reader;
 		tinyobj::ObjReaderConfig objConfig;
 		std::map<int,Material> materialsDatas;
+		
 
 		if (!reader.ParseFromFile(path, objConfig))
 		{
@@ -222,26 +233,51 @@ namespace VULKAN {
 		std::unordered_set<std::string> unique_texturePaths;
 		
 		int matCount = 0;
+		std::filesystem::path currentModelPath(path);
+		currentModelPath = currentModelPath.parent_path();
+
+		std::string texturesPath = currentModelPath.string()+"/Textures/";
+		if (!std::filesystem::exists(currentModelPath))
+		{
+			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
+		}
+
 		for (const auto& material : materials)
 		{
 			
 			Material materialData{};
 			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
 			if (!material.diffuse_texname.empty()) {
-				unique_texturePaths.insert(material.diffuse_texname);
+				std::string texturePathFinded= material.diffuse_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
 			}
-			if (!material.specular_texname.empty()) {
-				unique_texturePaths.insert(material.specular_texname);
+			if (!material.alpha_texname.empty()) {
+				std::string texturePathFinded= material.alpha_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
 			}
-			if (!material.bump_texname.empty()) {
-				unique_texturePaths.insert(material.bump_texname);
-			}
-			if (!material.bump_texname.empty()) {
-				unique_texturePaths.insert(material.normal_texname);
-			}
-			if (!material.bump_texname.empty()) {
-				unique_texturePaths.insert(material.ambient_texname);
-			}
+
+			//if (!material.specular_texname.empty()) {
+			//	std::string texturePathFinded= material.specular_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.bump_texname.empty()) {
+			//	std::string texturePathFinded= material.bump_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.normal_texname.empty()) {
+			//	std::string texturePathFinded= material.normal_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.ambient_texname.empty()) {
+			//	std::string texturePathFinded= material.ambient_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
 			materialData.materialUniform.meshIndex = matCount;
@@ -251,6 +287,62 @@ namespace VULKAN {
 		}
 		
 		return materialsDatas;
+	}
+
+	void ModelLoaderHandler::FixMaterialPaths(std::string& path, std::string texturesPath)
+	{
+		if (!std::filesystem::exists(texturesPath))
+		{
+			std::cout << "Filepath for textures does not exist: " << texturesPath << "\n";
+			path = "";
+			return;
+			
+		}
+		if (!std::filesystem::exists(path)&&path.size()>0)
+		{
+			size_t notValidPathFinishPos = path.find_last_of("//");
+			path.erase(0, notValidPathFinishPos + 1);
+			size_t extensionPart = path.find_last_of('.');
+			path.erase(extensionPart, path.size());
+			for (auto element :std::filesystem::directory_iterator(texturesPath))
+			{
+				if (element.is_regular_file())
+				{
+					std::string fileInPath=element.path().string();
+					std::string bufferFileInPath=element.path().string();
+
+					size_t filePathFinishPos = fileInPath.find_last_of("//");
+
+					fileInPath.erase(0, filePathFinishPos + 1);
+					bufferFileInPath.erase(0, filePathFinishPos + 1);
+
+					size_t extensionPartFileInPath = bufferFileInPath.find_last_of('.');
+
+					//extension part
+					bufferFileInPath.erase(extensionPartFileInPath, path.size());
+
+					if (bufferFileInPath == path)
+					{
+						path = fileInPath;
+						std::cout << "Filepath matches with: " << path <<"\n";
+						break;
+					}
+					
+				}
+				
+			}
+			path = texturesPath + path;
+			if (!std::filesystem::exists(path))
+			{
+				std::cout << "Filepath does not exist: " << path <<"\n";
+				path = "";
+			}
+
+		}
+		else
+		{
+			std::cout << "Path is absolute and exist: " << path <<"\n";
+		}
 	}
 }
 

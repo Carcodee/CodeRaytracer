@@ -17,6 +17,7 @@
 #include <deque>
 
 #define PRINTLVK(x) std::cout << #x << std::endl;
+
 namespace VULKAN {
 
 	struct DeletionQueue
@@ -57,10 +58,12 @@ namespace VULKAN {
 		~VulkanInit();
 
 
+
 	private:
 
 		int widht;
 		int height;
+
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		bool framebufferResized = false;
 

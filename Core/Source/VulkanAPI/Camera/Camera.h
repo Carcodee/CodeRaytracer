@@ -15,7 +15,6 @@ namespace VULKAN
 	public:
 		struct matrices
 		{
-			
 			glm::mat4 perspective;
 			glm::mat4 view;
 			glm::mat4 rotation;
@@ -28,17 +27,24 @@ namespace VULKAN
 		void UpdateCamera();
 		void SetPerspective(float fov, float aspect, float znear, float zfar);
 		void SetLookAt(glm::vec3 targetPosition);	
+		void SetPosition();	
+		void Move(float x, float y,float z, float deltaTime);
+		void RotateCamera(float deltaTime);
+
 		
 		glm::vec3 position;
 		glm::vec3 lookAt = glm::vec3(0.0f);
 
-		glm::vec3 rot = glm::vec3(0.0f);
+		glm::vec3 rotX = glm::vec3(0.0f);
+		glm::vec3 rotZ = glm::vec3(0.0f);
+		glm::vec3 rotY = glm::vec3(0.0f);
+		glm::vec2 currentForwardAngle = glm::vec3(0.0f);
 
 		CameraMode currentMode = CameraMode::E_Fixed;
 
 		float rotationSpeed = 1.0f;
-		float movementSpeed = 1.0f;
-	private:
+		float movementSpeed = 5.0f;
+
 	};
 
 }
