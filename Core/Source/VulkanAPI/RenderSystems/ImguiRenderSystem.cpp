@@ -424,10 +424,10 @@ namespace VULKAN
 
 		ImGui::End(); // End DockSpace Demo window
 		// Make the window full-screen and set the dock space
+
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
-		
 		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
 		ImGui::LabelText("Raytracing", "");
 		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
@@ -437,7 +437,6 @@ namespace VULKAN
 		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
 
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
 		// and handle the pass-thru hole, so we ask Begin() to not render a background.
 		//if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))

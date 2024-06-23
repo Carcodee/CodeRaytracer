@@ -123,10 +123,11 @@ void main()
 
 
   
+  vec3 normDebug= vec3(1.0);
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
-  hitValue = diffuse.xyz;
   //hitValue = debugGeometryIndex;
+  //hitValue = normal * 0.5 + 0.5; // Uncomment for normal debugging
   }
 
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){

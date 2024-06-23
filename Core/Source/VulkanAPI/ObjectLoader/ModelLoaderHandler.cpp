@@ -213,7 +213,6 @@ namespace VULKAN {
 		tinyobj::ObjReader reader;
 		tinyobj::ObjReaderConfig objConfig;
 		std::map<int,Material> materialsDatas;
-		
 
 		if (!reader.ParseFromFile(path, objConfig))
 		{

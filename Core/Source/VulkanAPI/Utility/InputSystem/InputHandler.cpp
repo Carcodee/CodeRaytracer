@@ -8,13 +8,15 @@ namespace VULKAN
 
 	InputHandler* InputHandler::instance = nullptr;
     GLFWwindow* InputHandler::userWindow = nullptr;
-	InputHandler::USER_KEY InputHandler::userKeyDown=InputHandler::KEY_NONE;
-	InputHandler::USER_KEY InputHandler::userKeyHold=InputHandler::KEY_NONE;
-	InputHandler::USER_KEY InputHandler::userKeyReleased= InputHandler::KEY_NONE;
+	std::map<InputHandler::USER_KEY, InputHandler::INPUT_ACTION> InputHandler::keysActioned;
+	std::map<InputHandler::USER_BUTTON, InputHandler::INPUT_ACTION> InputHandler::buttonsActioned;
+
 	float InputHandler::xInput= 0;
 	float InputHandler::yInput= 0;
 	float InputHandler::xMousePos= 0;
 	float InputHandler::yMousePos= 0;
+	float InputHandler::xMouseInput= 0;
+	float InputHandler::yMouseInput= 0;
 
 	InputHandler::InputHandler()
 	{
@@ -39,49 +41,92 @@ namespace VULKAN
 		return instance;
 	}
 
-	bool InputHandler::GetUserKeyHold(USER_KEY key)
+	bool InputHandler::GetUserInput(USER_KEY key, INPUT_ACTION action)
 	{
-		if (key== userKeyHold)
+
+		if (keysActioned.contains(key))
 		{
-			return true;
+			if (keysActioned.at(key) == action)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
 		}
 		else
 		{
 			return false;
 		}
+
 	}
 
-	bool InputHandler::GetUserKeyDown(USER_KEY key)
+	bool InputHandler::GetUserInput(USER_BUTTON key, INPUT_ACTION action)
 	{
-		if (key== userKeyDown)
+
+		if (buttonsActioned.contains(key))
 		{
-			return true;
+			if (buttonsActioned.at(key) == action)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
 		}
 		else
 		{
 			return false;
 		}
+
+
 	}
 
-	bool InputHandler::GetUserKeyUp(USER_KEY key)
-	{
-		if (key == userKeyReleased)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
 
 	float InputHandler::GetCutomInput(CUSTOM_INPUT inputType)
 	{
+		bool movingX = false;
+		bool movingY = false;
 		switch (inputType)
 		{
 		case CUSTOM_INPUT::x:
+			if (GetUserInput(KEY_A, ACTION_HOLD)||GetUserInput(KEY_A, ACTION_DOWN) )
+			{
+				xInput = -1.0f;
+				movingX = true;
+			}
+			if (GetUserInput(KEY_D, ACTION_HOLD)||GetUserInput(KEY_D, ACTION_DOWN) )
+			{
+				xInput = 1.0f;
+				movingX = true;
+			}
+			if (!movingX)
+			{
+				yInput = 0.0f;
+			}
 			return xInput;
+
 		case CUSTOM_INPUT::y:
+
+			if (GetUserInput(KEY_W, ACTION_HOLD) || GetUserInput(KEY_W, ACTION_DOWN))
+			{
+				yInput = 1.0f;
+				movingY = true;
+			}
+			if (GetUserInput(KEY_S, ACTION_HOLD) || GetUserInput(KEY_S, ACTION_DOWN))
+			{
+				yInput = -1.0f;
+				movingY = true;
+			}
+			if (!movingY)
+			{
+				xInput = 0.0f;
+			}
+
 			return yInput;
 		}
 		
@@ -94,87 +139,113 @@ namespace VULKAN
 
 	glm::vec2 InputHandler::GetMouseInput()
 	{
+		return glm::vec2(xMouseInput, yMouseInput);
 	}
 
 	void InputHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 
-		userKeyDown = KEY_NONE;
-		userKeyHold = KEY_NONE;
-		userKeyReleased = KEY_NONE;
+		USER_KEY currentKey = KEY_NONE;
+		INPUT_ACTION currentAction = ACTION_NONE;
 
 
 		//keydown
 		if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-			userKeyDown = KEY_W;
-			yInput = 1;
+			currentKey = KEY_W;
+			currentAction = ACTION_DOWN;
 		}
 		if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-			userKeyDown = KEY_S;
-			yInput = -1;
+			currentKey = KEY_S;
+			currentAction = ACTION_DOWN;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			userKeyDown = KEY_D;
-			xInput = 1;
+			currentKey = KEY_D;
+			currentAction = ACTION_DOWN;
 		}
 		if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-			userKeyDown = KEY_A;
-			xInput = -1;
+			currentKey = KEY_A;
+			currentAction = ACTION_DOWN;
 		}
 		if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS) {
-			userKeyDown = KEY_LSHIFT;
-		}
-
-		//keyhold
-		if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
-			userKeyHold = KEY_W;
-			yInput = 1;
-		}
-		if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
-			userKeyHold = KEY_S;
-			yInput = -1;
-		}
-		if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
-			userKeyHold = KEY_D;
-			xInput = 1;
-		}
-		if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
-			userKeyHold = KEY_A;
-			xInput = -1;
-		}
-		if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_REPEAT) {
-			userKeyHold = KEY_LSHIFT;
+			currentKey = KEY_LSHIFT;
+			currentAction = ACTION_DOWN;
 		}
 
 		//release
-
-
 		if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
-			userKeyHold = KEY_W;
-			yInput = 0;
+			currentKey = KEY_W;
+			currentAction = ACTION_RELEASE;
 		}
 		if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-			userKeyHold = KEY_S;
-			yInput = 0;
+			currentKey = KEY_S;
+			currentAction = ACTION_RELEASE;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
-			userKeyHold = KEY_D;
-			xInput = 0;
+			currentKey = KEY_D;
+			currentAction = ACTION_RELEASE;
 		}
 		if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
-			userKeyHold = KEY_A;
-			xInput = 0;
+			currentKey = KEY_A;
+			currentAction = ACTION_RELEASE;
 		}
 		if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
-			userKeyHold = KEY_LSHIFT;
+			currentKey = KEY_LSHIFT;
+			currentAction = ACTION_RELEASE;
 		}
 
-
+		if (keysActioned.contains(currentKey))
+		{
+			keysActioned.at(currentKey) = currentAction;
+		}
+		else
+		{
+			keysActioned.try_emplace(currentKey, currentAction);
+		}
+		
 
 	}
 
 	void InputHandler::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
+
+
+		USER_BUTTON currentButton = BUTTON_NONE;
+		INPUT_ACTION currentActionMade = ACTION_NONE;
+
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+		{
+			currentButton = BUTTON_MOUSE0;
+			currentActionMade = ACTION_DOWN;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		{
+			currentButton = BUTTON_MOUSE1;
+			currentActionMade = ACTION_DOWN;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+		{
+			currentButton = BUTTON_MOUSE0;
+			currentActionMade = ACTION_RELEASE;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+		{
+			currentButton = BUTTON_MOUSE1;
+			currentActionMade = ACTION_RELEASE;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+
+		if (buttonsActioned.contains(currentButton))
+		{
+			buttonsActioned.at(currentButton) = currentActionMade;
+		}
+		else
+		{
+			buttonsActioned.try_emplace(currentButton, currentActionMade);
+		}
 
 	}
 	void InputHandler::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -203,5 +274,34 @@ namespace VULKAN
 	{
 	}
 
+	void InputHandler::UpdateInputStates()
+	{
+
+		for (auto& key : keysActioned)
+		{
+			if (key.second== ACTION_RELEASE)
+			{
+				key.second = ACTION_NONE;
+			}
+			if (key.second== ACTION_DOWN)
+			{
+				key.second = ACTION_HOLD;
+			}
+		}
+		for (auto& key : buttonsActioned)
+		{
+			if (key.second== ACTION_RELEASE)
+			{
+				key.second = ACTION_NONE;
+			}
+			if (key.second== ACTION_DOWN)
+			{
+				key.second = ACTION_HOLD;
+			}
+		}
+
+
+
+	}
 }
 

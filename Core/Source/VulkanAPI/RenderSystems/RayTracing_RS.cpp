@@ -5,12 +5,13 @@
 
 
 namespace VULKAN {
+
 	RayTracing_RS::RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer):myDevice(device), myRenderer(renderer)
 	{
 		cam.SetPerspective(100.0f, (float)800 / (float)600, 0.1f, 512.0f);
 		cam.position=(glm::vec3(0.0f, 4.0f, 0.0f));
 		cam.currentMode = CameraMode::E_Free;
-        cam.SetLookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+        //cam.SetLookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 	
 	void RayTracing_RS::LoadFunctionsPointers()

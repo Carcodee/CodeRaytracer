@@ -29,6 +29,7 @@ namespace VULKAN
 		}
 		if (currentMode==CameraMode::E_Free)
 		{
+
 			SetPosition();
 		}
 	}
@@ -51,26 +52,77 @@ namespace VULKAN
 	void Camera::SetPosition()
 	{
 		
-		matrices.view = glm::translate(glm::mat4(1.0f), position);
+		matrices.view = glm::lookAt(position, position+forward, up);
+
+		//matrices.view = glm::translate(glm::mat4(1.0f), position);
 	}
 
-	void Camera::Move(float x, float y,float z, float deltaTime)
+	void Camera::Move(float deltaTime)
 	{
 
+		InputHandler * instanceSingleton= InputHandler::GetInstance();
+		if (instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE0, InputHandler::ACTION_HOLD) ||instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE1, InputHandler::ACTION_HOLD))
+		{
+			RotateCamera();
+		}
+		else
+		{
+			firstMouse = true;
+		}
 
-		glm::vec3 dir(x, y, z);
+		float inputX = instanceSingleton->GetCutomInput(InputHandler::x);
+		float inputY = instanceSingleton->GetCutomInput(InputHandler::y);
 		glm::vec3 lastPos = position;
-		position += dir * movementSpeed * deltaTime;
-		//std::cout << "Position: (" << position.x << ", " << position.y << ", " << position.z << ")\n";
+		position += forward * inputY * movementSpeed * deltaTime;
+		position += right * inputX  * movementSpeed * deltaTime;
 
 		UpdateCamera();
 	}
 
-	void Camera::RotateCamera(float deltaTime)
+	void Camera::RotateCamera()
 	{
+
 		InputHandler * instanceSingleton= InputHandler::GetInstance();
-		glm::vec2 input = instanceSingleton->GetMouseInput();
-		currentForwardAngle += input * rotationSpeed * deltaTime;
+		glm::vec2 input = instanceSingleton->GetMousePos();
+
+
+		float currentX = input.x;
+		float currentY = input.y;
+
+		if (firstMouse)
+		{
+			lastX = currentX;
+			lastY = currentY;
+			firstMouse = false;
+		}
+
+		float xOffset =  lastX - currentX;
+		float yOffset =  lastY - currentY;
+
+		lastX = currentX;
+		lastY = currentY;
+
+		xOffset *= sens;
+		yOffset *= sens;
+		yaw += xOffset;
+		pitch += yOffset;
+
+		pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+		if (inverseY)
+		{
+			WorldUp = glm::vec3(0.0f, -1.0f,0.0f);
+		}
+
+		glm::vec3 camForward;
+
+		camForward.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		camForward.y = sin(glm::radians(pitch));
+		camForward.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		forward = normalize(camForward);
+		right = normalize(cross(forward, WorldUp));
+		up = normalize(cross(right, forward));
+
 
 	}
 }

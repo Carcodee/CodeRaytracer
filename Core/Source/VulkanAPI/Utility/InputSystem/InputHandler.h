@@ -1,9 +1,14 @@
 #pragma once
+#include <map>
+#include <queue>
 #include <string>
+#include <vector>
 #include <GLFW/glfw3.h>
 
 
 #include <glm/vec2.hpp>
+
+#include "GLFW/glfw3native.h"
 
 namespace VULKAN
 {
@@ -25,28 +30,53 @@ namespace VULKAN
 			KEY_S,
 			KEY_D,
 			KEY_LSHIFT,
+		};
+
+		enum USER_BUTTON
+		{
+			BUTTON_NONE,
 			BUTTON_MOUSE0,
 			BUTTON_MOUSE1
 		};
+
+		enum INPUT_ACTION 
+		{
+			ACTION_NONE = 0,
+			ACTION_DOWN = 1,
+			ACTION_HOLD = 2,
+			ACTION_RELEASE = 3
+		};
+
 
 		enum CUSTOM_INPUT 
 		{
 			x,
 			y
 		};
-		bool GetUserKeyHold(USER_KEY key);
-		bool GetUserKeyDown(USER_KEY key);
-		bool GetUserKeyUp(USER_KEY key);
-		float GetCutomInput (CUSTOM_INPUT inputType);
+
+		struct InputState
+		{
+			INPUT_ACTION currentAction = ACTION_NONE;
+			USER_KEY currentKey = KEY_NONE;
+			bool keyDownDone = false;
+		};
+
+
+
+		static bool GetUserInput(USER_KEY key, INPUT_ACTION action);
+		static bool GetUserInput(USER_BUTTON key, INPUT_ACTION action);
+
+		static float GetCutomInput (CUSTOM_INPUT inputType);
+		static void UpdateInputStates();
+
 		glm::vec2 GetMousePos();
 		glm::vec2 GetMouseInput();
 
+		static std::map<USER_KEY, INPUT_ACTION> keysActioned;
+		static std::map<USER_BUTTON, INPUT_ACTION> buttonsActioned;
+		static bool isMouseInsideViewport;
 	protected:
 
-
-		static USER_KEY userKeyDown;
-		static USER_KEY userKeyHold;
-		static USER_KEY userKeyReleased;
 		static float xInput;
 		static float yInput;
 		static float xMousePos;
@@ -62,6 +92,8 @@ namespace VULKAN
 		static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos);
 		static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 		static GLFWwindow* userWindow;
+
+		float timeForDeletionKey;
 
 
 	};

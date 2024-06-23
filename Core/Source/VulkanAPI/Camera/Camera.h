@@ -28,21 +28,31 @@ namespace VULKAN
 		void SetPerspective(float fov, float aspect, float znear, float zfar);
 		void SetLookAt(glm::vec3 targetPosition);	
 		void SetPosition();	
-		void Move(float x, float y,float z, float deltaTime);
-		void RotateCamera(float deltaTime);
+		void Move(float deltaTime);
+		void RotateCamera();
 
 		
+		glm::vec3 WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 		glm::vec3 position;
+
+		glm::vec3 forward = glm::vec3(0.0f, 0.0f, 1.0f);
+		glm::vec3 right;
+		glm::vec3 up;
 		glm::vec3 lookAt = glm::vec3(0.0f);
 
 		glm::vec3 rotX = glm::vec3(0.0f);
 		glm::vec3 rotZ = glm::vec3(0.0f);
 		glm::vec3 rotY = glm::vec3(0.0f);
-		glm::vec2 currentForwardAngle = glm::vec3(0.0f);
 
+		float yaw = -90;
+		float pitch = -90;
+		float lastX;
+		float lastY;
+		float sens = .4f;
+		bool firstMouse = true;
+		bool inverseY = true;
 		CameraMode currentMode = CameraMode::E_Fixed;
-
-		float rotationSpeed = 1.0f;
 		float movementSpeed = 5.0f;
 
 	};

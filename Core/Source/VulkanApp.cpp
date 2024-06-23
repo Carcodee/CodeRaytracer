@@ -197,7 +197,7 @@ namespace VULKAN{
 			rayTracing_RS.light.pos = glm::make_vec3(imgui_RS.lightPos);
 			rayTracing_RS.light.intensity = imgui_RS.lightIntensity;
 			InputHandler* instanceSingleton = InputHandler::GetInstance();
-			rayTracing_RS.cam.Move(instanceSingleton->GetCutomInput(InputHandler::CUSTOM_INPUT::x), instanceSingleton->GetCutomInput(InputHandler::CUSTOM_INPUT::y), 0, deltaTime);
+			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
 
@@ -308,6 +308,7 @@ namespace VULKAN{
 			deltaTime = (currentTime - lastDeltaTime);
 			lastDeltaTime = currentTime;
 			cicles++;
+			InputHandler::GetInstance()->UpdateInputStates();
 
 		}
 		vkDeviceWaitIdle(myDevice.device());
