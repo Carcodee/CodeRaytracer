@@ -128,7 +128,8 @@ void main()
   hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
   //hitValue = debugGeometryIndex;
   //hitValue = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  }
+  hitValue = diffuse.xyz;
+}
 
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
 

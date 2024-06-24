@@ -161,7 +161,7 @@ namespace VULKAN {
 		{
 
 			vertexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(vertexBuffer.buffer);
-			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + obj.combinedMesh.firstMeshIndex[i] * sizeof(uint32_t);
+			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + (obj.combinedMesh.firstMeshIndex[i] * sizeof(uint32_t));
 			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer);
 
 			VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
@@ -989,7 +989,7 @@ namespace VULKAN {
 	{
 
 		std::string assetPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath();
-		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject(assetPath+"/Models/House/House.obj");
+		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject(assetPath+"/Models/house2/house2.obj");
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain());
 		modelDatas.push_back(combinedMesh);

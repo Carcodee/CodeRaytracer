@@ -106,7 +106,7 @@ namespace VULKAN
 			}
 			if (!movingX)
 			{
-				yInput = 0.0f;
+				xInput = 0.0f;
 			}
 			return xInput;
 
@@ -124,7 +124,7 @@ namespace VULKAN
 			}
 			if (!movingY)
 			{
-				xInput = 0.0f;
+				yInput = 0.0f;
 			}
 
 			return yInput;

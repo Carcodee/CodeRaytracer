@@ -43,11 +43,17 @@ namespace VULKAN {
 					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
 				};
 				vertex.color = { 1.0f, 1.0f, 1.0f };
-				vertex.normal = {
-					attrib.normals[3 * index.normal_index + 0],
-					attrib.normals[3 * index.normal_index + 1],
-					attrib.normals[3 * index.normal_index + 2]
-				};
+				if (index.normal_index >= 0) {
+					vertex.normal = {
+						attrib.normals[3 * index.normal_index + 0],
+						attrib.normals[3 * index.normal_index + 1],
+						attrib.normals[3 * index.normal_index + 2]
+					};
+				}
+				else {
+					vertex.normal = { 0.0f, 0.0f, 0.0f }; // Default normal if not present
+				}
+
 				if (uniqueVertices.count(vertex)==0)
 				{
 					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
@@ -69,10 +75,10 @@ namespace VULKAN {
 		{
 			if (!reader.Error().empty())
 			{
-				PRINTLVK("Error from reader": )
-				PRINTLVK(reader.Error())
+				PRINTLVK("Error from reader":)
+					PRINTLVK(reader.Error())
 			}
-			
+
 		}
 		if (!reader.Warning().empty()) {
 			std::cout << "TinyObjReader: " << reader.Warning();
@@ -89,20 +95,20 @@ namespace VULKAN {
 		std::vector<uint32_t> firstMeshVertex;
 		std::vector<uint32_t> meshIndexCount;
 		std::vector<uint32_t> meshVertexCount;
-		std::map<int,Material> materialsDatas;
+		std::map<int, Material> materialsDatas;
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 		std::vector<int> materialIdsOnObject;
 
 		attrib = reader.GetAttrib();
 		shapes = reader.GetShapes();
 		materials = reader.GetMaterials();
-		ModelData modelData={};
+		ModelData modelData = {};
 		int meshCount = shapes.size();
 		int indexStartCounter = 0;
-		int vertexStartCouner= 0;
-		for (const auto& shape: shapes)
+		int vertexStartCouner = 0;
+		for (const auto& shape : shapes)
 		{
-			if (shape.mesh.material_ids.size()<=0||shape.mesh.material_ids[0]<=0)
+			if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] <= 0)
 			{
 				materialIdsOnObject.push_back(0);
 			}
@@ -114,7 +120,7 @@ namespace VULKAN {
 			bool firstVertexFinded = false;
 			int indexCount = 0;
 			int vertexCount = 0;
-			for (const auto&  index : shape.mesh.indices)
+			for (const auto& index : shape.mesh.indices)
 			{
 				Vertex vertex{};
 				vertex.position = {
@@ -123,16 +129,23 @@ namespace VULKAN {
 					attrib.vertices[3 * index.vertex_index + 2]
 				};
 				vertex.color = { 1.0f, 1.0f, 1.0f };
-				vertex.normal = {
-					attrib.normals[3 * index.normal_index + 0],
-					attrib.normals[3 * index.normal_index + 1],
-					attrib.normals[3 * index.normal_index + 2]
-				};
-				if (index.texcoord_index==-1)
+
+				if (index.normal_index >= 0) {
+					vertex.normal = {
+						attrib.normals[3 * index.normal_index + 0],
+						attrib.normals[3 * index.normal_index + 1],
+						attrib.normals[3 * index.normal_index + 2]
+					};
+				}
+				else {
+					vertex.normal = { 0.0f, 0.0f, 0.0f }; // Default normal if not present
+				}
+
+				if (index.texcoord_index == -1)
 				{
 					vertex.texCoord = {
 						0,
-						0	
+						0
 					};
 				}
 				else
@@ -142,8 +155,8 @@ namespace VULKAN {
 						1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
 					};
 				}
-				
-			if (uniqueVertices.count(vertex)==0){
+
+				if (uniqueVertices.count(vertex) == 0) {
 					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
 					vertices.push_back(vertex);
 
@@ -163,20 +176,21 @@ namespace VULKAN {
 				indices.push_back(uniqueVertices[vertex]);
 				indexStartCounter++;
 				indexCount++;
-				
+
 			}
 			meshIndexCount.push_back(indexCount);
 			meshVertexCount.push_back(vertexCount);
-			
+
 		}
 
 		int textureTotalSize = 0;
 
-		materialsDatas = LoadMaterialsFromObject(path, textureTotalSize);
+		materialsDatas = LoadMaterialsFromReader(reader, path, textureTotalSize);
 
 		std::vector<VKTexture>allTextures;
 
-		modelData = { vertices,indices, firstIndices, firstMeshVertex, materialIdsOnObject, meshIndexCount, meshVertexCount,materialsDatas,allTextures, textureTotalSize, meshCount};
+		std::cout << sizeof(Vertex) << "\n";
+		modelData = { vertices,indices, firstIndices, firstMeshVertex, materialIdsOnObject, meshIndexCount, meshVertexCount,materialsDatas,allTextures, textureTotalSize, meshCount };
 		return modelData;
 	}
 
@@ -285,6 +299,70 @@ namespace VULKAN {
 			matCount++;
 		}
 		
+		return materialsDatas;
+	}
+
+	std::map<int, Material> ModelLoaderHandler::LoadMaterialsFromReader(tinyobj::ObjReader reader ,std::string path, int& texturesSizes)
+	{
+		auto& materials = reader.GetMaterials();
+		std::unordered_set<std::string> unique_texturePaths;
+
+		int matCount = 0;
+		std::filesystem::path currentModelPath(path);
+		currentModelPath = currentModelPath.parent_path();
+
+		std::string texturesPath = currentModelPath.string() + "/textures/";
+		if (!std::filesystem::exists(currentModelPath))
+		{
+			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
+		}
+
+		std::map<int,Material> materialsDatas;
+
+		for (const auto& material : materials)
+		{
+
+			Material materialData{};
+			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
+			if (!material.diffuse_texname.empty()) {
+				std::string texturePathFinded = material.diffuse_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.alpha_texname.empty()) {
+				std::string texturePathFinded = material.alpha_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+
+			//if (!material.specular_texname.empty()) {
+			//	std::string texturePathFinded= material.specular_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.bump_texname.empty()) {
+			//	std::string texturePathFinded= material.bump_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.normal_texname.empty()) {
+			//	std::string texturePathFinded= material.normal_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+			//if (!material.ambient_texname.empty()) {
+			//	std::string texturePathFinded= material.ambient_texname;
+			//	FixMaterialPaths(texturePathFinded, texturePath);
+			//	unique_texturePaths.insert(texturePathFinded);
+			//}
+
+			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
+			materialData.materialUniform.meshIndex = matCount;
+			materialsDatas.try_emplace(matCount, materialData);
+			unique_texturePaths.clear();
+			matCount++;
+		}
+
 		return materialsDatas;
 	}
 
