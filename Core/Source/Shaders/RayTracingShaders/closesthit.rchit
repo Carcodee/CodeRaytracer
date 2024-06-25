@@ -22,6 +22,7 @@ struct MaterialData {
 
 struct MeshData {
     int materialIndexOnShape;
+    int geometryIndexStartOffset;
 };
 
 
@@ -95,9 +96,15 @@ vec4 GetColorOrDiffuseTex(vec2 uv);
 void main()
 {
 
-  int index1= int(indices[3 * gl_PrimitiveID + 0].index);
-  int index2= int(indices[3 * gl_PrimitiveID + 1].index);
-  int index3= int(indices[3 * gl_PrimitiveID + 2].index);
+
+  int primitiveIndex=int(meshesData[gl_GeometryIndexEXT].geometryIndexStartOffset);
+
+  int idx1= primitiveIndex + (3 * gl_PrimitiveID + 0);
+  int idx2= primitiveIndex + (3 * gl_PrimitiveID + 1);
+  int idx3= primitiveIndex + (3 * gl_PrimitiveID + 2);
+  int index1= int(indices[idx1].index);
+  int index2= int(indices[idx2].index);
+  int index3= int(indices[idx3].index);
 
   Vertex v1 = vertices[index1];
   Vertex v2 = vertices[index2];
@@ -110,6 +117,8 @@ void main()
   vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
   normal=normalize(normal);
 
+  //materials
+
   int materialIndex= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
   int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
   int materialTextureSizes =materials[materialIndex].textureSizes;
@@ -118,17 +127,30 @@ void main()
   
   vec4 diffuse=GetColorOrDiffuseTex(uv);
 
-  vec3 debuging=GetDebugCol(gl_PrimitiveID,  3828.0);
-  vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
-
-
   
-  vec3 normDebug= vec3(1.0);
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
+  //hitValue = diffuse.xyz;
+  //1724928
+  //550091
+//
+//  if(gl_GeometryIndexEXT == 21){
+//  
+//    hitValue = vec3(1.0, 0.0, 0.0);
+//    if(primitiveIndex>=1724928){
+//        hitValue = vec3(0.0, 0.0, 1.0);
+//    }
+//  }
+//  else{
+//    hitValue = vec3(0.0); 
+//  }
+
+  //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
+  //vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
+  //hitValue = debuging;
   //hitValue = debugGeometryIndex;
   //hitValue = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  hitValue = diffuse.xyz;
+  //hitValue = normDebug;
 }
 
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){

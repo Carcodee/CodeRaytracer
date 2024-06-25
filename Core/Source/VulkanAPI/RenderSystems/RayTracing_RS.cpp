@@ -185,8 +185,8 @@ namespace VULKAN {
 			maxPrimitiveCounts.push_back(obj.combinedMesh.meshIndexCount[i]/3);
 
 			VkAccelerationStructureBuildRangeInfoKHR accelerationStructureBuildRangeInfo{};
-			accelerationStructureBuildRangeInfo.primitiveCount = maxPrimitiveCounts[i];
-			accelerationStructureBuildRangeInfo.primitiveOffset = 0;
+			accelerationStructureBuildRangeInfo.primitiveCount = obj.combinedMesh.meshIndexCount[i]/3;
+			accelerationStructureBuildRangeInfo.primitiveOffset =0;
 			accelerationStructureBuildRangeInfo.firstVertex = 0;
 			accelerationStructureBuildRangeInfo.transformOffset = 0;
 			buildRangeInfos.push_back(accelerationStructureBuildRangeInfo);
@@ -783,11 +783,11 @@ namespace VULKAN {
 
 		for (int i = 0; i < modelDatas.size(); ++i)
 		{
-			for (auto modelData : modelDatas[i].materialIds)
+			for (int j=0 ; j < modelDatas[i].meshCount ; j++)
 			{
 				ModelDataUniformBuffer myModelDataUniformBuffer={};
-
-				myModelDataUniformBuffer.materialIndex = modelData;
+				myModelDataUniformBuffer.materialIndex = modelDatas[i].materialIds[j];
+				myModelDataUniformBuffer.geometryIndexStart = modelDatas[i].firstMeshIndex[j];
 				modelDataUniformBuffer.push_back(myModelDataUniformBuffer);
 				//modelDataUniformBuffer.insert(modelDataUniformBuffer.begin(),myModelDataUniformBuffer);
 			}

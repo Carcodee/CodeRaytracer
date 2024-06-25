@@ -200,11 +200,6 @@ namespace VULKAN{
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
-
-			//forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
-			//forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
-			//forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
-
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
 

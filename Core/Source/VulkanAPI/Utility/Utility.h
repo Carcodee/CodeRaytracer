@@ -41,6 +41,7 @@ namespace VULKAN{
 		struct ModelDataUniformBuffer 
 		{
 			uint32_t materialIndex;
+			uint32_t geometryIndexStart;
 		};
 		struct Material
 		{
