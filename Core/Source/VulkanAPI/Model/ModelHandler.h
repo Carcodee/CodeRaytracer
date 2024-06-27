@@ -17,7 +17,9 @@ namespace VULKAN
 
 		static ModelHandler *GetInstance();
 
+		std::vector<std::string> queryModelPathsToHandle;
 		std::map<int,std::vector<RayTracing_RS::BottomLevelObj>> bottomLevelObjects;
+
 
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
 		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);

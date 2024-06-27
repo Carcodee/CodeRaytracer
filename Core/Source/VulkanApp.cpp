@@ -5,6 +5,7 @@
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 #include <string>
 
+#include "VulkanAPI/Model/ModelHandler.h"
 #include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 int cicles=0;
@@ -196,10 +197,26 @@ namespace VULKAN{
 			rayTracing_RS.light.color = glm::make_vec3(imgui_RS.lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(imgui_RS.lightPos);
 			rayTracing_RS.light.intensity = imgui_RS.lightIntensity;
-			InputHandler* instanceSingleton = InputHandler::GetInstance();
+
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
+			if (ModelHandler::GetInstance()->queryModelPathsToHandle.size()>0)
+			{
+				for (int i = 0; i < ModelHandler::GetInstance()->queryModelPathsToHandle.size(); ++i)
+				{
+
+					rayTracing_RS.AddModelToPipeline(ModelHandler::GetInstance()->queryModelPathsToHandle[i]);
+					
+				}
+				ModelHandler::GetInstance()->queryModelPathsToHandle.clear();
+				if (rayTracing_RS.updateDescriptorData)
+				{
+					rayTracing_RS.UpdateDescriptorData();
+					rayTracing_RS.updateDescriptorData = false;
+				}
+
+			}
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
 
@@ -281,6 +298,8 @@ namespace VULKAN{
 				imgui_RS.WasWindowResized();
 				renderer.BeginDynamicRenderPass(commandBuffer, renderingInfo);
 				imgui_RS.BeginFrame();
+
+				
 				editorContext();
 				imgui_RS.EndFrame();
 				imgui_RS.UpdateBuffers();

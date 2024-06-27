@@ -871,6 +871,7 @@ namespace VULKAN {
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
+
 		VkPhysicalDeviceFeatures deviceFeatures = {};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -893,26 +894,36 @@ namespace VULKAN {
 			VK_TRUE
 		};
 
-		VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
-			 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-			 &rtPipelineFeature,
-			 VK_TRUE,
-		};
+		//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
+		//	 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+		//	 &rtPipelineFeature,
+		//	 VK_TRUE,
+		//};
+		VkPhysicalDeviceRobustness2FeaturesEXT robustness2features{};
+		robustness2features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
+		robustness2features.nullDescriptor = VK_TRUE;
+		robustness2features.pNext = &rtPipelineFeature;
+
 		VkPhysicalDeviceVulkan12Features vulkan12Features{};
 		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		vulkan12Features.runtimeDescriptorArray = VK_TRUE; 
 		vulkan12Features.descriptorIndexing = VK_TRUE;
 		vulkan12Features.scalarBlockLayout = VK_TRUE;
 		vulkan12Features.bufferDeviceAddress = VK_TRUE;
-		VkPhysicalDeviceVulkan13Features features{};
-		vulkan12Features.pNext = &dynamic_rendering_feature;
+		vulkan12Features.descriptorBindingPartiallyBound = VK_TRUE;
+		vulkan12Features.descriptorBindingVariableDescriptorCount = VK_TRUE;
+		vulkan12Features.pNext = &robustness2features;
 
-
+		VkPhysicalDeviceVulkan13Features vulkan13Features{};
+		vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		vulkan13Features.maintenance4 = VK_TRUE;
+		vulkan13Features.dynamicRendering = VK_TRUE;
+		vulkan13Features.pNext = &vulkan12Features;
 		
-		createInfo.pNext = &vulkan12Features;
-		
+		createInfo.pNext = &vulkan13Features;
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
 
 		// might not really be necessary anymore because device specific validation layers
 		// have been deprecated

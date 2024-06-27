@@ -6,6 +6,7 @@
 
 #include <stb_image.h>
 
+#include "VulkanAPI/Model/ModelHandler.h"
 #include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 namespace VULKAN {
@@ -24,6 +25,7 @@ namespace VULKAN {
 		window = glfwCreateWindow(widht, height, appName.c_str(), nullptr, nullptr);
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+		glfwSetDropCallback(window, dropCallback);
 		if (window!=nullptr)
 		{
 			std::cout << "GLFW initialized" << std::endl;
@@ -64,6 +66,14 @@ namespace VULKAN {
 		myWindow->height = height;
 
 	}
- }
+
+	void VulkanInit::dropCallback(GLFWwindow* window, int count, const char** paths)
+	{
+		for (int i = 0; i < count; ++i)
+		{
+			ModelHandler::GetInstance()->queryModelPathsToHandle.push_back(std::string(paths[i]));
+		}
+	}
+}
 
 

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "VulkanAPI/Model/ModelHandler.h"
+
 
 namespace VULKAN
 {
@@ -435,8 +437,16 @@ namespace VULKAN
 		ImGui::SliderFloat3("light Pos", lightPos, -50.0f, 50.0f, "%.3f");
 		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
 		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
+		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+		if (ImGui::Button("Confirm"))
+		{
+			ModelHandler::GetInstance()->queryModelPathsToHandle.push_back(modelImporterText);
+		}
 
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+
+
+
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
 		// and handle the pass-thru hole, so we ask Begin() to not render a background.
 		//if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))

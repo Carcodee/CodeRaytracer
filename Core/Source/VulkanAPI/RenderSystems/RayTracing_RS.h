@@ -55,6 +55,7 @@ namespace VULKAN {
 			std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
 			AccelerationStructure BottomLevelAs;
 			std::vector<RxTexture> materialsData;
+			uint32_t indexOffset = 0;
 
 			glm::vec3 pos;
 			glm::vec3 rot;
@@ -106,6 +107,7 @@ namespace VULKAN {
 		PFN_vkCreateRayTracingPipelinesKHR vkCreateRayTracingPipelinesKHR;
 
 		bool readyToDraw = false;
+		bool updateDescriptorData = false;
 
 		VKTexture* storageImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
@@ -114,6 +116,9 @@ namespace VULKAN {
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
 		void TransitionStorageImage();
+
+		void AddModelToPipeline(std::string path);
+		void UpdateDescriptorData();
 
 	private:
 		struct UniformData {
@@ -125,7 +130,7 @@ namespace VULKAN {
 
 		std::vector<ModelData>modelDatas;
 		//helpers
-		void SetupBottomLevelObj();
+		void SetupBottomLevelObj(std::string path = "");
 		void LoadFunctionsPointers();
 		void UpdateUniformbuffers();
 		RayTracingScratchBuffer CreateScratchBuffer(VkDeviceSize size);
@@ -151,6 +156,7 @@ namespace VULKAN {
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};
 		VkPhysicalDeviceRayTracingPipelinePropertiesKHR  rayTracingPipelineProperties{};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures{};
+		std::vector<VkWriteDescriptorSet> writeDescriptorSets{};
 
 
 		VkPipeline pipeline;
@@ -177,6 +183,7 @@ namespace VULKAN {
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
 
+		bool invalidModelToLoad = false;
 	};
 
 }

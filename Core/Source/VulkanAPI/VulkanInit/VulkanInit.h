@@ -65,6 +65,7 @@ namespace VULKAN {
 		int height;
 
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+		static void dropCallback(GLFWwindow* window, int count, const char** paths);
 		bool framebufferResized = false;
 
 		std::string appName;

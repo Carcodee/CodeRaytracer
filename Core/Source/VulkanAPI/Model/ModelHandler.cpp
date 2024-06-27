@@ -53,7 +53,6 @@ namespace VULKAN
 
 	RayTracing_RS::BottomLevelObj& ModelHandler::GetBLASFromTLAS(RayTracing_RS::TopLevelObj TLAS, int index)
 	{
-
 		return bottomLevelObjects.at(TLAS.TLASID)[index];
 	}
 }

@@ -7,6 +7,13 @@
 
 
 
+struct TexturesFinded{
+    vec4 diffuse;
+    vec4 alpha;
+    vec4 specular;
+    vec4 bump;
+    vec4 ambient;
+};
 struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
@@ -85,6 +92,11 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
 }
 
 #define MAX_TEXTURES 5
+#define DIFFUSE_TEX 0 
+#define ALPHA_TEX 1 
+#define SPECULAR_TEX 2 
+#define BUMP_TEX 3 
+#define AMBIENT_TEX 4 
 
 vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
@@ -95,7 +107,7 @@ vec4 GetColorOrDiffuseTex(vec2 uv);
 
 void main()
 {
-
+    
 
   int primitiveIndex=int(meshesData[gl_GeometryIndexEXT].geometryIndexStartOffset);
 
@@ -176,11 +188,11 @@ vec3 GetDiffuseColor(int materialIndex){
    return diffuse;
 }
 vec4 GetColorOrDiffuseTex(vec2 uv){
+
     if(texturesOnMaterialCount>0){
-        vec4 diffuseText = CurrentMaterialTextures[0];
+        vec4 diffuseText = CurrentMaterialTextures[DIFFUSE_TEX];
         return diffuseText;
     }else{
-
         int index= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
         vec3 diffuseCol=GetDiffuseColor(index); 
         return vec4(diffuseCol, 1.0);
@@ -188,3 +200,4 @@ vec4 GetColorOrDiffuseTex(vec2 uv){
 
 
 }
+

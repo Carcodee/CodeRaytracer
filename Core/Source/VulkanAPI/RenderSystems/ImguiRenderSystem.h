@@ -30,28 +30,8 @@ namespace VULKAN
 			glm::vec2 translate;
 		} myPushConstBlock;
 
-		ImguiRenderSystem& operator=(ImguiRenderSystem& other)
-		{
-			this->pipelineLayout = other.pipelineLayout;
-			this->transitionImage= other.transitionImage;
-			this->descriptorSetLayoutBindings= std::move(other.descriptorSetLayoutBindings);
-			this->descriptorSetLayout= other.descriptorSetLayout;
-			this->descriptorSets= other.descriptorSets;
-			this->imguiPool= other.imguiPool;
-			this->uniformBuffers= std::move(other.uniformBuffers);
-			this->uniformBuffersMemory= std::move(other.uniformBuffersMemory);
-			this->uniformBuffersMapped= std::move(other.uniformBuffersMapped);
-			this->vulkanStyle= other.vulkanStyle;
-			this->vertexBuffer= std::move(other.vertexBuffer);
-			this->indexBuffer= std::move(other.indexBuffer);
-			this->vertexCount= other.vertexCount;
-			this->indexCount= other.indexCount;
-			this->myWindow= other.myWindow;
-			this->viewportSampler= other.viewportSampler;
-			this->vpDescriptorSet= other.vpDescriptorSet;
-			this->pipelineReader= std::move(other.pipelineReader);
-			return *this;
-		}
+		ImguiRenderSystem& operator=(ImguiRenderSystem& other) = delete;
+
 		ImguiRenderSystem ( VulkanRenderer& renderer, MyVulkanDevice& myDevice);
 		~ImguiRenderSystem();
 		void CreatePipeline();
@@ -65,6 +45,7 @@ namespace VULKAN
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
 		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor);
+
 		bool transitionImage= false;
 
 		void AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor);
@@ -85,6 +66,7 @@ namespace VULKAN
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
 		float lightCol[3] = { 1.0f, 1.0f, 1.0f };
 		float lightIntensity = 1.0f;
+		char modelImporterText[128];
 
 	private:
 		void SetStyle(uint32_t index);

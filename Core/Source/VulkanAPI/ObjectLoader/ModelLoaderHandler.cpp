@@ -189,8 +189,7 @@ namespace VULKAN {
 
 		std::vector<VKTexture>allTextures;
 
-		std::cout << sizeof(Vertex) << "\n";
-		modelData = { vertices,indices, firstIndices, firstMeshVertex, materialIdsOnObject, meshIndexCount, meshVertexCount,materialsDatas,allTextures, textureTotalSize, meshCount };
+		modelData = { vertices,indices, firstIndices, firstMeshVertex, materialIdsOnObject, meshIndexCount, meshVertexCount,materialsDatas,allTextures, textureTotalSize, meshCount, 0 };
 		return modelData;
 	}
 
@@ -271,26 +270,26 @@ namespace VULKAN {
 				unique_texturePaths.insert(texturePathFinded);
 			}
 
-			//if (!material.specular_texname.empty()) {
-			//	std::string texturePathFinded= material.specular_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.bump_texname.empty()) {
-			//	std::string texturePathFinded= material.bump_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.normal_texname.empty()) {
-			//	std::string texturePathFinded= material.normal_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.ambient_texname.empty()) {
-			//	std::string texturePathFinded= material.ambient_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
+			if (!material.specular_texname.empty()) {
+				std::string texturePathFinded= material.specular_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.bump_texname.empty()) {
+				std::string texturePathFinded= material.bump_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.normal_texname.empty()) {
+				std::string texturePathFinded= material.normal_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.ambient_texname.empty()) {
+				std::string texturePathFinded= material.ambient_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
 			materialData.materialUniform.meshIndex = matCount;
@@ -335,26 +334,26 @@ namespace VULKAN {
 				unique_texturePaths.insert(texturePathFinded);
 			}
 
-			//if (!material.specular_texname.empty()) {
-			//	std::string texturePathFinded= material.specular_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.bump_texname.empty()) {
-			//	std::string texturePathFinded= material.bump_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.normal_texname.empty()) {
-			//	std::string texturePathFinded= material.normal_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.ambient_texname.empty()) {
-			//	std::string texturePathFinded= material.ambient_texname;
-			//	FixMaterialPaths(texturePathFinded, texturePath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
+			if (!material.specular_texname.empty()) {
+				std::string texturePathFinded= material.specular_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.bump_texname.empty()) {
+				std::string texturePathFinded= material.bump_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.normal_texname.empty()) {
+				std::string texturePathFinded= material.normal_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
+			if (!material.ambient_texname.empty()) {
+				std::string texturePathFinded= material.ambient_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+			}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
 			materialData.materialUniform.meshIndex = matCount;

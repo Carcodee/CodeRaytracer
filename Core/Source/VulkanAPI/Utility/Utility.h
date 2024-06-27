@@ -76,6 +76,9 @@ namespace VULKAN{
 			std::vector<VKTexture>allTextures;
 			int textureSizes;
 			int meshCount;
+			uint32_t indexBLASOffset = 0;
+			uint32_t vertexBLASOffset = 0;
+			uint32_t transformBLASOffset = 0;
 			void CreateAllTextures(VulkanSwapChain& swap_chain)
 			{
 				for (int i = 0; i < materialDataPerMesh.size(); ++i)

@@ -149,7 +149,9 @@ class MyVulkanDevice {
                                                       VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
                                                       VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
                                                       VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
-                                                      VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME};
+                                                      VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
+                                                      VK_EXT_ROBUSTNESS_2_EXTENSION_NAME,
+														};
   														
 
 
