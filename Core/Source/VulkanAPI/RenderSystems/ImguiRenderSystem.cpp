@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "VulkanAPI/Model/ModelHandler.h"
+#include "VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h"
 
 
 namespace VULKAN
@@ -416,7 +417,7 @@ namespace VULKAN
 		int height = 0;
 		glfwGetWindowSize(myWindow,&width,&height);
 		ImGui::SetWindowSize(ImVec2(width, height));
-		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus );
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 		//ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
 		for (auto& imageDescriptorSet : imagesToCreate)
@@ -424,7 +425,9 @@ namespace VULKAN
 			ImGui::Image((ImTextureID)imageDescriptorSet.descriptor, ImVec2(viewportSize.x, viewportSize.y));
 		}
 
-		ImGui::End(); // End DockSpace Demo window
+		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
+
+		ImGui::End(); 
 		// Make the window full-screen and set the dock space
 
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -438,6 +441,7 @@ namespace VULKAN
 		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
 		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
 		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+
 		if (ImGui::Button("Confirm"))
 		{
 			ModelHandler::GetInstance()->queryModelPathsToHandle.push_back(modelImporterText);

@@ -6,6 +6,7 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
 
+#include "../UtilsShaders/ShadersUtility.glsl"
 
 struct TexturesFinded{
     vec4 diffuse;

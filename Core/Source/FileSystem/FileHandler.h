@@ -20,11 +20,15 @@ namespace HELPERS
 		std::string GetAssetsPath();
 		bool IsPathInAssets(std::string path);
 		bool IsPathAbsolute(std::string path);
+		bool IsValidPath(std::string path);
 		std::string HandleModelFilePath(std::string path);
 		std::string GetPathExtension(std::string path);
+		uintmax_t GetFileSize(std::string path);
 		static FileHandler* GetInstance();
 		FileHandler(FileHandler& other) = delete;
 		void operator=(const FileHandler&) = delete;
+		static std::filesystem::path currentPathRelativeToAssets;
+
 
 	private:
 
@@ -32,6 +36,7 @@ namespace HELPERS
 		std::filesystem::path projectPath;
 		std::filesystem::path assetPath;
 		std::filesystem::path shadersPath;
-	};
+		
+		};
 
 }

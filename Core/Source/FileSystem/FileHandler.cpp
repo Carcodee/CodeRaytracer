@@ -6,6 +6,7 @@ namespace HELPERS
 {
 
 	FileHandler* FileHandler::instance = nullptr;
+	std::filesystem::path FileHandler::currentPathRelativeToAssets = std::filesystem::path();
 
 	FileHandler::FileHandler()
 	{
@@ -14,6 +15,7 @@ namespace HELPERS
 		projectPath = workingDir.parent_path();
 		assetPath = projectPath / "Core"/"Source" / "Resources" / "Assets";
 		shadersPath = projectPath / "Core"/ "Source" / "Shaders";
+		currentPathRelativeToAssets = assetPath;
 
 	}
 
@@ -56,11 +58,26 @@ namespace HELPERS
 		}
 	}
 
+	bool FileHandler::IsValidPath(std::string path)
+	{
+		if (IsPathAbsolute(path) || IsPathInAssets(path))
+		{
+			return true;
+		}
+		std::cout << path << "Not exist \n";
+		return false;
+	}
+
 	std::string FileHandler::HandleModelFilePath(std::string path)
 	{
 		std::filesystem::path newPath = "";
 
 		std::string extension = GetPathExtension(path);
+
+		if (!IsValidPath(path))
+		{
+			return "";
+		}
 		if (extension!= "obj")
 		{
 			std::cout << "Path is not the expected extension: " + extension << "\n";
@@ -75,6 +92,8 @@ namespace HELPERS
 		{
 			return path;
 		}
+
+		return path;
 	}
 
 	std::string FileHandler::GetPathExtension(std::string path)
@@ -86,8 +105,22 @@ namespace HELPERS
 		}
 		std::string extension = path.erase(0, extensionPos + 1);
 		return extension;
+	}
 
+	uintmax_t FileHandler::GetFileSize(std::string path)
+	{
+		if (!std::filesystem::exists(path) && IsValidPath(path))
+		{
+			return 0;
+		}
+		if (!std::filesystem::is_regular_file(path))
+		{
+			std::cout << "Path: " << path << " Is not a file" << "\n";
+			return 0;
+		}
+		uintmax_t size = std::filesystem::file_size(path);
 
+		return size;
 
 	}
 }
