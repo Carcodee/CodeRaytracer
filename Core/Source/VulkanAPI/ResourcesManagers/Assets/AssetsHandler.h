@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "VulkanAPI/Utility/ISerializable.h"
+
 namespace VULKAN
 {
 	enum ASSET_TYPE
@@ -15,7 +17,7 @@ namespace VULKAN
 		MATERIAL,
 		MODEL
 	};
-	struct AssetData
+	struct AssetData: ISerializable<AssetData>
 	{
 		int assetId;
 		std::string name;
@@ -23,21 +25,38 @@ namespace VULKAN
 		std::string extensionType;
 		uintmax_t sizeInBytes;
 		ASSET_TYPE assetType;
+
+		AssetData Deserialize(nlohmann::json& jsonObj) override;
+		nlohmann::json Serialize() override;
+		void SaveData() override;
+
 	};
 
 	class AssetsHandler
 	{
 
 	protected:
+
+
 		static AssetsHandler* instance;
-		static std::map<std::string, AssetData> assets;
+		std::map<std::string, AssetData> assets;
+		std::map<std::string, AssetData> assetsOnLoad;
+
 		AssetsHandler();
-		void LoadAllAssets(std::filesystem::path path);
+		void SearchAllAssets(std::filesystem::path path);
+		void LoadMetadata(std::string path);
+		void CreateMetadata();
+		void SaveMetadataOnClose();
 		int assetCounter;
+
+		std::string assetFilepath ;
 
 	public:
 		
+		~AssetsHandler();
+		void AddAssetData(std::string path);
 		AssetData GetAssetData(std::string path);
+
 		static AssetsHandler* GetInstance();
 
 

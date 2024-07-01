@@ -26,8 +26,13 @@ namespace HELPERS
 		uintmax_t GetFileSize(std::string path);
 		static FileHandler* GetInstance();
 		FileHandler(FileHandler& other) = delete;
+		void DeleteLinesFromFile(std::string path, const std::vector<int>& linesToDelete);
 		void operator=(const FileHandler&) = delete;
-		static std::filesystem::path currentPathRelativeToAssets;
+		std::filesystem::path currentPathRelativeToAssets;
+
+		void CreateFile(std::string path,std::string data = "");
+		void AppendToFile(std::string path,std::string data);
+		std::string ReadFile(std::string path);
 
 
 	private:

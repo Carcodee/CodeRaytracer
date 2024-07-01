@@ -30,6 +30,7 @@ namespace VULKAN
 			KEY_S,
 			KEY_D,
 			KEY_LSHIFT,
+			KEY_DEL
 		};
 
 		enum USER_BUTTON

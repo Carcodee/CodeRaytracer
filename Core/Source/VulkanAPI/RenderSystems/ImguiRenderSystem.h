@@ -31,9 +31,9 @@ namespace VULKAN
 		} myPushConstBlock;
 
 		ImguiRenderSystem& operator=(ImguiRenderSystem& other) = delete;
+		~ImguiRenderSystem();
 
 		ImguiRenderSystem ( VulkanRenderer& renderer, MyVulkanDevice& myDevice);
-		~ImguiRenderSystem();
 		void CreatePipeline();
 		void CreatePipelineLayout();
 		void InitImgui();
@@ -50,6 +50,7 @@ namespace VULKAN
 
 		void AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor);
 		void AddSamplerAndViewForImage(VkSampler sampler, VkImageView view);
+		void CreateStyles();
 
 		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
@@ -81,6 +82,7 @@ namespace VULKAN
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 		std::vector<void*> uniformBuffersMapped;
 		ImGuiStyle vulkanStyle;
+		ImGuiStyle minimalistStyle;
 
 		Buffer vertexBuffer;
 		Buffer indexBuffer;

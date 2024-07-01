@@ -170,6 +170,10 @@ namespace VULKAN
 			currentKey = KEY_LSHIFT;
 			currentAction = ACTION_DOWN;
 		}
+		if (key == GLFW_KEY_DELETE && action == GLFW_PRESS) {
+			currentKey = KEY_DEL;
+			currentAction = ACTION_DOWN;
+		}
 
 		//release
 		if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
@@ -191,6 +195,10 @@ namespace VULKAN
 		if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
 			currentKey = KEY_LSHIFT;
 			currentAction = ACTION_RELEASE;
+		}
+		if (key == GLFW_KEY_DELETE && action == GLFW_RELEASE) {
+			currentKey = KEY_DEL;
+			currentAction = ACTION_DOWN;
 		}
 
 		if (keysActioned.contains(currentKey))

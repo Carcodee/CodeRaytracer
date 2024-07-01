@@ -1,12 +1,12 @@
 #include "FileHandler.h"
 
+#include <fstream>
 #include <iostream>
 
 namespace HELPERS
 {
 
 	FileHandler* FileHandler::instance = nullptr;
-	std::filesystem::path FileHandler::currentPathRelativeToAssets = std::filesystem::path();
 
 	FileHandler::FileHandler()
 	{
@@ -38,6 +38,86 @@ namespace HELPERS
 		return instance;
 	}
 
+	void FileHandler::DeleteLinesFromFile(std::string path, const std::vector<int>& linesToDelete)
+	{
+		std::ifstream inputFile(path);
+		if (!inputFile)
+		{
+			std::cout << "filename: " << path << " could not opened \n";
+		}
+		int lineNumber;
+		std::string line;
+		std::vector<std::string> newFile;
+		while (std::getline(inputFile, line))
+		{
+			for (auto value : linesToDelete)
+			{
+				if (value!=lineNumber)
+				{
+					newFile.push_back(line);
+				}
+				
+			}
+			lineNumber++;
+			
+		}
+		std::ofstream outputFile(path);
+		if (!outputFile)
+		{
+			std::cout << "filename: " << path << " could not be changed \n";
+		}
+		for (auto line : newFile)
+		{
+			outputFile << line;
+		}
+		std::cout << "filename: " << path << " changed lines successfully \n";
+
+	}
+
+	void FileHandler::CreateFile(std::string path, std::string data)
+	{
+		std::ofstream outFile(path.c_str());
+		if (!outFile)
+		{
+			std::cout << "filename: " << path << " could not be created \n";
+		}
+		outFile << data << "\n";
+
+		outFile.close();
+
+		std::cout << "filename: " << path << " was successfully created \n";
+
+	}
+
+	void FileHandler::AppendToFile(std::string path, std::string data)
+	{
+		std::ofstream outFile(path.c_str(), std::ios::app);
+		if (!outFile)
+		{
+			std::cout << "filename: " << path << " could not be appended \n";
+		}
+		outFile << data << "\n";
+
+		outFile.close();
+
+		std::cout << "filename: " << path << " was successfully appended \n";
+
+	}
+
+	std::string FileHandler::ReadFile(std::string path)
+	{
+		std::ifstream inFile(path);
+		std::string data;
+
+
+		while (std::getline(inFile, data))
+		{
+			
+		}
+		return data;
+		
+	}
+
 	bool FileHandler::IsPathInAssets(std::string path)
 	{
 		std::filesystem::path relativeToAssetsPath(path);
@@ -47,6 +127,7 @@ namespace HELPERS
 		{
 			return false;
 		}
+		return true;
 
 	}
 
@@ -56,6 +137,7 @@ namespace HELPERS
 		{
 			return false;
 		}
+		return true;
 	}
 
 	bool FileHandler::IsValidPath(std::string path)
@@ -78,7 +160,7 @@ namespace HELPERS
 		{
 			return "";
 		}
-		if (extension!= "obj")
+		if (extension!= ".obj")
 		{
 			std::cout << "Path is not the expected extension: " + extension << "\n";
 			return "";
@@ -103,7 +185,7 @@ namespace HELPERS
 		{
 			return "";
 		}
-		std::string extension = path.erase(0, extensionPos + 1);
+		std::string extension = path.erase(0, extensionPos);
 		return extension;
 	}
 

@@ -9,11 +9,14 @@
 namespace VULKAN
 {
 	ResourcesUIHandler* ResourcesUIHandler::instance = nullptr;
-	HELPERS::FileHandler* fileHandlerInstanceRef = HELPERS::FileHandler::GetInstance();
-	AssetsHandler* assetInstanceRef = AssetsHandler::GetInstance();
+	HELPERS::FileHandler* fileHandlerInstanceRef;
+	AssetsHandler* assetInstanceRef;
 
 	ResourcesUIHandler::ResourcesUIHandler()
 	{
+		fileHandlerInstanceRef = HELPERS::FileHandler::GetInstance();
+		assetInstanceRef= AssetsHandler::GetInstance();
+
 		
 	}
 
@@ -48,8 +51,8 @@ namespace VULKAN
 			}
 			else
 			{
+				fileHandlerInstanceRef->currentPathRelativeToAssets = fileHandlerInstanceRef->currentPathRelativeToAssets.parent_path();
 			}
-			fileHandlerInstanceRef->currentPathRelativeToAssets = fileHandlerInstanceRef->currentPathRelativeToAssets.parent_path();
 		}
 
 
@@ -69,21 +72,23 @@ namespace VULKAN
 				{
 					fileHandlerInstanceRef->currentPathRelativeToAssets = std::filesystem::path(element.path());
 				}
+
+				ImGui::NextColumn();
 			}
-			if (asset.assetType == FILE || asset.assetType == MODEL || asset.assetType == IMAGE)
+			else if (asset.assetType == FILE || asset.assetType == MODEL || asset.assetType == IMAGE)
 			{
-				if(ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
+				if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
 				{
-					std::cout << "Opening: "<< asset.absolutePath <<"\n";
-					std::cout << "Id: "<< asset.assetId<< "\n";
-					std::cout << "assetType: "<< asset.assetType<<"\n";
-					std::cout << "size: "<< asset.sizeInBytes <<"\n";
-					std::cout << "extensionType: "<< asset.extensionType<<"\n";
+					std::cout << "Opening: " << asset.absolutePath << "\n";
+					std::cout << "Id: " << asset.assetId << "\n";
+					std::cout << "assetType: " << asset.assetType << "\n";
+					std::cout << "size: " << asset.sizeInBytes << "\n";
+					std::cout << "extensionType: " << asset.extensionType << "\n";
 				}
+
+				ImGui::NextColumn();
 			}
 
-			colCounter++;
-			ImGui::NextColumn();
 			ImGui::PopID();
 						
 		}

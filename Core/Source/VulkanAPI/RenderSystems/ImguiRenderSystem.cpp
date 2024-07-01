@@ -4,20 +4,24 @@
 #include <iostream>
 
 #include "VulkanAPI/Model/ModelHandler.h"
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include "VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h"
+#include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 
 namespace VULKAN
 {
+	ImguiRenderSystem::~ImguiRenderSystem()
+	{
+		AssetsHandler::GetInstance()->~AssetsHandler();
+
+	}
+
 	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer& renderer, MyVulkanDevice& device ) : myRenderer(renderer) ,myDevice(device) 
 	{
 
 	}
 
-	ImguiRenderSystem::~ImguiRenderSystem()
-	{
-
-	}
 
 	void ImguiRenderSystem::SetUpSystem(GLFWwindow* window)
 	{
@@ -44,8 +48,8 @@ namespace VULKAN
 		}
 		CreatePipeline();
 
-		myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
-		myDevice.deletionQueue.push_function([this]() {indexBuffer.destroy();});
+		//myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
+		//myDevice.deletionQueue.push_function([this]() {indexBuffer.destroy();});
         
 		//for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
 		//{
@@ -61,14 +65,14 @@ namespace VULKAN
 		//			});
 		//	}
 		//}
-		myDevice.deletionQueue.push_function([this]()
-			{
-				vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
-			});
-		myDevice.deletionQueue.push_function([this]()
-			{
-				vkDestroySampler(myDevice.device(), viewportSampler, nullptr);
-			});
+		//myDevice.deletionQueue.push_function([this]()
+		//	{
+		//		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
+		//	});
+		//myDevice.deletionQueue.push_function([this]()
+		//	{
+		//		vkDestroySampler(myDevice.device(), viewportSampler, nullptr);
+		//	});
 	}
 
 
@@ -279,6 +283,11 @@ namespace VULKAN
 		case 3:
 			ImGui::StyleColorsLight();
 			break;
+		case 4:
+
+			ImGuiStyle& style = ImGui::GetStyle();
+			style = minimalistStyle;
+			break;
 		}
 
 	}
@@ -307,6 +316,149 @@ namespace VULKAN
 		ImguiImageInfo image{sampler,view, newSet};
 		
 		imagesToCreate.push_back(image);	
+	}
+
+	void ImguiRenderSystem::CreateStyles()
+	{
+		vulkanStyle = ImGui::GetStyle();
+		vulkanStyle.FrameRounding = 3.0f;
+		vulkanStyle.WindowPadding = ImVec2(8.00f, 8.00f);
+		vulkanStyle.FramePadding = ImVec2(5.00f, 2.00f);
+		vulkanStyle.CellPadding = ImVec2(6.00f, 6.00f);
+		vulkanStyle.ItemSpacing = ImVec2(6.00f, 6.00f);
+		vulkanStyle.ItemInnerSpacing = ImVec2(6.00f, 6.00f);
+		vulkanStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
+		vulkanStyle.IndentSpacing = 25;
+		vulkanStyle.ScrollbarSize = 15;
+		vulkanStyle.GrabMinSize = 10;
+		vulkanStyle.WindowBorderSize = 1;
+		vulkanStyle.ChildBorderSize = 1;
+		vulkanStyle.PopupBorderSize = 1;
+		vulkanStyle.FrameBorderSize = 1;
+		vulkanStyle.TabBorderSize = 1;
+		vulkanStyle.WindowRounding = 7;
+		vulkanStyle.ChildRounding = 4;
+		vulkanStyle.FrameRounding = 3;
+		vulkanStyle.PopupRounding = 4;
+		vulkanStyle.ScrollbarRounding = 9;
+		vulkanStyle.GrabRounding = 3;
+		vulkanStyle.LogSliderDeadzone = 4;
+		vulkanStyle.TabRounding = 4;
+
+		vulkanStyle.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		vulkanStyle.Colors[ImGuiCol_PopupBg] = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
+		vulkanStyle.Colors[ImGuiCol_Border] = ImVec4(0.19f, 0.19f, 0.19f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
+		vulkanStyle.Colors[ImGuiCol_FrameBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TitleBg] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_CheckMark] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_SliderGrab] = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_Button] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
+		vulkanStyle.Colors[ImGuiCol_ButtonActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_Header] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+		vulkanStyle.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
+		vulkanStyle.Colors[ImGuiCol_HeaderActive] = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
+		vulkanStyle.Colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_Tab] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+		vulkanStyle.Colors[ImGuiCol_TabHovered] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.20f, 0.20f, 0.36f);
+		vulkanStyle.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+		vulkanStyle.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_DockingPreview] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_DockingEmptyBg] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+		vulkanStyle.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
+		vulkanStyle.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
+		vulkanStyle.Colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		vulkanStyle.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
+		vulkanStyle.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_NavHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+		vulkanStyle.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 0.70f);
+		vulkanStyle.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
+		vulkanStyle.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
+
+
+
+		minimalistStyle = ImGui::GetStyle();
+		minimalistStyle.Alpha = 1.0f;
+		minimalistStyle.FrameRounding = 3.0f;
+		minimalistStyle.Colors[ImGuiCol_Text] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_WindowBg] = ImVec4(0.94f, 0.94f, 0.94f, 0.94f);
+		minimalistStyle.Colors[ImGuiCol_PopupBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
+		minimalistStyle.Colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.39f);
+		minimalistStyle.Colors[ImGuiCol_BorderShadow] = ImVec4(1.00f, 1.00f, 1.00f, 0.10f);
+		minimalistStyle.Colors[ImGuiCol_FrameBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.94f);
+		minimalistStyle.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+		minimalistStyle.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+		minimalistStyle.Colors[ImGuiCol_TitleBg] = ImVec4(0.96f, 0.96f, 0.96f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
+		minimalistStyle.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.82f, 0.82f, 0.82f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
+		minimalistStyle.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.69f, 0.69f, 0.69f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.59f, 0.59f, 0.59f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.49f, 0.49f, 0.49f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_Button] = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
+		minimalistStyle.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
+		minimalistStyle.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+		minimalistStyle.Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 0.50f);
+		minimalistStyle.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+		minimalistStyle.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+		minimalistStyle.Colors[ImGuiCol_PlotLines] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		minimalistStyle.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+
+		for (int i = 0; i <= ImGuiCol_COUNT; i++)
+		{
+			ImVec4& col = minimalistStyle.Colors[i];
+			float H, S, V;
+			ImGui::ColorConvertRGBtoHSV(col.x, col.y, col.z, H, S, V);
+
+			if (S < 0.1f)
+			{
+				V = 1.0f - V;
+			}
+			ImGui::ColorConvertHSVtoRGB(H, S, V, col.x, col.y, col.z);
+			if (col.w < 1.00f)
+			{
+				col.w *= 0.3;
+			}
+		}
+
+
 	}
 
 	void ImguiRenderSystem::DrawFrame(VkCommandBuffer commandBuffer)
@@ -481,13 +633,7 @@ namespace VULKAN
 	void ImguiRenderSystem::SetImgui(GLFWwindow* window)
 	{
 		// Color scheme
-		vulkanStyle = ImGui::GetStyle();
-		vulkanStyle.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
-		vulkanStyle.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.0f, 0.0f, 0.8f);
-		vulkanStyle.Colors[ImGuiCol_MenuBarBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-		vulkanStyle.Colors[ImGuiCol_Header] = ImVec4(1.0f, 0.0f, 0.0f, 0.4f);
-		vulkanStyle.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-
+		CreateStyles();
 		SetStyle(0);
 		// Setup display size (every frame to accommodate for window resizing)
 		int w, h;
