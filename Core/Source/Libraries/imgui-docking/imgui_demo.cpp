@@ -808,7 +808,7 @@ static void ShowDemoWindowWidgets()
             ImGui::ColorEdit3("color 1", col1);
             ImGui::SameLine(); HelpMarker(
                 "Click on the color square to open a color picker.\n"
-                "Click and hold to use drag and drop.\n"
+                "Click and hold to use  drop.\n"
                 "Right-click on the color square to show options.\n"
                 "CTRL+click on individual component to input value.\n");
 

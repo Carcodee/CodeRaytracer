@@ -26,6 +26,7 @@ namespace VULKAN
 		uintmax_t sizeInBytes;
 		ASSET_TYPE assetType;
 
+
 		AssetData Deserialize(nlohmann::json& jsonObj) override;
 		nlohmann::json Serialize() override;
 		void SaveData() override;
@@ -46,7 +47,7 @@ namespace VULKAN
 		void SearchAllAssets(std::filesystem::path path);
 		void LoadMetadata(std::string path);
 		void CreateMetadata();
-		void SaveMetadataOnClose();
+		void SaveMetadata();
 		int assetCounter;
 
 		std::string assetFilepath ;
@@ -54,6 +55,7 @@ namespace VULKAN
 	public:
 		
 		~AssetsHandler();
+		void RegisterSaves();
 		void AddAssetData(std::string path);
 		AssetData GetAssetData(std::string path);
 

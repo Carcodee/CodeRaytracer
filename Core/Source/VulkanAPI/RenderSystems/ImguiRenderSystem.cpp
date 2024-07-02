@@ -568,18 +568,41 @@ namespace VULKAN
 		int width = 0;
 		int height = 0;
 		glfwGetWindowSize(myWindow,&width,&height);
-		ImGui::SetWindowSize(ImVec2(width, height));
 		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus );
+		ImGui::SetWindowSize(ImVec2(width, height));
+		ImGui::PushID("viewport");
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
-		//ImGui::Image((ImTextureID)vpDescriptorSet, ImVec2(viewportSize.x, viewportSize.y));
-		for (auto& imageDescriptorSet : imagesToCreate)
+
+		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
+		if (ImGui::BeginDragDropTarget())
 		{
-			ImGui::Image((ImTextureID)imageDescriptorSet.descriptor, ImVec2(viewportSize.x, viewportSize.y));
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MODEL_PATH"))
+			{
+				const char* data = *(const char**)payload->Data;
+
+				std::filesystem::path pathToAppend(data);
+
+
+				ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+				ImGui::BeginTooltip();
+				ImGui::Text("Cannot drop here!");
+
+				ImGui::EndTooltip();
+
+			}
+			ImGui::EndDragDropTarget();
 		}
+
+		ImGui::PopID();
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
 
 		ImGui::End(); 
+
+		for (int i= 1; i < imagesToCreate.size(); i++)
+		{
+			ImGui::Image((ImTextureID)imagesToCreate[i].descriptor, ImVec2(viewportSize.x, viewportSize.y));
+		}
 		// Make the window full-screen and set the dock space
 
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -596,7 +619,7 @@ namespace VULKAN
 
 		if (ImGui::Button("Confirm"))
 		{
-			ModelHandler::GetInstance()->queryModelPathsToHandle.push_back(modelImporterText);
+			ModelHandler::GetInstance()->AddModelToQuery(modelImporterText);
 		}
 
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background

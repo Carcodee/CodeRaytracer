@@ -6,6 +6,7 @@
 #include <string>
 
 #include "VulkanAPI/Model/ModelHandler.h"
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 int cicles=0;
@@ -64,12 +65,7 @@ namespace VULKAN{
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
-
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
-				myModel->BindVertexBufferIndexed(commandBuffer);
-				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout, forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
-				myModel->DrawIndexed(commandBuffer);
-
 				renderer.EndSwapChainRenderPass(commandBuffer);
 
 				renderer.EndFrame();
@@ -139,10 +135,6 @@ namespace VULKAN{
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
 
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
-				myModel->BindVertexBufferIndexed(commandBuffer);
-				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout,forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
-				myModel->DrawIndexed(commandBuffer);
-
 				renderer.EndSwapChainRenderPass(commandBuffer);
 
 
@@ -201,15 +193,28 @@ namespace VULKAN{
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
-			if (ModelHandler::GetInstance()->queryModelPathsToHandle.size()>0)
+			if (!ModelHandler::GetInstance()->queryModelPathsToHandle.empty())
 			{
-				for (int i = 0; i < ModelHandler::GetInstance()->queryModelPathsToHandle.size(); ++i)
-				{
+				
+				ModelHandler::GetInstance()->LoadAllModels();
 
-					rayTracing_RS.AddModelToPipeline(ModelHandler::GetInstance()->queryModelPathsToHandle[i]);
+				for (auto element :ModelHandler::GetInstance()->modelsReady)
+				{
+					//std::shared_ptr<ModelHandler::ModelToLoadState> current = element;
+					if (element.get()->state== ModelHandler::UNLOADED || element.get()->state== ModelHandler::DISPACHED)
+					{
+						continue;
+					}
 					
+					rayTracing_RS.AddModelToPipeline(element.get()->model);
+					element.get()->state = ModelHandler::DISPACHED;
 				}
-				ModelHandler::GetInstance()->queryModelPathsToHandle.clear();
+				if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelPathsToHandle.size())
+				{
+					ModelHandler::GetInstance()->queryModelPathsToHandle.clear();
+					ModelHandler::GetInstance()->modelsReady.clear();
+					ModelHandler::GetInstance()->Loading = false;
+				}
 				if (rayTracing_RS.updateDescriptorData)
 				{
 					rayTracing_RS.UpdateDescriptorData();
@@ -249,10 +254,6 @@ namespace VULKAN{
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
-
-				myModel->BindVertexBufferIndexed(commandBuffer);
-				myModel->BindDescriptorSet(commandBuffer, forward_RS.pipelineLayout, forward_RS.renderSystemDescriptorSetHandler->descriptorData[0].descriptorSets[renderer.GetCurrentFrame()]);
-				myModel->DrawIndexed(commandBuffer);
 
 				renderer.EndSwapChainRenderPass(commandBuffer);
 
@@ -322,7 +323,11 @@ namespace VULKAN{
 			deltaTime = (currentTime - lastDeltaTime);
 			lastDeltaTime = currentTime;
 			cicles++;
+			AssetsHandler::GetInstance()->RegisterSaves();
+
+
 			InputHandler::GetInstance()->UpdateInputStates();
+
 
 		}
 		vkDeviceWaitIdle(myDevice.device());
@@ -390,12 +395,7 @@ namespace VULKAN{
 		//		0, 1, 2, 2, 3, 0,
 		//		4, 5, 6, 6, 7, 4
 		//};
-		std::string path = "C:/Users/carlo/Downloads/VikingRoom.fbx";
-		VKBufferHandler* myBuffer= modelLoader->LoadModelTinyObject(path);
 		
-		myModel = std::make_unique<MyModel>(myDevice, *myBuffer);
-		
-
 
 	}
 

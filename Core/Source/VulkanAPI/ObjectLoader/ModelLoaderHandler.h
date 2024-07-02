@@ -16,20 +16,23 @@ namespace VULKAN {
 	class ModelLoaderHandler
 	{
 
+		
+	protected:
+		static ModelLoaderHandler* instance;
+
+
 	public:
-		ModelLoaderHandler(MyVulkanDevice& device);
+		
+		static ModelLoaderHandler* GetInstance();
+		ModelLoaderHandler();
 
 
 
-		VKBufferHandler* LoadModelTinyObject(std::string path);
-			ModelData GetModelVertexAndIndicesTinyObject(std::string path);
+		ModelData GetModelVertexAndIndicesTinyObject(std::string path);
 		std::vector<VKTexture> LoadTexturesFromPath(std::string path,VulkanSwapChain& swapChain);
 		std::map<int,Material> LoadMaterialsFromObject(std::string path, int& texturesSizes);
 		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader reader,std::string path, int& texturesSizes);
 		void FixMaterialPaths(std::string& path, std::string texturesPath);
-
-		MyVulkanDevice& myDevice;
-
 	};
 
 	//class GLTFObject

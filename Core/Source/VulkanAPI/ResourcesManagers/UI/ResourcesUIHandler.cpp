@@ -77,6 +77,7 @@ namespace VULKAN
 			}
 			else if (asset.assetType == FILE || asset.assetType == MODEL || asset.assetType == IMAGE)
 			{
+				
 				if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
 				{
 					std::cout << "Opening: " << asset.absolutePath << "\n";
@@ -84,6 +85,21 @@ namespace VULKAN
 					std::cout << "assetType: " << asset.assetType << "\n";
 					std::cout << "size: " << asset.sizeInBytes << "\n";
 					std::cout << "extensionType: " << asset.extensionType << "\n";
+				}
+				if (asset.assetType==MODEL)
+				{
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+					{
+						// Set payload to carry the index of our item (could be anything)
+						std::filesystem::path relPath(std::filesystem::relative(asset.absolutePath,fileHandlerInstanceRef->GetAssetsPath()));
+						std::string stringData = relPath.string();
+						const char* data = stringData.c_str();
+
+						ImGui::SetDragDropPayload("MODEL_PATH",&data, strlen(data) * sizeof(char));
+						
+						// Display preview (could be anything, e.g. when dragging an image we could decide to display
+						ImGui::EndDragDropSource();
+					}
 				}
 
 				ImGui::NextColumn();

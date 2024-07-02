@@ -1,5 +1,9 @@
 #include "ModelHandler.h"
 
+#include <future>
+
+#include "FileSystem/FileHandler.h"
+
 
 namespace VULKAN
 {
@@ -8,6 +12,15 @@ namespace VULKAN
 
 	ModelHandler::ModelHandler()
 	{
+		ModelLoaderHandler::GetInstance();
+		baseMaterial.albedoIntensity = 0;
+		baseMaterial.normalIntensity = 0;
+		baseMaterial.specularIntensity = 0;
+		baseMaterial.diffuseColor = glm::vec3(1);
+		baseMaterial.textureIndexStart = -1;
+		baseMaterial.texturesSizes = 0;
+		baseMaterial.meshIndex = -1;
+
 	}
 
 	ModelHandler *ModelHandler::GetInstance()
@@ -17,6 +30,48 @@ namespace VULKAN
 			instance = new ModelHandler;
 		}
 		return instance;
+	}
+
+	void ModelHandler::AddModelToQuery(std::string path)
+	{
+
+		std::string realPath = HELPERS::FileHandler::GetInstance()->HandleModelFilePath(path);
+
+		if (realPath=="")
+		{
+			std::cout << "Path: " << path << " is not valid";
+			return;
+		}
+
+		queryModelPathsToHandle.push_back(realPath);
+
+	}
+
+	void ModelHandler::LoadAllModels()
+	{
+		if (Loading)return;
+		for (auto path : queryModelPathsToHandle)
+		{
+			Loading = true;
+			futures.push_back(std::async(std::launch::async,[this, path]()
+			{
+				LoadModel(&modelsReady, path);
+			}));
+		}
+		
+	}
+
+	void ModelHandler::LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path)
+	{
+		//path is already cleaned
+		auto modelToLoadState = std::make_shared<ModelToLoadState>();
+		modelToLoadState->state = UNLOADED;
+		modelToLoadState->model= ModelLoaderHandler::GetInstance()->GetModelVertexAndIndicesTinyObject(path);
+		modelToLoadState->state = LOADED;
+
+		//std::lock_guard<std::mutex> lock(loadAssetMutex);
+		modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
+
 	}
 
 	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS)

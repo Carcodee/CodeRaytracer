@@ -551,6 +551,10 @@ namespace VULKAN {
 				imageCount = static_cast<uint32_t>(modelDatas[0].textureSizes);
 			}
 		}
+		if (imageCount==0)
+		{
+			imageCount = 1;
+		}
 		uint32_t materialCount =0;
 		uint32_t meshCount =0;
 
@@ -558,6 +562,11 @@ namespace VULKAN {
 		{
 			materialCount += static_cast<uint32_t>(model.materialDataPerMesh.size());
 			meshCount += static_cast<uint32_t>(model.meshCount);
+		}
+
+		if (materialCount == 0)
+		{
+			materialCount = meshCount;
 		}
 
 		std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -582,8 +591,7 @@ namespace VULKAN {
 			throw std::runtime_error("Unable to create descriptorPools");
 		}
 		VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
-		uint32_t variableDescCounts[] = {	imageCount
-											};
+		uint32_t variableDescCounts[] = {imageCount};
 		variableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
 		variableDescriptorCountAllocInfo.descriptorSetCount = 1;
 		variableDescriptorCountAllocInfo.pDescriptorCounts = variableDescCounts;
@@ -925,14 +933,25 @@ namespace VULKAN {
 	{
 		std::vector<MaterialUniformData> materialDatas{};
 
-		for (int i = 0; i < modelDatas.size(); ++i)
+		for (int i = 0; i < modelDatas.size(); i++)
 		{
 			for (auto material_data : modelDatas[i].materialDataPerMesh)
 			{
 				materialDatas.push_back(material_data.second.materialUniform);
 
-				//materialDatas.insert(materialDatas.begin(),material_data.second.materialUniform);
 			}
+		}
+		if (materialDatas.size()==0)
+		{
+
+			for (int i = 0; i < modelDatas.size(); i++)
+			{
+				for (int j= 0;j<modelDatas[i].meshCount; ++j)
+				{
+					materialDatas.push_back(ModelHandler::GetInstance()->baseMaterial);
+				}
+			}
+			
 		}
 		myDevice.createBuffer(
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -1025,10 +1044,10 @@ namespace VULKAN {
 
 	}
 
-	void RayTracing_RS::AddModelToPipeline(std::string path)
+	void RayTracing_RS::AddModelToPipeline(ModelData modelData)
 	{
 
-		SetupBottomLevelObj(path);
+		SetupBottomLevelObj(modelData);
 		if (invalidModelToLoad)
 		{
 			invalidModelToLoad = false;
@@ -1221,18 +1240,9 @@ namespace VULKAN {
 
 	}
 
-	void RayTracing_RS::SetupBottomLevelObj(std::string path)
+	void RayTracing_RS::SetupBottomLevelObj(ModelData& modelData)
 	{
-
-		std::string realPath = HELPERS::FileHandler::GetInstance()->HandleModelFilePath(path);
-
-		if (realPath=="")
-		{
-			std::cout << "Path: " << path << " is not valid";
-			invalidModelToLoad = true;
-			return;
-		}
-		ModelData combinedMesh=modelLoader.GetModelVertexAndIndicesTinyObject(realPath);
+		ModelData combinedMesh=modelData;
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain());
 		modelDatas.push_back(combinedMesh);

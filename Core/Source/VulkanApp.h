@@ -49,12 +49,10 @@ namespace VULKAN {
 //
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
-		ModelLoaderHandler* modelLoader = new ModelLoaderHandler(myDevice);
 		VulkanRenderer renderer{ initWindow , myDevice };
 		Forward_RS forward_RS{renderer, myDevice};
 		ImguiRenderSystem imgui_RS{ renderer, myDevice };
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
-		std::unique_ptr<MyModel> myModel;
 		int currentFrame;
 	    
 	private:

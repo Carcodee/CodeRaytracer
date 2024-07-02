@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "FileSystem/FileHandler.h"
+#include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 
 namespace VULKAN
@@ -41,7 +42,7 @@ namespace VULKAN
 	AssetsHandler::~AssetsHandler()
 	{
 	
-		SaveMetadataOnClose();
+		SaveMetadata();
 
 	}
 
@@ -104,12 +105,13 @@ namespace VULKAN
 		
 	}
 
-	void AssetsHandler::SaveMetadataOnClose()
+	void AssetsHandler::SaveMetadata()
 	{
 		std::vector<AssetData>newAssets;
 		assets.clear();
 		SearchAllAssets(fileHandlerInstance->GetAssetsPath());
 
+		std::cout << "Saved\n";
 
 		bool recreateMetata = false;
 		int offset = 0;
@@ -170,6 +172,14 @@ namespace VULKAN
 
 
 
+	}
+
+	void AssetsHandler::RegisterSaves()
+	{
+		if (InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_RIGHT_CONTROL, InputHandler::ACTION_HOLD)
+		&& InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_S, InputHandler::ACTION_DOWN)){
+			SaveMetadata();
+		}
 	}
 
 	void AssetsHandler::LoadMetadata(std::string path)

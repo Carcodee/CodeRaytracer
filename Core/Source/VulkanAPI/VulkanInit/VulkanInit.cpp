@@ -71,8 +71,9 @@ namespace VULKAN {
 	{
 		for (int i = 0; i < count; ++i)
 		{
-			ModelHandler::GetInstance()->queryModelPathsToHandle.push_back(std::string(paths[i]));
+			ModelHandler::GetInstance()->AddModelToQuery(std::string(paths[i]));
 		}
+
 	}
 }
 

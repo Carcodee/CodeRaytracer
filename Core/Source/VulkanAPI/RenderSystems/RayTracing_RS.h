@@ -117,7 +117,7 @@ namespace VULKAN {
 		void DrawRT(VkCommandBuffer& currentBuffer);
 		void TransitionStorageImage();
 
-		void AddModelToPipeline(std::string path);
+		void AddModelToPipeline(ModelData modelData);
 		void UpdateDescriptorData();
 
 	private:
@@ -130,7 +130,7 @@ namespace VULKAN {
 
 		std::vector<ModelData>modelDatas;
 		//helpers
-		void SetupBottomLevelObj(std::string path = "");
+		void SetupBottomLevelObj(ModelData& modelData);
 		void LoadFunctionsPointers();
 		void UpdateUniformbuffers();
 		RayTracingScratchBuffer CreateScratchBuffer(VkDeviceSize size);
@@ -150,7 +150,6 @@ namespace VULKAN {
 
 		VulkanRenderer& myRenderer;
 		MyVulkanDevice& myDevice;
-		ModelLoaderHandler modelLoader{ myDevice };
 
 		
 		std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups{};

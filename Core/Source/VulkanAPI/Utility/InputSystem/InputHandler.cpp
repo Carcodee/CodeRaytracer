@@ -174,6 +174,15 @@ namespace VULKAN
 			currentKey = KEY_DEL;
 			currentAction = ACTION_DOWN;
 		}
+		if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS) {
+			currentKey = KEY_LEFT_CONTROL;
+			currentAction = ACTION_DOWN;
+		}
+		if (key == GLFW_KEY_RIGHT_CONTROL && action == GLFW_PRESS) {
+			currentKey = KEY_RIGHT_CONTROL;
+			currentAction = ACTION_DOWN;
+		}
+
 
 		//release
 		if (key == GLFW_KEY_W && action == GLFW_RELEASE) {
@@ -198,6 +207,14 @@ namespace VULKAN
 		}
 		if (key == GLFW_KEY_DELETE && action == GLFW_RELEASE) {
 			currentKey = KEY_DEL;
+			currentAction = ACTION_DOWN;
+		}
+		if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_RELEASE) {
+			currentKey = KEY_LEFT_CONTROL;
+			currentAction = ACTION_DOWN;
+		}
+		if (key == GLFW_KEY_RIGHT_CONTROL && action == GLFW_RELEASE) {
+			currentKey = KEY_RIGHT_CONTROL;
 			currentAction = ACTION_DOWN;
 		}
 
