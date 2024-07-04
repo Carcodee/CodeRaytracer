@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "FileSystem/FileHandler.h"
 #include "VulkanAPI/Model/ModelHandler.h"
 #include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include "VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h"
@@ -567,25 +568,46 @@ namespace VULKAN
 		// Start the Dear ImGui frame
 		int width = 0;
 		int height = 0;
-		glfwGetWindowSize(myWindow,&width,&height);
-		ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar  | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus );
-		ImGui::SetWindowSize(ImVec2(width, height));
+		//ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar ;
+		//window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		//window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		
+
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+		/*ImGuiID dockspace_id = ImGui::GetID("DockSpaceDemo");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);*/
+
+		//ImGui::Begin("DockSpace Demo", nullptr);
+		//glfwGetWindowSize(myWindow,&width,&height);
+		//ImGui::SetWindowSize(ImVec2(width, height));
+		//ImGui::SetWindowPos(ImVec2(0, 0));
+		//ImGui::End();
+
+		
+		ImGui::Begin("ViewportImage", nullptr);
 		ImGui::PushID("viewport");
+
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
+
 
 		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MODEL_PATH"))
 			{
-				const char* data = *(const char**)payload->Data;
+				const char* data = (const char*)payload->Data;
 
 				std::filesystem::path pathToAppend(data);
+				std::filesystem::path newPath = HELPERS::FileHandler::GetInstance()->GetAssetsPath() / pathToAppend;
+
+				ModelHandler::GetInstance()->AddModelToQuery(newPath.string());
 
 
 				ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
 				ImGui::BeginTooltip();
-				ImGui::Text("Cannot drop here!");
+				ImGui::Text("+");
 
 				ImGui::EndTooltip();
 
@@ -597,16 +619,13 @@ namespace VULKAN
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
 
-		ImGui::End(); 
+		
+		//ImGui::DockSpace(dockSpaceId, ImVec2(0, 0),ImGuiWindowFlags_NoMove);
+		ImGui::PushID("AssetsID");
 
-		for (int i= 1; i < imagesToCreate.size(); i++)
-		{
-			ImGui::Image((ImTextureID)imagesToCreate[i].descriptor, ImVec2(viewportSize.x, viewportSize.y));
-		}
-		// Make the window full-screen and set the dock space
-
+		ImGui::Begin("Configs");
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+		ImGui::SetWindowSize(ImVec2(400, 400));
 		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
 		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
 		ImGui::LabelText("Raytracing", "");
@@ -624,6 +643,19 @@ namespace VULKAN
 
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
+		ImGui::End();
+		ImGui::PopID();
+
+		ImGui::End(); 
+
+		for (int i= 1; i < imagesToCreate.size(); i++)
+		{
+			ImGui::Image((ImTextureID)imagesToCreate[i].descriptor, ImVec2(viewportSize.x, viewportSize.y));
+		}
+
+		bool open = true;
+		ImGui::ShowDemoWindow(&open);
+		// Make the window full-screen and set the dock space
 
 
 		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
@@ -670,15 +702,11 @@ namespace VULKAN
 		io.DisplayFramebufferScale = ImVec2((float)display_w / (float)w, (float)display_h / (float)h);
 
 		// If we directly work with os specific key codes, we need to map special key types like tab
-		//io.KeyMap[ImGuiKey_Tab] = VK_TAB;
-		//io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-		//io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-		//io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
-		//io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-		//io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
-		//io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
-		//io.KeyMap[ImGuiKey_Space] = VK_SPACE;
-		//io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
+		//io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
+		//io.KeyMap[ImGuiKey_Backspace] =GLFW_KEY_BACKSPACE;
+		//io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
+		//io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
+		//io.KeyMap[ImGuiKey_Delete] =GLFW_KEY_DELETE;
 	}
 
 }

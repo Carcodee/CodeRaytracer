@@ -13,8 +13,6 @@
 void ImguiContext() {
 
 
-     bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
 
 }
 int main() {

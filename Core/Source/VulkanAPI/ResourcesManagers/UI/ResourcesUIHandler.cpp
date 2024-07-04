@@ -32,9 +32,10 @@ namespace VULKAN
 
 	void ResourcesUIHandler::DisplayDirInfo()
 	{
+		ImGui::PushID("AssetsID");
 		ImGui::SetWindowSize(ImVec2(400, 400));
-		ImGuiID dockSpaceId = ImGui::GetID("DockSpace Demo");
-		ImGui::DockSpace(dockSpaceId, ImVec2(0, 0),ImGuiWindowFlags_NoMove);
+		//ImGuiID dockSpaceId = ImGui::GetID("DockSpace Demo");
+		//ImGui::DockSpace(dockSpaceId, ImVec2(0, 0),ImGuiWindowFlags_NoMove);
 		ImGui::Begin("Assets");
 
 		float panelWidth = ImGui::GetContentRegionAvail().x;
@@ -74,6 +75,7 @@ namespace VULKAN
 				}
 
 				ImGui::NextColumn();
+				colCounter++;
 			}
 			else if (asset.assetType == FILE || asset.assetType == MODEL || asset.assetType == IMAGE)
 			{
@@ -95,12 +97,14 @@ namespace VULKAN
 						std::string stringData = relPath.string();
 						const char* data = stringData.c_str();
 
-						ImGui::SetDragDropPayload("MODEL_PATH",&data, strlen(data) * sizeof(char));
+						ImGui::SetDragDropPayload("MODEL_PATH", data,  strlen(data) + 1 * sizeof(char));
 						
 						// Display preview (could be anything, e.g. when dragging an image we could decide to display
 						ImGui::EndDragDropSource();
 					}
 				}
+
+				colCounter++;
 
 				ImGui::NextColumn();
 			}
@@ -115,5 +119,7 @@ namespace VULKAN
 		ImGui::SliderFloat("thumbnailSpace", &thumbnailSpace,0.0f , 100.0f, "%.3f");
 
 		ImGui::End();
+
+		ImGui::PopID();
 	}
 }
