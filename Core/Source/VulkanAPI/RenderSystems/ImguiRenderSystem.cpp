@@ -565,32 +565,13 @@ namespace VULKAN
 	{
 		ImGui::NewFrame();
 
-		// Start the Dear ImGui frame
-		int width = 0;
-		int height = 0;
-		//ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar ;
-		//window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		//window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		
-
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-		/*ImGuiID dockspace_id = ImGui::GetID("DockSpaceDemo");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);*/
-
-		//ImGui::Begin("DockSpace Demo", nullptr);
-		//glfwGetWindowSize(myWindow,&width,&height);
-		//ImGui::SetWindowSize(ImVec2(width, height));
-		//ImGui::SetWindowPos(ImVec2(0, 0));
-		//ImGui::End();
-
-		
 		ImGui::Begin("ViewportImage", nullptr);
 		ImGui::PushID("viewport");
 
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
-
 
 		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
 		if (ImGui::BeginDragDropTarget())
@@ -619,8 +600,6 @@ namespace VULKAN
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
 
-		
-		//ImGui::DockSpace(dockSpaceId, ImVec2(0, 0),ImGuiWindowFlags_NoMove);
 		ImGui::PushID("AssetsID");
 
 		ImGui::Begin("Configs");

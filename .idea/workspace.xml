@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="Editor" targetName="Editor" />
+      <config projectName="Editor" targetName="Core" />
+      <config projectName="Editor" targetName="uninstall" />
+      <config projectName="Editor" targetName="tinyobjloader" />
+      <config projectName="Editor" targetName="loader_example" />
+      <config projectName="Editor" targetName="tinygltf" />
+    </generated>
+  </component>
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
@@ -7,20 +26,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CodeRT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CodeRT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App/Source/App.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/App/Source/App.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Libraries/imgui-docking/imgui_impl_vulkan.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Libraries/imgui-docking/imgui_impl_vulkan.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Forward_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Forward_RS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanInit/VulkanInit.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanInit/VulkanInit.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Editor/Source/Editor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/Source/Editor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/imgui.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.ilk" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.ilk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.command.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.read.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.write.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/ImguiSetup.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/ImguiSetup.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/vc143.idb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/vc143.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/vc143.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x64/Debug/Editor.exe" beforeDir="false" afterPath="$PROJECT_DIR$/x64/Debug/Editor.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x64/Debug/Editor.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/x64/Debug/Editor.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,34 +50,110 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2023" />
+    <option name="minorVersion" value="2.2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2im2sJMAaytrlBTYocueCTdhfk5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/carlo/Documents/GitHub/CodeRT",
-    "settings.editor.selected.configurable": "com.maddyhome.idea.vim.ui.VimEmulationConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;CmakeBranch&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/carlo/Documents/GitHub/CodeRT_Cmake&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RunManager" selected="CMake Application.Editor">
+    <configuration name="Editor" type="CMakeListConfigurationType" factoryName="CMakeListConfigurationFactory" temporary="true">
+      <method v="2" />
+    </configuration>
+    <configuration name="Core" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="Core" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="Core">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Editor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="true" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="Editor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="Editor">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="loader_example" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="loader_example" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="loader_example">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tinygltf" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="tinygltf" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tinyobjloader" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="tinyobjloader" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="uninstall" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.Editor" />
+      <item itemvalue="CMake Application.Core" />
+      <item itemvalue="CMake Application.loader_example" />
+      <item itemvalue="CMake Application.tinygltf" />
+      <item itemvalue="CMake Application.tinyobjloader" />
+      <item itemvalue="CMake Application.uninstall" />
+      <item itemvalue="CMake Debug.Editor" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="CMake Debug.Editor" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -67,10 +163,40 @@
       <option name="presentableId" value="Default" />
       <updated>1720081636668</updated>
       <workItem from="1720081637687" duration="140000" />
+      <workItem from="1720082123798" duration="1452000" />
+      <workItem from="1720114979856" duration="4673000" />
+      <workItem from="1720210631920" duration="7948000" />
+      <workItem from="1720218679758" duration="15000" />
+      <workItem from="1720264828047" duration="13319000" />
+      <workItem from="1720280195235" duration="222000" />
+      <workItem from="1720280432134" duration="175000" />
+      <workItem from="1720280622717" duration="99000" />
+      <workItem from="1720280733782" duration="17000" />
+      <workItem from="1720280785147" duration="343000" />
+      <workItem from="1720281988291" duration="1099000" />
+      <workItem from="1720283122317" duration="2761000" />
+      <workItem from="1720286119977" duration="2000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticEditVcpkgJson value="false" />
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticFoundErrors value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

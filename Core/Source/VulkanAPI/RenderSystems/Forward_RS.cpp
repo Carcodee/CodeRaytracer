@@ -80,8 +80,10 @@ namespace VULKAN {
 
 	void Forward_RS::CreateComputePipeline()
 	{
-		
-		std::string path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/ComputeShaders/compute.comp.spv";
+
+
+        std::string shadersPath=HELPERS::FileHandler::GetInstance()->GetShadersPath();
+		std::string path = shadersPath+"/ComputeShaders/compute.comp.spv";
 		VkPipelineShaderStageCreateInfo pipelineConfigInfo = PipelineReader::CreateComputeStageModule(computeModule, myDevice, path);
 
 

@@ -458,24 +458,24 @@ namespace VULKAN{
             {
                 std::cout << "Imgui window init success" << "\n";
             }
-            ImGui_ImplVulkan_InitInfo init_info = {};
-            init_info.Instance = VULKAN::MyVulkanDevice::g_Instance;
-            init_info.PhysicalDevice = VULKAN::MyVulkanDevice::g_PhysicalDevice;
-            init_info.Device = VULKAN::MyVulkanDevice::g_Device;
-            init_info.QueueFamily = VULKAN::MyVulkanDevice::g_QueueFamily;
-            init_info.Queue = VULKAN::MyVulkanDevice::g_Queue;
-            init_info.PipelineCache = VULKAN::MyVulkanDevice::g_PipelineCache;
-            init_info.DescriptorPool = imguiPool;
-            init_info.RenderPass = renderer.GetSwapchainRenderPass();
-            init_info.Subpass = 0;
-            init_info.MinImageCount = VULKAN::MyVulkanDevice::g_MinImageCount;
-            init_info.ImageCount = renderer.GetImageCount();
-            init_info.MSAASamples = myDevice.msaaSamples;
-            init_info.Allocator = VULKAN::MyVulkanDevice::g_Allocator;
-            init_info.CheckVkResultFn = check_vk_result;
-            ImGui_ImplVulkan_Init(&init_info);
-            std::cout << "Hello Editor" << std::endl;
-            ImGui_ImplVulkan_CreateFontsTexture();
+//            ImGui_ImplVulkan_InitInfo init_info = {};
+//            init_info.Instance = VULKAN::MyVulkanDevice::g_Instance;
+//            init_info.PhysicalDevice = VULKAN::MyVulkanDevice::g_PhysicalDevice;
+//            init_info.Device = VULKAN::MyVulkanDevice::g_Device;
+//            init_info.QueueFamily = VULKAN::MyVulkanDevice::g_QueueFamily;
+//            init_info.Queue = VULKAN::MyVulkanDevice::g_Queue;
+//            init_info.PipelineCache = VULKAN::MyVulkanDevice::g_PipelineCache;
+//            init_info.DescriptorPool = imguiPool;
+//            init_info.RenderPass = renderer.GetSwapchainRenderPass();
+//            init_info.Subpass = 0;
+//            init_info.MinImageCount = VULKAN::MyVulkanDevice::g_MinImageCount;
+//            init_info.ImageCount = renderer.GetImageCount();
+//            init_info.MSAASamples = myDevice.msaaSamples;
+//            init_info.Allocator = VULKAN::MyVulkanDevice::g_Allocator;
+//            init_info.CheckVkResultFn = check_vk_result;
+//            ImGui_ImplVulkan_Init(&init_info);
+//            std::cout << "Hello Editor" << std::endl;
+//            ImGui_ImplVulkan_CreateFontsTexture();
 
         }
 

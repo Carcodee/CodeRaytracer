@@ -1,9 +1,9 @@
 #include "ModelHandler.h"
 
-#include <future>
 
 #include "FileSystem/FileHandler.h"
 
+#include <string>
 
 namespace VULKAN
 {

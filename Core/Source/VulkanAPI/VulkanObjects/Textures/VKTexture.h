@@ -15,13 +15,13 @@ namespace VULKAN {
 		VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t heigh, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat formatt);
 		VKTexture(VulkanSwapChain& swapchain);
 
-		VKTexture operator=(VKTexture& other) {
-		
-			std::swap(textureImage, other.textureImage);
-			std::swap(textureSampler, other.textureSampler);
-			std::swap(textureImageView, other.textureImageView);
-			std::swap(textureImageMemory, other.textureImageMemory);
-			return other;
+		VKTexture& operator=(const VKTexture& other) {
+
+            this->textureImage = other.textureImage;
+            this->textureSampler = other.textureSampler;
+            this->textureImageView = other.textureImageView;
+            this->textureImageMemory = other.textureImageMemory;
+			return *this;
 		
 		}
 

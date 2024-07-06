@@ -88,6 +88,8 @@
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_impl_vulkan.h"
+#include "../../VulkanAPI/DevicePipeline/Vulkan_Device.h"
+
 #include <stdio.h>
 #ifndef IM_MAX
 #define IM_MAX(A, B)    (((A) >= (B)) ? (A) : (B))
@@ -1900,3 +1902,4 @@ void ImGui_ImplVulkan_ShutdownPlatformInterface()
 //-----------------------------------------------------------------------------
 
 #endif // #ifndef IMGUI_DISABLE
+

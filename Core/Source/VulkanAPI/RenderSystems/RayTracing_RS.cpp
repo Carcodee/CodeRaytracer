@@ -413,8 +413,9 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 		};
-
-		VKTexture* baseTexture = new VKTexture("C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Solid_white.png", myRenderer.GetSwapchain());
+        
+        std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
+		VKTexture* baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
 
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
@@ -582,8 +583,8 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 		};
 
-		VKTexture* baseTexture = new VKTexture("C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Resources/Assets/Images/Solid_white.png", myRenderer.GetSwapchain());
-
+        std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
+        VKTexture* baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
 		if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
@@ -850,9 +851,10 @@ namespace VULKAN {
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 		std::string path;
 
+        std::string shaderPath= HELPERS::FileHandler::GetInstance()->GetShadersPath();
 		// Ray generation group
 		{
-			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
+			path = shaderPath + "/RayTracingShaders/raygen.rgen.spv";
 			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rGenShaderModule,myDevice,VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
@@ -867,7 +869,7 @@ namespace VULKAN {
 
 		// Miss group
 		{
-			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv";
+			path = shaderPath+ "/RayTracingShaders/miss.rmiss.spv";
 			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rMissShaderModule, myDevice, VK_SHADER_STAGE_MISS_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
@@ -882,7 +884,7 @@ namespace VULKAN {
 
 		// Closest hit group
 		{
-			path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv";
+			path = shaderPath+ "/RayTracingShaders/closesthit.rchit.spv";
 			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
@@ -1040,8 +1042,6 @@ namespace VULKAN {
 			&transformBuffer,
 			sizeof(VkTransformMatrixKHR),
 			allModelsTransformationMatrices.data());
-
-
 	}
 
 	void RayTracing_RS::AddModelToPipeline(ModelData modelData)

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
 #include "VulkanAPI/Utility/Globals.h"
+
 static void check_vk_result(VkResult err)
 {
     if (err == 0)
