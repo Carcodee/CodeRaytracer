@@ -9,6 +9,8 @@
 #include "VulkanAPI/Camera/Camera.h"
 #include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
 #include <random>
+
+
 namespace VULKAN {
 	// Holds data for a ray tracing scratch buffer that is used as a temporary storage
 	struct RayTracingScratchBuffer
@@ -118,7 +120,7 @@ namespace VULKAN {
 		void TransitionStorageImage();
 
 		void AddModelToPipeline(ModelData modelData);
-		void UpdateDescriptorData();
+		void UpdateRaytracingData();
 
 	private:
 		struct UniformData {
@@ -129,6 +131,7 @@ namespace VULKAN {
 
 
 		std::vector<ModelData>modelDatas;
+        std::vector<uint32_t> instancesGeometryOffsets;
 		//helpers
 		void SetupBottomLevelObj(ModelData& modelData);
 		void LoadFunctionsPointers();
@@ -165,6 +168,7 @@ namespace VULKAN {
 		VkDescriptorSet descriptorSet;
 		uint32_t indexCount;
 
+        Buffer BLAsInstanceOffsetBuffer;
 		Buffer vertexBuffer;
 		Buffer combinedMeshBuffer;
 		Buffer indexBuffer;

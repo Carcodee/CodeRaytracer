@@ -6,38 +6,22 @@
 #define SPECULAR_TEX 2 
 #define BUMP_TEX 3 
 #define AMBIENT_TEX 4 
-
-
-int GetTextureType(int textureType){
-
-	if(textureType == DIFFUSE_TEX){
-		
-
 	
+struct MaterialFindInfo{
+	bool hasDiffuse;
+	bool hasNormals;
+};
+
+MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
+	
+	MaterialFindInfo materialFindInfo;
+	materialFindInfo.hasDiffuse= true;
+	materialFindInfo.hasNormals= true;
+	if(diffuse==vec4(-1)){
+		materialFindInfo.hasDiffuse = false;
 	}
-	if(textureType == ALPHA_TEX){
-		
-
-	
+	if(diffuse==vec4(-1)){
+		materialFindInfo.hasNormals = false;
 	}
- 	if(textureType == AMBIENT_TEX){
-		
-
-	
-	}
-  	if(textureType == BUMP_TEX){
-		
-
-	
-	}
-    if(textureType == AMBIENT_TEX){
-		
-
-	
-	} 
-   
-   return 0;
-
-
+	return materialFindInfo;
 }
-

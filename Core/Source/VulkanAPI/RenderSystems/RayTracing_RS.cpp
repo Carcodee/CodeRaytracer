@@ -162,7 +162,7 @@ namespace VULKAN {
 
 			vertexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(vertexBuffer.buffer) + obj.combinedMesh.vertexBLASOffset * sizeof(Vertex);
 			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + ((obj.combinedMesh.indexBLASOffset + obj.combinedMesh.firstMeshIndex[i]) * sizeof(uint32_t));
-			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) + obj.combinedMesh.transformBLASOffset;
+			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) /*+ obj.combinedMesh.transformBLASOffset*/;
 
 			VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
 			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -204,8 +204,6 @@ namespace VULKAN {
 		accelerationsStructureBuildGeometryInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
 		accelerationsStructureBuildGeometryInfo.geometryCount = static_cast<uint32_t>(geometries.size());
 		accelerationsStructureBuildGeometryInfo.pGeometries = geometries.data();
-
-
 
 		VkAccelerationStructureBuildSizesInfoKHR accelerationStructureBuildSizesInfo{};
 		accelerationStructureBuildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
@@ -437,12 +435,12 @@ namespace VULKAN {
 		{
 			throw std::runtime_error("Unable to create descriptorAllocateInfo");
 		}
-
+        VkAccelerationStructureKHR nullAccelerationStructure = VK_NULL_HANDLE;
+        
 		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
 		descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 		descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-
-		descriptorAccelerationStructureInfo.pAccelerationStructures = &topLevelObjBase.TopLevelAsData.handle;
+		descriptorAccelerationStructureInfo.pAccelerationStructures = &nullAccelerationStructure;
 
 		VkWriteDescriptorSet accelerationStructureWrite{};
 		accelerationStructureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -452,6 +450,7 @@ namespace VULKAN {
 		accelerationStructureWrite.dstBinding = 0;
 		accelerationStructureWrite.descriptorCount = 1;
 		accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        
 
 		VkDescriptorImageInfo storageImageDescriptor{};
 		storageImageDescriptor.imageView = storageImage->textureImageView;
@@ -487,7 +486,11 @@ namespace VULKAN {
 		allModelDataBuffer.descriptor.offset = 0;
 		allModelDataBuffer.descriptor.range = VK_WHOLE_SIZE;
 
-		VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
+        BLAsInstanceOffsetBuffer.descriptor.buffer = BLAsInstanceOffsetBuffer.buffer;
+        BLAsInstanceOffsetBuffer.descriptor.offset = 0;
+        BLAsInstanceOffsetBuffer.descriptor.range = VK_WHOLE_SIZE;
+
+        VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
 		VkWriteDescriptorSet textWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3, &roomText);
 		VkWriteDescriptorSet vertexBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4, &vertexBuffer.descriptor);
@@ -495,6 +498,7 @@ namespace VULKAN {
 		VkWriteDescriptorSet lightBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6, &lightBuffer.descriptor);
 		VkWriteDescriptorSet allMaterialsBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 7, &allMaterialsBuffer.descriptor);
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
+        VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (modelDatas.size()>0)
@@ -519,7 +523,8 @@ namespace VULKAN {
 			indexBufferWrite,
 			lightBufferWrite,
 			allMaterialsBufferWrite,
-			allModelsDataBufferWrite
+			allModelsDataBufferWrite,
+            BLAsInstanceOffsetBufferWrite
 		};
 		if (texturesDescriptors.size()<=0)
 		{
@@ -531,25 +536,33 @@ namespace VULKAN {
 		}
 		VkWriteDescriptorSet writeDescriptorImgArray{};
 		writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorImgArray.dstBinding = 9;
+		writeDescriptorImgArray.dstBinding = 10;
 		writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorImgArray.descriptorCount = imageCount;
 		writeDescriptorImgArray.dstSet = descriptorSet;
 		writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
 		writeDescriptorSets.push_back(writeDescriptorImgArray);
 
+//        assert(false);
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 	}
 
-	void RayTracing_RS::UpdateDescriptorData()
+	void RayTracing_RS::UpdateRaytracingData()
 	{
-
-		uint32_t imageCount = 1;
+        CreateMaterialsBuffer();
+        CreateAllModelsBuffer();
+        for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
+        {
+            CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
+        }
+        CreateTopLevelAccelerationStructure(topLevelObjBase);
+        
+		uint32_t imageCount = 0;
 		if (modelDatas.size()>0)
 		{
 			for (int i = 0; i < modelDatas.size(); ++i)
 			{
-				imageCount = static_cast<uint32_t>(modelDatas[0].textureSizes);
+				imageCount += static_cast<uint32_t>(modelDatas[i].textureSizes);
 			}
 		}
 		if (imageCount==0)
@@ -661,9 +674,14 @@ namespace VULKAN {
 		allModelDataBuffer.descriptor.buffer = allModelDataBuffer.buffer;
 		allModelDataBuffer.descriptor.offset = 0;
 		allModelDataBuffer.descriptor.range = sizeof(ModelDataUniformBuffer) * meshCount;
+        
+        BLAsInstanceOffsetBuffer.descriptor.buffer = BLAsInstanceOffsetBuffer.buffer;
+        BLAsInstanceOffsetBuffer.descriptor.offset = 0;
+        BLAsInstanceOffsetBuffer.descriptor.range = sizeof(uint32_t) * instancesGeometryOffsets.size();
 
 
-		VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
+
+        VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
 		VkWriteDescriptorSet textWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3, &roomText);
 		VkWriteDescriptorSet vertexBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4, &vertexBuffer.descriptor);
@@ -671,6 +689,7 @@ namespace VULKAN {
 		VkWriteDescriptorSet lightBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6, &lightBuffer.descriptor);
 		VkWriteDescriptorSet allMaterialsBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 7, &allMaterialsBuffer.descriptor);
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
+        VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (modelDatas.size()>0)
@@ -699,7 +718,8 @@ namespace VULKAN {
 			indexBufferWrite,
 			lightBufferWrite,
 			allMaterialsBufferWrite,
-			allModelsDataBufferWrite
+			allModelsDataBufferWrite,
+            BLAsInstanceOffsetBufferWrite
 		};
 		if (texturesDescriptors.size()<=0)
 		{
@@ -711,7 +731,7 @@ namespace VULKAN {
 		}
 		VkWriteDescriptorSet writeDescriptorImgArray{};
 		writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorImgArray.dstBinding = 9;
+		writeDescriptorImgArray.dstBinding = 10;
 		writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorImgArray.descriptorCount = imageCount;
 		writeDescriptorImgArray.dstSet = descriptorSet;
@@ -786,8 +806,15 @@ namespace VULKAN {
 		modelDataBinding.descriptorCount = 1;
 		modelDataBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 
-		VkDescriptorSetLayoutBinding texturesBinding{};
-		texturesBinding.binding = 9;
+        VkDescriptorSetLayoutBinding instancesGeometryOffsetsBinding{};
+        instancesGeometryOffsetsBinding.binding = 9;
+        instancesGeometryOffsetsBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        instancesGeometryOffsetsBinding.descriptorCount = 1;
+        instancesGeometryOffsetsBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+
+
+        VkDescriptorSetLayoutBinding texturesBinding{};
+		texturesBinding.binding = 10;
 		texturesBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		texturesBinding.descriptorCount = 10000;
 		texturesBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
@@ -806,17 +833,15 @@ namespace VULKAN {
 			lightBinding,
 			materialBinding,
 			modelDataBinding,
+            instancesGeometryOffsetsBinding,
 			texturesBinding
 			});
 
 
 
-
-
-
 		VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
 		setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-		setLayoutBindingFlags.bindingCount = 10;
+		setLayoutBindingFlags.bindingCount = 11;
 		std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
 			0,
 			0,
@@ -827,6 +852,7 @@ namespace VULKAN {
 			0,
 			0,
 			0,
+            0,
 			VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT
 		};
 		setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
@@ -940,7 +966,6 @@ namespace VULKAN {
 			for (auto material_data : modelDatas[i].materialDataPerMesh)
 			{
 				materialDatas.push_back(material_data.second.materialUniform);
-
 			}
 		}
 		if (materialDatas.size()==0)
@@ -971,29 +996,34 @@ namespace VULKAN {
 		std::vector <uint32_t> allModelIndices;
 		std::vector <Vertex> allModelsVertices;
 		std::vector <VkTransformMatrixKHR> allModelsTransformationMatrices;
+        instancesGeometryOffsets.clear();
 
 		uint32_t perModelIndexStride=0;
 		uint32_t perModelVertexCount = 0;
 		uint32_t transformationMatrixCount = 0;
+        uint32_t materialOffset = 0;
+        uint32_t instanceMeshCountOffset= 0;
 
 		for (int i = 0; i < modelDatas.size(); ++i)
 		{
 			for (int j=0 ; j < modelDatas[i].meshCount ; j++)
 			{
 				ModelDataUniformBuffer myModelDataUniformBuffer={};
-				myModelDataUniformBuffer.materialIndex = modelDatas[i].materialIds[j];
-				myModelDataUniformBuffer.geometryIndexStart =perModelIndexStride + modelDatas[i].firstMeshIndex[j];
+				myModelDataUniformBuffer.materialIndex =materialOffset + modelDatas[i].materialIds[j];
+				myModelDataUniformBuffer.geometryIndexStart = perModelIndexStride + modelDatas[i].firstMeshIndex[j];
 				modelDataUniformBuffer.push_back(myModelDataUniformBuffer);
-
-				
 				//modelDataUniformBuffer.insert(modelDataUniformBuffer.begin(),myModelDataUniformBuffer);
 			}
+            instancesGeometryOffsets.push_back(instanceMeshCountOffset);
+            instanceMeshCountOffset += modelDatas[i].meshCount;
+            materialOffset += modelDatas[i].materialDataPerMesh.size();
 			modelDatas[i].indexBLASOffset = perModelIndexStride;
 			modelDatas[i].vertexBLASOffset = perModelVertexCount;
 			modelDatas[i].transformBLASOffset = i;
 
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.indexBLASOffset = perModelIndexStride;
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.vertexBLASOffset = perModelVertexCount;
+//            ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.transformBLASOffset = i;
 			perModelIndexStride += modelDatas[i].indices.size();
 			perModelVertexCount += modelDatas[i].vertices.size();
 			transformationMatrixCount++;
@@ -1001,7 +1031,6 @@ namespace VULKAN {
 
 		for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); ++i)
 		{
-
 			allModelsTransformationMatrices.push_back(ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).matrix);
 		}
 
@@ -1011,9 +1040,9 @@ namespace VULKAN {
 		{
 			allModelIndices.insert(allModelIndices.end(), modelDatas[i].indices.begin(), modelDatas[i].indices.end());
 			allModelsVertices.insert(allModelsVertices.end(), modelDatas[i].vertices.begin(), modelDatas[i].vertices.end());
-			
 		}
 
+        //shaders
 
 		myDevice.createBuffer(
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -1026,8 +1055,19 @@ namespace VULKAN {
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			&vertexBuffer,
-		allModelsVertices.size() * sizeof(Vertex),
+            allModelsVertices.size() * sizeof(Vertex),
 		   allModelsVertices.data());
+
+        //this is done because we need to tell the shaders how much offset we need depending the instance becuase geometries restart on every bottom level obj
+        myDevice.createBuffer(
+                VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                &BLAsInstanceOffsetBuffer,
+                instancesGeometryOffsets.size() * sizeof(uint32_t),
+                instancesGeometryOffsets.data());
+        
+        
+        
 		// Index buffer
 		myDevice.createBuffer(
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -1040,8 +1080,9 @@ namespace VULKAN {
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			&transformBuffer,
-			sizeof(VkTransformMatrixKHR),
+			allModelsTransformationMatrices.size() * sizeof(VkTransformMatrixKHR),
 			allModelsTransformationMatrices.data());
+        
 	}
 
 	void RayTracing_RS::AddModelToPipeline(ModelData modelData)
@@ -1053,19 +1094,8 @@ namespace VULKAN {
 			invalidModelToLoad = false;
 			return;
 		}
-		CreateMaterialsBuffer();
-		CreateAllModelsBuffer();
-		for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
-		{
-			CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
-		}
-
-		CreateTopLevelAccelerationStructure(topLevelObjBase);
-
+		
 		updateDescriptorData = true;
-
-
-
 	}
 
 
@@ -1244,7 +1274,7 @@ namespace VULKAN {
 	{
 		ModelData combinedMesh=modelData;
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
-		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain());
+		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain(), ModelHandler::GetInstance()->allTexturesOffset);
 		modelDatas.push_back(combinedMesh);
 		glm::vec3 positions[3];
 		glm::vec3 rots[3];

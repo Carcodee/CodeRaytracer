@@ -53,6 +53,7 @@ namespace VULKAN
 		std::mutex loadAssetMutex;
 		bool Loading = false;
 		int TLASesCount = 0;
+        int allTexturesOffset =0;
 		MaterialUniformData baseMaterial{};
 
 	};

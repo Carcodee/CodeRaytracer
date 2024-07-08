@@ -12,6 +12,7 @@ namespace HELPERS
 	{
 
 		workingDir = std::filesystem::current_path();
+        //TODO: fix this when is launched from exe
 		projectPath = workingDir.parent_path();
 		assetPath = projectPath / "Core"/"Source" / "Resources" / "Assets";
 		shadersPath = projectPath / "Core"/ "Source" / "Shaders";

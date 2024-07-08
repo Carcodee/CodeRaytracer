@@ -11,7 +11,6 @@
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 #include <glm/gtc/type_ptr.hpp>
 
-
 namespace VULKAN {
 	class ModelLoaderHandler
 	{

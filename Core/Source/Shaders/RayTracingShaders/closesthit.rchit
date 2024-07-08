@@ -24,8 +24,8 @@ struct MaterialData {
     float padding2;
 	int texturesIndexStart; 
 	int textureSizes; 
-	int meshIndex; 
-    int padding3;
+	int diffuseOffset;
+    int normalOffset;
 };
 
 struct MeshData {
@@ -75,7 +75,11 @@ layout(set = 0, binding = 8, scalar) buffer MeshesData {
     MeshData meshesData[];
 };
 
-layout(set = 0,binding = 9) uniform sampler2D textures[];
+layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
+    uint geometryOffset[];
+};
+
+layout(set = 0,binding = 10) uniform sampler2D textures[];
 
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
@@ -93,24 +97,21 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
 }
 
 #define MAX_TEXTURES 5
-#define DIFFUSE_TEX 0 
-#define ALPHA_TEX 1 
-#define SPECULAR_TEX 2 
-#define BUMP_TEX 3 
-#define AMBIENT_TEX 4 
 
 vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
 
 vec3 GetDiffuseColor(int materialIndex);
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
+vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv);
 vec4 GetColorOrDiffuseTex(vec2 uv);
 
 void main()
 {
     
+  int realGeometryOffset= int(geometryOffset[gl_InstanceID]) + gl_GeometryIndexEXT; 
 
-  int primitiveIndex=int(meshesData[gl_GeometryIndexEXT].geometryIndexStartOffset);
+  int primitiveIndex=int(meshesData[realGeometryOffset].geometryIndexStartOffset);
 
   int idx1= primitiveIndex + (3 * gl_PrimitiveID + 0);
   int idx2= primitiveIndex + (3 * gl_PrimitiveID + 1);
@@ -132,20 +133,25 @@ void main()
 
   //materials
 
-  int materialIndex= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
+  int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
   int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
   int materialTextureSizes =materials[materialIndex].textureSizes;
-
-  FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
   
-  vec4 diffuse=GetColorOrDiffuseTex(uv);
+  vec4 diffuseInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].diffuseOffset, uv);
+  vec4 normalInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].normalOffset, uv);
+  MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
+  
+  
+  //FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
+  
+  vec4 diffuse=diffuseInMat;
 
   
+ 
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
-  //hitValue = diffuse.xyz;
-  //1724928
-  //550091
+  
+//hitValue = diffuse.xyz;
 //
 //  if(gl_GeometryIndexEXT == 21){
 //  
@@ -166,6 +172,13 @@ void main()
   //hitValue = normDebug;
 }
 
+vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
+    if (texOffset== -1){
+        return vec4(0, 1, 1, 1);
+    }
+    vec4 texture = texture(textures[texIndexStart + texOffset],uv);
+    return texture;
+}
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
 
     int textureFinishSize = texturesIndexStart + textureSizes;
@@ -201,4 +214,5 @@ vec4 GetColorOrDiffuseTex(vec2 uv){
 
 
 }
+
 

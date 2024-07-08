@@ -19,7 +19,8 @@ namespace VULKAN
 		baseMaterial.diffuseColor = glm::vec3(1);
 		baseMaterial.textureIndexStart = -1;
 		baseMaterial.texturesSizes = 0;
-		baseMaterial.meshIndex = -1;
+		baseMaterial.diffuseOffset = -1;
+        baseMaterial.normalOffset = -1;
 
 	}
 

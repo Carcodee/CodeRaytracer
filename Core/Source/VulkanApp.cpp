@@ -197,7 +197,6 @@ namespace VULKAN{
 			{
 				
 				ModelHandler::GetInstance()->LoadAllModels();
-
 				for (auto element :ModelHandler::GetInstance()->modelsReady)
 				{
 					//std::shared_ptr<ModelHandler::ModelToLoadState> current = element;
@@ -217,7 +216,7 @@ namespace VULKAN{
 				}
 				if (rayTracing_RS.updateDescriptorData)
 				{
-					rayTracing_RS.UpdateDescriptorData();
+					rayTracing_RS.UpdateRaytracingData();
 					rayTracing_RS.updateDescriptorData = false;
 				}
 
@@ -339,6 +338,7 @@ namespace VULKAN{
 	VulkanApp::VulkanApp(bool DynamicRendering, bool editor)
 	{
 
+        std::cout << "Present mode: currentWorkingDir: "<< std::filesystem::current_path()  << std::endl;
 		rayTracing_RS.Create_RT_RenderSystem();
 		forward_RS.raytracingImage = rayTracing_RS.storageImage;
 		forward_RS.InitForwardSystem();

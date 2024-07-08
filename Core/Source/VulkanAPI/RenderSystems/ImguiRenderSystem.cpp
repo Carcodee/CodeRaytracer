@@ -217,9 +217,11 @@ namespace VULKAN
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 		pipelineReader = std::make_unique<PipelineReader>(myDevice);
+        
+        std::string shaderPath=HELPERS::FileHandler::GetInstance()->GetShadersPath();  
 		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
-			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
-			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
+			shaderPath+"/Imgui/imgui_shader.vert.spv",
+            shaderPath+"/Imgui/imgui_shader.frag.spv",
 			pipelineConfig, UseDynamicRendering, pipeline_rendering_create_info);
 		std::cout << "You are using dynamic rendering" << "\n";
 	}

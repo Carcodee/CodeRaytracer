@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.26)
-project(Core)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+project(Core)
 
 set(CORE_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -64,11 +68,36 @@ add_library(Core STATIC
         ${CORE_SOURCES}
         ${IMGUI_SOURCES}
 )
+set_target_properties(Core PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+# Function to copy a specific DLL
+function(copy_dll TARGET DLL_PATH)
+    add_custom_command(TARGET ${TARGET} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${DLL_PATH}"
+            $<TARGET_FILE_DIR:${TARGET}>)
+endfunction()
+
+add_custom_command(TARGET Core
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Compiling shaders..."
+        COMMAND ${CMAKE_COMMAND} -E chdir "${CORE_BASE_DIR}/VulkanAPI" compile.bat
+        COMMENT "Shaders compiled."
+)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 # GLFW
-set(GLFW_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/glfw-3.3.9.bin.WIN64/include")
-set(GLFW_LIB_DIR "${CORE_BASE_DIR}/Libraries/glfw-3.3.9.bin.WIN64/lib-mingw-w64")
 
+set(GLFW_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/glfw-3.3.9.bin.WIN64/include")
+if (MINGW)
+    set(GLFW_LIB_DIR "${CORE_BASE_DIR}/Libraries/glfw-3.3.9.bin.WIN64/lib-mingw-w64")
+else ()
+    set(GLFW_LIB_DIR "${CORE_BASE_DIR}/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022")
+endif ()
 # Vulkan
 set(VULKAN_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/VulkanInclude")
 set(VULKAN_LIB_DIR "${CORE_BASE_DIR}/Libraries/VulkanInclude/Lib")
@@ -82,6 +111,8 @@ set(NLOHMANN_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/nlohmann")
 # imgui
 set(IMGUI_DOCKING_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/imgui-docking")
 
+copy_dll(Core "${GLFW_LIB_DIR}/glfw3.dll")
+
 set(GLM_BUILD_LIBRARY OFF)
 add_subdirectory("${CORE_BASE_DIR}/Libraries/glm")
 add_subdirectory("${CORE_BASE_DIR}/Libraries/tinyobjloader-release")
@@ -93,6 +124,7 @@ set (GLM_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/glm")
 set (TINY_OBJ_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/tinyobjloader-release")
 set (TINY_GLTF_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/tinygltf-release")
 
+find_package(Vulkan REQUIRED)
 
 target_include_directories(Core PUBLIC
         ${GLFW_INCLUDE_DIR}

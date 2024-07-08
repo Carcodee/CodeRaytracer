@@ -57,7 +57,11 @@ namespace VULKAN
 		}
 
 
+        if (columns==0){
+            columns = 1;
+        }
 		ImGui::Columns(columns, "Columns", false);
+//        ImGui::Columns(1, "Columns", false);
 		int colCounter = 0;
 
 		for (auto element : std::filesystem::directory_iterator(fileHandlerInstanceRef->currentPathRelativeToAssets))

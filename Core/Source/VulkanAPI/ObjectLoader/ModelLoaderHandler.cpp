@@ -253,7 +253,6 @@ namespace VULKAN {
 			//}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
-			materialData.materialUniform.meshIndex = matCount;
 			materialsDatas.try_emplace(matCount, materialData);
 			unique_texturePaths.clear();
 			matCount++;
@@ -282,12 +281,15 @@ namespace VULKAN {
 		for (const auto& material : materials)
 		{
 
+            int textureOffset = 0;
 			Material materialData{};
 			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
 			if (!material.diffuse_texname.empty()) {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
 				unique_texturePaths.insert(texturePathFinded);
+                materialData.materialUniform.diffuseOffset= textureOffset;
+                textureOffset++;
 			}
 			//if (!material.alpha_texname.empty()) {
 			//	std::string texturePathFinded = material.alpha_texname;
@@ -305,11 +307,13 @@ namespace VULKAN {
 			//	FixMaterialPaths(texturePathFinded, texturesPath);
 			//	unique_texturePaths.insert(texturePathFinded);
 			//}
-			//if (!material.normal_texname.empty()) {
-			//	std::string texturePathFinded= material.normal_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
+			if (!material.normal_texname.empty()) {
+				std::string texturePathFinded= material.normal_texname;
+				FixMaterialPaths(texturePathFinded, texturesPath);
+				unique_texturePaths.insert(texturePathFinded);
+                materialData.materialUniform.normalOffset= textureOffset;
+                textureOffset++;
+			}
 			//if (!material.ambient_texname.empty()) {
 			//	std::string texturePathFinded= material.ambient_texname;
 			//	FixMaterialPaths(texturePathFinded, texturesPath);
@@ -317,7 +321,6 @@ namespace VULKAN {
 			//}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
-			materialData.materialUniform.meshIndex = matCount;
 			materialsDatas.try_emplace(matCount, materialData);
 			unique_texturePaths.clear();
 			matCount++;

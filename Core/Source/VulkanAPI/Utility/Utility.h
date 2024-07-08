@@ -8,6 +8,8 @@
 #endif
 
 
+
+
 #include <filesystem>
 #include <map>
 
@@ -34,8 +36,8 @@ namespace VULKAN{
 			float padding2;
 			int textureIndexStart = -1;
 			int texturesSizes = 0;
-			int meshIndex = -1;
-			int padding3;
+            int diffuseOffset = -1;
+            int normalOffset = -1;
 		};
 
 		struct ModelDataUniformBuffer 
@@ -48,9 +50,9 @@ namespace VULKAN{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
 			std::vector<VKTexture> modelTextures;
-			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures, int& textureSizes)
+			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset, std::vector<VKTexture>& allTextures, int& textureSizes)
 			{
-				materialUniform.textureIndexStart = allTextures.size();
+				materialUniform.textureIndexStart = allTexturesOffset;
 				for (int i = 0; i < paths.size(); ++i)
 				{
 					if (!std::filesystem::exists(paths[i].c_str()))continue;
@@ -59,7 +61,9 @@ namespace VULKAN{
 					modelTextures.push_back(texture);
 					allTextures.push_back(texture);
 					textureSizes++;
+                    allTexturesOffset++;
 				}
+                std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n"; 
 			}
 		};
 
@@ -79,11 +83,11 @@ namespace VULKAN{
 			uint32_t indexBLASOffset = 0;
 			uint32_t vertexBLASOffset = 0;
 			uint32_t transformBLASOffset = 0;
-			void CreateAllTextures(VulkanSwapChain& swap_chain)
+			void CreateAllTextures(VulkanSwapChain& swap_chain, int& allTextureOffset)
 			{
 				for (int i = 0; i < materialDataPerMesh.size(); ++i)
 				{
-					materialDataPerMesh.at(i).CreateTextures(swap_chain, allTextures, textureSizes);
+					materialDataPerMesh.at(i).CreateTextures(swap_chain,allTextureOffset, allTextures, textureSizes);
 				}
 			}
 		};
