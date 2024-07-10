@@ -387,10 +387,6 @@ namespace VULKAN {
 	{
 
 		uint32_t imageCount = 1;
-		if (modelDatas.size()>0)
-		{
-			imageCount = static_cast<uint32_t>(modelDatas[0].textureSizes);
-		}
 		uint32_t materialCount =0;
 		uint32_t meshCount =0;
 
@@ -503,14 +499,7 @@ namespace VULKAN {
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (modelDatas.size()>0)
 		{
-			for (auto texture : modelDatas[0].allTextures)
-			{
-				VkDescriptorImageInfo descriptor{};
-				descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				descriptor.sampler = texture.textureSampler;
-				descriptor.imageView = texture.textureImageView;
-				texturesDescriptors.push_back(descriptor);
-			}
+		
 		}
 		
 		
@@ -549,6 +538,7 @@ namespace VULKAN {
 
 	void RayTracing_RS::UpdateRaytracingData()
 	{
+        ModelHandler::GetInstance()->CreateMaterialTextures(myRenderer.GetSwapchain());
         CreateMaterialsBuffer();
         CreateAllModelsBuffer();
         for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
@@ -558,15 +548,16 @@ namespace VULKAN {
         CreateTopLevelAccelerationStructure(topLevelObjBase);
         
 		uint32_t imageCount = 0;
-		if (modelDatas.size()>0)
+		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (int i = 0; i < modelDatas.size(); ++i)
+			for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); ++i)
 			{
-				imageCount += static_cast<uint32_t>(modelDatas[i].textureSizes);
+				imageCount += static_cast<uint32_t>(ModelHandler::GetInstance()->allMaterialsOnApp[i]->materialUniform.texturesSizes);
 			}
 		}
 		if (imageCount==0)
 		{
+            std::cout<<"There is no images on the materials loaded!"<<"\n";
 			imageCount = 1;
 		}
 		uint32_t materialCount =0;
@@ -692,18 +683,21 @@ namespace VULKAN {
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
-		if (modelDatas.size()>0)
+		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (int i = 0; i < modelDatas.size(); ++i)
+			for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); ++i)
 			{
-				for (auto texture : modelDatas[i].allTextures)
-				{
-					VkDescriptorImageInfo descriptor{};
-					descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					descriptor.sampler = texture.textureSampler;
-					descriptor.imageView = texture.textureImageView;
-					texturesDescriptors.push_back(descriptor);
-				}
+                std::vector<VKTexture>& currentTextures =ModelHandler::GetInstance()->allMaterialsOnApp[i].get()->materialTextures;
+                for (int j = 0; j < currentTextures.size(); ++j) {
+                    
+                    VkDescriptorImageInfo descriptor{};
+                    descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    descriptor.sampler = currentTextures[j].textureSampler;
+                    descriptor.imageView = currentTextures[j].textureImageView;
+                    texturesDescriptors.push_back(descriptor);
+
+                }
+               
 			}
 
 		}
@@ -745,9 +739,9 @@ namespace VULKAN {
 	void RayTracing_RS::CreateRTPipeline()
 	{
 		uint32_t imageCount = 0;
-		if (modelDatas.size() > 0)
+		if (ModelHandler::GetInstance()->allMaterialsOnApp.size() > 0)
 		{
-			imageCount = { static_cast<uint32_t>(modelDatas[0].textureSizes) };
+			imageCount = { static_cast<uint32_t>(ModelHandler::GetInstance()->allMaterialsOnApp[0].get()->materialUniform.texturesSizes) };
 		}
 
 
@@ -961,12 +955,9 @@ namespace VULKAN {
 	{
 		std::vector<MaterialUniformData> materialDatas{};
 
-		for (int i = 0; i < modelDatas.size(); i++)
+		for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); i++)
 		{
-			for (auto material_data : modelDatas[i].materialDataPerMesh)
-			{
-				materialDatas.push_back(material_data.second.materialUniform);
-			}
+            materialDatas.push_back(ModelHandler::GetInstance()->allMaterialsOnApp[i].get()->materialUniform);
 		}
 		if (materialDatas.size()==0)
 		{
@@ -1279,7 +1270,7 @@ namespace VULKAN {
 	{
 		ModelData combinedMesh=modelData;
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
-		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain(), ModelHandler::GetInstance()->allTexturesOffset);
+//		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain(), ModelHandler::GetInstance()->allTexturesOffset);
 		modelDatas.push_back(combinedMesh);
 		glm::vec3 positions[3];
 		glm::vec3 rots[3];

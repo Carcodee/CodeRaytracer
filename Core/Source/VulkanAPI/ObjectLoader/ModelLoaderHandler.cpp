@@ -1,4 +1,5 @@
 #include "ModelLoaderHandler.h"
+#include "VulkanAPI/Model/ModelHandler.h"
 #include <filesystem>
 #include <fstream>
 #include <unordered_set>
@@ -164,7 +165,7 @@ namespace VULKAN {
 
 		int textureTotalSize = 0;
 
-		materialsDatas = LoadMaterialsFromReader(reader, path, textureTotalSize);
+		materialsDatas = LoadMaterialsFromReader(reader, path);
 
 		std::vector<VKTexture>allTextures;
 
@@ -177,8 +178,6 @@ namespace VULKAN {
         modelData.meshIndexCount=meshIndexCount;
         modelData.meshVertexCount=meshVertexCount;
         modelData.materialDataPerMesh=materialsDatas;
-        modelData.allTextures = allTextures;
-        modelData.textureSizes= textureTotalSize;
         modelData.meshCount = meshCount;
         modelData.indexBLASOffset = 0;
         modelData.vertexBLASOffset = 0;
@@ -293,7 +292,7 @@ namespace VULKAN {
 		return materialsDatas;
 	}
 
-	std::map<int, Material> ModelLoaderHandler::LoadMaterialsFromReader(tinyobj::ObjReader reader ,std::string path, int& texturesSizes)
+	std::map<int, Material> ModelLoaderHandler::LoadMaterialsFromReader(tinyobj::ObjReader reader ,std::string path)
 	{
 		auto& materials = reader.GetMaterials();
 		std::unordered_set<std::string> unique_texturePaths;
@@ -356,7 +355,7 @@ namespace VULKAN {
             materialData.id= matCount;
 			materialsDatas.try_emplace(matCount, materialData);
 			unique_texturePaths.clear();
-            
+            ModelHandler::GetInstance()->allMaterialsOnApp.push_back(std::make_shared<Material>(materialData));
 			matCount++;
 		}
 

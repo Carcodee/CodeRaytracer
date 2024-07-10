@@ -40,6 +40,7 @@ namespace VULKAN
 		void AddModelToQuery(std::string path);
 		void LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path);
 		void LoadAllModels();
+        void CreateMaterialTextures(VulkanSwapChain& swapChain);
 
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
 		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);

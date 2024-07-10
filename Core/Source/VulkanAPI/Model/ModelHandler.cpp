@@ -112,4 +112,12 @@ namespace VULKAN
 	{
 		return bottomLevelObjects.at(TLAS.TLASID)[index];
 	}
+
+    void ModelHandler::CreateMaterialTextures(VulkanSwapChain& swapChain) {
+
+        for (int i = 0; i < allMaterialsOnApp.size(); ++i)
+        {
+            allMaterialsOnApp[i].get()->CreateTextures(swapChain,allTexturesOffset);
+        }
+    }
 }

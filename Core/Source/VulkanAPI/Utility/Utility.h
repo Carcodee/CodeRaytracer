@@ -51,9 +51,9 @@ namespace VULKAN{
 		{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
-			std::vector<VKTexture> modelTextures;
+			std::vector<VKTexture> materialTextures;
             int id= 0;
-			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset, std::vector<VKTexture>& allTextures, int& textureSizes)
+			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset)
 			{
 				materialUniform.textureIndexStart = allTexturesOffset;
 				for (int i = 0; i < paths.size(); ++i)
@@ -61,9 +61,7 @@ namespace VULKAN{
 					if (!std::filesystem::exists(paths[i].c_str()))continue;
 					materialUniform.texturesSizes++;
 					VKTexture texture(paths[i].c_str(), swap_chain);
-					modelTextures.push_back(texture);
-					allTextures.push_back(texture);
-					textureSizes++;
+					materialTextures.push_back(texture);
                     allTexturesOffset++;
 				}
                 std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n"; 
@@ -80,7 +78,6 @@ namespace VULKAN{
 //                };
                 return jsonData;
 //
-
             }
             Material Deserialize(nlohmann::json &jsonObj) override{
                 
@@ -101,8 +98,6 @@ namespace VULKAN{
 			std::vector<uint32_t> meshIndexCount;
 			std::vector<uint32_t> meshVertexCount;
 			std::map<int,Material>materialDataPerMesh;
-			std::vector<VKTexture>allTextures;
-			int textureSizes;
 			int meshCount;
 			uint32_t indexBLASOffset = 0;
 			uint32_t vertexBLASOffset = 0;
@@ -111,7 +106,7 @@ namespace VULKAN{
 			{
 				for (int i = 0; i < materialDataPerMesh.size(); ++i)
 				{
-					materialDataPerMesh.at(i).CreateTextures(swap_chain,allTextureOffset, allTextures, textureSizes);
+					materialDataPerMesh.at(i).CreateTextures(swap_chain,allTextureOffset);
 				}
 			}
             nlohmann::json Serialize() override{
