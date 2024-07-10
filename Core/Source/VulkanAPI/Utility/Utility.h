@@ -15,6 +15,7 @@
 
 #include "VulkanAPI/Model/MyModel.h"
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
+#include "ISerializable.h"
 
 
 namespace VULKAN{
@@ -44,12 +45,14 @@ namespace VULKAN{
 		{
 			uint32_t materialIndex;
 			uint32_t geometryIndexStart;
+            uint32_t indexOffset;
 		};
-		struct Material
+		struct Material: ISerializable<Material>
 		{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
 			std::vector<VKTexture> modelTextures;
+            int id= 0;
 			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset, std::vector<VKTexture>& allTextures, int& textureSizes)
 			{
 				materialUniform.textureIndexStart = allTexturesOffset;
@@ -65,9 +68,30 @@ namespace VULKAN{
 				}
                 std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n"; 
 			}
+            nlohmann::json Serialize() override{
+                nlohmann::json jsonData;
+//                jsonData = {
+//                        {
+//                                "MeshCount",this->meshCount
+//                        },
+//                        {
+//                                "MaterialsIDs",this->materialIds
+//                        },
+//                };
+                return jsonData;
+//
+
+            }
+            Material Deserialize(nlohmann::json &jsonObj) override{
+                
+                return *this;
+            }
+            void SaveData() override{
+                
+            }
 		};
 
-		struct ModelData 
+		struct ModelData : ISerializable<ModelData>
 		{
 			std::vector <Vertex> vertices;
 			std::vector<uint32_t> indices;
@@ -90,6 +114,27 @@ namespace VULKAN{
 					materialDataPerMesh.at(i).CreateTextures(swap_chain,allTextureOffset, allTextures, textureSizes);
 				}
 			}
+            nlohmann::json Serialize() override{
+                nlohmann::json jsonData;
+                jsonData = {
+                        {
+                                "MeshCount",this->meshCount
+                        },
+                        {
+                                "MaterialsIDs",this->materialIds
+                        },
+                };
+                return jsonData;
+
+            }
+            ModelData Deserialize(nlohmann::json &jsonObj) override{
+                this->meshCount = jsonObj.at("MeshCount");
+                this->materialIds = jsonObj.at("MaterialIDs").get<std::vector<int>>();
+                return *this; 
+            }
+            void SaveData() override{
+                
+            }
 		};
 		
 

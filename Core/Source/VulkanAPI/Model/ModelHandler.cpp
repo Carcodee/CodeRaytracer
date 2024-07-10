@@ -1,8 +1,6 @@
 #include "ModelHandler.h"
-
-
 #include "FileSystem/FileHandler.h"
-
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include <string>
 
 namespace VULKAN
@@ -69,9 +67,12 @@ namespace VULKAN
 		modelToLoadState->state = UNLOADED;
 		modelToLoadState->model= ModelLoaderHandler::GetInstance()->GetModelVertexAndIndicesTinyObject(path);
 		modelToLoadState->state = LOADED;
-
-		//std::lock_guard<std::mutex> lock(loadAssetMutex);
+        std::lock_guard<std::mutex> lock(loadAssetMutex);
+        
 		modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
+        
+        AssetsHandler::GetInstance()->HandleAssetLoad(modelToLoadState->model,path, AssetsHandler::GetInstance()->codeFileExtension);
+        AssetsHandler::GetInstance()->AddAssetData(path);       
 
 	}
 

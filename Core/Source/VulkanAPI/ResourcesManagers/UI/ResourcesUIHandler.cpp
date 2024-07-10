@@ -68,7 +68,6 @@ namespace VULKAN
 		{
 			ImGui::PushID(colCounter);
 			std::string path = element.path().string();
-			AssetData asset = assetInstanceRef->GetAssetData(path);
 			size_t shortNamePos = path.find_last_of("\\");
 			std::string shortName = path.erase(0, shortNamePos + 1);
 			if (element.is_directory())
@@ -81,9 +80,9 @@ namespace VULKAN
 				ImGui::NextColumn();
 				colCounter++;
 			}
-			else if (asset.assetType == FILE || asset.assetType == MODEL || asset.assetType == IMAGE)
+			else if (element.path().extension()== assetInstanceRef->assetFileExtension)
 			{
-				
+                AssetData& asset = assetInstanceRef->GetAssetData(element.path().string());
 				if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
 				{
 					std::cout << "Opening: " << asset.absolutePath << "\n";
@@ -102,7 +101,6 @@ namespace VULKAN
 						const char* data = stringData.c_str();
 
 						ImGui::SetDragDropPayload("MODEL_PATH", data,  strlen(data) + 1 * sizeof(char));
-						
 						// Display preview (could be anything, e.g. when dragging an image we could decide to display
 						ImGui::EndDragDropSource();
 					}

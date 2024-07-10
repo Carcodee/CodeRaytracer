@@ -27,6 +27,7 @@ namespace VULKAN {
 
 
 
+        tinyobj::ObjReader& GetObjReader(std::string path);
 		ModelData GetModelVertexAndIndicesTinyObject(std::string path);
 		std::vector<VKTexture> LoadTexturesFromPath(std::string path,VulkanSwapChain& swapChain);
 		std::map<int,Material> LoadMaterialsFromObject(std::string path, int& texturesSizes);

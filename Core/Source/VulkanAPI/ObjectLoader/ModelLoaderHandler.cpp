@@ -27,6 +27,25 @@ namespace VULKAN {
 
 	}
 
+    tinyobj::ObjReader &ModelLoaderHandler::GetObjReader(std::string path) {
+        tinyobj::ObjReader reader;
+		tinyobj::ObjReaderConfig objConfig;
+
+		if (!reader.ParseFromFile(path, objConfig))
+		{
+			if (!reader.Error().empty())
+			{
+				PRINTLVK("Error from reader":)
+					PRINTLVK(reader.Error())
+			}
+
+		}
+		if (!reader.Warning().empty()) {
+			std::cout << "TinyObjReader: " << reader.Warning();
+		}
+        return reader;
+
+    }
 	ModelData ModelLoaderHandler::GetModelVertexAndIndicesTinyObject(std::string path)
 	{
 		tinyobj::ObjReader reader;
@@ -63,7 +82,6 @@ namespace VULKAN {
 		attrib = reader.GetAttrib();
 		shapes = reader.GetShapes();
 		materials = reader.GetMaterials();
-		ModelData modelData = {};
 		int meshCount = shapes.size();
 		int indexStartCounter = 0;
 		int vertexStartCouner = 0;
@@ -150,7 +168,21 @@ namespace VULKAN {
 
 		std::vector<VKTexture>allTextures;
 
-		modelData = { vertices,indices, firstIndices, firstMeshVertex, materialIdsOnObject, meshIndexCount, meshVertexCount,materialsDatas,allTextures, textureTotalSize, meshCount, 0 };
+        ModelData modelData = {};
+        modelData.vertices=vertices;
+        modelData.indices=indices;
+        modelData.firstMeshIndex=firstIndices;
+        modelData.firstMeshVertex=firstMeshVertex;
+        modelData.materialIds=materialIdsOnObject;
+        modelData.meshIndexCount=meshIndexCount;
+        modelData.meshVertexCount=meshVertexCount;
+        modelData.materialDataPerMesh=materialsDatas;
+        modelData.allTextures = allTextures;
+        modelData.textureSizes= textureTotalSize;
+        modelData.meshCount = meshCount;
+        modelData.indexBLASOffset = 0;
+        modelData.vertexBLASOffset = 0;
+        modelData.transformBLASOffset = 0;
 		return modelData;
 	}
 
@@ -321,8 +353,10 @@ namespace VULKAN {
 			//}
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
+            materialData.id= matCount;
 			materialsDatas.try_emplace(matCount, materialData);
 			unique_texturePaths.clear();
+            
 			matCount++;
 		}
 
@@ -384,6 +418,7 @@ namespace VULKAN {
 			std::cout << "Path is absolute and exist: " << path <<"\n";
 		}
 	}
+
 }
 
 

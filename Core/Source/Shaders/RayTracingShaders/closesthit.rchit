@@ -31,6 +31,7 @@ struct MaterialData {
 struct MeshData {
     int materialIndexOnShape;
     int geometryIndexStartOffset;
+    int indexOffset;
 };
 
 
@@ -112,13 +113,16 @@ void main()
   int realGeometryOffset= int(geometryOffset[gl_InstanceID]) + gl_GeometryIndexEXT; 
 
   int primitiveIndex=int(meshesData[realGeometryOffset].geometryIndexStartOffset);
+  
+  int indexOffset=int(meshesData[realGeometryOffset].indexOffset);
 
   int idx1= primitiveIndex + (3 * gl_PrimitiveID + 0);
   int idx2= primitiveIndex + (3 * gl_PrimitiveID + 1);
   int idx3= primitiveIndex + (3 * gl_PrimitiveID + 2);
-  int index1= int(indices[idx1].index);
-  int index2= int(indices[idx2].index);
-  int index3= int(indices[idx3].index);
+  
+  int index1= indexOffset + int(indices[idx1].index);
+  int index2= indexOffset + int(indices[idx2].index);
+  int index3= indexOffset + int(indices[idx3].index);
 
   Vertex v1 = vertices[index1];
   Vertex v2 = vertices[index2];

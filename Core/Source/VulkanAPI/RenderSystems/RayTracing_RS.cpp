@@ -1011,6 +1011,7 @@ namespace VULKAN {
 				ModelDataUniformBuffer myModelDataUniformBuffer={};
 				myModelDataUniformBuffer.materialIndex =materialOffset + modelDatas[i].materialIds[j];
 				myModelDataUniformBuffer.geometryIndexStart = perModelIndexStride + modelDatas[i].firstMeshIndex[j];
+                myModelDataUniformBuffer.indexOffset = perModelVertexCount;
 				modelDataUniformBuffer.push_back(myModelDataUniformBuffer);
 				//modelDataUniformBuffer.insert(modelDataUniformBuffer.begin(),myModelDataUniformBuffer);
 			}
@@ -1033,10 +1034,15 @@ namespace VULKAN {
 		{
 			allModelsTransformationMatrices.push_back(ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).matrix);
 		}
-
+       
 		allModelIndices.reserve(perModelIndexStride);
 		allModelsVertices.reserve(perModelVertexCount);
-		for (int i = 0; i < modelDatas.size(); ++i)
+//        for (int i = 0; i < modelDatas.size(); ++i) {
+//            for (int j = 0; j < modelDatas[i].indices.size(); ++j) {
+//               allModelIndices.push_back(modelDatas[i].indexBLASOffset+modelDatas[i].indices[j]);
+//            }
+//        }
+        for (int i = 0; i < modelDatas.size(); ++i)
 		{
 			allModelIndices.insert(allModelIndices.end(), modelDatas[i].indices.begin(), modelDatas[i].indices.end());
 			allModelsVertices.insert(allModelsVertices.end(), modelDatas[i].vertices.begin(), modelDatas[i].vertices.end());
@@ -1087,14 +1093,13 @@ namespace VULKAN {
 
 	void RayTracing_RS::AddModelToPipeline(ModelData modelData)
 	{
-
+        //TODO: here the model data pointer gets free because is a copy, maybe change this later  
 		SetupBottomLevelObj(modelData);
 		if (invalidModelToLoad)
 		{
 			invalidModelToLoad = false;
 			return;
 		}
-		
 		updateDescriptorData = true;
 	}
 

@@ -22,17 +22,16 @@ namespace VULKAN
 
 		fileHandlerInstance = HELPERS::FileHandler::GetInstance();
 
-		if (std::filesystem::exists(assetFilepath))
-		{
-
-			LoadMetadata(assetFilepath);
-		}
-		else
-		{
-			//if the data file does not exist we search for the assets and create a file 
-			SearchAllAssets(fileHandlerInstance->GetAssetsPath());
-			CreateMetadata();
-		}
+//		if (std::filesystem::exists(assetFilepath))
+//		{
+//			LoadMetadata(assetFilepath);
+//		}
+//		else
+//		{
+//			//if the data file does not exist we search for the assets and create a file 
+////			CreateMetadata();
+//		}
+        SearchAllAssets(fileHandlerInstance->GetAssetsPath());
 
 		std::cout << "Assets Founded: " << assets.size() <<"\n";
 		
@@ -52,7 +51,6 @@ namespace VULKAN
 		std::queue<std::filesystem::path> pathsToSeek{};
 		std::filesystem::path currentPath = path;
 		pathsToSeek.push(path);
-		int counter = 0;
 		while (!pathsToSeek.empty())
 		{
 			for (auto& directoryPath : std::filesystem::directory_iterator(currentPath))
@@ -65,11 +63,10 @@ namespace VULKAN
 				{
 					pathsToSeek.push(directoryPath);
 				}
-				else
+				else if (directoryPath.path().extension()== assetFileExtension)
 				{
-
 					std::string pathToCheck = directoryPath.path().string();
-					AddAssetData(pathToCheck);
+					LoadSingleAssetMetadata(pathToCheck);
 				}
 
 			}
@@ -81,139 +78,44 @@ namespace VULKAN
 			
 		}
 
-
-
-	}
-
-	
-	void AssetsHandler::CreateMetadata()
-	{
-		if (!std::filesystem::exists(assetFilepath))
-		{
-			fileHandlerInstance->CreateFile(assetFilepath);
-			std::vector<nlohmann::json> assetsJson;
-			for (auto& pairVal : assets)
-			{
-				assetsJson.push_back(pairVal.second.Serialize());
-			}
-			assetsOnLoad = assets;
-			for (auto json : assetsJson)
-			{
-				fileHandlerInstance->AppendToFile(assetFilepath, json.dump(4));
-			}
-		}
-		
 	}
 
 	void AssetsHandler::SaveMetadata()
 	{
-		std::vector<AssetData>newAssets;
 		assets.clear();
 		SearchAllAssets(fileHandlerInstance->GetAssetsPath());
+        int counter = 0;
+        for(auto& pair: assets){
+            std::fstream fstream(pair.first, std::ios::out | std::ios::trunc);
+            if (fstream.is_open())
+            {
+                fstream.clear();
+                fstream.close();
+            }
+            else
+            {
+                std::cout << "There is no metadata file \n";
+                continue;
+            }
+            counter++;
+            nlohmann::json jsonData = pair.second.Serialize();
+            fileHandlerInstance->AppendToFile(pair.first, jsonData.dump(4));
+        }
 
-		std::cout << "Saved\n";
-
-		bool recreateMetata = false;
-		int offset = 0;
-		for (auto pair : assetsOnLoad)
-		{
-			if (!assets.contains(pair.first))
-			{
-				//offset++;
-
-				//pair.second.assetId = assets.size() + offset;
-				//assetsOnLoad.try_emplace(pair.first, pair.second);
-				//
-				//nlohmann::json assetJson = pair.second.Serialize();
-
-				//fileHandlerInstance->AppendToFile(assetFilepath,assetJson.dump(4));
-				recreateMetata = true;
-
-			}
-
-		}
-
-		for (auto& pair : assets)
-		{
-			if (!assetsOnLoad.contains(pair.first))
-			{
-				recreateMetata = true;
-			}
-		}
-
-		if (recreateMetata)
-		{
-			std::fstream fstream(assetFilepath, std::ios::out | std::ios::trunc);
-			if (fstream.is_open())
-			{
-				fstream.clear();
-				fstream.close();
-			}
-			else
-			{
-				std::cout << "There is no metadata file \n";
-			}
-
-			std::vector<nlohmann::json> assetsJson;
-			for (auto& pairVal : assets)
-			{
-				assetsJson.push_back(pairVal.second.Serialize());
-			}
-			assetsOnLoad = assets;
-			for (auto json : assetsJson)
-			{
-				fileHandlerInstance->AppendToFile(assetFilepath, json.dump(4));
-			}
-
-		}
-
-		std::cout << "Total saved on close: " << assets.size() << "\n";
+        std::cout << "Asset Count saved: "<< counter<<"\n";
 
 
 
 
-	}
+    }
 
 	void AssetsHandler::RegisterSaves()
 	{
 		if (InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_RIGHT_CONTROL, InputHandler::ACTION_HOLD)
 		&& InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_S, InputHandler::ACTION_DOWN)){
-			SaveMetadata();
+//			SaveMetadata();
 		}
 	}
-
-	void AssetsHandler::LoadMetadata(std::string path)
-	{
-		std::vector<AssetData>assetsToLoad;
-		std::ifstream inFile(path);
-		std::string line;
-		std::string currentJsonString = "";
-		while (std::getline(inFile, line))
-		{
-			
-			currentJsonString += line;
-
-			if (line[0]=='}')
-			{
-				try
-				{
-					nlohmann::json currentJson = nlohmann::json::parse(currentJsonString);
-					AssetData asset{};
-					asset.Deserialize(currentJson);
-					assets.try_emplace(asset.absolutePath, asset);
-					assetsOnLoad.try_emplace(asset.absolutePath, asset);
-					currentJsonString = "";
-				}
-				catch (nlohmann::json::parse_error& e)
-				{
-					std::cout << "Parse error at line " << line << ": " << e.what() << "\n";
-				}
-			}
-			
-		}
-
-	}
-
 	AssetsHandler* AssetsHandler::GetInstance()
 	{
 		if (instance==nullptr)
@@ -233,11 +135,8 @@ namespace VULKAN
 		{
 			return;
 		}
-		std::string extension = fileHandlerInstance->GetPathExtension(path);
-
-		asset.extensionType = extension;
-
-		std::string ext = currentPath.extension().string();
+		asset.extensionType = currentPath.extension().string();
+        
 		if (asset.extensionType== ".obj")
 		{
 			asset.assetType = MODEL;
@@ -251,20 +150,34 @@ namespace VULKAN
 			asset.assetType = FILE;
 		}
 
-		asset.name = std::filesystem::path(path).filename().string();
+        std::string name =std::filesystem::path(path).filename().string();
+        size_t objPos= name.find_last_of('.');
+        name= name.substr(0,objPos);
+        
+		asset.name = name;
 
 		asset.sizeInBytes = fileHandlerInstance->GetFileSize(path);
 
 		asset.absolutePath = path;
 
 		asset.assetId = static_cast<int>(assets.size()) + 1;
+        
+        std::string metaFilePath=currentPath.parent_path().string()+"\\"+asset.name+ assetFileExtension;
+        if(std::filesystem::exists(metaFilePath)){
+            asset.metaDataPath=metaFilePath;
+        }
 
-		assets.try_emplace(path, asset);
+        std::string codeFilePath=currentPath.parent_path().string()+"\\"+asset.name+ codeFileExtension;
+        asset.metaDataPath=codeFilePath;
+        
 
+        HandleAssetLoad<AssetData>(asset,asset.absolutePath,assetFileExtension);
+
+        assets.try_emplace(asset.metaDataPath, asset);
 
 	}
 
-	AssetData AssetsHandler::GetAssetData(std::string path)
+	AssetData& AssetsHandler::GetAssetData(std::string path)
 	{
 		if (assets.contains(path))
 		{
@@ -277,8 +190,45 @@ namespace VULKAN
 			return asset;
 		}
 	}
-	
-	nlohmann::json AssetData::Serialize()
+
+    
+    void AssetsHandler::CreateSingleAssetMetadata(std::filesystem::path path, std::string data) {
+        fileHandlerInstance->CreateFile(path.string(),data);
+    }
+
+    void AssetsHandler::LoadSingleAssetMetadata(std::filesystem::path path) {
+
+        if (!std::filesystem::exists(path)){
+            std::cout<<"Couldn't open path to load data: "<<path<<"\n";
+            return;
+        }
+        std::vector<AssetData>assetsToLoad;
+        std::ifstream inFile(path);
+        std::string line;
+        std::string currentJsonString = "";
+        while (std::getline(inFile, line))
+        {
+            currentJsonString += line;
+            if (line[0]=='}')
+            {
+                try
+                {
+                    nlohmann::json currentJson = nlohmann::json::parse(currentJsonString);
+                    AssetData asset{};
+                    asset.Deserialize(currentJson);
+                    assets.try_emplace(path.string(), asset);
+                    currentJsonString = "";
+                }
+                catch (nlohmann::json::parse_error& e)
+                {
+                    std::cout << "Parse error at line " << line << ": " << e.what() << "\n";
+                }
+            }
+
+        }
+    }
+
+    nlohmann::json AssetData::Serialize()
 	{
 		nlohmann::json jsonData;
 		jsonData = {
@@ -291,6 +241,12 @@ namespace VULKAN
 			{
 				"AbsolutePath",this->absolutePath
 			},
+            {
+                "CodeFilePath",this->codeFilePath
+            },
+            {
+                "MetaFilePath",this->metaDataPath
+            },
 			{
 				"ExtensionType",this->extensionType
 			},
@@ -316,12 +272,14 @@ namespace VULKAN
 
 	AssetData AssetData::Deserialize(nlohmann::json& jsonObj)
 	{
-
 		this->assetId = jsonObj.at("AssetId");
+        this->absolutePath = jsonObj.at("AbsolutePath");
+        this->codeFilePath = jsonObj.at("CodeFilePath");
+        this->metaDataPath = jsonObj.at("MetaFilePath");
+        this->assetType = jsonObj.at("AssetType");
+        this->extensionType = jsonObj.at("ExtensionType");
 		this->name = jsonObj.at("Name");
-		this->absolutePath = jsonObj.at("AbsolutePath");
 		this->sizeInBytes = jsonObj.at("SizeInBytes");
-		this->assetType = jsonObj.at("AssetType");
 		return *this;
 	}
 

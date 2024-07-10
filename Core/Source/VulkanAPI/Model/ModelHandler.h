@@ -55,6 +55,7 @@ namespace VULKAN
 		int TLASesCount = 0;
         int allTexturesOffset =0;
 		MaterialUniformData baseMaterial{};
+        std::vector<std::shared_ptr<Material>> allMaterialsOnApp;
 
 	};
 
