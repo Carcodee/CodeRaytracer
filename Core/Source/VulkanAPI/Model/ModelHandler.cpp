@@ -66,14 +66,13 @@ namespace VULKAN
 		auto modelToLoadState = std::make_shared<ModelToLoadState>();
 		modelToLoadState->state = UNLOADED;
 		modelToLoadState->model= ModelLoaderHandler::GetInstance()->GetModelVertexAndIndicesTinyObject(path);
+        modelToLoadState->model.pathToAssetReference = path;
 		modelToLoadState->state = LOADED;
         std::lock_guard<std::mutex> lock(loadAssetMutex);
-        
 		modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
-        
-        AssetsHandler::GetInstance()->HandleAssetLoad(modelToLoadState->model,path, AssetsHandler::GetInstance()->codeFileExtension);
-        AssetsHandler::GetInstance()->AddAssetData(path);       
-
+        //runtime
+        std::string metaFilePath=AssetsHandler::GetInstance()->HandleAssetLoad<ModelData>(modelToLoadState->model,path, AssetsHandler::GetInstance()->codeModelFileExtension);
+        allModelsOnApp.try_emplace(metaFilePath,std::make_shared<ModelData>(modelToLoadState->model));
 	}
 
 	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS)
@@ -115,9 +114,15 @@ namespace VULKAN
 
     void ModelHandler::CreateMaterialTextures(VulkanSwapChain& swapChain) {
 
-        for (int i = 0; i < allMaterialsOnApp.size(); ++i)
+        for (auto& mat: allMaterialsOnApp)
         {
-            allMaterialsOnApp[i].get()->CreateTextures(swapChain,allTexturesOffset);
+            mat.get()->CreateTextures(swapChain,allTexturesOffset);
+            std::string path= mat->targetPath;
+            AssetsHandler::GetInstance()->HandleAssetLoad<Material>(*mat.get() ,path , AssetsHandler::GetInstance()->matFileExtension);
         }
+    }
+
+    Material &ModelHandler::GetMaterialFromPath(std::string path) {
+        return *allMaterialsOnApp[0];
     }
 }

@@ -82,30 +82,47 @@ namespace VULKAN
 			}
 			else if (element.path().extension()== assetInstanceRef->assetFileExtension)
 			{
+                
                 AssetData& asset = assetInstanceRef->GetAssetData(element.path().string());
-				if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
-				{
-					std::cout << "Opening: " << asset.absolutePath << "\n";
-					std::cout << "Id: " << asset.assetId << "\n";
-					std::cout << "assetType: " << asset.assetType << "\n";
-					std::cout << "size: " << asset.sizeInBytes << "\n";
-					std::cout << "extensionType: " << asset.extensionType << "\n";
-				}
-				if (asset.assetType==MODEL)
+                
+                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
+                {
+                    std::cout << "Id: " << asset.assetId << "\n";
+                    std::cout << "assetType: " << asset.assetType << "\n";
+                    std::cout << "size: " << asset.sizeInBytes << "\n";
+                    std::cout << "extensionType: " << asset.extensionType << "\n";
+                }
+				if (asset.extensionType== AssetsHandler::GetInstance()->codeModelFileExtension)
 				{
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 					{
+                        
+                        ModelData& modelToLookInto= *ModelHandler::GetInstance()->allModelsOnApp.at(asset.codeFilePath).get();
 						// Set payload to carry the index of our item (could be anything)
-						std::filesystem::path relPath(std::filesystem::relative(asset.absolutePath,fileHandlerInstanceRef->GetAssetsPath()));
+						std::filesystem::path relPath(std::filesystem::relative(modelToLookInto.pathToAssetReference,fileHandlerInstanceRef->GetAssetsPath()));
+                        
 						std::string stringData = relPath.string();
 						const char* data = stringData.c_str();
-
 						ImGui::SetDragDropPayload("MODEL_PATH", data,  strlen(data) + 1 * sizeof(char));
 						// Display preview (could be anything, e.g. when dragging an image we could decide to display
 						ImGui::EndDragDropSource();
 					}
 				}
-
+                if (asset.extensionType== AssetsHandler::GetInstance()->matFileExtension)
+                {
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+                    {
+                        // Set payload to carry the index of our item (could be anything)
+                        
+                        Material& materialToLookInto= ModelHandler::GetInstance()->GetMaterialFromPath(asset.codeFilePath);
+//                        std::filesystem::path relPath(std::filesystem::relative(materialToLookInto.materialReferencePath,fileHandlerInstanceRef->GetAssetsPath()));
+//                        std::string stringData = relPath.string();
+//                        const char* data = stringData.c_str();
+//                        ImGui::SetDragDropPayload("MODEL_PATH", data,  strlen(data) + 1 * sizeof(char));
+                        // Display preview (could be anything, e.g. when dragging an image we could decide to display
+//                        ImGui::EndDragDropSource();
+                    }
+                }
 				colCounter++;
 
 				ImGui::NextColumn();

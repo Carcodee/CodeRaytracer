@@ -550,9 +550,10 @@ namespace VULKAN {
 		uint32_t imageCount = 0;
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); ++i)
+			for (auto& mat : ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-				imageCount += static_cast<uint32_t>(ModelHandler::GetInstance()->allMaterialsOnApp[i]->materialUniform.texturesSizes);
+                uint32_t size =static_cast<uint32_t>(mat->materialUniform.texturesSizes);
+				imageCount += size;
 			}
 		}
 		if (imageCount==0)
@@ -685,9 +686,9 @@ namespace VULKAN {
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); ++i)
+			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                std::vector<VKTexture>& currentTextures =ModelHandler::GetInstance()->allMaterialsOnApp[i].get()->materialTextures;
+                std::vector<VKTexture>& currentTextures =mat.get()->materialTextures;
                 for (int j = 0; j < currentTextures.size(); ++j) {
                     
                     VkDescriptorImageInfo descriptor{};
@@ -955,9 +956,9 @@ namespace VULKAN {
 	{
 		std::vector<MaterialUniformData> materialDatas{};
 
-		for (int i = 0; i < ModelHandler::GetInstance()->allMaterialsOnApp.size(); i++)
+		for (auto& mat:ModelHandler::GetInstance()->allMaterialsOnApp)
 		{
-            materialDatas.push_back(ModelHandler::GetInstance()->allMaterialsOnApp[i].get()->materialUniform);
+            materialDatas.push_back(mat->materialUniform);
 		}
 		if (materialDatas.size()==0)
 		{
@@ -977,8 +978,6 @@ namespace VULKAN {
 		&allMaterialsBuffer,
 		materialDatas.size() * sizeof(MaterialUniformData),
 		materialDatas.data());
-
-
 	}
 
 	void RayTracing_RS::CreateAllModelsBuffer()
@@ -1186,7 +1185,27 @@ namespace VULKAN {
 			myRenderer.swapChain->height(),
 			1);
 
-		//TODO::
+        vkCmdTraceRaysKHR(
+                currentBuffer,
+                &raygenShaderSbtEntry,
+                &missShaderSbtEntry,
+                &hitShaderSbtEntry,
+                &callableShaderSbtEntry,
+                myRenderer.swapChain->width(),
+                myRenderer.swapChain->height(),
+                1);
+
+        vkCmdTraceRaysKHR(
+                currentBuffer,
+                &raygenShaderSbtEntry,
+                &missShaderSbtEntry,
+                &hitShaderSbtEntry,
+                &callableShaderSbtEntry,
+                myRenderer.swapChain->width(),
+                myRenderer.swapChain->height(),
+                1);
+
+
 		UpdateUniformbuffers();
 	
 	}

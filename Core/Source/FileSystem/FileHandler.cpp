@@ -81,6 +81,8 @@ namespace HELPERS
 		if (!outFile)
 		{
 			std::cout << "filename: " << path << " could not be created \n";
+            outFile.close();
+            return;
 		}
 		outFile << data << "\n";
 
@@ -96,6 +98,8 @@ namespace HELPERS
 		if (!outFile)
 		{
 			std::cout << "filename: " << path << " could not be appended \n";
+            outFile.close();
+            return;
 		}
 		outFile << data << "\n";
 
@@ -206,4 +210,13 @@ namespace HELPERS
 		return size;
 
 	}
+
+    std::string FileHandler::RemovePathExtension(std::filesystem::path path) {
+        std::string strPath= path.string();
+        
+        size_t extensionPos= strPath.find_last_of(".");
+        strPath = strPath.substr(0, extensionPos);
+        
+        return strPath;
+    }
 }

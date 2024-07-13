@@ -240,7 +240,7 @@ namespace VULKAN {
 		std::filesystem::path currentModelPath(path);
 		currentModelPath = currentModelPath.parent_path();
 
-		std::string texturesPath = currentModelPath.string()+"/Textures/";
+		std::string texturesPath = currentModelPath.string()+"\\Textures";
 		if (!std::filesystem::exists(currentModelPath))
 		{
 			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
@@ -301,7 +301,7 @@ namespace VULKAN {
 		std::filesystem::path currentModelPath(path);
 		currentModelPath = currentModelPath.parent_path();
 
-		std::string texturesPath = currentModelPath.string() + "/textures/";
+		std::string texturesPath = currentModelPath.string() + "\\textures";
 		if (!std::filesystem::exists(currentModelPath))
 		{
 			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
@@ -353,9 +353,12 @@ namespace VULKAN {
 
 			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
             materialData.id= matCount;
+            materialData.materialReferencePath= texturesPath;
+            materialData.name = "Material_"+std::to_string(materialData.id);
+            materialData.targetPath = texturesPath +"\\"+ materialData.name + ".MATCODE";
 			materialsDatas.try_emplace(matCount, materialData);
-			unique_texturePaths.clear();
             ModelHandler::GetInstance()->allMaterialsOnApp.push_back(std::make_shared<Material>(materialData));
+			unique_texturePaths.clear();
 			matCount++;
 		}
 
@@ -384,7 +387,7 @@ namespace VULKAN {
 					std::string fileInPath=element.path().string();
 					std::string bufferFileInPath=element.path().string();
 
-					size_t filePathFinishPos = fileInPath.find_last_of("//");
+					size_t filePathFinishPos = fileInPath.find_last_of("\\");
 
 					fileInPath.erase(0, filePathFinishPos + 1);
 					bufferFileInPath.erase(0, filePathFinishPos + 1);
@@ -404,7 +407,7 @@ namespace VULKAN {
 				}
 				
 			}
-			path = texturesPath + path;
+			path = texturesPath + "\\" + path;
 			if (!std::filesystem::exists(path))
 			{
 				std::cout << "Filepath does not exist: " << path <<"\n";

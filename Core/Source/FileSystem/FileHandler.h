@@ -33,6 +33,7 @@ namespace HELPERS
 
 		void CreateFile(std::string path,std::string data = "");
 		void AppendToFile(std::string path,std::string data);
+        std::string RemovePathExtension(std::filesystem::path path);
 		std::string ReadFile(std::string path);
 
 
