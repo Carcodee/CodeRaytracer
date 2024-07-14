@@ -27,11 +27,12 @@ namespace VULKAN {
 
 
 
-        tinyobj::ObjReader& GetObjReader(std::string path);
+        void FindReader(tinyobj::ObjReader& reader,std::string path);
 		ModelData GetModelVertexAndIndicesTinyObject(std::string path);
+        ModelData GetModelFromReader(tinyobj::ObjReader& reader);
 		std::vector<VKTexture> LoadTexturesFromPath(std::string path,VulkanSwapChain& swapChain);
 		std::map<int,Material> LoadMaterialsFromObject(std::string path, int& texturesSizes);
-		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader reader,std::string path);
+		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader& reader,std::string path);
 		void FixMaterialPaths(std::string& path, std::string texturesPath);
 	};
 

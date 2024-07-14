@@ -548,12 +548,14 @@ namespace VULKAN {
         CreateTopLevelAccelerationStructure(topLevelObjBase);
         
 		uint32_t imageCount = 0;
+        uint32_t materialCount =0;
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
 			for (auto& mat : ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                uint32_t size =static_cast<uint32_t>(mat->materialUniform.texturesSizes);
+                uint32_t size =static_cast<uint32_t>(mat.second->materialUniform.texturesSizes);
 				imageCount += size;
+                materialCount ++/*= static_cast<uint32_t>(model.materialDataPerMesh.size())*/;
 			}
 		}
 		if (imageCount==0)
@@ -561,18 +563,16 @@ namespace VULKAN {
             std::cout<<"There is no images on the materials loaded!"<<"\n";
 			imageCount = 1;
 		}
-		uint32_t materialCount =0;
 		uint32_t meshCount =0;
 
 		for (auto model : modelDatas)
 		{
-			materialCount += static_cast<uint32_t>(model.materialDataPerMesh.size());
 			meshCount += static_cast<uint32_t>(model.meshCount);
 		}
 
 		if (materialCount == 0)
 		{
-			materialCount = meshCount;
+			materialCount = 1;
 		}
 
 		std::vector<VkDescriptorPoolSize> poolSizes = {
@@ -688,7 +688,7 @@ namespace VULKAN {
 		{
 			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                std::vector<VKTexture>& currentTextures =mat.get()->materialTextures;
+                std::vector<VKTexture>& currentTextures =mat.second->materialTextures;
                 for (int j = 0; j < currentTextures.size(); ++j) {
                     
                     VkDescriptorImageInfo descriptor{};
@@ -958,7 +958,7 @@ namespace VULKAN {
 
 		for (auto& mat:ModelHandler::GetInstance()->allMaterialsOnApp)
 		{
-            materialDatas.push_back(mat->materialUniform);
+            materialDatas.push_back(mat.second->materialUniform);
 		}
 		if (materialDatas.size()==0)
 		{
@@ -999,7 +999,7 @@ namespace VULKAN {
 			for (int j=0 ; j < modelDatas[i].meshCount ; j++)
 			{
 				ModelDataUniformBuffer myModelDataUniformBuffer={};
-				myModelDataUniformBuffer.materialIndex =materialOffset + modelDatas[i].materialIds[j];
+				myModelDataUniformBuffer.materialIndex =modelDatas[i].materialOffset + modelDatas[i].materialIds[j];
 				myModelDataUniformBuffer.geometryIndexStart = perModelIndexStride + modelDatas[i].firstMeshIndex[j];
                 myModelDataUniformBuffer.indexOffset = perModelVertexCount;
 				modelDataUniformBuffer.push_back(myModelDataUniformBuffer);

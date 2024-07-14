@@ -59,6 +59,7 @@ namespace VULKAN{
             int id= 0;
 			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset)
 			{
+                std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
                 if(generated)return;
 				materialUniform.textureIndexStart = allTexturesOffset;
 				for (int i = 0; i < paths.size(); ++i)
@@ -80,6 +81,7 @@ namespace VULKAN{
                 diffuse.push_back(materialUniform.diffuseColor.z);
                 
                 jsonData = {
+                        {"ID",this->id},
                         {"AlbedoIntensity",this->materialUniform.albedoIntensity},
                         {"NormalIntensity",this->materialUniform.normalIntensity},
                         {"SpecularIntensity",this->materialUniform.specularIntensity},
@@ -97,6 +99,7 @@ namespace VULKAN{
             }
             Material Deserialize(nlohmann::json &jsonObj) override{
 
+                this->id = jsonObj.at("ID");
                 std::vector<int> diffuse;
                 this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
                 this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
@@ -138,6 +141,9 @@ namespace VULKAN{
 			uint32_t indexBLASOffset = 0;
 			uint32_t vertexBLASOffset = 0;
 			uint32_t transformBLASOffset = 0;
+            uint32_t id;
+            bool generated= false;
+            uint32_t materialOffset= 0;
             std::string pathToAssetReference="";
 			void CreateAllTextures(VulkanSwapChain& swap_chain, int& allTextureOffset)
 			{
@@ -150,7 +156,13 @@ namespace VULKAN{
                 nlohmann::json jsonData;
                 jsonData = {
                         {
+                                "ModelID",this->id
+                        },
+                        {
                                 "MeshCount",this->meshCount
+                        },
+                        {
+                                "Generated",this->generated
                         },
                         {
                                 "MaterialsIDs",this->materialIds
@@ -158,15 +170,19 @@ namespace VULKAN{
                         {
                                 "PathToAssetReference",this->pathToAssetReference
                         },
-                        
+                        {
+                                "MaterialOffset",this->materialOffset
+                        },
                 };
                 return jsonData;
-
             }
             ModelData Deserialize(nlohmann::json &jsonObj) override{
+                this->id = jsonObj.at("ModelID");
                 this->meshCount = jsonObj.at("MeshCount");
+                this->generated=jsonObj.at("Generated");
                 this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
                 this->pathToAssetReference = jsonObj.at("PathToAssetReference");
+                this->materialOffset = jsonObj.at("MaterialOffset");
                 return *this; 
             }
             void SaveData() override{

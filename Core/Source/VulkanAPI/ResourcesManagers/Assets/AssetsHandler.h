@@ -20,19 +20,6 @@ namespace VULKAN
 		MATERIAL,
 		MODEL
 	};
-	struct AssetData: ISerializable<AssetData>
-	{
-		int assetId;
-		std::string name;
-        std::string codeFilePath="";
-		std::string extensionType;
-		uintmax_t sizeInBytes;
-		ASSET_TYPE assetType;
-		AssetData Deserialize(nlohmann::json& jsonObj) override;
-		nlohmann::json Serialize() override;
-		void SaveData() override;
-
-	};
 
 	class AssetsHandler
 	{
@@ -41,19 +28,14 @@ namespace VULKAN
 
 
 		static AssetsHandler* instance;
-		std::unordered_map<std::string, AssetData> assets;
-        std::vector<std::string>modelsPaths;
-        std::vector<std::string>materialPaths;
 		AssetsHandler();
         //only searching for assets extensions(ONLY, not mat of models)
 		void SearchAllAssets(std::filesystem::path path);
         
-        std::unordered_map<std::string, int> assetsLoaded;
 		void SaveMetadata();
 		int assetCounter;
-
         int counter = 0;
-        void CreateSingleAssetMetadata(std::filesystem::path path, std::string data);
+        void CreateSingleAssetMetadata(std::filesystem::path path, std::string data, int id);
         void LoadSingleAssetMetadata(std::filesystem::path path);
 
         friend ModelHandler;
@@ -67,27 +49,22 @@ namespace VULKAN
 		~AssetsHandler();
 		void RegisterSaves();
 
-        std::string assetFileExtension = ".cAST";
+        std::unordered_map<std::string, int> assetsLoaded;
         std::string codeModelFileExtension = ".CODE";
         std::string matFileExtension = ".MATCODE";
-
        
-		void AddAssetData(std::string path, std::string codeAssetPath= "");
-		AssetData& GetAssetData(std::string path);
 		static AssetsHandler* GetInstance();
         
   
         template<typename T>
-        std::string HandleAssetLoad(ISerializable<T>& iSerializableObj, std::string path , std::string fileType);
+        std::string HandleAssetLoad(ISerializable<T>& iSerializableObj, std::string path , std::string fileType, int id);
         template<typename T>
         void DeserializeCodeFile(std::unordered_map<std::string,std::shared_ptr<T>>& vectorToModify);
-        template<typename T>
-        void CreateCodeAsset(ISerializable<T>& iSerializableAsset,std::string path, std::string fileType);
     
 	};
 
     template<typename T>
-    std::string  AssetsHandler::HandleAssetLoad(ISerializable<T>& iSerializableObj, std::string path, std::string fileType) {
+    std::string  AssetsHandler::HandleAssetLoad(ISerializable<T>& iSerializableObj, std::string path, std::string fileType, int id) {
         nlohmann::json fileData = iSerializableObj.Serialize();
         std::filesystem::path filePath(path);
         std::string name = filePath.filename().string();
@@ -99,12 +76,9 @@ namespace VULKAN
             std::cout<<"Metafile name is empty: "<<metaFileName<<"\n";
             return "";
         }
-        if (std::filesystem::exists(metaFileName) && fileType== assetFileExtension){
-            std::cout<<"Loading asset from file: "<<metaFileName<<"\n";
-            LoadSingleAssetMetadata(metaFileName);
-        }else if(!std::filesystem::exists(metaFileName)) {
+        if(!std::filesystem::exists(metaFileName)) {
             std::cout<<"Creating asset from file: "<<metaFileName<<"\n";
-            CreateSingleAssetMetadata(metaFileName, fileData.dump(4));
+            CreateSingleAssetMetadata(metaFileName, fileData.dump(4), id);
         }
         return metaFileName;
     }
@@ -115,11 +89,11 @@ namespace VULKAN
         int flagsCount=0;
         if (std::is_same<T, Material>::value){
             flagsCount = 1;
-            pathsToLookInto = &materialPaths;
+//            pathsToLookInto = &materialPaths;
             
         } else if (std::is_same<T, ModelData>::value){
             flagsCount = 2;
-            pathsToLookInto = &modelsPaths;
+//            pathsToLookInto = &modelsPaths;
         } else{
             std::cout<<"It was tried to deserialize a non valid type \n";
             return;
@@ -155,13 +129,4 @@ namespace VULKAN
         }           
     }
 
-
-    template<typename T>
-    void AssetsHandler::CreateCodeAsset(ISerializable<T>& iSerializableAsset,std::string path ,std::string fileType) {
-
-        assetThreat.AddTask([this, &iSerializableAsset, path, fileType](){
-            HandleAssetLoad<T>(iSerializableAsset, path, fileType);
-        });
-    }
-    
 }

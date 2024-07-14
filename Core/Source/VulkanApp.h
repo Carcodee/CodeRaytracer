@@ -45,6 +45,7 @@ namespace VULKAN {
 
 		void RunEngine_EDITOR(std::function<void()>&& editorContext);
 		void RunDynamicRendering(std::function<void()>&& editorContext);
+        
 		VkDescriptorPool imguiDescriptorPool;
 //
 //#endif
@@ -61,6 +62,7 @@ namespace VULKAN {
 
 		void LoadModels();
 		void SetUpImgui();
+        void LoadQueryModels();
 
        
 

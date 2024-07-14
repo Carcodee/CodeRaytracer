@@ -38,9 +38,13 @@ namespace VULKAN
 		static ModelHandler *GetInstance();
 
 		void AddModelToQuery(std::string path);
+        void AddIdToQuery(int id);
 		void LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path);
+        void LoadModelFromDisc(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, int id);
+        void LoadAllModelsFromDisc();
 		void LoadAllModels();
         void CreateMaterialTextures(VulkanSwapChain& swapChain);
+        void CalculateMaterialOffsets();
 
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
 		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);
@@ -50,6 +54,7 @@ namespace VULKAN
 		std::vector<RayTracing_RS::BottomLevelObj>& GetBLASesFromTLAS(RayTracing_RS::TopLevelObj TLAS);
 		RayTracing_RS::BottomLevelObj& GetBLASFromTLAS(RayTracing_RS::TopLevelObj TLAS, int index);
 		std::vector<std::string> queryModelPathsToHandle;
+        std::vector<int> queryModelIdsToHandle;
 		std::vector<std::shared_ptr<ModelToLoadState>> modelsReady;
 		std::map<int,std::vector<RayTracing_RS::BottomLevelObj>> bottomLevelObjects;
 		std::vector<std::future<void>> futures;
@@ -57,9 +62,10 @@ namespace VULKAN
 		bool Loading = false;
 		int TLASesCount = 0;
         int allTexturesOffset =0;
+        int currentMaterialsOffset= 0;
 		MaterialUniformData baseMaterial{};
-        std::vector<std::shared_ptr<Material>> allMaterialsOnApp;
-        std::unordered_map<std::string,std::shared_ptr<ModelData>> allModelsOnApp;
+        std::map<int,std::shared_ptr<Material>> allMaterialsOnApp;
+        std::map<int,std::shared_ptr<ModelData>> allModelsOnApp;
 
 	};
 

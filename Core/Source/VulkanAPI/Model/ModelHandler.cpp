@@ -71,10 +71,44 @@ namespace VULKAN
         std::lock_guard<std::mutex> lock(loadAssetMutex);
 		modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
         //runtime
-        std::string metaFilePath=AssetsHandler::GetInstance()->HandleAssetLoad<ModelData>(modelToLoadState->model,path, AssetsHandler::GetInstance()->codeModelFileExtension);
-        allModelsOnApp.try_emplace(metaFilePath,std::make_shared<ModelData>(modelToLoadState->model));
+        modelToLoadState->model.id =allModelsOnApp.size();
+        allModelsOnApp.try_emplace(modelToLoadState->model.id,std::make_shared<ModelData>(modelToLoadState->model));
+        std::string metaFilePath=AssetsHandler::GetInstance()->HandleAssetLoad<ModelData>(modelToLoadState->model,path, AssetsHandler::GetInstance()->codeModelFileExtension, modelToLoadState->model.id);
 	}
 
+    void ModelHandler::LoadModelFromDisc(std::vector<std::shared_ptr<ModelToLoadState>> *modelsReadyToLoadVec, int id) {
+        auto modelToLoadState = std::make_shared<ModelToLoadState>();
+        std::string path = allModelsOnApp.at(id)->pathToAssetReference;
+        modelToLoadState->state = UNLOADED;
+        tinyobj::ObjReader reader;
+        ModelLoaderHandler::GetInstance()->FindReader(reader,path);
+        modelToLoadState->model= ModelLoaderHandler::GetInstance()->GetModelFromReader(reader);
+        modelToLoadState->model.id = id;
+        modelToLoadState->model.pathToAssetReference = path;
+        modelToLoadState->model.materialOffset =allModelsOnApp.at(id)->materialOffset;
+        modelToLoadState->model.generated =allModelsOnApp.at(id)->generated;
+        if(!modelToLoadState->model.generated){
+            modelToLoadState->model.materialDataPerMesh=ModelLoaderHandler::GetInstance()->LoadMaterialsFromReader(reader, path); 
+        } else{
+            std::cout<< "Model already generated the materials, not doing it again for id: "<<modelToLoadState->model.id<<"\n";
+        }
+        modelToLoadState->state = LOADED;
+        std::lock_guard<std::mutex> lock(loadAssetMutex);
+        modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
+        //runtime
+    }
+
+    void ModelHandler::LoadAllModelsFromDisc() {
+        if (Loading)return;
+        for (auto id : queryModelIdsToHandle)
+        {
+            Loading = true;
+            futures.push_back(std::async(std::launch::async,[this, id]()
+            {
+                LoadModelFromDisc(&modelsReady,id);
+            }));
+        }
+    }
 	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS)
 	{
 			VkTransformMatrixKHR matrix = {
@@ -114,15 +148,33 @@ namespace VULKAN
 
     void ModelHandler::CreateMaterialTextures(VulkanSwapChain& swapChain) {
 
+        int counter = 0;
         for (auto& mat: allMaterialsOnApp)
         {
-            mat.get()->CreateTextures(swapChain,allTexturesOffset);
-            std::string path= mat->targetPath;
-            AssetsHandler::GetInstance()->HandleAssetLoad<Material>(*mat.get() ,path , AssetsHandler::GetInstance()->matFileExtension);
+            mat.second.get()->CreateTextures(swapChain,allTexturesOffset);
+            std::string path= mat.second->targetPath;
+            AssetsHandler::GetInstance()->HandleAssetLoad<Material>(*mat.second.get() ,path , AssetsHandler::GetInstance()->matFileExtension, mat.second->id);
+            counter++;
         }
     }
 
     Material &ModelHandler::GetMaterialFromPath(std::string path) {
         return *allMaterialsOnApp[0];
     }
+
+    void ModelHandler::AddIdToQuery(int id) {
+        if(allModelsOnApp.contains(id)){
+            queryModelIdsToHandle.push_back(id);
+        } else{
+            std::cout<< "ID Does not exist: "<<std::to_string(id)<<"\n";
+        }
+    }
+
+    void ModelHandler::CalculateMaterialOffsets() {
+
+        for (int i = 0; i < allMaterialsOnApp.size(); ++i) {
+            currentMaterialsOffset ++;
+        }
+    }
+
 }

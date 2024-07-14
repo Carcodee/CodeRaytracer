@@ -193,34 +193,8 @@ namespace VULKAN{
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
-			if (!ModelHandler::GetInstance()->queryModelPathsToHandle.empty())
-			{
-				
-				ModelHandler::GetInstance()->LoadAllModels();
-				for (auto element :ModelHandler::GetInstance()->modelsReady)
-				{
-					//std::shared_ptr<ModelHandler::ModelToLoadState> current = element;
-					if (element.get()->state== ModelHandler::UNLOADED || element.get()->state== ModelHandler::DISPACHED)
-					{
-						continue;
-					}
-					
-					rayTracing_RS.AddModelToPipeline(element.get()->model);
-					element.get()->state = ModelHandler::DISPACHED;
-				}
-				if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelPathsToHandle.size())
-				{
-					ModelHandler::GetInstance()->queryModelPathsToHandle.clear();
-					ModelHandler::GetInstance()->modelsReady.clear();
-					ModelHandler::GetInstance()->Loading = false;
-				}
-				if (rayTracing_RS.updateDescriptorData)
-				{
-					rayTracing_RS.UpdateRaytracingData();
-					rayTracing_RS.updateDescriptorData = false;
-				}
-
-			}
+            LoadQueryModels();
+            
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
 
@@ -479,6 +453,65 @@ namespace VULKAN{
 
         }
 
+    void VulkanApp::LoadQueryModels() {
+
+        if (!ModelHandler::GetInstance()->queryModelIdsToHandle.empty())
+        {
+
+            ModelHandler::GetInstance()->LoadAllModelsFromDisc();
+            for (auto element :ModelHandler::GetInstance()->modelsReady)
+            {
+                //std::shared_ptr<ModelHandler::ModelToLoadState> current = element;
+                if (element.get()->state== ModelHandler::UNLOADED || element.get()->state== ModelHandler::DISPACHED)
+                {
+                    continue;
+                }
+
+                rayTracing_RS.AddModelToPipeline(element.get()->model);
+                element.get()->state = ModelHandler::DISPACHED;
+            }
+            if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelIdsToHandle.size())
+            {
+                ModelHandler::GetInstance()->queryModelIdsToHandle.clear();
+                ModelHandler::GetInstance()->modelsReady.clear();
+                ModelHandler::GetInstance()->Loading = false;
+            }
+            if (rayTracing_RS.updateDescriptorData)
+            {
+                rayTracing_RS.UpdateRaytracingData();
+                rayTracing_RS.updateDescriptorData = false;
+            }
+
+        }
+        if (!ModelHandler::GetInstance()->queryModelPathsToHandle.empty())
+        {
+
+            ModelHandler::GetInstance()->LoadAllModels();
+            for (auto element :ModelHandler::GetInstance()->modelsReady)
+            {
+                //std::shared_ptr<ModelHandler::ModelToLoadState> current = element;
+                if (element.get()->state== ModelHandler::UNLOADED || element.get()->state== ModelHandler::DISPACHED)
+                {
+                    continue;
+                }
+
+                rayTracing_RS.AddModelToPipeline(element.get()->model);
+                element.get()->state = ModelHandler::DISPACHED;
+            }
+            if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelPathsToHandle.size())
+            {
+                ModelHandler::GetInstance()->queryModelPathsToHandle.clear();
+                ModelHandler::GetInstance()->modelsReady.clear();
+                ModelHandler::GetInstance()->Loading = false;
+            }
+            if (rayTracing_RS.updateDescriptorData)
+            {
+                rayTracing_RS.UpdateRaytracingData();
+                rayTracing_RS.updateDescriptorData = false;
+            }
+
+        }       
+    }
 
 
 }

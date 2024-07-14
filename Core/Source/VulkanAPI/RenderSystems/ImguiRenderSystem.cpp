@@ -580,12 +580,14 @@ namespace VULKAN
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MODEL_PATH"))
 			{
-				const char* data = (const char*)payload->Data;
+//				const char* data = (const char*)payload->Data;
+                int data = *(int*)payload->Data;
 
-				std::filesystem::path pathToAppend(data);
-				std::filesystem::path newPath = HELPERS::FileHandler::GetInstance()->GetAssetsPath() / pathToAppend;
+//				std::filesystem::path pathToAppend(data);
+//				std::filesystem::path newPath = HELPERS::FileHandler::GetInstance()->GetAssetsPath() / pathToAppend;
 
-				ModelHandler::GetInstance()->AddModelToQuery(newPath.string());
+//				ModelHandler::GetInstance()->AddModelToQuery(newPath.string());
+				ModelHandler::GetInstance()->AddIdToQuery(data);
 
 
 				ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
