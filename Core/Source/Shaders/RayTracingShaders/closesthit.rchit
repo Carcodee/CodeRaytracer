@@ -168,12 +168,12 @@ void main()
   vec3 view = normalize(pos-rayPayload.origin);
   vec3 lightDir= normalize(pos-myLight.pos); 
   vec3 halfway =normalize(view + lightDir);
-  vec3 pbr= GetPBR(diffuse.xyz, myLight.col, 0.0f, 0.5f, 0.0f,spec, normal, view, lightDir, halfway);
+  vec3 pbr= GetPBR(diffuse.xyz, myLight.col, 0.0f, 0.0f, 0.0f, spec, normal, view, lightDir, halfway);
  
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   
   //rayPayload.color = (diffuse.xyz * myLight.col * rayPayload.indirectLight) * shadingIntensity * myLight.intensity * rayPayload.lightForce; 
-  rayPayload.color = pbr * myLight.intensity ; 
+  rayPayload.color = pbr * myLight.intensity; 
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;
   rayPayload.indirectLight = diffuse.xyz;

@@ -76,7 +76,7 @@ vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float m
 	vec3 lambert= LambertDiffuse(col);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
-	vec3 BRDF = lambert * kd + cookTorrence;
+	vec3 BRDF =  kd * lambert + cookTorrence;
 	vec3 outgoingLight = emissiveMesh + BRDF * lightCol * max(dot(light,normal), 0.0001);
 	return outgoingLight;
 }
