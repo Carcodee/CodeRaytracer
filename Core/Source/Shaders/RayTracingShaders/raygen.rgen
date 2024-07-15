@@ -9,7 +9,17 @@ layout(binding = 2, set = 0) uniform CameraProperties
 	mat4 projInverse;
 } cam;
 
+struct RayPayload{
+    vec3 color;
+    float distance;
+    vec3 normal;
+    float reflector;
+}
+
+
 layout(location = 0) rayPayloadEXT vec3 hitValue;
+
+layout (constant_id = 0) const int MAX_RECURSION = 0;
 
 void main() 
 {
@@ -25,9 +35,13 @@ void main()
 	float tmin = 0.001;
 	float tmax = 10000.0;
 
+	for (int i = 0; i < MAX_RECURSION; i++) {
+	
+	}
+	
+    traceRayEXT(topLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
     hitValue = vec3(0.0);
 
-    traceRayEXT(topLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
 
 	imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(hitValue, 1.0f));
 }

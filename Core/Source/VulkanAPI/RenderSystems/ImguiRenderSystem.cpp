@@ -576,7 +576,15 @@ namespace VULKAN
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 
 		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
-		if (ImGui::BeginDragDropTarget())
+        
+        if  (ImGui::IsItemHovered()){
+            InputHandler::GetInstance()->isMouseInsideViewport= true;
+        }else{
+            InputHandler::GetInstance()->isMouseInsideViewport= false;
+            
+        }
+
+        if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MODEL_PATH"))
 			{
@@ -600,9 +608,12 @@ namespace VULKAN
 			ImGui::EndDragDropTarget();
 		}
 
-		ImGui::PopID();
+
+
+        ImGui::PopID();
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
+        ResourcesUIHandler::GetInstance()->DisplayMeshInfo();
 
 		ImGui::PushID("AssetsID");
 

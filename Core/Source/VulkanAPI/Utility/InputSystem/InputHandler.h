@@ -71,13 +71,14 @@ namespace VULKAN
 
 		static float GetCutomInput (CUSTOM_INPUT inputType);
 		static void UpdateInputStates();
+        void DisableMouse(bool value);
 
 		glm::vec2 GetMousePos();
 		glm::vec2 GetMouseInput();
 
 		static std::map<USER_KEY, INPUT_ACTION> keysActioned;
 		static std::map<USER_BUTTON, INPUT_ACTION> buttonsActioned;
-		static bool isMouseInsideViewport;
+		bool isMouseInsideViewport;
 	protected:
 
 		static float xInput;
@@ -88,6 +89,7 @@ namespace VULKAN
 		static float yMouseInput;
 
 		InputHandler();
+        bool mouseInsideViewport = false;
 		InputHandler(InputHandler& other) = delete;
 		void operator=(const InputHandler&) = delete;
 		static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

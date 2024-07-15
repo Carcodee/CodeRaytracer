@@ -31,8 +31,9 @@ namespace VULKAN
 //		}
 
         assetThreat.AddTask([this](){
+            ModelHandler::GetInstance()->AddMaterial(ModelHandler::GetInstance()->materialBase);
             SearchAllAssets(fileHandlerInstance->GetAssetsPath());
-            ModelHandler::GetInstance()->CalculateMaterialOffsets();
+            ModelHandler::GetInstance()->ReCalculateMaterialOffsets();
             
             
 //            DeserializeCodeFile<Material>(ModelHandler::GetInstance()->allMaterialsOnApp);
@@ -89,24 +90,36 @@ namespace VULKAN
 
 	void AssetsHandler::SaveMetadata()
 	{
-		SearchAllAssets(fileHandlerInstance->GetAssetsPath());
+//		SearchAllAssets(fileHandlerInstance->GetAssetsPath());
         int counter = 0;
-//        for(auto& pair: assets){
-//            std::fstream fstream(pair.first, std::ios::out | std::ios::trunc);
-//            if (fstream.is_open())
-//            {
-//                fstream.clear();
-//                fstream.close();
-//            }
-//            else
-//            {
-//                std::cout << "There is no metadata file \n";
-//                continue;
-//            }
-//            counter++;
-//            nlohmann::json jsonData = pair.second.Serialize();
-//            fileHandlerInstance->AppendToFile(pair.first, jsonData.dump(4));
-//        }
+        for(auto& pair: assetsLoaded){
+            std::fstream fstream(pair.first, std::ios::out | std::ios::trunc);
+            if (fstream.is_open())
+            {
+                fstream.clear();
+                fstream.close();
+            }
+            else
+            {
+                std::cout << "There is no metadata file \n";
+                continue;
+            }
+            counter++;
+
+            nlohmann::json jsonData;
+            if (fileHandlerInstance->GetPathExtension(pair.first)==matFileExtension){
+                Material& data = *ModelHandler::GetInstance()->allMaterialsOnApp.at(pair.second);
+                jsonData = data.Serialize();
+                
+            }
+            if (fileHandlerInstance->GetPathExtension(pair.first)==codeModelFileExtension){
+                ModelData& data = *ModelHandler::GetInstance()->allModelsOnApp.at(pair.second);
+                jsonData = data.Serialize();
+            }
+            if(!jsonData.empty()){
+                fileHandlerInstance->AppendToFile(pair.first, jsonData.dump(4));
+            }
+        }
 
         std::cout << "Asset Count saved: "<< counter<<"\n";
 

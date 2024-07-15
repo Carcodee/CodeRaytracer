@@ -390,10 +390,10 @@ namespace VULKAN {
 		uint32_t materialCount =0;
 		uint32_t meshCount =0;
 
-		for (auto model : modelDatas)
+		for (auto model : modelsOnScene)
 		{
-			materialCount += static_cast<uint32_t>(model.materialDataPerMesh.size());
-			meshCount += static_cast<uint32_t>(model.meshCount);
+			materialCount += static_cast<uint32_t>(model->materialDataPerMesh.size());
+			meshCount += static_cast<uint32_t>(model->meshCount);
 		}
 		std::vector<VkDescriptorPoolSize> poolSizes = {
 			{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
@@ -497,7 +497,7 @@ namespace VULKAN {
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
-		if (modelDatas.size()>0)
+		if (modelsOnScene.size()>0)
 		{
 		
 		}
@@ -565,9 +565,9 @@ namespace VULKAN {
 		}
 		uint32_t meshCount =0;
 
-		for (auto model : modelDatas)
+		for (auto model : modelsOnScene)
 		{
-			meshCount += static_cast<uint32_t>(model.meshCount);
+			meshCount += static_cast<uint32_t>(model->meshCount);
 		}
 
 		if (materialCount == 0)
@@ -871,6 +871,10 @@ namespace VULKAN {
 
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 		std::string path;
+        
+        VkSpecializationMapEntry specializationMapEntry = INITIALIZERS::specializationMapEntry(0, 0, sizeof(uint32_t));
+        uint32_t maxRecursion = 4;
+        VkSpecializationInfo specializationInfo = INITIALIZERS::specializationInfo(1, &specializationMapEntry, sizeof(maxRecursion), &maxRecursion);
 
         std::string shaderPath= HELPERS::FileHandler::GetInstance()->GetShadersPath();
 		// Ray generation group
@@ -878,6 +882,7 @@ namespace VULKAN {
 			path = shaderPath + "/RayTracingShaders/raygen.rgen.spv";
 			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rGenShaderModule,myDevice,VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
+            shaderStages.back().pSpecializationInfo= &specializationInfo;
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
 			shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
@@ -960,18 +965,7 @@ namespace VULKAN {
 		{
             materialDatas.push_back(mat.second->materialUniform);
 		}
-		if (materialDatas.size()==0)
-		{
 
-			for (int i = 0; i < modelDatas.size(); i++)
-			{
-				for (int j= 0;j<modelDatas[i].meshCount; ++j)
-				{
-					materialDatas.push_back(ModelHandler::GetInstance()->baseMaterial);
-				}
-			}
-			
-		}
 		myDevice.createBuffer(
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -994,32 +988,35 @@ namespace VULKAN {
         uint32_t materialOffset = 0;
         uint32_t instanceMeshCountOffset= 0;
 
-		for (int i = 0; i < modelDatas.size(); ++i)
+		for (int i = 0; i < modelsOnScene.size(); ++i)
 		{
-			for (int j=0 ; j < modelDatas[i].meshCount ; j++)
+            modelsOnScene[i]->dataUniformBuffer.clear();
+			for (int j=0 ; j < modelsOnScene[i]->meshCount ; j++)
 			{
-				ModelDataUniformBuffer myModelDataUniformBuffer={};
-				myModelDataUniformBuffer.materialIndex =modelDatas[i].materialOffset + modelDatas[i].materialIds[j];
-				myModelDataUniformBuffer.geometryIndexStart = perModelIndexStride + modelDatas[i].firstMeshIndex[j];
-                myModelDataUniformBuffer.indexOffset = perModelVertexCount;
-				modelDataUniformBuffer.push_back(myModelDataUniformBuffer);
+                ModelDataUniformBuffer currentModelDataUniformBuffer{};
+                currentModelDataUniformBuffer.materialIndex = modelsOnScene[i]->materialIds[j];
+                currentModelDataUniformBuffer.geometryIndexStart =perModelIndexStride + modelsOnScene[i]->firstMeshIndex[j];
+                currentModelDataUniformBuffer.indexOffset = perModelVertexCount;
+                modelsOnScene[i]->dataUniformBuffer.push_back(currentModelDataUniformBuffer);
+                modelDataUniformBuffer.push_back(currentModelDataUniformBuffer);
 				//modelDataUniformBuffer.insert(modelDataUniformBuffer.begin(),myModelDataUniformBuffer);
 			}
             instancesGeometryOffsets.push_back(instanceMeshCountOffset);
-            instanceMeshCountOffset += modelDatas[i].meshCount;
-            materialOffset += modelDatas[i].materialDataPerMesh.size();
-			modelDatas[i].indexBLASOffset = perModelIndexStride;
-			modelDatas[i].vertexBLASOffset = perModelVertexCount;
-			modelDatas[i].transformBLASOffset = i;
-
+            instanceMeshCountOffset += modelsOnScene[i]->meshCount;
+            materialOffset += modelsOnScene[i]->materialDataPerMesh.size();
+			modelsOnScene[i]->indexBLASOffset = perModelIndexStride;
+			modelsOnScene[i]->vertexBLASOffset = perModelVertexCount;
+			modelsOnScene[i]->transformBLASOffset = i;
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.indexBLASOffset = perModelIndexStride;
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.vertexBLASOffset = perModelVertexCount;
+            
 //            ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.transformBLASOffset = i;
-			perModelIndexStride += modelDatas[i].indices.size();
-			perModelVertexCount += modelDatas[i].vertices.size();
+			perModelIndexStride += modelsOnScene[i]->indices.size();
+			perModelVertexCount += modelsOnScene[i]->vertices.size();
 			transformationMatrixCount++;
 		}
 
+        
 		for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); ++i)
 		{
 			allModelsTransformationMatrices.push_back(ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).matrix);
@@ -1027,15 +1024,15 @@ namespace VULKAN {
        
 		allModelIndices.reserve(perModelIndexStride);
 		allModelsVertices.reserve(perModelVertexCount);
-//        for (int i = 0; i < modelDatas.size(); ++i) {
-//            for (int j = 0; j < modelDatas[i].indices.size(); ++j) {
-//               allModelIndices.push_back(modelDatas[i].indexBLASOffset+modelDatas[i].indices[j]);
+//        for (int i = 0; i < modelsOnScene.size(); ++i) {
+//            for (int j = 0; j < modelsOnScene[i]->indices.size(); ++j) {
+//               allModelIndices.push_back(modelsOnScene[i]->indexBLASOffset+modelsOnScene[i]->indices[j]);
 //            }
 //        }
-        for (int i = 0; i < modelDatas.size(); ++i)
+        for (int i = 0; i < modelsOnScene.size(); ++i)
 		{
-			allModelIndices.insert(allModelIndices.end(), modelDatas[i].indices.begin(), modelDatas[i].indices.end());
-			allModelsVertices.insert(allModelsVertices.end(), modelDatas[i].vertices.begin(), modelDatas[i].vertices.end());
+			allModelIndices.insert(allModelIndices.end(), modelsOnScene[i]->indices.begin(), modelsOnScene[i]->indices.end());
+			allModelsVertices.insert(allModelsVertices.end(), modelsOnScene[i]->vertices.begin(), modelsOnScene[i]->vertices.end());
 		}
 
         //shaders
@@ -1046,6 +1043,7 @@ namespace VULKAN {
 		&allModelDataBuffer,
 		modelDataUniformBuffer.size() * sizeof(ModelDataUniformBuffer),
 		modelDataUniformBuffer.data());
+        allModelDataBuffer.map();
 
 		myDevice.createBuffer(
 			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -1061,7 +1059,6 @@ namespace VULKAN {
                 &BLAsInstanceOffsetBuffer,
                 instancesGeometryOffsets.size() * sizeof(uint32_t),
                 instancesGeometryOffsets.data());
-        
         
         
 		// Index buffer
@@ -1080,8 +1077,20 @@ namespace VULKAN {
 			allModelsTransformationMatrices.data());
         
 	}
+    void RayTracing_RS::UpdateMeshInfo() {
+        std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
+        for (int i = 0; i < modelsOnScene.size(); ++i) {
+            modelsOnScene[i]->CalculateMaterialsIdsOffsets();
+            for (int j = 0; j < modelsOnScene[i]->meshCount; j++) {
+                modelDataUniformBuffer.push_back(modelsOnScene[i]->dataUniformBuffer[j]);
+            }
+        }
+        std::cout<<"Mesh info updated\n";
+        memcpy(allModelDataBuffer.mapped, modelDataUniformBuffer.data(), sizeof (ModelDataUniformBuffer)* modelDataUniformBuffer.size());
 
-	void RayTracing_RS::AddModelToPipeline(ModelData modelData)
+
+    }
+	void RayTracing_RS::AddModelToPipeline(ModelData& modelData)
 	{
         //TODO: here the model data pointer gets free because is a copy, maybe change this later  
 		SetupBottomLevelObj(modelData);
@@ -1185,26 +1194,6 @@ namespace VULKAN {
 			myRenderer.swapChain->height(),
 			1);
 
-        vkCmdTraceRaysKHR(
-                currentBuffer,
-                &raygenShaderSbtEntry,
-                &missShaderSbtEntry,
-                &hitShaderSbtEntry,
-                &callableShaderSbtEntry,
-                myRenderer.swapChain->width(),
-                myRenderer.swapChain->height(),
-                1);
-
-        vkCmdTraceRaysKHR(
-                currentBuffer,
-                &raygenShaderSbtEntry,
-                &missShaderSbtEntry,
-                &hitShaderSbtEntry,
-                &callableShaderSbtEntry,
-                myRenderer.swapChain->width(),
-                myRenderer.swapChain->height(),
-                1);
-
 
 		UpdateUniformbuffers();
 	
@@ -1287,10 +1276,9 @@ namespace VULKAN {
 
 	void RayTracing_RS::SetupBottomLevelObj(ModelData& modelData)
 	{
-		ModelData combinedMesh=modelData;
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 //		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain(), ModelHandler::GetInstance()->allTexturesOffset);
-		modelDatas.push_back(combinedMesh);
+		modelsOnScene.push_back(&modelData);
 		glm::vec3 positions[3];
 		glm::vec3 rots[3];
 		glm::vec3 scales[3];
@@ -1307,13 +1295,15 @@ namespace VULKAN {
 			positions[i] = glm::vec3(.0f, i, i);
 			rots[i] = glm::vec3(0);
 			scales[i] = glm::vec3(1.0f);
-			for (int j = 0; j < modelDatas.size(); ++j)
+			for (int j = 0; j < modelsOnScene.size(); ++j)
 			{
-				ModelHandler::GetInstance()->CreateBLAS(positions[i], rots[i], scales[i],modelDatas[j], topLevelObjBase);
+				ModelHandler::GetInstance()->CreateBLAS(positions[i], rots[i], scales[i],*modelsOnScene[j], topLevelObjBase);
 			}
 		}
 
 
 	}
+
+
 }
 

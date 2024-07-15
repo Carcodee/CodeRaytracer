@@ -52,9 +52,9 @@ namespace VULKAN{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
 			std::vector<VKTexture> materialTextures;
-            std::string materialReferencePath;
-            std::string name;
-            std::string targetPath;
+            std::string materialReferencePath="";
+            std::string name="";
+            std::string targetPath="";
             bool generated = false;
             int id= 0;
 			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset)
@@ -82,6 +82,7 @@ namespace VULKAN{
                 
                 jsonData = {
                         {"ID",this->id},
+                        {"Name",this->name},
                         {"AlbedoIntensity",this->materialUniform.albedoIntensity},
                         {"NormalIntensity",this->materialUniform.normalIntensity},
                         {"SpecularIntensity",this->materialUniform.specularIntensity},
@@ -100,6 +101,7 @@ namespace VULKAN{
             Material Deserialize(nlohmann::json &jsonObj) override{
 
                 this->id = jsonObj.at("ID");
+                this->name = jsonObj.at("Name");
                 std::vector<int> diffuse;
                 this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
                 this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
@@ -141,10 +143,16 @@ namespace VULKAN{
 			uint32_t indexBLASOffset = 0;
 			uint32_t vertexBLASOffset = 0;
 			uint32_t transformBLASOffset = 0;
+            std::vector<ModelDataUniformBuffer> dataUniformBuffer;
             uint32_t id;
             bool generated= false;
             uint32_t materialOffset= 0;
             std::string pathToAssetReference="";
+            void CalculateMaterialsIdsOffsets(){
+                for (int i = 0; i < dataUniformBuffer.size(); ++i) {
+                    dataUniformBuffer[i].materialIndex = materialIds[i];
+                }
+            }
 			void CreateAllTextures(VulkanSwapChain& swap_chain, int& allTextureOffset)
 			{
 				for (int i = 0; i < materialDataPerMesh.size(); ++i)

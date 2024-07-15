@@ -86,13 +86,13 @@ namespace VULKAN {
 		int vertexStartCouner = 0;
 		for (const auto& shape : shapes)
 		{
-			if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] <= 0)
+			if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] < 0)
 			{
 				materialIdsOnObject.push_back(0);
 			}
 			else
 			{
-				materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0]));
+				materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0]+ ModelHandler::GetInstance()->currentMaterialsOffset));
 			}
 			bool firstIndexAddedPerMesh = false;
 			bool firstVertexFinded = false;
@@ -421,7 +421,7 @@ namespace VULKAN {
 		}
 	}
 
-    ModelData ModelLoaderHandler::GetModelFromReader(tinyobj::ObjReader& reader) {
+    void ModelLoaderHandler::GetModelFromReader(tinyobj::ObjReader& reader, ModelData& modelData) {
 
 
         tinyobj::attrib_t attrib;
@@ -446,13 +446,14 @@ namespace VULKAN {
         int vertexStartCouner = 0;
         for (const auto& shape : shapes)
         {
-            if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] <= 0)
+            if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] < 0)
             {
                 materialIdsOnObject.push_back(0);
             }
             else
             {
-                materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0]));
+                //TODO: this is wrong, the offset must be the one that was when was loaded
+                materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0] + modelData.materialOffset));
             }
             bool firstIndexAddedPerMesh = false;
             bool firstVertexFinded = false;
@@ -523,8 +524,6 @@ namespace VULKAN {
 
         int textureTotalSize = 0;
         std::vector<VKTexture>allTextures;
-
-        ModelData modelData = {};
         modelData.vertices=vertices;
         modelData.indices=indices;
         modelData.firstMeshIndex=firstIndices;
@@ -537,7 +536,6 @@ namespace VULKAN {
         modelData.indexBLASOffset = 0;
         modelData.vertexBLASOffset = 0;
         modelData.transformBLASOffset = 0;
-        return modelData;       
     }
 
 }

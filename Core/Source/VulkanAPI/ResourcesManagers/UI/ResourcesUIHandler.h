@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include "VulkanAPI/Utility/Utility.h"
 
 
 namespace VULKAN
@@ -15,6 +16,9 @@ namespace VULKAN
 
 		static ResourcesUIHandler* GetInstance();
 		void DisplayDirInfo();
+        void DisplayMeshInfo();
+        int modelIDInspected=-1;
+        int materialIDInspected=-1;
 
 		float iconSize = 50;
 		float thumbnailSpace = 20;

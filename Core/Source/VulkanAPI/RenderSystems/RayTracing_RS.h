@@ -118,9 +118,9 @@ namespace VULKAN {
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
 		void TransitionStorageImage();
-
-		void AddModelToPipeline(ModelData modelData);
+		void AddModelToPipeline(ModelData& modelData);
 		void UpdateRaytracingData();
+        void UpdateMeshInfo();
 
 	private:
 		struct UniformData {
@@ -130,7 +130,7 @@ namespace VULKAN {
 
 
 
-		std::vector<ModelData>modelDatas;
+		std::vector<ModelData*>modelsOnScene;
         std::vector<uint32_t> instancesGeometryOffsets;
 		//helpers
 		void SetupBottomLevelObj(ModelData& modelData);

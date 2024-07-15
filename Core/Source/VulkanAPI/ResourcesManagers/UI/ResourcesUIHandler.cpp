@@ -82,7 +82,11 @@ namespace VULKAN
 			}
 			else if (element.path().extension()== assetInstanceRef->codeModelFileExtension)
 			{
-                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){}
+                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){
+                    int modelId= AssetsHandler::GetInstance()->assetsLoaded.at(element.path().string());
+                    ModelData& modelToLookInto= *ModelHandler::GetInstance()->allModelsOnApp.at(modelId).get();
+                    modelIDInspected=modelToLookInto.id; 
+                }
                 if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
                 {
 
@@ -102,18 +106,26 @@ namespace VULKAN
 				ImGui::NextColumn();
 			}
             else if (element.path().extension()== assetInstanceRef->matFileExtension) {
-                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){}
-                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-                    // Set payload to carry the index of our item (could be anything)
-//
-//                    Material &materialToLookInto = ModelHandler::GetInstance()->GetMaterialFromPath(
-//                            asset.codeFilePath);
-//                    std::filesystem::path relPath(std::filesystem::relative(materialToLookInto.materialReferencePath,fileHandlerInstanceRef->GetAssetsPath()));
+                int matId= AssetsHandler::GetInstance()->assetsLoaded.at(element.path().string());
+                Material &materialToLookInto = *ModelHandler::GetInstance()->allMaterialsOnApp.at(matId);
+                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){
+                    
+                    materialIDInspected= materialToLookInto.id;
+                }
+                if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+                {
+
+                    int matId= AssetsHandler::GetInstance()->assetsLoaded.at(element.path().string());
+                    Material& material= *ModelHandler::GetInstance()->allMaterialsOnApp.at(matId).get();
+//                     Set payload to carry the index of our item (could be anything)
+//                    std::filesystem::path relPath(std::filesystem::relative(modelToLookInto.pathToAssetReference,fileHandlerInstanceRef->GetAssetsPath()));
+
 //                    std::string stringData = relPath.string();
 //                    const char* data = stringData.c_str();
 //                    ImGui::SetDragDropPayload("MODEL_PATH", data,  strlen(data) + 1 * sizeof(char));
-////                     Display preview (could be anything, e.g. when dragging an image we could decide to display
-//                    ImGui::EndDragDropSource();
+                    ImGui::SetDragDropPayload("MATERIAL_ID", &matId,  sizeof(int));
+//                     Display preview (could be anything, e.g. when dragging an image we could decide to display
+                    ImGui::EndDragDropSource();
                 }
 
                 colCounter++;
@@ -132,4 +144,61 @@ namespace VULKAN
 
 		ImGui::PopID();
 	}
+
+    void ResourcesUIHandler::DisplayMeshInfo() {
+
+        ImGui::PushID("Inspector");
+        ImGui::SetWindowSize(ImVec2(400, 400));
+        ImGui::Begin("Inspector");
+        
+        if (modelIDInspected !=-1){
+
+            ModelData& modelInspected = *ModelHandler::GetInstance()->allModelsOnApp.at(modelIDInspected);
+            std::filesystem::path refPath(modelInspected.pathToAssetReference);
+            std::string text = "Mesh Selected: " + refPath.filename().string();
+            ImGui::SeparatorText(text.c_str());
+            
+            for (int i = 0; i < modelInspected.meshCount; ++i) {
+
+                std::string text = "Mesh_" + std::to_string(i);
+                if (ImGui::TreeNode(text.c_str())) {
+                    int matIndex =modelInspected.materialIds[i];
+                    Material &materialReference = *ModelHandler::GetInstance()->allMaterialsOnApp.at(matIndex);
+                    std::string materialText = materialReference.name;
+                    ImGui::PushID(materialReference.id);
+                    ImGui::Button(materialText.c_str(), ImVec2{100, 100});
+                    if (ImGui::BeginDragDropTarget()) {
+                        if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("MATERIAL_ID")) {
+                            int data = *(int *) payload->Data;
+
+                            ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+                            ImGui::BeginTooltip();
+                            ImGui::Text("Set Material");
+                            modelInspected.materialIds[i] = data;
+                            ModelHandler::GetInstance()->updateMeshData = true;
+                            ImGui::EndTooltip();
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                    ImGui::PopID();
+                    if  (materialReference.materialUniform.texturesSizes<=0){
+                        float matCol[3];
+                        matCol[0]= materialReference.materialUniform.diffuseColor.x;
+                        matCol[1]= materialReference.materialUniform.diffuseColor.y;
+                        matCol[2]= materialReference.materialUniform.diffuseColor.z;
+                        ImGui::ColorEdit3("Diffuse", matCol);
+                    }
+
+                    ImGui::TreePop();
+                }
+            }
+        } else{
+
+            ImGui::SeparatorText("There is no Model selected");
+        }
+        
+        
+        ImGui::End();
+        ImGui::PopID();
+    }
 }

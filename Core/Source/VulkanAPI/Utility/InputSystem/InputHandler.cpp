@@ -241,26 +241,23 @@ namespace VULKAN
 		{
 			currentButton = BUTTON_MOUSE0;
 			currentActionMade = ACTION_DOWN;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 		{
 			currentButton = BUTTON_MOUSE1;
 			currentActionMade = ACTION_DOWN;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
 			currentButton = BUTTON_MOUSE0;
 			currentActionMade = ACTION_RELEASE;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
 		{
 			currentButton = BUTTON_MOUSE1;
 			currentActionMade = ACTION_RELEASE;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 		}
 
 		if (buttonsActioned.contains(currentButton))
@@ -328,5 +325,13 @@ namespace VULKAN
 
 
 	}
+
+    void InputHandler::DisableMouse(bool value) {
+        if (value){
+            glfwSetInputMode(userWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }else{
+            glfwSetInputMode(userWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
 }
 

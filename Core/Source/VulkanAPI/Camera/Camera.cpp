@@ -61,12 +61,16 @@ namespace VULKAN
 	{
 
 		InputHandler * instanceSingleton= InputHandler::GetInstance();
-		if (instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE0, InputHandler::ACTION_HOLD) ||instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE1, InputHandler::ACTION_HOLD))
+        bool isClicking=(instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE0, InputHandler::ACTION_HOLD) ||
+                         instanceSingleton->GetUserInput(InputHandler::BUTTON_MOUSE1, InputHandler::ACTION_HOLD));
+		if ( isClicking && instanceSingleton->isMouseInsideViewport)
 		{
+            instanceSingleton->DisableMouse(false);
 			RotateCamera();
 		}
 		else
 		{
+            instanceSingleton->DisableMouse(true);
 			firstMouse = true;
 		}
 
@@ -84,7 +88,6 @@ namespace VULKAN
 
 		InputHandler * instanceSingleton= InputHandler::GetInstance();
 		glm::vec2 input = instanceSingleton->GetMousePos();
-
 
 		float currentX = input.x;
 		float currentY = input.y;

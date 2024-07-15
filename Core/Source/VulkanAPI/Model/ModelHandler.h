@@ -26,7 +26,7 @@ namespace VULKAN
 		};
 		struct ModelToLoadState
 		{
-			ModelData model;
+			std::shared_ptr<ModelData> model;
 			STATE state = UNLOADED;
 
 		};
@@ -44,11 +44,11 @@ namespace VULKAN
         void LoadAllModelsFromDisc();
 		void LoadAllModels();
         void CreateMaterialTextures(VulkanSwapChain& swapChain);
-        void CalculateMaterialOffsets();
+        void ReCalculateMaterialOffsets();
+        void AddMaterial(Material& material);
 
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
 		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);
-        Material& GetMaterialFromPath(std::string path);
         
         
 		std::vector<RayTracing_RS::BottomLevelObj>& GetBLASesFromTLAS(RayTracing_RS::TopLevelObj TLAS);
@@ -60,10 +60,12 @@ namespace VULKAN
 		std::vector<std::future<void>> futures;
 		std::mutex loadAssetMutex;
 		bool Loading = false;
+        bool updateMeshData = false;
 		int TLASesCount = 0;
         int allTexturesOffset =0;
         int currentMaterialsOffset= 0;
-		MaterialUniformData baseMaterial{};
+		MaterialUniformData baseMaterialUniformData{};
+        Material materialBase{};
         std::map<int,std::shared_ptr<Material>> allMaterialsOnApp;
         std::map<int,std::shared_ptr<ModelData>> allModelsOnApp;
 
