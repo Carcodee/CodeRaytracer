@@ -193,10 +193,15 @@ namespace VULKAN{
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
+            if (ModelHandler::GetInstance()->updateMaterialData){
+                rayTracing_RS.UpdateMaterialInfo();
+                ModelHandler::GetInstance()->updateMaterialData = false;
+            }
             if (ModelHandler::GetInstance()->updateMeshData){
                 rayTracing_RS.UpdateMeshInfo();
                 ModelHandler::GetInstance()->updateMeshData = false;
             }
+
             LoadQueryModels();
             
 			if (auto commandBuffer = renderer.BeginComputeFrame())

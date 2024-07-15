@@ -1,5 +1,5 @@
 #version 460
-#extension GL_EXT_ray_tracing : enable
+#extension GL_EXT_ray_tracing : require
 #extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_scalar_block_layout :enable
 #extension GL_EXT_buffer_reference2 : require
@@ -7,6 +7,20 @@
 
 
 #include "../UtilsShaders/ShadersUtility.glsl"
+
+struct RayPayload{
+    vec3 color;
+    float distance;
+    vec3 normal;
+    float reflector;
+    vec3 indirectLight;
+    float lightForce;
+    vec3 origin;
+};
+
+layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
+
+hitAttributeEXT vec2 attribs;
 
 struct TexturesFinded{
     vec4 diffuse;
@@ -19,9 +33,9 @@ struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
 	float specularIntensity;
-    float padding1;
+	float roughnessIntensity;
     vec3 diffuseColor;
-    float padding2;
+    int reflector;
 	int texturesIndexStart; 
 	int textureSizes; 
 	int diffuseOffset;
@@ -53,8 +67,6 @@ layout(binding=6) uniform light{
 }myLight;
 
 
-layout(location = 0) rayPayloadInEXT vec3 hitValue;
-hitAttributeEXT vec2 attribs;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
 
@@ -135,6 +147,8 @@ void main()
   vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
   normal=normalize(normal);
 
+
+
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
@@ -150,30 +164,32 @@ void main()
   
   vec4 diffuse=diffuseInMat;
 
-  
+  vec3 spec = vec3(0.8f); 
+  vec3 view = normalize(pos-rayPayload.origin);
+  vec3 lightDir= normalize(pos-myLight.pos); 
+  vec3 halfway =normalize(view + lightDir);
+  vec3 pbr= GetPBR(diffuse.xyz, myLight.col, 0.0f, 0.5f, 0.0f,spec, normal, view, lightDir, halfway);
  
   float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
-  hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
   
-//hitValue = diffuse.xyz;
-//
-//  if(gl_GeometryIndexEXT == 21){
-//  
-//    hitValue = vec3(1.0, 0.0, 0.0);
-//    if(primitiveIndex>=1724928){
-//        hitValue = vec3(0.0, 0.0, 1.0);
-//    }
-//  }
-//  else{
-//    hitValue = vec3(0.0); 
-//  }
+  //rayPayload.color = (diffuse.xyz * myLight.col * rayPayload.indirectLight) * shadingIntensity * myLight.intensity * rayPayload.lightForce; 
+  rayPayload.color = pbr * myLight.intensity ; 
+  rayPayload.distance = gl_RayTmaxEXT;
+  rayPayload.normal = normal;
+  rayPayload.indirectLight = diffuse.xyz;
+  rayPayload.lightForce -= 0.3f;
+  if(materials[materialIndex].reflector == 1){
+    rayPayload.reflector = 1.0f;
+  }else{
+    rayPayload.reflector = 0.0f;
+  }
 
   //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
   //vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
-  //hitValue = debuging;
-  //hitValue = debugGeometryIndex;
-  //hitValue = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  //hitValue = normDebug;
+  //rayPayload.color = debuging;
+  //rayPayload.color = debugGeometryIndex;
+  //rayPayload.color = normal * 0.5 + 0.5; // Uncomment for normal debugging
+  //rayPayload.color = normDebug;
 }
 
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){

@@ -32,9 +32,9 @@ namespace VULKAN{
 			float albedoIntensity;
 			float normalIntensity;
 			float specularIntensity;
-			float padding1;
+            float roughnessIntensity;
 			glm::vec3 diffuseColor;
-			float padding2;
+			int reflector;
 			int textureIndexStart = -1;
 			int texturesSizes = 0;
             int diffuseOffset = -1;
@@ -86,7 +86,9 @@ namespace VULKAN{
                         {"AlbedoIntensity",this->materialUniform.albedoIntensity},
                         {"NormalIntensity",this->materialUniform.normalIntensity},
                         {"SpecularIntensity",this->materialUniform.specularIntensity},
+                        {"RoughnessIntensity",this->materialUniform.roughnessIntensity},
                         {"DiffuseColor",diffuse},
+                        {"Reflector", this->materialUniform.reflector},
                         {"TextureIndexStart",this->materialUniform.textureIndexStart},
                         {"TextureSizes",this->materialUniform.texturesSizes},
                         {"DiffuseOffset",this->materialUniform.diffuseOffset},
@@ -115,6 +117,7 @@ namespace VULKAN{
                     std::cout<< "There is no diffuse color in material with ID:"<< this->id<<"\n";
                 }
                 this->materialUniform.textureIndexStart = jsonObj.at("TextureIndexStart");
+                this->materialUniform.reflector = jsonObj.at("Reflector");
 //                this->materialUniform.texturesSizes = jsonObj.at("TextureSizes");
                 this->materialUniform.texturesSizes = 0;
                 this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");

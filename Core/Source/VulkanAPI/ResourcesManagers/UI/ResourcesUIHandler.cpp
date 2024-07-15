@@ -188,6 +188,15 @@ namespace VULKAN
                         matCol[2]= materialReference.materialUniform.diffuseColor.z;
                         ImGui::ColorEdit3("Diffuse", matCol);
                     }
+                    if (ImGui::Button("Reflector")){
+                        if(materialReference.materialUniform.reflector==1){
+                            materialReference.materialUniform.reflector = 0;
+                        }else if (materialReference.materialUniform.reflector==0){
+                            materialReference.materialUniform.reflector = 1;
+                        }
+                        ModelHandler::GetInstance()->updateMaterialData = true;
+                        
+                    }
 
                     ImGui::TreePop();
                 }

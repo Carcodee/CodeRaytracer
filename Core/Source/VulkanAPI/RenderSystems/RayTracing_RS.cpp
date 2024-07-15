@@ -972,6 +972,7 @@ namespace VULKAN {
 		&allMaterialsBuffer,
 		materialDatas.size() * sizeof(MaterialUniformData),
 		materialDatas.data());
+        allMaterialsBuffer.map();
 	}
 
 	void RayTracing_RS::CreateAllModelsBuffer()
@@ -1077,6 +1078,17 @@ namespace VULKAN {
 			allModelsTransformationMatrices.data());
         
 	}
+
+    void RayTracing_RS::UpdateMaterialInfo() {
+        std::vector<MaterialUniformData> materialDatas{};
+        for (auto& mat:ModelHandler::GetInstance()->allMaterialsOnApp)
+        {
+            materialDatas.push_back(mat.second->materialUniform);
+        }
+        std::cout<<"Material info updated\n";
+        memcpy(allMaterialsBuffer.mapped, materialDatas.data(), sizeof (MaterialUniformData)* materialDatas.size());
+
+    }
     void RayTracing_RS::UpdateMeshInfo() {
         std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
         for (int i = 0; i < modelsOnScene.size(); ++i) {
@@ -1090,7 +1102,9 @@ namespace VULKAN {
 
 
     }
-	void RayTracing_RS::AddModelToPipeline(ModelData& modelData)
+
+
+    void RayTracing_RS::AddModelToPipeline(ModelData& modelData)
 	{
         //TODO: here the model data pointer gets free because is a copy, maybe change this later  
 		SetupBottomLevelObj(modelData);

@@ -121,6 +121,7 @@ namespace VULKAN {
 		void AddModelToPipeline(ModelData& modelData);
 		void UpdateRaytracingData();
         void UpdateMeshInfo();
+        void UpdateMaterialInfo();
 
 	private:
 		struct UniformData {
