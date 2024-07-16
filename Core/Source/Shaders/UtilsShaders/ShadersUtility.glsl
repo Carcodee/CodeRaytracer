@@ -22,7 +22,7 @@ MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	if(diffuse==vec4(-1)){
 		materialFindInfo.hasDiffuse = false;
 	}
-	if(diffuse==vec4(-1)){
+	if(normal==vec4(-1)){
 		materialFindInfo.hasNormals = false;
 	}
 	return materialFindInfo;
@@ -68,10 +68,10 @@ vec3 FresnelShilck(vec3 halfway, vec3 view, vec3 FO){
 	return FO + vecPow;
 }
 
-vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 specular, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
+vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
 	float D = D_GGX(roughness, normal, halfWay);
 	float G = G(roughness, normal, view, light);
-	vec3 F = FresnelShilck(halfWay, view, specular);
+	vec3 F = FresnelShilck(halfWay, view, baseReflectivity);
 	vec3 cookTorrence = CookTorrance(normal, view, light, D, G, F);
 	vec3 lambert= LambertDiffuse(col);
 	vec3 ks = F;
@@ -79,6 +79,35 @@ vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float m
 	vec3 BRDF =  kd * lambert + cookTorrence;
 	vec3 outgoingLight = emissiveMesh + BRDF * lightCol * max(dot(light,normal), 0.0001);
 	return outgoingLight;
+}
+
+//raytracing indirect lightning
+float rand(float uvX, float uvY) {
+	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
+}
+
+vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float uvX, float uvY) {
+	// Generate two random numbers between 0 and 1
+	float r1 = rand(uvX, uvY);
+	float r2 = rand(uvX, uvY);
+
+	// Convert to spherical coordinates
+	float theta = acos(sqrt(1.0 - r1));
+	float phi = 2.0 * PI * r2;
+
+	// Convert spherical coordinates to Cartesian coordinates
+	float x = sin(theta) * cos(phi);
+	float y = sin(theta) * sin(phi);
+	float z = cos(theta);
+
+	vec3 bitangent = cross(normal, tangent);
+	// Convert the sample to world coordinates
+	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
+	return normalize(sampleDir);
+}
+
+vec3 GetReflection(vec3 reflectedDir, vec3 randomDir, float rougness){
+	return normalize(mix(reflectedDir, randomDir, rougness));
 }
 
 

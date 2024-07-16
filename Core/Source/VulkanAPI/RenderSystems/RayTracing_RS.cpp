@@ -873,7 +873,7 @@ namespace VULKAN {
 		std::string path;
         
         VkSpecializationMapEntry specializationMapEntry = INITIALIZERS::specializationMapEntry(0, 0, sizeof(uint32_t));
-        uint32_t maxRecursion = 4;
+        uint32_t maxRecursion = 3;
         VkSpecializationInfo specializationInfo = INITIALIZERS::specializationInfo(1, &specializationMapEntry, sizeof(maxRecursion), &maxRecursion);
 
         std::string shaderPath= HELPERS::FileHandler::GetInstance()->GetShadersPath();

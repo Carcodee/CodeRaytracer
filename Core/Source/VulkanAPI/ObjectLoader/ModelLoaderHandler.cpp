@@ -160,8 +160,21 @@ namespace VULKAN {
 			meshVertexCount.push_back(vertexCount);
 
 		}
+//        for (int i = 0; i <indices.size()/3 ; ++i) {
+//            
+//            int index1 = 3 * indices[i] + 0;
+//            int index2 = 3 * indices[i] + 1;
+//            int index3 = 3 * indices[i] + 2;
+//            
+//            glm::vec3 tangent = CalculateTangent(vertices[index1].position,vertices[index2].position,vertices[index3].position,
+//                                                 vertices[index1].texCoord,vertices[index2].texCoord,vertices[index3].texCoord);
+//            vertices[3 * indices[i] + 0].tangent = tangent;
+//            vertices[3 * indices[i] + 1].tangent = tangent;
+//            vertices[3 * indices[i] + 2].tangent = tangent;
+//        }
 
-		int textureTotalSize = 0;
+
+        int textureTotalSize = 0;
 
         ModelData modelData = {};
         modelData.materialOffset= ModelHandler::GetInstance()->currentMaterialsOffset;
@@ -211,90 +224,9 @@ namespace VULKAN {
 		return textures;
 	}
 
-
-	std::map<int,Material> ModelLoaderHandler:: LoadMaterialsFromObject(std::string path, int& texturesSizes)
-	{
-		tinyobj::ObjReader reader;
-		tinyobj::ObjReaderConfig objConfig;
-		std::map<int,Material> materialsDatas;
-
-		if (!reader.ParseFromFile(path, objConfig))
-		{
-			if (!reader.Error().empty())
-			{
-				PRINTLVK("Error from reader": )
-				PRINTLVK(reader.Error())
-			}
-			
-			return materialsDatas;
-		}
-		if (!reader.Warning().empty()) {
-			std::cout << "TinyObjReader: " << reader.Warning();
-		}
-
-		auto& materials = reader.GetMaterials();
-		std::unordered_set<std::string> unique_texturePaths;
-		
-		int matCount = 0;
-		std::filesystem::path currentModelPath(path);
-		currentModelPath = currentModelPath.parent_path();
-
-		std::string texturesPath = currentModelPath.string()+"\\Textures";
-		if (!std::filesystem::exists(currentModelPath))
-		{
-			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
-		}
-
-		for (const auto& material : materials)
-		{
-			
-			Material materialData{};
-			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
-			if (!material.diffuse_texname.empty()) {
-				std::string texturePathFinded= material.diffuse_texname;
-				FixMaterialPaths(texturePathFinded, texturesPath);
-				unique_texturePaths.insert(texturePathFinded);
-			}
-			//if (!material.alpha_texname.empty()) {
-			//	std::string texturePathFinded= material.alpha_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-
-			//if (!material.specular_texname.empty()) {
-			//	std::string texturePathFinded= material.specular_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.bump_texname.empty()) {
-			//	std::string texturePathFinded= material.bump_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.normal_texname.empty()) {
-			//	std::string texturePathFinded= material.normal_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.ambient_texname.empty()) {
-			//	std::string texturePathFinded= material.ambient_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-
-			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
-			materialsDatas.try_emplace(matCount, materialData);
-			unique_texturePaths.clear();
-			matCount++;
-		}
-		
-		return materialsDatas;
-	}
-
 	std::map<int, Material> ModelLoaderHandler::LoadMaterialsFromReader(tinyobj::ObjReader& reader ,std::string path)
 	{
 		auto& materials = reader.GetMaterials();
-		std::unordered_set<std::string> unique_texturePaths;
 
 		int matCount = 0;
 		std::filesystem::path currentModelPath(path);
@@ -314,50 +246,56 @@ namespace VULKAN {
             int textureOffset = 0;
 			Material materialData{};
 			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
+            materialData.materialUniform.roughnessIntensity = material.roughness;
+            materialData.materialUniform.metallicIntensity = material.metallic;
 			if (!material.diffuse_texname.empty()) {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-				unique_texturePaths.insert(texturePathFinded);
+                materialData.paths.push_back(texturePathFinded);
                 materialData.materialUniform.diffuseOffset= textureOffset;
                 textureOffset++;
 			}
-			//if (!material.alpha_texname.empty()) {
-			//	std::string texturePathFinded = material.alpha_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
+            if (!material.roughness_texname.empty() || !material.specular_texname.empty()|| !material.specular_highlight_texname.empty()) {
+                std::string texName;
+                if (!material.roughness_texname.empty()){
+                    texName=material.roughness_texname;
+                }else if (!material.specular_texname.empty()){
+                    texName=material.specular_texname;
+                }else if (!material.specular_highlight_texname.empty()){
+                    texName=material.specular_highlight_texname;
+                }
+                std::string texturePathFinded= texName;
+                FixMaterialPaths(texturePathFinded, texturesPath);
+                materialData.paths.push_back(texturePathFinded);
+                materialData.materialUniform.roughnessOffset= textureOffset;
+                materialData.materialUniform.roughnessIntensity = 1.0f;
+                textureOffset++;
+            }
+            if (!material.metallic_texname.empty()) {
+                std::string texturePathFinded= material.metallic_texname;
+                FixMaterialPaths(texturePathFinded, texturesPath);
+                materialData.paths.push_back(texturePathFinded);
+                materialData.materialUniform.metallicOffset= textureOffset;
+                materialData.materialUniform.metallicIntensity = 1.0f;
+                textureOffset++;
+            }
 
-			//if (!material.specular_texname.empty()) {
-			//	std::string texturePathFinded= material.specular_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			//if (!material.bump_texname.empty()) {
-			//	std::string texturePathFinded= material.bump_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
-			if (!material.normal_texname.empty()) {
-				std::string texturePathFinded= material.normal_texname;
+			if (!material.bump_texname.empty()) {
+				std::string texturePathFinded= material.bump_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-				unique_texturePaths.insert(texturePathFinded);
+                materialData.paths.push_back(texturePathFinded);
                 materialData.materialUniform.normalOffset= textureOffset;
+                materialData.materialUniform.normalIntensity = 1.0f;
                 textureOffset++;
 			}
-			//if (!material.ambient_texname.empty()) {
-			//	std::string texturePathFinded= material.ambient_texname;
-			//	FixMaterialPaths(texturePathFinded, texturesPath);
-			//	unique_texturePaths.insert(texturePathFinded);
-			//}
 
-			materialData.paths = std::vector<std::string>(unique_texturePaths.begin(), unique_texturePaths.end());
+
             materialData.materialReferencePath= texturesPath;
             materialData.name = "Material_"+std::to_string(matCount);
             materialData.id = ModelHandler::GetInstance()->currentMaterialsOffset;
             materialData.targetPath = texturesPath +"\\"+ materialData.name + ".MATCODE";
 			materialsDatas.try_emplace(matCount, materialData);
             ModelHandler::GetInstance()->allMaterialsOnApp.try_emplace(materialData.id,std::make_shared<Material>(materialData));
-			unique_texturePaths.clear();
 			matCount++;
             ModelHandler::GetInstance()->currentMaterialsOffset++;
 		}
@@ -422,7 +360,6 @@ namespace VULKAN {
 	}
 
     void ModelLoaderHandler::GetModelFromReader(tinyobj::ObjReader& reader, ModelData& modelData) {
-
 
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
@@ -494,7 +431,7 @@ namespace VULKAN {
                             1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                     };
                 }
-
+                
                 if (uniqueVertices.count(vertex) == 0) {
                     uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
                     vertices.push_back(vertex);
@@ -515,13 +452,25 @@ namespace VULKAN {
                 indices.push_back(uniqueVertices[vertex]);
                 indexStartCounter++;
                 indexCount++;
+                
 
             }
             meshIndexCount.push_back(indexCount);
             meshVertexCount.push_back(vertexCount);
 
         }
+        for (int i = 0; i <indices.size() ; i+=3) {
 
+            int index1 =indices[i];
+            int index2 =indices[i + 1];
+            int index3 =indices[i + 2];
+            
+            glm::vec3 tangent = CalculateTangent(vertices[index1].position,vertices[index2].position,vertices[index3].position,
+                                                 vertices[index1].texCoord,vertices[index2].texCoord,vertices[index3].texCoord);
+            vertices[index1].tangent = tangent;
+            vertices[index2].tangent = tangent;
+            vertices[index3].tangent = tangent;
+        } 
         int textureTotalSize = 0;
         std::vector<VKTexture>allTextures;
         modelData.vertices=vertices;
@@ -538,6 +487,19 @@ namespace VULKAN {
         modelData.transformBLASOffset = 0;
     }
 
-}
 
+    glm::vec3 ModelLoaderHandler::CalculateTangent(glm::vec3 pos1, glm::vec3 pos2, glm::vec3 pos3,
+                                                   glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
+        glm::vec3 edge1 = pos2 - pos1;
+        glm::vec3 edge2 = pos3 - pos1;
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+        glm::vec3 tangent;
+        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+        tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        return glm::normalize(tangent);
+    }
+}
 

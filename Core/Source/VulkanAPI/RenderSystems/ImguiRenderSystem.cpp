@@ -625,9 +625,9 @@ namespace VULKAN
 		ImGui::LabelText("Raytracing", "");
 		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
 		ImGui::LabelText("Light", "");
-		ImGui::SliderFloat3("light Pos", lightPos, -50.0f, 50.0f, "%.3f");
+		ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f");
 		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
-		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
+		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
 		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
 
 		if (ImGui::Button("Confirm"))

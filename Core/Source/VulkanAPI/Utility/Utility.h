@@ -32,13 +32,23 @@ namespace VULKAN{
 			float albedoIntensity;
 			float normalIntensity;
 			float specularIntensity;
-            float roughnessIntensity;
+            float roughnessIntensity = 0.5f;
 			glm::vec3 diffuseColor;
-			int reflector;
+			float reflectivityIntensity = 0.5f;
+            //32
+            glm::vec3 baseReflection;
+            float metallicIntensity;
+            //48
+            float emissionIntensity;
+            int roughnessOffset = -1;
+            int metallicOffset = -1;
+            int specularOffset = -1;
+            //64
 			int textureIndexStart = -1;
 			int texturesSizes = 0;
             int diffuseOffset = -1;
             int normalOffset = -1;
+            //80
 		};
 
 		struct ModelDataUniformBuffer 
@@ -79,7 +89,11 @@ namespace VULKAN{
                 diffuse.push_back(materialUniform.diffuseColor.x);
                 diffuse.push_back(materialUniform.diffuseColor.y);
                 diffuse.push_back(materialUniform.diffuseColor.z);
-                
+                std::vector<float> baseReflection;
+                baseReflection.push_back(materialUniform.baseReflection.x);
+                baseReflection.push_back(materialUniform.baseReflection.y);
+                baseReflection.push_back(materialUniform.baseReflection.z);
+
                 jsonData = {
                         {"ID",this->id},
                         {"Name",this->name},
@@ -87,12 +101,26 @@ namespace VULKAN{
                         {"NormalIntensity",this->materialUniform.normalIntensity},
                         {"SpecularIntensity",this->materialUniform.specularIntensity},
                         {"RoughnessIntensity",this->materialUniform.roughnessIntensity},
+                        //16
                         {"DiffuseColor",diffuse},
-                        {"Reflector", this->materialUniform.reflector},
+                        {"ReflectivityIntensity", this->materialUniform.reflectivityIntensity},
+                        //32
+                        {"BaseReflection",baseReflection},
+                        {"MetallicIntensity",this->materialUniform.metallicIntensity},
+                        //48
+                        {"EmissionIntensity",this->materialUniform.emissionIntensity},
+                        {"RoughnessOffset",this->materialUniform.roughnessOffset},
+                        {"MetallicOffset",this->materialUniform.metallicOffset},
+                        {"SpecularOffset",this->materialUniform.specularOffset},
+                        //60
                         {"TextureIndexStart",this->materialUniform.textureIndexStart},
                         {"TextureSizes",this->materialUniform.texturesSizes},
                         {"DiffuseOffset",this->materialUniform.diffuseOffset},
                         {"NormalOffset",this->materialUniform.normalOffset},
+                        //80
+                        
+                        
+                        
                         {"Paths",this->paths},
                         {"MaterialReferencePath",this->materialReferencePath},
                         {"TargetPath",this->targetPath}
@@ -105,23 +133,38 @@ namespace VULKAN{
                 this->id = jsonObj.at("ID");
                 this->name = jsonObj.at("Name");
                 std::vector<int> diffuse;
+                std::vector<int> baseReflection;
                 this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
                 this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
                 this->materialUniform.specularIntensity = jsonObj.at("SpecularIntensity");
+                this->materialUniform.roughnessIntensity = jsonObj.at("RoughnessIntensity");
+                //16
                 diffuse = jsonObj.at("DiffuseColor").get<std::vector<int>>();
-                if(diffuse.size()==3){
-                    this->materialUniform.diffuseColor.x = diffuse[0];
-                    this->materialUniform.diffuseColor.y = diffuse[1];
-                    this->materialUniform.diffuseColor.z = diffuse[2];
-                } else{
-                    std::cout<< "There is no diffuse color in material with ID:"<< this->id<<"\n";
-                }
-                this->materialUniform.textureIndexStart = jsonObj.at("TextureIndexStart");
-                this->materialUniform.reflector = jsonObj.at("Reflector");
-//                this->materialUniform.texturesSizes = jsonObj.at("TextureSizes");
+                this->materialUniform.diffuseColor.x = diffuse[0];
+                this->materialUniform.diffuseColor.y = diffuse[1];
+                this->materialUniform.diffuseColor.z = diffuse[2];
+                this->materialUniform.reflectivityIntensity = jsonObj.at("ReflectivityIntensity");
+                //32
+
+                //base reflection
+                baseReflection = jsonObj.at("BaseReflection").get<std::vector<int>>();
+                this->materialUniform.baseReflection.x = baseReflection[0];
+                this->materialUniform.baseReflection.y = baseReflection[1];
+                this->materialUniform.baseReflection.z = baseReflection[2];
+                this->materialUniform.metallicIntensity=jsonObj.at("MetallicIntensity");
+                //48
+                this->materialUniform.emissionIntensity==jsonObj.at("EmissionIntensity");
+                this->materialUniform.roughnessOffset = jsonObj.at("RoughnessOffset");
+                this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
+                this->materialUniform.specularOffset= jsonObj.at("SpecularOffset");
+                //60
+                this->materialUniform.textureIndexStart=jsonObj.at("TextureIndexStart");
                 this->materialUniform.texturesSizes = 0;
+//                this->materialUniform.texturesSizes = jsonObj.at("TextureSizes");
                 this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
                 this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
+                //80
+                
                 this->paths = jsonObj.at("Paths").get<std::vector<std::string>>();
                 this->materialReferencePath = jsonObj.at("MaterialReferencePath");
                 this->targetPath = jsonObj.at("TargetPath");
@@ -136,7 +179,8 @@ namespace VULKAN{
 		{
 			std::vector <Vertex> vertices;
 			std::vector<uint32_t> indices;
-			std::vector<uint32_t> firstMeshIndex;
+
+            std::vector<uint32_t> firstMeshIndex;
 			std::vector<uint32_t> firstMeshVertex;
 			std::vector<int> materialIds;
 			std::vector<uint32_t> meshIndexCount;

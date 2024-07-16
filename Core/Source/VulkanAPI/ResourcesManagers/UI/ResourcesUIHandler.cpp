@@ -181,6 +181,34 @@ namespace VULKAN
                         ImGui::EndDragDropTarget();
                     }
                     ImGui::PopID();
+                    if(ImGui::SliderFloat("albedo intensity",&materialReference.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
+                        ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
+                    if(ImGui::SliderFloat("roughness",&materialReference.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
+                        ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
+                    if(ImGui::SliderFloat("reflectivity",&materialReference.materialUniform.reflectivityIntensity, 0.0f, 3.0f,"%.3f")){
+
+                        ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
+                    if(ImGui::SliderFloat("metalness",&materialReference.materialUniform.metallicIntensity, 0.0f, 3.0f,"%.3f")){
+
+                        ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
+                    if(ImGui::SliderFloat("emission base",&materialReference.materialUniform.emissionIntensity, 0.0f, 3.0f,"%.3f")){
+
+                        ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
+                    float baseReflection[3];
+                    baseReflection[0]= materialReference.materialUniform.baseReflection.x;
+                    baseReflection[1]= materialReference.materialUniform.baseReflection.y;
+                    baseReflection[2]= materialReference.materialUniform.baseReflection.z;
+                    if(ImGui::SliderFloat3("metalness",baseReflection, 0.0f, 1.0f,"%.3f")){
+                         materialReference.materialUniform.baseReflection.x=baseReflection[0];
+                         materialReference.materialUniform.baseReflection.y=baseReflection[1];
+                         materialReference.materialUniform.baseReflection.z=baseReflection[2];
+                         ModelHandler::GetInstance()->updateMaterialData= true;
+                    }
                     if  (materialReference.materialUniform.texturesSizes<=0){
                         float matCol[3];
                         matCol[0]= materialReference.materialUniform.diffuseColor.x;
@@ -188,15 +216,7 @@ namespace VULKAN
                         matCol[2]= materialReference.materialUniform.diffuseColor.z;
                         ImGui::ColorEdit3("Diffuse", matCol);
                     }
-                    if (ImGui::Button("Reflector")){
-                        if(materialReference.materialUniform.reflector==1){
-                            materialReference.materialUniform.reflector = 0;
-                        }else if (materialReference.materialUniform.reflector==0){
-                            materialReference.materialUniform.reflector = 1;
-                        }
-                        ModelHandler::GetInstance()->updateMaterialData = true;
-                        
-                    }
+
 
                     ImGui::TreePop();
                 }

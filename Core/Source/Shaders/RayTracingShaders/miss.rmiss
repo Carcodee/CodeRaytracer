@@ -6,10 +6,10 @@ struct RayPayload{
     vec3 color;
     float distance;
     vec3 normal;
-    float reflector;
-    vec3 indirectLight;
-    float lightForce;
+    vec3 tangent;
     vec3 origin;
+    float roughness;
+    float reflectivity;
 };
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
@@ -21,10 +21,8 @@ void main()
 	vec3 unitDir = normalize(gl_WorldRayDirectionEXT);
 	float t = 0.5 * (unitDir.y + 1.0);
 	rayPayload.color = (1.0-t) * gradientStart + t * gradientEnd;
-	rayPayload.lightForce = 0.0f;
-	rayPayload.indirectLight= rayPayload.indirectLight;
 	rayPayload.distance = -1.0f;
 	rayPayload.normal = vec3(0.0f);
-	rayPayload.reflector = 0.0f;
+	rayPayload.tangent = vec3(0.0f);
 	
 }

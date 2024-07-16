@@ -12,10 +12,10 @@ struct RayPayload{
     vec3 color;
     float distance;
     vec3 normal;
-    float reflector;
-    vec3 indirectLight;
-    float lightForce;
+    vec3 tangent;
     vec3 origin;
+    float roughness;
+    float reflectivity; 
 };
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
@@ -31,15 +31,26 @@ struct TexturesFinded{
 };
 struct MaterialData {
 	float albedoIntensity;
-	float normalIntensity;
-	float specularIntensity;
-	float roughnessIntensity;
+    float normalIntensity;
+    float specularIntensity;
+    float roughnessIntensity;
+    //16
     vec3 diffuseColor;
-    int reflector;
-	int texturesIndexStart; 
-	int textureSizes; 
-	int diffuseOffset;
+    float reflectivityIntensity;
+    //32
+    vec3 baseReflection;
+    float metallicIntensity;
+    //48
+    float emissionIntensity;
+    int roughnessOffset;
+    int metallicOffset;
+    int specularOffset;
+    //64
+    int texturesIndexStart;
+    int textureSizes;
+    int diffuseOffset;
     int normalOffset;
+    //80
 };
 
 struct MeshData {
@@ -53,6 +64,7 @@ struct Vertex {
     vec3 position; 
     vec3 col;
     vec3 normal;
+    vec3 tangent;
     vec2 texCoords; 
 };
 
@@ -94,21 +106,6 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
 
 layout(set = 0,binding = 10) uniform sampler2D textures[];
 
-vec3 GetDebugCol(uint primitiveId, float primitiveCount){
-
-    float idNormalized = float(primitiveId) / primitiveCount; 
-    vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
-    return debugColor;
-}
-float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
-    
-    vec3 dir= fragPos-lightPos; 
-    dir= normalize(dir);
-    float colorShading=max(dot(dir, normal),0.2);
-    return colorShading;
-
-}
-
 #define MAX_TEXTURES 5
 
 vec4 CurrentMaterialTextures[MAX_TEXTURES];
@@ -117,8 +114,10 @@ int texturesOnMaterialCount = 0;
 vec3 GetDiffuseColor(int materialIndex);
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv);
+float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity);
 vec4 GetColorOrDiffuseTex(vec2 uv);
-
+vec3 GetDebugCol(uint primitiveId, float primitiveCount);
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
 void main()
 {
     
@@ -145,7 +144,12 @@ void main()
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
   vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
+  vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
+  
   normal=normalize(normal);
+  tangent=normalize(tangent);
+  vec3 bitTangent =cross(normal, tangent); 
+  mat3 TBN = mat3(tangent, bitTangent, normal);
 
 
 
@@ -159,6 +163,15 @@ void main()
   vec4 normalInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].normalOffset, uv);
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
+  if(!matInfo.hasDiffuse){
+     diffuseInMat =vec4(materials[0].diffuseColor, 1.0);
+  }
+  vec3 finalNormal = normal;
+  if(matInfo.hasNormals){
+      mat3 inverseTBN = transpose(TBN);
+      vec3 normalWorldSpace = normalInMat.xyz * inverseTBN;
+      finalNormal = normalize(normalWorldSpace); 
+  }
   
   //FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
   
@@ -168,36 +181,45 @@ void main()
   vec3 view = normalize(pos-rayPayload.origin);
   vec3 lightDir= normalize(pos-myLight.pos); 
   vec3 halfway =normalize(view + lightDir);
-  vec3 pbr= GetPBR(diffuse.xyz, myLight.col, 0.0f, 0.0f, 0.0f, spec, normal, view, lightDir, halfway);
- 
-  float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
   
-  //rayPayload.color = (diffuse.xyz * myLight.col * rayPayload.indirectLight) * shadingIntensity * myLight.intensity * rayPayload.lightForce; 
-  rayPayload.color = pbr * myLight.intensity; 
+  float roughness =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+  float metallic =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
+  
+  vec3 pbr= GetPBR(diffuse.xyz, myLight.col,
+  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
+  finalNormal, view, lightDir, halfway);
+
+  rayPayload.color = (pbr * myLight.intensity); 
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;
-  rayPayload.indirectLight = diffuse.xyz;
-  rayPayload.lightForce -= 0.3f;
-  if(materials[materialIndex].reflector == 1){
-    rayPayload.reflector = 1.0f;
-  }else{
-    rayPayload.reflector = 0.0f;
-  }
+  rayPayload.tangent = tangent;
+  rayPayload.roughness = materials[materialIndex].roughnessIntensity;
+  rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
+
 
   //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
   //vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
   //rayPayload.color = debuging;
   //rayPayload.color = debugGeometryIndex;
   //rayPayload.color = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  //rayPayload.color = normDebug;
+  //rayPayload.color = materials[materialIndex].;
 }
 
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
     if (texOffset== -1){
-        return vec4(0, 1, 1, 1);
+    
+        return vec4(-1, -1, -1, -1);
     }
     vec4 texture = texture(textures[texIndexStart + texOffset],uv);
     return texture;
+}
+
+float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity){
+	if (texOffset== -1){
+		return intensity;
+	}
+	vec4 texture = texture(textures[texIndexStart + texOffset],uv);
+	return texture.x * intensity;
 }
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
 
@@ -235,4 +257,18 @@ vec4 GetColorOrDiffuseTex(vec2 uv){
 
 }
 
+vec3 GetDebugCol(uint primitiveId, float primitiveCount){
+
+    float idNormalized = float(primitiveId) / primitiveCount; 
+    vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
+    return debugColor;
+}
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
+    
+    vec3 dir= fragPos-lightPos; 
+    dir= normalize(dir);
+    float colorShading=max(dot(dir, normal),0.2);
+    return colorShading;
+
+}
 

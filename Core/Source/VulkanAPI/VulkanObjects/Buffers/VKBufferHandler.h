@@ -15,13 +15,14 @@ namespace VULKAN {
 		glm::vec3 position;
 		glm::vec3 color;
 		glm::vec3 normal;
+        glm::vec3 tangent;
 		glm::vec2 texCoord;
 
 		static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
 		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
 
 		bool operator==(const Vertex& other) const {
-			return position == other.position && color == other.color && texCoord == other.texCoord && normal == other.normal;
+			return position == other.position && color == other.color && texCoord == other.texCoord && normal == other.normal && tangent == other.tangent;
 		}
 	};
 	struct GLTFVertex {
@@ -82,13 +83,15 @@ namespace std {
 			size_t hash1 = hash<glm::vec3>()(vertex.position);
 			size_t hash2 = hash<glm::vec3>()(vertex.color);
 			size_t hash3 = hash<glm::vec3>()(vertex.normal);
-			size_t hash4 = hash<glm::vec2>()(vertex.texCoord);
+            size_t hash4 = hash<glm::vec2>()(vertex.tangent);
+			size_t hash5 = hash<glm::vec2>()(vertex.texCoord);
 
 			// Combine the hashes using bitwise operations
 			size_t result = hash1;
 			result = (result * 31) + hash2;
 			result = (result * 31) + hash3;
-			result = (result * 31) + hash4;
+            result = (result * 31) + hash4;
+			result = (result * 31) + hash5;
 
 			return result;
 		}
