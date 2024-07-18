@@ -10,6 +10,7 @@ namespace VULKAN {
 	public:
 
 		VKTexture(const char* path, VulkanSwapChain& swapchain);
+        ~VKTexture() override;
 		//VKTexture(VKTexture& other);
 		//Resources handled by the swapchain;
 		VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t heigh, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat formatt);
@@ -48,7 +49,7 @@ namespace VULKAN {
 		VkDeviceMemory textureImageMemory=nullptr;
 		VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 		uint32_t mipLevels=0;
-		VkDescriptorSet textureDescriptor;
+		VkDescriptorSet textureDescriptor = nullptr;
 
 	private:
 		

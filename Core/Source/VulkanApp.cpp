@@ -9,6 +9,7 @@
 #include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
+
 int cicles=0;
 namespace VULKAN{
 	
@@ -183,13 +184,11 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-			//rayTracing_RS.cam.position.x = ImguiRenderSystem::GetInstance()->camPos[0];
-			//rayTracing_RS.cam.position.y = ImguiRenderSystem::GetInstance()->camPos[1];
-			//rayTracing_RS.cam.position.z = ImguiRenderSystem::GetInstance()->camPos[2];
+            
 			rayTracing_RS.light.color = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightPos);
 			rayTracing_RS.light.intensity = ImguiRenderSystem::GetInstance()->lightIntensity;
-
+            
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
@@ -201,14 +200,11 @@ namespace VULKAN{
                 rayTracing_RS.UpdateMeshInfo();
                 ModelHandler::GetInstance()->updateMeshData = false;
             }
-
             LoadQueryModels();
-            
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
 
 				rayTracing_RS.DrawRT(commandBuffer);
-				
 				forward_RS.TransitionBeforeComputeRender(renderer.GetCurrentFrame());
 
 				if (cicles==3)
@@ -277,12 +273,9 @@ namespace VULKAN{
 				renderingInfo.renderArea.offset = { 0,0 };
 				renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
 
-
 				ImguiRenderSystem::GetInstance()->WasWindowResized();
 				renderer.BeginDynamicRenderPass(commandBuffer, renderingInfo);
 				ImguiRenderSystem::GetInstance()->BeginFrame();
-
-				
 				editorContext();
 				ImguiRenderSystem::GetInstance()->EndFrame();
 				ImguiRenderSystem::GetInstance()->UpdateBuffers();
@@ -294,8 +287,11 @@ namespace VULKAN{
 				//	VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				//	 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 				renderer.GetSwapchain().HandleColorImage(renderer.GetSwapchain().colorUIImages[renderer.currentImageIndex],
-					VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, commandBuffer,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					VK_IMAGE_LAYOUT_UNDEFINED,
+                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                    commandBuffer,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+                    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 					VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 
 				renderer.EndFrame();
@@ -335,7 +331,7 @@ namespace VULKAN{
 //			ImguiRenderSystem::GetInstance()->AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
 			ImguiRenderSystem::GetInstance()->SetUpSystem(initWindow.window);
             
-            ImguiRenderSystem::GetInstance()->AddTexture(rayTracing_RS.storageImage);
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(rayTracing_RS.storageImage);
             ImguiRenderSystem::GetInstance()->viewportTexture = rayTracing_RS.storageImage;
             
 		}

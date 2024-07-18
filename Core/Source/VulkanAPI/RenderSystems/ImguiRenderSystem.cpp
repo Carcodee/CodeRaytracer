@@ -612,7 +612,7 @@ namespace VULKAN
         
 		if (ImGui::Button("Addtexture"))
 		{
-            VKTexture* texRef=&ModelHandler::GetInstance()->allMaterialsOnApp.at(10).get()->materialTextures[0]; 
+            VKTexture* texRef=ModelHandler::GetInstance()->allMaterialsOnApp.at(10).get()->materialTextures[0]; 
             AddTexture(texRef);
 		}
 
@@ -694,6 +694,13 @@ namespace VULKAN
         }
         CreateImguiImage(vkTexture->textureSampler , vkTexture->textureImageView, vkTexture->textureDescriptor);
 
+    }
+
+    void ImguiRenderSystem::HandleTextureCreation(VKTexture *vkTexture) {
+        if (vkTexture->textureDescriptor == nullptr){
+            AddTexture(vkTexture);
+        }
+            
     }
 
 

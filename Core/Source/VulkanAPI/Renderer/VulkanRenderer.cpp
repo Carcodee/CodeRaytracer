@@ -190,8 +190,6 @@ namespace VULKAN {
 		{
 			//compute queue
 			auto computeCommandBuffer = GetCurrentComputeCommandBuffer();
-
-
 			if (vkEndCommandBuffer(computeCommandBuffer) != VK_SUCCESS)
 			{
 				throw std::runtime_error("Failed to record command buffer!");
@@ -200,8 +198,6 @@ namespace VULKAN {
 			if (result != VK_SUCCESS) {
 				throw std::runtime_error("failed to present swap chain image!");
 			}
-
-
 		}
 
 		void VulkanRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {

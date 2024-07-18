@@ -61,7 +61,7 @@ namespace VULKAN{
 		{
 			MaterialUniformData materialUniform{};
 			std::vector<std::string> paths;
-			std::vector<VKTexture> materialTextures;
+			std::vector<VKTexture*> materialTextures;
             std::string materialReferencePath="";
             std::string name="";
             std::string targetPath="";
@@ -76,7 +76,7 @@ namespace VULKAN{
 				{
 					if (!std::filesystem::exists(paths[i].c_str()))continue;
 					materialUniform.texturesSizes++;
-					VKTexture texture(paths[i].c_str(), swap_chain);
+					VKTexture* texture = new VKTexture(paths[i].c_str(), swap_chain);
 					materialTextures.push_back(texture);
                     allTexturesOffset++;
 				}

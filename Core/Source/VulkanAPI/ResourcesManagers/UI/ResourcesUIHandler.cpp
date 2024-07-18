@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "FileSystem/FileHandler.h"
 #include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
+#include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 
 namespace VULKAN
 {
@@ -166,7 +167,14 @@ namespace VULKAN
                     Material &materialReference = *ModelHandler::GetInstance()->allMaterialsOnApp.at(matIndex);
                     std::string materialText = materialReference.name;
                     ImGui::PushID(materialReference.id);
-                    ImGui::Button(materialText.c_str(), ImVec2{100, 100});
+
+                    if (!materialReference.materialTextures.empty()){
+                        ImguiRenderSystem::GetInstance()->HandleTextureCreation(materialReference.materialTextures[0]);
+                        ImGui::ImageButton(((ImTextureID)materialReference.materialTextures[0]->textureDescriptor), ImVec2{100, 100});
+                    } else{
+                        ImGui::Button(materialText.c_str(), ImVec2{100, 100});
+                    }
+                    
                     if (ImGui::BeginDragDropTarget()) {
                         if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("MATERIAL_ID")) {
                             int data = *(int *) payload->Data;

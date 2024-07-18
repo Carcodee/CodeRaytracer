@@ -57,7 +57,7 @@ namespace VULKAN
         
 		bool transitionImage= false;
         
-        void AddTexture(VKTexture* vkTexture);
+        void HandleTextureCreation(VKTexture* vkTexture);
 		void CreateStyles();
 		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
@@ -78,6 +78,7 @@ namespace VULKAN
 		char modelImporterText[128];
 
 	private:
+        void AddTexture(VKTexture* vkTexture);
 		void SetStyle(uint32_t index);
         
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;

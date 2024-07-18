@@ -10,10 +10,13 @@ namespace VULKAN {
 		textureImageView = mySwapChain.CreateImageView(textureImage, format, VK_IMAGE_ASPECT_COLOR_BIT,mipLevels);
 		CreateTextureSample();
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureSampler== nullptr)return;
 		vkDestroySampler(device.device(), textureSampler, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImageView== nullptr)return;
 			vkDestroyImageView(device.device(), textureImageView, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImage== nullptr)return;
 			vkDestroyImage(device.device(), textureImage, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this](){
             if (textureImageMemory== nullptr)return;
@@ -32,27 +35,35 @@ namespace VULKAN {
 		CreateTextureSample();
 		CreateImageViews();
 		mySwapChain.device.deletionQueue.push_function([this]() {
-			vkDestroySampler(device.device(), textureSampler, nullptr);});
+            if (textureSampler== nullptr)return;
+		vkDestroySampler(device.device(), textureSampler, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImageView== nullptr)return;
 			vkDestroyImageView(device.device(), textureImageView, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImage== nullptr)return;
 			vkDestroyImage(device.device(), textureImage, nullptr);});
-		mySwapChain.device.deletionQueue.push_function([this]() {
+		mySwapChain.device.deletionQueue.push_function([this](){
+            if (textureImageMemory== nullptr)return;
 			vkFreeMemory(device.device(), textureImageMemory, nullptr);
-			});
+		});
 	}
 
 	VKTexture::VKTexture(VulkanSwapChain& swapchain) : mySwapChain{ swapchain }, device{ swapchain.device }
 	{
 		mySwapChain.device.deletionQueue.push_function([this]() {
-			vkDestroySampler(device.device(), textureSampler, nullptr);});
+            if (textureSampler== nullptr)return;
+		vkDestroySampler(device.device(), textureSampler, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImageView== nullptr)return;
 			vkDestroyImageView(device.device(), textureImageView, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this]() {
+            if (textureImage== nullptr)return;
 			vkDestroyImage(device.device(), textureImage, nullptr);});
-		mySwapChain.device.deletionQueue.push_function([this]() {
+		mySwapChain.device.deletionQueue.push_function([this](){
+            if (textureImageMemory== nullptr)return;
 			vkFreeMemory(device.device(), textureImageMemory, nullptr);
-			});
+		});
 	}
 
 
@@ -209,6 +220,12 @@ namespace VULKAN {
 		}
 		
 	}
+
+    VKTexture::~VKTexture() {
+        if (this== nullptr){
+            free(this);
+        }
+    }
 
 
 }

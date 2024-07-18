@@ -686,13 +686,13 @@ namespace VULKAN {
 		{
 			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                std::vector<VKTexture>& currentTextures =mat.second->materialTextures;
+                std::vector<VKTexture*>& currentTextures =mat.second->materialTextures;
                 for (int j = 0; j < currentTextures.size(); ++j) {
                     
                     VkDescriptorImageInfo descriptor{};
                     descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    descriptor.sampler = currentTextures[j].textureSampler;
-                    descriptor.imageView = currentTextures[j].textureImageView;
+                    descriptor.sampler = currentTextures[j]->textureSampler;
+                    descriptor.imageView = currentTextures[j]->textureImageView;
                     texturesDescriptors.push_back(descriptor);
 
                 }
