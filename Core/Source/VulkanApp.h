@@ -45,14 +45,11 @@ namespace VULKAN {
 
 		void RunEngine_EDITOR(std::function<void()>&& editorContext);
 		void RunDynamicRendering(std::function<void()>&& editorContext);
-        
-		VkDescriptorPool imguiDescriptorPool;
 //
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
 		VulkanRenderer renderer{ initWindow , myDevice };
 		Forward_RS forward_RS{renderer, myDevice};
-		ImguiRenderSystem imgui_RS{ renderer, myDevice };
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
 		int currentFrame;
 	    
@@ -63,13 +60,6 @@ namespace VULKAN {
 		void LoadModels();
 		void SetUpImgui();
         void LoadQueryModels();
-
-       
-
-
-
-
-
 
 		
 

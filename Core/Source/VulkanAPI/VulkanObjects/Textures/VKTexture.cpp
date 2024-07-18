@@ -16,6 +16,7 @@ namespace VULKAN {
 		mySwapChain.device.deletionQueue.push_function([this]() {
 			vkDestroyImage(device.device(), textureImage, nullptr);});
 		mySwapChain.device.deletionQueue.push_function([this](){
+            if (textureImageMemory== nullptr)return;
 			vkFreeMemory(device.device(), textureImageMemory, nullptr);
 		});
 

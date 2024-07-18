@@ -12,15 +12,20 @@
 
 namespace VULKAN
 {
+    ImguiRenderSystem* ImguiRenderSystem::instance = nullptr;
+
+    ImguiRenderSystem *ImguiRenderSystem::GetInstance(VulkanRenderer* renderer, MyVulkanDevice* myDevice) {
+        if (instance== nullptr){
+            instance =new ImguiRenderSystem(renderer, myDevice);
+        }
+        return instance;
+    }   
 	ImguiRenderSystem::~ImguiRenderSystem()
 	{
-		AssetsHandler::GetInstance()->~AssetsHandler();
-
 	}
 
-	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer& renderer, MyVulkanDevice& device ) : myRenderer(renderer) ,myDevice(device) 
+	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer* renderer, MyVulkanDevice* device ) : myRenderer(renderer) ,myDevice(device) 
 	{
-
 	}
 
 
@@ -28,51 +33,43 @@ namespace VULKAN
 	{
 		this->myWindow= window;
 		
-		vertexBuffer.device = myDevice.device();
-		indexBuffer.device = myDevice.device();
+		vertexBuffer.device = myDevice->device();
+		indexBuffer.device = myDevice->device();
 
 		InitImgui();
 		CreateFonts();
 		SetImgui(window);
 
-		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
-		vpImageView= myRenderer.GetSwapchain().colorImageView;
+		myRenderer->GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
+		vpImageView= myRenderer->GetSwapchain().colorImageView;
 
-		//AddSamplerAndViewForImage(viewportSampler,vpImageView);
 		CreatePipelineLayout();
-
-		//CreateImguiImage(viewportSampler, vpImageView, vpDescriptorSet);
-
-		for (auto& image : imagesToCreate)
-		{
-			AddImage(image.sampler, image.imageView, image.descriptor);
-		}
 		CreatePipeline();
 
-		//myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
-		//myDevice.deletionQueue.push_function([this]() {indexBuffer.destroy();});
+		//myDevice->deletionQueue.push_function([this]() {vertexBuffer.destroy();});
+		//myDevice->deletionQueue.push_function([this]() {indexBuffer.destroy();});
         
-		//for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		//for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
 		//{
 		//	if (uniformBuffers.size()>0)
 		//	{
-		//		myDevice.deletionQueue.push_function([this, i]()
+		//		myDevice->deletionQueue.push_function([this, i]()
 		//			{
-		//				vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
+		//				vkDestroyBuffer(myDevice->device(), uniformBuffers[i], nullptr);
 		//			});
-		//		myDevice.deletionQueue.push_function([this, i]()
+		//		myDevice->deletionQueue.push_function([this, i]()
 		//			{
-		//				vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
+		//				vkFreeMemory(myDevice->device(), uniformBuffersMemory[i], nullptr);
 		//			});
 		//	}
 		//}
-		//myDevice.deletionQueue.push_function([this]()
+		//myDevice->deletionQueue.push_function([this]()
 		//	{
-		//		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
+		//		vkDestroyDescriptorSetLayout(myDevice->device(), descriptorSetLayout, nullptr);
 		//	});
-		//myDevice.deletionQueue.push_function([this]()
+		//myDevice->deletionQueue.push_function([this]()
 		//	{
-		//		vkDestroySampler(myDevice.device(), viewportSampler, nullptr);
+		//		vkDestroySampler(myDevice->device(), viewportSampler, nullptr);
 		//	});
 	}
 
@@ -95,73 +92,68 @@ namespace VULKAN
 		layoutInfo.bindingCount = static_cast<uint32_t>(descriptorSetLayoutBindings.size());
 		layoutInfo.pBindings = descriptorSetLayoutBindings.data();
 
-		if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout)!= VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(myDevice->device(), &layoutInfo, nullptr, &descriptorSetLayout)!= VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create descriptor set layout!");
 		}
 
 		VkDeviceSize bufferSize = sizeof(UIVertex);
 
-		uniformBuffers.resize(myRenderer.GetMaxRenderInFlight());
-		uniformBuffersMemory.resize(myRenderer.GetMaxRenderInFlight());
-		uniformBuffersMapped.resize(myRenderer.GetMaxRenderInFlight());
-		for (size_t j = 0; j < myRenderer.GetMaxRenderInFlight(); j++)
+		uniformBuffers.resize(myRenderer->GetMaxRenderInFlight());
+		uniformBuffersMemory.resize(myRenderer->GetMaxRenderInFlight());
+		uniformBuffersMapped.resize(myRenderer->GetMaxRenderInFlight());
+		for (size_t j = 0; j < myRenderer->GetMaxRenderInFlight(); j++)
 		{
-			myDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			myDevice->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				uniformBuffers[j], uniformBuffersMemory[j]);
 
-			vkMapMemory(myDevice.device(), uniformBuffersMemory[j], 0, bufferSize, 0, &uniformBuffersMapped[j]);
+			vkMapMemory(myDevice->device(), uniformBuffersMemory[j], 0, bufferSize, 0, &uniformBuffersMapped[j]);
 
 		}
 
-
-		std::array<VkDescriptorPoolSize, 1> poolSize{};
-		for (size_t i = 0; i < descriptorSetLayoutBindings.size(); i++)
-		{
-			poolSize[i].type = descriptorSetLayoutBindings[i].descriptorType;
-			if (poolSize[i].type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			{
-				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-				continue;
-			}
-			poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-
-		}
+        std::vector<VkDescriptorPoolSize> poolSize =
+                {
+                        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+                };
+        
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
 		poolInfo.pPoolSizes = poolSize.data();
-		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()*(imagesToCreate.size()+2));
-		vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &imguiPool);
+		poolInfo.maxSets = 1000;
+        
+		vkCreateDescriptorPool(myDevice->device(), &poolInfo, nullptr, &imguiPool);
 
-		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(myRenderer->GetMaxRenderInFlight(), descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = imguiPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer->GetMaxRenderInFlight());
 		allocInfo.pSetLayouts = layouts.data();
-		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
 		//normalRenderingVP
-		//if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
+		//if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
 		//{
 		//	throw std::runtime_error("failed to allocate descriptor sets!");
 		//}
-		for (auto& descriptor : imagesToCreate)
-		{
-			if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptor.descriptor) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to allocate descriptor sets!");
-			}
-		}
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
 		{
 			
 			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
-			
 
 			VkDescriptorImageInfo imageInfo{};
 			
@@ -178,7 +170,7 @@ namespace VULKAN
 			descriptorWrite[0].pImageInfo = &imageInfo;
 			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
 
-            vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
+            vkUpdateDescriptorSets(myDevice->device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
 		}
 		
 
@@ -186,7 +178,7 @@ namespace VULKAN
 	}
 	void ImguiRenderSystem::CreatePipeline()
 	{
-		 VkFormat format = myRenderer.GetSwapchain().getSwapChainImageFormat();
+		 VkFormat format = myRenderer->GetSwapchain().getSwapChainImageFormat();
 		const VkPipelineRenderingCreateInfoKHR pipeline_rendering_create_info{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
 			.colorAttachmentCount = 1,
@@ -204,7 +196,7 @@ namespace VULKAN
 		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(myDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(myDevice->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
@@ -213,10 +205,10 @@ namespace VULKAN
 		PipelineConfigInfo pipelineConfig{};
 
 		PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = myRenderer.GetSwapchain().UIRenderPass;
+		pipelineConfig.renderPass = myRenderer->GetSwapchain().UIRenderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-		pipelineReader = std::make_unique<PipelineReader>(myDevice);
+		pipelineReader = std::make_unique<PipelineReader>(*myDevice);
         
         std::string shaderPath=HELPERS::FileHandler::GetInstance()->GetShadersPath();  
 		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
@@ -225,12 +217,10 @@ namespace VULKAN
 			pipelineConfig, UseDynamicRendering, pipeline_rendering_create_info);
 		std::cout << "You are using dynamic rendering" << "\n";
 	}
-	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor)
+	void ImguiRenderSystem::CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor)
 	{
-
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
+		for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
 		{
-
 			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
 
 			VkDescriptorImageInfo imageInfo{};
@@ -248,7 +238,7 @@ namespace VULKAN
 			descriptorWrite[0].pImageInfo = &imageInfo;
 			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
 
-			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
+			vkUpdateDescriptorSets(myDevice->device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
 		}
 
 	}
@@ -302,23 +292,10 @@ namespace VULKAN
 		int texWidth, texHeight;
 		io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
 		VkDeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
-		fontTexture=new VKTexture(myRenderer.GetSwapchain());
+		fontTexture=new VKTexture(myRenderer->GetSwapchain());
 		fontTexture->CreateImageFromSize(uploadSize, fontData, texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateImageViews(VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateTextureSample();
-	}
-
-	void ImguiRenderSystem::AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor)
-	{
-		CreateImguiImage(sampler, image, descriptor);
-	}
-
-	void ImguiRenderSystem::AddSamplerAndViewForImage(VkSampler sampler, VkImageView view)
-	{
-		VkDescriptorSet newSet{};
-		ImguiImageInfo image{sampler,view, newSet};
-		
-		imagesToCreate.push_back(image);	
 	}
 
 	void ImguiRenderSystem::CreateStyles()
@@ -476,7 +453,7 @@ namespace VULKAN
 		myPushConstBlock.translate = glm::vec2( - 1.0f);
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MyPushConstBlock), &myPushConstBlock);
 		ImDrawData* imDrawData = ImGui::GetDrawData();
-
+        
 		int32_t vertexOffset = 0;
 		int32_t indexOffset = 0;
 
@@ -499,7 +476,7 @@ namespace VULKAN
 					scissorRect.extent.height = (uint32_t)(pcmd->ClipRect.w - pcmd->ClipRect.y);
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissorRect);
 	
-					//myDevice.TransitionImageLayout(myRenderer.GetSwapchain().colorImage, myRenderer.GetSwapchain().getSwapChainImageFormat(), 1,
+					//myDevice->TransitionImageLayout(myRenderer->GetSwapchain().colorImage, myRenderer->GetSwapchain().getSwapChainImageFormat(), 1,
 					//	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 					VkDescriptorSet currentSet= static_cast<VkDescriptorSet>(pcmd->TextureId);
@@ -535,7 +512,7 @@ namespace VULKAN
 		if ((vertexBuffer.buffer == VK_NULL_HANDLE) || (vertexCount != imDrawData->TotalVtxCount)) {
 			vertexBuffer.unmap();
 			vertexBuffer.destroy();
-			myDevice.createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer.buffer, vertexBuffer.memory);
+			myDevice->createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer.buffer, vertexBuffer.memory);
 
 			vertexCount = imDrawData->TotalVtxCount;
 			vertexBuffer.map();
@@ -543,7 +520,7 @@ namespace VULKAN
 		if ((indexBuffer.buffer == VK_NULL_HANDLE) || (indexCount < imDrawData->TotalIdxCount)) {
 			indexBuffer.unmap();
 			indexBuffer.destroy();
-			myDevice.createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, indexBuffer.buffer, indexBuffer.memory);
+			myDevice->createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, indexBuffer.buffer, indexBuffer.memory);
 			indexCount = imDrawData->TotalIdxCount;
 			indexBuffer.map();
 		}
@@ -575,7 +552,10 @@ namespace VULKAN
 
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 
-		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
+        if (viewportTexture->textureDescriptor!= nullptr){
+            ImGui::Image((ImTextureID)viewportTexture->textureDescriptor, ImVec2(viewportSize.x, viewportSize.y));
+        }
+//		ImGui::Image((ImTextureID)imagesToCreate[0]->descriptor, ImVec2(viewportSize.x, viewportSize.y));
         
         if  (ImGui::IsItemHovered()){
             InputHandler::GetInstance()->isMouseInsideViewport= true;
@@ -629,10 +609,11 @@ namespace VULKAN
 		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
 		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
 		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
-
-		if (ImGui::Button("Confirm"))
+        
+		if (ImGui::Button("Addtexture"))
 		{
-			ModelHandler::GetInstance()->AddModelToQuery(modelImporterText);
+            VKTexture* texRef=&ModelHandler::GetInstance()->allMaterialsOnApp.at(10).get()->materialTextures[0]; 
+            AddTexture(texRef);
 		}
 
 		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
@@ -641,11 +622,6 @@ namespace VULKAN
 		ImGui::PopID();
 
 		ImGui::End(); 
-
-		for (int i= 1; i < imagesToCreate.size(); i++)
-		{
-			ImGui::Image((ImTextureID)imagesToCreate[i].descriptor, ImVec2(viewportSize.x, viewportSize.y));
-		}
 
 		bool open = true;
 		ImGui::ShowDemoWindow(&open);
@@ -665,7 +641,7 @@ namespace VULKAN
 
 	void ImguiRenderSystem::WasWindowResized()
 	{
-		if (myRenderer.GetSwapchain().colorImageView!=vpImageView)
+		if (myRenderer->GetSwapchain().colorImageView!=vpImageView)
 		{
 			SetUpSystem(myWindow);
 			
@@ -702,5 +678,23 @@ namespace VULKAN
 		//io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
 		//io.KeyMap[ImGuiKey_Delete] =GLFW_KEY_DELETE;
 	}
+
+    void ImguiRenderSystem::AddTexture(VKTexture *vkTexture) {
+
+        std::vector<VkDescriptorSetLayout> layouts(myRenderer->GetMaxRenderInFlight(), descriptorSetLayout);
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = imguiPool;
+
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer->GetMaxRenderInFlight());
+        allocInfo.pSetLayouts = layouts.data();
+        if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &vkTexture->textureDescriptor) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate descriptor sets!");
+        }
+        CreateImguiImage(vkTexture->textureSampler , vkTexture->textureImageView, vkTexture->textureDescriptor);
+
+    }
+
 
 }

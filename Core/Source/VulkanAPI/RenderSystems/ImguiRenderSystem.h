@@ -22,7 +22,15 @@ namespace VULKAN
 			VkSampler sampler;
 			VkImageView imageView;
 			VkDescriptorSet descriptor;
+            ~ImguiImageInfo() {
+                
+            }
 		};
+    protected:
+        
+        static ImguiRenderSystem* instance;
+        ImguiRenderSystem ( VulkanRenderer* renderer, MyVulkanDevice* myDevice);
+        
 	public:
 
 		struct MyPushConstBlock {
@@ -33,7 +41,8 @@ namespace VULKAN
 		ImguiRenderSystem& operator=(ImguiRenderSystem& other) = delete;
 		~ImguiRenderSystem();
 
-		ImguiRenderSystem ( VulkanRenderer& renderer, MyVulkanDevice& myDevice);
+        static ImguiRenderSystem* GetInstance(VulkanRenderer* renderer = nullptr, MyVulkanDevice* myDevice = nullptr);
+        
 		void CreatePipeline();
 		void CreatePipelineLayout();
 		void InitImgui();
@@ -44,20 +53,19 @@ namespace VULKAN
 		void WasWindowResized();
 		void EndFrame();
 		void SetUpSystem(GLFWwindow* window);
-		void CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor);
-
+		void CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor);
+        
 		bool transitionImage= false;
-
-		void AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor);
-		void AddSamplerAndViewForImage(VkSampler sampler, VkImageView view);
+        
+        void AddTexture(VKTexture* vkTexture);
 		void CreateStyles();
-
 		void DrawFrame(VkCommandBuffer commandBuffer);
 		std::unique_ptr<PipelineReader> pipelineReader;
 		VkPipelineLayout pipelineLayout;
-		MyVulkanDevice& myDevice;
-		VulkanRenderer& myRenderer;
+		MyVulkanDevice* myDevice;
+		VulkanRenderer* myRenderer;
 		VKTexture* fontTexture;
+        VKTexture* viewportTexture;
 
 		bool show_demo_window = true;
 		bool UseDynamicRendering = false;
@@ -71,19 +79,18 @@ namespace VULKAN
 
 	private:
 		void SetStyle(uint32_t index);
-
+        
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
-		std::vector<ImguiImageInfo> imagesToCreate;
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
+        std::vector<void*> uniformBuffersMapped;
+
 		VkDescriptorSetLayout descriptorSetLayout;
-		VkDescriptorSet vpDescriptorSet;
+        VkDescriptorPool imguiPool = VK_NULL_HANDLE;
 		VkDescriptorSet descriptorSets;
-		VkDescriptorPool imguiPool;
-		std::vector<VkBuffer> uniformBuffers;
-		std::vector<VkDeviceMemory> uniformBuffersMemory;
-		std::vector<void*> uniformBuffersMapped;
+		
 		ImGuiStyle vulkanStyle;
 		ImGuiStyle minimalistStyle;
-
 		Buffer vertexBuffer;
 		Buffer indexBuffer;
 		int32_t vertexCount = 0;

@@ -23,15 +23,15 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
-			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
-			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			rayTracing_RS.cam.position.x = ImguiRenderSystem::GetInstance()->camPos[0];
+			rayTracing_RS.cam.position.y = ImguiRenderSystem::GetInstance()->camPos[1];
+			rayTracing_RS.cam.position.z = ImguiRenderSystem::GetInstance()->camPos[2];
 			rayTracing_RS.cam.UpdateCamera();
 
 
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = ImguiRenderSystem::GetInstance()->modelCamPos[0];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = ImguiRenderSystem::GetInstance()->modelCamPos[1];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = ImguiRenderSystem::GetInstance()->modelCamPos[2];
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
@@ -64,7 +64,7 @@ namespace VULKAN{
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
+				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, ImguiRenderSystem::GetInstance()->RotationSpeed);
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 				renderer.EndSwapChainRenderPass(commandBuffer);
 
@@ -91,15 +91,15 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-			rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
-			rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
-			rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
+			rayTracing_RS.cam.position.x = ImguiRenderSystem::GetInstance()->camPos[0];
+			rayTracing_RS.cam.position.y = ImguiRenderSystem::GetInstance()->camPos[1];
+			rayTracing_RS.cam.position.z = ImguiRenderSystem::GetInstance()->camPos[2];
 			rayTracing_RS.cam.UpdateCamera();
 
 
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = imgui_RS.modelCamPos[0];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = imgui_RS.modelCamPos[1];
-			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = imgui_RS.modelCamPos[2];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.x = ImguiRenderSystem::GetInstance()->modelCamPos[0];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.y = ImguiRenderSystem::GetInstance()->modelCamPos[1];
+			forward_RS.renderSystemDescriptorSetHandler->cam.position.z = ImguiRenderSystem::GetInstance()->modelCamPos[2];
 
 			if (auto commandBuffer = renderer.BeginComputeFrame())
 			{
@@ -132,7 +132,7 @@ namespace VULKAN{
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
+				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, ImguiRenderSystem::GetInstance()->RotationSpeed);
 
 				//vkCmdDraw(commandBuffer[imageIndex], 3, 1, 0, 0);
 				renderer.EndSwapChainRenderPass(commandBuffer);
@@ -153,13 +153,13 @@ namespace VULKAN{
 					0, nullptr                                     // Image barriers
 				);
 
-				imgui_RS.WasWindowResized();
+				ImguiRenderSystem::GetInstance()->WasWindowResized();
 				renderer.BeginUIRenderPass(commandBuffer);
-				imgui_RS.BeginFrame();
+				ImguiRenderSystem::GetInstance()->BeginFrame();
 				editorContext();
-				imgui_RS.EndFrame();
-				imgui_RS.UpdateBuffers();
-				imgui_RS.DrawFrame(commandBuffer);
+				ImguiRenderSystem::GetInstance()->EndFrame();
+				ImguiRenderSystem::GetInstance()->UpdateBuffers();
+				ImguiRenderSystem::GetInstance()->DrawFrame(commandBuffer);
 				renderer.EndUIRenderPass(commandBuffer);
 
 				renderer.EndFrame();
@@ -183,12 +183,12 @@ namespace VULKAN{
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-			//rayTracing_RS.cam.position.x = imgui_RS.camPos[0];
-			//rayTracing_RS.cam.position.y = imgui_RS.camPos[1];
-			//rayTracing_RS.cam.position.z = imgui_RS.camPos[2];
-			rayTracing_RS.light.color = glm::make_vec3(imgui_RS.lightCol);
-			rayTracing_RS.light.pos = glm::make_vec3(imgui_RS.lightPos);
-			rayTracing_RS.light.intensity = imgui_RS.lightIntensity;
+			//rayTracing_RS.cam.position.x = ImguiRenderSystem::GetInstance()->camPos[0];
+			//rayTracing_RS.cam.position.y = ImguiRenderSystem::GetInstance()->camPos[1];
+			//rayTracing_RS.cam.position.z = ImguiRenderSystem::GetInstance()->camPos[2];
+			rayTracing_RS.light.color = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightCol);
+			rayTracing_RS.light.pos = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightPos);
+			rayTracing_RS.light.intensity = ImguiRenderSystem::GetInstance()->lightIntensity;
 
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
@@ -235,7 +235,7 @@ namespace VULKAN{
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, imgui_RS.RotationSpeed);
+				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, ImguiRenderSystem::GetInstance()->RotationSpeed);
 
 				renderer.EndSwapChainRenderPass(commandBuffer);
 
@@ -278,15 +278,15 @@ namespace VULKAN{
 				renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
 
 
-				imgui_RS.WasWindowResized();
+				ImguiRenderSystem::GetInstance()->WasWindowResized();
 				renderer.BeginDynamicRenderPass(commandBuffer, renderingInfo);
-				imgui_RS.BeginFrame();
+				ImguiRenderSystem::GetInstance()->BeginFrame();
 
 				
 				editorContext();
-				imgui_RS.EndFrame();
-				imgui_RS.UpdateBuffers();
-				imgui_RS.DrawFrame(commandBuffer);
+				ImguiRenderSystem::GetInstance()->EndFrame();
+				ImguiRenderSystem::GetInstance()->UpdateBuffers();
+				ImguiRenderSystem::GetInstance()->DrawFrame(commandBuffer);
 				renderer.EndDynamicRenderPass(commandBuffer);
 
 				//renderer.GetSwapchain().HandleColorImage(renderer.GetSwapchain().colorImage,
@@ -327,12 +327,17 @@ namespace VULKAN{
 		forward_RS.InitForwardSystem();
 		LoadModels();
 		InitConfigsCache();
+        ImguiRenderSystem::GetInstance(&renderer, &myDevice);
 		if (editor)
 		{
 			SetUpImgui();
-			imgui_RS.UseDynamicRendering = DynamicRendering;
-			imgui_RS.AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
-			imgui_RS.SetUpSystem(initWindow.window);
+			ImguiRenderSystem::GetInstance()->UseDynamicRendering = DynamicRendering;
+//			ImguiRenderSystem::GetInstance()->AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
+			ImguiRenderSystem::GetInstance()->SetUpSystem(initWindow.window);
+            
+            ImguiRenderSystem::GetInstance()->AddTexture(rayTracing_RS.storageImage);
+            ImguiRenderSystem::GetInstance()->viewportTexture = rayTracing_RS.storageImage;
+            
 		}
 
 		
@@ -346,7 +351,6 @@ namespace VULKAN{
 	void VulkanApp::InitConfigsCache()
 	{
     
-
 		MyVulkanDevice::g_Instance=myDevice.instance;
 		MyVulkanDevice::g_PhysicalDevice=myDevice.physicalDevice;
 		MyVulkanDevice::g_Device=myDevice.device();
@@ -385,32 +389,7 @@ namespace VULKAN{
 	 void VulkanApp::SetUpImgui()
         {
 
-            VkDescriptorPoolSize pool_sizes[] =
-            {
-                { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-            };
-
-            VkDescriptorPoolCreateInfo pool_info = {};
-            pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-            pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-            pool_info.maxSets = 1000;
-            pool_info.poolSizeCount = std::size(pool_sizes);
-            pool_info.pPoolSizes = pool_sizes;
-
-            VkDescriptorPool imguiPool;
-            (vkCreateDescriptorPool(myDevice.device(), &pool_info, nullptr, &imguiPool));
-
-            // Setup Dear ImGui context
+                // Setup Dear ImGui context
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -419,46 +398,12 @@ namespace VULKAN{
             io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
             //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 
-            //io.ConfigViewportsNoAutoMerge = true;
-            //io.ConfigViewportsNoTaskBarIcon = true;
-            ImGuiStyle& style = ImGui::GetStyle();
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            {
-                style.WindowRounding = 0.0f;
-                style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-            }
-            io.Fonts->AddFontDefault();
-            // Our state
-            ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-            // Setup Dear ImGui style
-
-            io.DisplaySize = ImVec2(800, 600); // Set to actual window size
-            ImGui::StyleColorsDark();
-
             // Setup Platform/Renderer backends
             bool result = ImGui_ImplGlfw_InitForVulkan(initWindow.window, true);
             if (result)
             {
                 std::cout << "Imgui window init success" << "\n";
             }
-//            ImGui_ImplVulkan_InitInfo init_info = {};
-//            init_info.Instance = VULKAN::MyVulkanDevice::g_Instance;
-//            init_info.PhysicalDevice = VULKAN::MyVulkanDevice::g_PhysicalDevice;
-//            init_info.Device = VULKAN::MyVulkanDevice::g_Device;
-//            init_info.QueueFamily = VULKAN::MyVulkanDevice::g_QueueFamily;
-//            init_info.Queue = VULKAN::MyVulkanDevice::g_Queue;
-//            init_info.PipelineCache = VULKAN::MyVulkanDevice::g_PipelineCache;
-//            init_info.DescriptorPool = imguiPool;
-//            init_info.RenderPass = renderer.GetSwapchainRenderPass();
-//            init_info.Subpass = 0;
-//            init_info.MinImageCount = VULKAN::MyVulkanDevice::g_MinImageCount;
-//            init_info.ImageCount = renderer.GetImageCount();
-//            init_info.MSAASamples = myDevice.msaaSamples;
-//            init_info.Allocator = VULKAN::MyVulkanDevice::g_Allocator;
-//            init_info.CheckVkResultFn = check_vk_result;
-//            ImGui_ImplVulkan_Init(&init_info);
-//            std::cout << "Hello Editor" << std::endl;
-//            ImGui_ImplVulkan_CreateFontsTexture();
 
         }
 
