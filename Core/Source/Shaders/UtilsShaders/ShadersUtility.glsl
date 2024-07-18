@@ -40,6 +40,8 @@ vec3 CookTorrance(vec3 normal, vec3 view,vec3 light, float D, float G, vec3 F){
 	return DGF/dotProducts;
 }
 
+
+
 float D_GGX(float roughness, vec3 normal, vec3 halfway){
 	float dot = max(dot(normal,halfway), 0.0001);
 	dot = pow(dot,2.0);
@@ -47,7 +49,12 @@ float D_GGX(float roughness, vec3 normal, vec3 halfway){
 	float denom = PI* pow(((dot * roughnessPart)+1), 2.0);
 	return pow(roughness,2.0)/denom;
 }
-
+float PDF_GGX(vec3 normal, vec3 halfWay, vec3 view, float roughness) {
+	float D = D_GGX(roughness, normal, halfWay);
+	float cosThetaH = max(dot(normal, halfWay), 0.0001);
+	float dotHV = max(dot(halfWay, view), 0.0001);
+	return (D * cosThetaH) / (4.0 * dotHV);
+}
 //xVector could be view or light vector
 float G1( float rougness, vec3 xVector, vec3 normal){
 	
@@ -78,6 +85,19 @@ vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float m
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
 	vec3 BRDF =  kd * lambert + cookTorrence;
 	vec3 outgoingLight = emissiveMesh + BRDF * lightCol * max(dot(light,normal), 0.0001);
+	return outgoingLight;
+}
+
+vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
+	float D = D_GGX(roughness, normal, halfWay);
+	float G = G(roughness, normal, view, light);
+	vec3 F = FresnelShilck(halfWay, view, baseReflectivity);
+	vec3 cookTorrence = CookTorrance(normal, view, light, D, G, F);
+	vec3 lambert= LambertDiffuse(col);
+	vec3 ks = F;
+	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
+	vec3 BRDF =  kd * lambert + cookTorrence;
+	vec3 outgoingLight = emissiveMesh + BRDF * lightCol;
 	return outgoingLight;
 }
 

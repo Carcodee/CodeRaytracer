@@ -16,6 +16,8 @@ struct RayPayload{
     vec3 origin;
     float roughness;
     float reflectivity; 
+    float directLightIntensity;
+    bool shadow;
 };
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
@@ -79,6 +81,7 @@ layout(binding=6) uniform light{
 }myLight;
 
 
+layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
 
@@ -188,13 +191,22 @@ void main()
   vec3 pbr= GetPBR(diffuse.xyz, myLight.col,
   materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
   finalNormal, view, lightDir, halfway);
-
-  rayPayload.color = (pbr * myLight.intensity); 
+  
+ 
+  rayPayload.shadow = true;
+  float tmin = 0.001;
+  float tmax = 10000.0; 
+  vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
+  traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+  
+  rayPayload.color = pbr * myLight.intensity; 
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;
   rayPayload.tangent = tangent;
+  rayPayload.directLightIntensity = max(dot(lightDir, finalNormal), 0.0001f);
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
+  
 
 
   //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
@@ -264,11 +276,9 @@ vec3 GetDebugCol(uint primitiveId, float primitiveCount){
     return debugColor;
 }
 float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
-    
     vec3 dir= fragPos-lightPos; 
     dir= normalize(dir);
     float colorShading=max(dot(dir, normal),0.2);
     return colorShading;
-
 }
 

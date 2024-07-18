@@ -10,6 +10,7 @@ struct RayPayload{
     vec3 origin;
     float roughness;
     float reflectivity;
+    float directLightIntensity;
 };
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
@@ -24,5 +25,6 @@ void main()
 	rayPayload.distance = -1.0f;
 	rayPayload.normal = vec3(0.0f);
 	rayPayload.tangent = vec3(0.0f);
+	rayPayload.directLightIntensity = 1.0f;
 	
 }

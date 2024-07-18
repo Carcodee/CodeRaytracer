@@ -366,9 +366,9 @@ namespace VULKAN {
 		const VkBufferUsageFlags bufferUsageFlags = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		const VkMemoryPropertyFlags memoryUsageFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &raygenShaderBindingTable, handleSize);
-		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &missShaderBindingTable, handleSize);
+		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &missShaderBindingTable, handleSize * 2);
 		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &hitShaderBindingTable, handleSize);
-
+        
 		// Copy handles
 		raygenShaderBindingTable.device = myDevice.device();
 		missShaderBindingTable.device = myDevice.device();
@@ -378,9 +378,8 @@ namespace VULKAN {
 		missShaderBindingTable.map();
 		hitShaderBindingTable.map();
 		memcpy(raygenShaderBindingTable.mapped, shaderHandleStorage.data(), handleSize);
-		memcpy(missShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned, handleSize);
-		memcpy(hitShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned * 2, handleSize);
-
+		memcpy(missShaderBindingTable.mapped, shaderHandleStorage.data() + (handleSizeAligned), handleSize * 2);
+		memcpy(hitShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned * 3, handleSize);
 	}
 
 	void RayTracing_RS::CreateDescriptorSets()
@@ -389,7 +388,6 @@ namespace VULKAN {
 		uint32_t imageCount = 1;
 		uint32_t materialCount =0;
 		uint32_t meshCount =0;
-
 		for (auto model : modelsOnScene)
 		{
 			materialCount += static_cast<uint32_t>(model->materialDataPerMesh.size());
@@ -750,7 +748,7 @@ namespace VULKAN {
 		accelerationStructureLayoutBinding.binding = 0;
 		accelerationStructureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 		accelerationStructureLayoutBinding.descriptorCount = 1;
-		accelerationStructureLayoutBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+		accelerationStructureLayoutBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding resultImageLayoutBinding{};
 		resultImageLayoutBinding.binding = 1;
@@ -873,14 +871,13 @@ namespace VULKAN {
 		std::string path;
         
         VkSpecializationMapEntry specializationMapEntry = INITIALIZERS::specializationMapEntry(0, 0, sizeof(uint32_t));
-        uint32_t maxRecursion = 3;
+        uint32_t maxRecursion = 4;
         VkSpecializationInfo specializationInfo = INITIALIZERS::specializationInfo(1, &specializationMapEntry, sizeof(maxRecursion), &maxRecursion);
 
         std::string shaderPath= HELPERS::FileHandler::GetInstance()->GetShadersPath();
 		// Ray generation group
 		{
 			path = shaderPath + "/RayTracingShaders/raygen.rgen.spv";
-			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rGenShaderModule,myDevice,VK_SHADER_STAGE_RAYGEN_BIT_KHR, path));
             shaderStages.back().pSpecializationInfo= &specializationInfo;
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
@@ -896,7 +893,6 @@ namespace VULKAN {
 		// Miss group
 		{
 			path = shaderPath+ "/RayTracingShaders/miss.rmiss.spv";
-			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rMissShaderModule, myDevice, VK_SHADER_STAGE_MISS_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
@@ -906,12 +902,16 @@ namespace VULKAN {
 			shaderGroup.anyHitShader = VK_SHADER_UNUSED_KHR;
 			shaderGroup.intersectionShader = VK_SHADER_UNUSED_KHR;
 			this->shaderGroups.push_back(shaderGroup);
+            
+            path = shaderPath+ "/RayTracingShaders/shadow.rmiss.spv";
+            shaderStages.push_back(PipelineReader::CreateShaderStageModule(rMissShaderModule, myDevice, VK_SHADER_STAGE_MISS_BIT_KHR, path));
+            shaderGroup.generalShader = static_cast<uint32_t>(shaderStages.size()) - 1;
+            this->shaderGroups.push_back(shaderGroup);
 		}
 
 		// Closest hit group
 		{
 			path = shaderPath+ "/RayTracingShaders/closesthit.rchit.spv";
-			//path = "../Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));
 			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
@@ -1183,7 +1183,7 @@ namespace VULKAN {
 		VkStridedDeviceAddressRegionKHR missShaderSbtEntry{};
 		missShaderSbtEntry.deviceAddress = getBufferDeviceAddress(missShaderBindingTable.buffer);
 		missShaderSbtEntry.stride = handleSizeAligned;
-		missShaderSbtEntry.size = handleSizeAligned;
+		missShaderSbtEntry.size = handleSizeAligned * 2;
 
 		VkStridedDeviceAddressRegionKHR hitShaderSbtEntry{};
 		hitShaderSbtEntry.deviceAddress = getBufferDeviceAddress(hitShaderBindingTable.buffer);

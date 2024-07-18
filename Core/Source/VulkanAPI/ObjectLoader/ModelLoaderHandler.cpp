@@ -160,20 +160,18 @@ namespace VULKAN {
 			meshVertexCount.push_back(vertexCount);
 
 		}
-//        for (int i = 0; i <indices.size()/3 ; ++i) {
-//            
-//            int index1 = 3 * indices[i] + 0;
-//            int index2 = 3 * indices[i] + 1;
-//            int index3 = 3 * indices[i] + 2;
-//            
-//            glm::vec3 tangent = CalculateTangent(vertices[index1].position,vertices[index2].position,vertices[index3].position,
-//                                                 vertices[index1].texCoord,vertices[index2].texCoord,vertices[index3].texCoord);
-//            vertices[3 * indices[i] + 0].tangent = tangent;
-//            vertices[3 * indices[i] + 1].tangent = tangent;
-//            vertices[3 * indices[i] + 2].tangent = tangent;
-//        }
+        for (int i = 0; i <indices.size() ; i+=3) {
 
+            int index1 =indices[i];
+            int index2 =indices[i + 1];
+            int index3 =indices[i + 2];
 
+            glm::vec3 tangent = CalculateTangent(vertices[index1].position,vertices[index2].position,vertices[index3].position,
+                                                 vertices[index1].texCoord,vertices[index2].texCoord,vertices[index3].texCoord);
+            vertices[index1].tangent = tangent;
+            vertices[index2].tangent = tangent;
+            vertices[index3].tangent = tangent;
+        }
         int textureTotalSize = 0;
 
         ModelData modelData = {};
