@@ -46,6 +46,8 @@ namespace VULKAN
         void CreateMaterialTextures(VulkanSwapChain& swapChain);
         void ReCalculateMaterialOffsets();
         void AddMaterial(Material& material);
+        void CreateMaterial(std::string path);
+        void CreateInstance(Material& material);
 
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
 		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);

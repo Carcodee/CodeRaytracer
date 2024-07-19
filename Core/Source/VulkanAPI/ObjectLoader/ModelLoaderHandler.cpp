@@ -249,7 +249,7 @@ namespace VULKAN {
 			if (!material.diffuse_texname.empty()) {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.push_back(texturePathFinded);
+                materialData.paths.try_emplace(textureOffset,texturePathFinded);
                 materialData.materialUniform.diffuseOffset= textureOffset;
                 textureOffset++;
 			}
@@ -264,7 +264,7 @@ namespace VULKAN {
                 }
                 std::string texturePathFinded= texName;
                 FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.push_back(texturePathFinded);
+                materialData.paths.try_emplace(textureOffset,texturePathFinded);
                 materialData.materialUniform.roughnessOffset= textureOffset;
                 materialData.materialUniform.roughnessIntensity = 1.0f;
                 textureOffset++;
@@ -272,7 +272,7 @@ namespace VULKAN {
             if (!material.metallic_texname.empty()) {
                 std::string texturePathFinded= material.metallic_texname;
                 FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.push_back(texturePathFinded);
+                materialData.paths.try_emplace(textureOffset,texturePathFinded);
                 materialData.materialUniform.metallicOffset= textureOffset;
                 materialData.materialUniform.metallicIntensity = 1.0f;
                 textureOffset++;
@@ -281,14 +281,14 @@ namespace VULKAN {
 			if (!material.bump_texname.empty()) {
 				std::string texturePathFinded= material.bump_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.push_back(texturePathFinded);
+                materialData.paths.try_emplace(textureOffset,texturePathFinded);
                 materialData.materialUniform.normalOffset= textureOffset;
                 materialData.materialUniform.normalIntensity = 1.0f;
                 textureOffset++;
 			}
 
 
-            materialData.materialReferencePath= texturesPath;
+            materialData.textureReferencePath= texturesPath;
             materialData.name = "Material_"+std::to_string(matCount);
             materialData.id = ModelHandler::GetInstance()->currentMaterialsOffset;
             materialData.targetPath = texturesPath +"\\"+ materialData.name + ".MATCODE";

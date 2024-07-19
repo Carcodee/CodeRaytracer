@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include "VulkanAPI/Utility/Utility.h"
+#include "VulkanAPI/Utility/ISerializable.h"
 
 
 namespace VULKAN
@@ -16,10 +17,11 @@ namespace VULKAN
 
 		static ResourcesUIHandler* GetInstance();
 		void DisplayDirInfo();
-        void DisplayMeshInfo();
-        int modelIDInspected=-1;
-        int materialIDInspected=-1;
-
+        void DisplayInspectorInfo();
+        void DisplayMatInfo(Material& mat);
+        void DisplayMeshInfo(ModelData& modelData);
+        
+        std::string pathInspected ="";
 		float iconSize = 50;
 		float thumbnailSpace = 20;
 		int rows = 10;

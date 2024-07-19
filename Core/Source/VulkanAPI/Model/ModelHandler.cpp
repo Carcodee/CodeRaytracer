@@ -129,6 +129,7 @@ namespace VULKAN
 		bottomLevelObj.matrix = matrix;
 		bottomLevelObj.bottomLevelId = static_cast<int>(bottomLevelObjects.at(TLAS.TLASID).size());
 		bottomLevelObj.UpdateMatrix();
+        
 		bottomLevelObjects.at(TLAS.TLASID).push_back(bottomLevelObj);
 		
 	}
@@ -175,14 +176,34 @@ namespace VULKAN
 
     void ModelHandler::ReCalculateMaterialOffsets() {
         currentMaterialsOffset=0;
+        allTexturesOffset= 0;
         for (int i = 0; i < allMaterialsOnApp.size(); ++i) {
             currentMaterialsOffset ++;
+            allMaterialsOnApp.at(i).get()->CalculateTextureOffsets(allTexturesOffset);
         }
+        
     }
 
     void ModelHandler::AddMaterial(Material &material) {
         material.id= currentMaterialsOffset;
+        material.name = "Material_"+ std::to_string(material.id);
         allMaterialsOnApp.try_emplace(currentMaterialsOffset, std::make_shared<Material>(material));
+        
+    }
+
+    void ModelHandler::CreateMaterial(std::string path) {
+        Material material{};
+        material.textureReferencePath="";
+        bool generated = false;
+        AddMaterial(material);
+        ReCalculateMaterialOffsets();
+        //this data is filled in that methods, weird, I know
+        material.targetPath = path +"\\"+ material.name + ".MATCODE";
+        AssetsHandler::GetInstance()->HandleAssetLoad(material,material.targetPath, AssetsHandler::GetInstance()->matFileExtension, material.id);
+    }
+
+    void ModelHandler::CreateInstance(Material &material) {
+
     }
 
 }

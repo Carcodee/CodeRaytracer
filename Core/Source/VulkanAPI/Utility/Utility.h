@@ -57,12 +57,21 @@ namespace VULKAN{
 			uint32_t geometryIndexStart;
             uint32_t indexOffset;
 		};
+        enum TEXTURE_TYPE {
+            DIFFUSE,
+            ROUGHNESS,
+            METALLIC,
+            SPECULAR,
+            NORMAL
+        };
 		struct Material: ISerializable<Material>
 		{
+            
 			MaterialUniformData materialUniform{};
-			std::vector<std::string> paths;
-			std::vector<VKTexture*> materialTextures;
-            std::string materialReferencePath="";
+            //the key is the texture offset in order correlate them 
+			std::map<int,std::string> paths;
+			std::map<int,VKTexture*> materialTextures;
+            std::string textureReferencePath="";
             std::string name="";
             std::string targetPath="";
             bool generated = false;
@@ -72,17 +81,36 @@ namespace VULKAN{
                 std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
                 if(generated)return;
 				materialUniform.textureIndexStart = allTexturesOffset;
-				for (int i = 0; i < paths.size(); ++i)
+				for (auto& pair: paths)
 				{
-					if (!std::filesystem::exists(paths[i].c_str()))continue;
+					if (!std::filesystem::exists(pair.second.c_str()))continue;
 					materialUniform.texturesSizes++;
-					VKTexture* texture = new VKTexture(paths[i].c_str(), swap_chain);
-					materialTextures.push_back(texture);
+					VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain);
+					materialTextures.try_emplace(pair.first,texture);
                     allTexturesOffset++;
 				}
                 generated = true;
                 std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n"; 
 			}
+            void CalculateTextureOffsets(int& allTexturesOffset)
+            {
+                std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
+                materialUniform.textureIndexStart = allTexturesOffset;
+                for (int i = 0; i < materialTextures.size(); ++i)
+                {
+                    materialUniform.texturesSizes++;
+                    allTexturesOffset++;
+                }
+                std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n";
+            }
+            void SetDiffuseTexture(VKTexture* texture){
+                
+            }
+            ~Material(){
+                for (auto& pair : materialTextures) {
+                    delete pair.second;
+                }
+            };
             nlohmann::json Serialize() override{
                 nlohmann::json jsonData;
                 std::vector<float> diffuse;
@@ -118,11 +146,8 @@ namespace VULKAN{
                         {"DiffuseOffset",this->materialUniform.diffuseOffset},
                         {"NormalOffset",this->materialUniform.normalOffset},
                         //80
-                        
-                        
-                        
                         {"Paths",this->paths},
-                        {"MaterialReferencePath",this->materialReferencePath},
+                        {"TextureReferencePath",this->textureReferencePath},
                         {"TargetPath",this->targetPath}
                 };
                 return jsonData;
@@ -165,8 +190,8 @@ namespace VULKAN{
                 this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
                 //80
                 
-                this->paths = jsonObj.at("Paths").get<std::vector<std::string>>();
-                this->materialReferencePath = jsonObj.at("MaterialReferencePath");
+                this->paths = jsonObj.at("Paths").get<std::map<int,std::string>>();
+                this->textureReferencePath = jsonObj.at("TextureReferencePath");
                 this->targetPath = jsonObj.at("TargetPath");
                 return *this;
             }
@@ -177,9 +202,11 @@ namespace VULKAN{
 
 		struct ModelData : ISerializable<ModelData>
 		{
+            ~ModelData(){
+                
+            }
 			std::vector <Vertex> vertices;
 			std::vector<uint32_t> indices;
-
             std::vector<uint32_t> firstMeshIndex;
 			std::vector<uint32_t> firstMeshVertex;
 			std::vector<int> materialIds;

@@ -686,13 +686,13 @@ namespace VULKAN {
 		{
 			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                std::vector<VKTexture*>& currentTextures =mat.second->materialTextures;
-                for (int j = 0; j < currentTextures.size(); ++j) {
+                std::map<int,VKTexture*>& currentTextures =mat.second->materialTextures;
+                for (auto& pair : currentTextures) {
                     
                     VkDescriptorImageInfo descriptor{};
                     descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    descriptor.sampler = currentTextures[j]->textureSampler;
-                    descriptor.imageView = currentTextures[j]->textureImageView;
+                    descriptor.sampler = pair.second->textureSampler;
+                    descriptor.imageView = pair.second->textureImageView;
                     texturesDescriptors.push_back(descriptor);
 
                 }
@@ -1085,7 +1085,6 @@ namespace VULKAN {
         {
             materialDatas.push_back(mat.second->materialUniform);
         }
-        std::cout<<"Material info updated\n";
         memcpy(allMaterialsBuffer.mapped, materialDatas.data(), sizeof (MaterialUniformData)* materialDatas.size());
 
     }
@@ -1097,10 +1096,7 @@ namespace VULKAN {
                 modelDataUniformBuffer.push_back(modelsOnScene[i]->dataUniformBuffer[j]);
             }
         }
-        std::cout<<"Mesh info updated\n";
         memcpy(allModelDataBuffer.mapped, modelDataUniformBuffer.data(), sizeof (ModelDataUniformBuffer)* modelDataUniformBuffer.size());
-
-
     }
 
 

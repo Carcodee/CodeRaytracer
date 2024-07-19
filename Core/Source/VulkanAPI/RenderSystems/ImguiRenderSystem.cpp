@@ -593,35 +593,41 @@ namespace VULKAN
         ImGui::PopID();
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
-        ResourcesUIHandler::GetInstance()->DisplayMeshInfo();
-
-		ImGui::PushID("AssetsID");
-
-		ImGui::Begin("Configs");
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetWindowSize(ImVec2(400, 400));
-		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
-		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
-		ImGui::LabelText("Raytracing", "");
-		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
-		ImGui::LabelText("Light", "");
-		ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f");
-		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
-		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
-		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+        ResourcesUIHandler::GetInstance()->DisplayInspectorInfo();
         
-		if (ImGui::Button("Addtexture"))
-		{
-            VKTexture* texRef=ModelHandler::GetInstance()->allMaterialsOnApp.at(10).get()->materialTextures[0]; 
-            AddTexture(texRef);
-		}
+        {
+            ImGui::PushID("AssetsID");
+            ImGui::Begin("Configs");
 
-		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetWindowSize(ImVec2(400, 400));
+            ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
+            ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
+            ImGui::LabelText("Raytracing", "");
+            ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
+            ImGui::LabelText("Light", "");
+            ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f");
+            ImGui::ColorEdit3("light Col", lightCol, 0.0f);
+            ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
+            ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+            ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
 
-		ImGui::End();
-		ImGui::PopID();
-
+            ImGui::End();
+            ImGui::PopID();
+        }
 		ImGui::End(); 
+        
+        
+        if(ModelHandler::GetInstance()->Loading){
+
+            ImGui::PushID("Loading");
+            ImGui::SeparatorText("Loading...");
+            ImGui::SetWindowSize(ImVec2(400, 100));
+            ImGui::SetWindowPos(ImVec2(ImGui::GetContentRegionAvail().x/2,ImGui::GetContentRegionAvail().y/2));
+            
+            ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(ImGui::GetFontSize() * 25, 0.0f));
+            ImGui::PopID();
+        }
 
 		bool open = true;
 		ImGui::ShowDemoWindow(&open);
