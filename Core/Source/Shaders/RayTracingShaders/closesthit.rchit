@@ -222,7 +222,7 @@ vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
     
         return vec4(-1, -1, -1, -1);
     }
-    vec4 texture = texture(textures[texIndexStart + texOffset],uv);
+    vec4 texture = texture(textures[texOffset],uv);
     return texture;
 }
 
@@ -230,7 +230,7 @@ float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intens
 	if (texOffset== -1){
 		return intensity;
 	}
-	vec4 texture = texture(textures[texIndexStart + texOffset],uv);
+	vec4 texture = texture(textures[texOffset],uv);
 	return texture.x * intensity;
 }
 void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){

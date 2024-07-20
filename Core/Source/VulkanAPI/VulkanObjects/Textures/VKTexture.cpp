@@ -1,5 +1,6 @@
 #include "VKTexture.h"
 #include <stb_image.h>
+#include "VulkanAPI/Model/ModelHandler.h"
 
 namespace VULKAN {
 
@@ -25,6 +26,10 @@ namespace VULKAN {
 
 		//myDevice.ResourceToDestroy(this);
 
+        this->id = ModelHandler::GetInstance()->allTexturesOffset;
+        ModelHandler::GetInstance()->allTexturesOnApp.try_emplace(ModelHandler::GetInstance()->allTexturesOffset,std::make_shared<VKTexture>(*this));
+        ModelHandler::GetInstance()->allTexturesOffset++;
+        std::cout<<" New Texture sizes: "<<ModelHandler::GetInstance()->allTexturesOffset<<"\n";
 
 	}
 
@@ -47,7 +52,12 @@ namespace VULKAN {
             if (textureImageMemory== nullptr)return;
 			vkFreeMemory(device.device(), textureImageMemory, nullptr);
 		});
-	}
+        this->id = ModelHandler::GetInstance()->allTexturesOffset;
+        ModelHandler::GetInstance()->allTexturesOnApp.try_emplace(ModelHandler::GetInstance()->allTexturesOffset,std::make_shared<VKTexture>(*this));
+        ModelHandler::GetInstance()->allTexturesOffset++;
+        std::cout<<" New Texture sizes: "<<ModelHandler::GetInstance()->allTexturesOffset<<"\n";
+
+    }
 
 	VKTexture::VKTexture(VulkanSwapChain& swapchain) : mySwapChain{ swapchain }, device{ swapchain.device }
 	{
@@ -64,7 +74,12 @@ namespace VULKAN {
             if (textureImageMemory== nullptr)return;
 			vkFreeMemory(device.device(), textureImageMemory, nullptr);
 		});
-	}
+        this->id = ModelHandler::GetInstance()->allTexturesOffset;
+        ModelHandler::GetInstance()->allTexturesOnApp.try_emplace(ModelHandler::GetInstance()->allTexturesOffset,std::make_shared<VKTexture>(*this));
+        ModelHandler::GetInstance()->allTexturesOffset++;
+        std::cout<<" New Texture sizes: "<<ModelHandler::GetInstance()->allTexturesOffset<<"\n";
+
+    }
 
 
 	void VKTexture::CreateTextureImage()

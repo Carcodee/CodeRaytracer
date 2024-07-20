@@ -241,7 +241,6 @@ namespace VULKAN {
 		for (const auto& material : materials)
 		{
 
-            int textureOffset = 0;
 			Material materialData{};
 			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
             materialData.materialUniform.roughnessIntensity = material.roughness;
@@ -249,9 +248,7 @@ namespace VULKAN {
 			if (!material.diffuse_texname.empty()) {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.try_emplace(textureOffset,texturePathFinded);
-                materialData.materialUniform.diffuseOffset= textureOffset;
-                textureOffset++;
+                materialData.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,texturePathFinded);
 			}
             if (!material.roughness_texname.empty() || !material.specular_texname.empty()|| !material.specular_highlight_texname.empty()) {
                 std::string texName;
@@ -264,29 +261,23 @@ namespace VULKAN {
                 }
                 std::string texturePathFinded= texName;
                 FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.try_emplace(textureOffset,texturePathFinded);
-                materialData.materialUniform.roughnessOffset= textureOffset;
+                materialData.paths.try_emplace(TEXTURE_TYPE::ROUGHNESS,texturePathFinded);
                 materialData.materialUniform.roughnessIntensity = 1.0f;
-                textureOffset++;
             }
+            
             if (!material.metallic_texname.empty()) {
                 std::string texturePathFinded= material.metallic_texname;
                 FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.try_emplace(textureOffset,texturePathFinded);
-                materialData.materialUniform.metallicOffset= textureOffset;
+                materialData.paths.try_emplace(TEXTURE_TYPE::METALLIC,texturePathFinded);
                 materialData.materialUniform.metallicIntensity = 1.0f;
-                textureOffset++;
             }
 
 			if (!material.bump_texname.empty()) {
 				std::string texturePathFinded= material.bump_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath);
-                materialData.paths.try_emplace(textureOffset,texturePathFinded);
-                materialData.materialUniform.normalOffset= textureOffset;
+                materialData.paths.try_emplace(TEXTURE_TYPE::NORMAL,texturePathFinded);
                 materialData.materialUniform.normalIntensity = 1.0f;
-                textureOffset++;
 			}
-
 
             materialData.textureReferencePath= texturesPath;
             materialData.name = "Material_"+std::to_string(matCount);

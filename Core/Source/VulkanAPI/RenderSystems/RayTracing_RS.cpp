@@ -686,7 +686,7 @@ namespace VULKAN {
 		{
 			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
-                std::map<int,VKTexture*>& currentTextures =mat.second->materialTextures;
+                std::map<TEXTURE_TYPE,VKTexture*>& currentTextures =mat.second->materialTextures;
                 for (auto& pair : currentTextures) {
                     
                     VkDescriptorImageInfo descriptor{};

@@ -17,94 +17,84 @@ namespace VULKAN{
             materialUniform.texturesSizes++;
             VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain);
             materialTextures.try_emplace(pair.first,texture);
-            ModelHandler::GetInstance()->allTexturesOnApp.try_emplace(allTexturesOffset,std::make_shared<VKTexture>(*texture));
-            allTexturesOffset++;
+            switch (pair.first) {
+                case DIFFUSE:
+                    materialUniform.diffuseOffset = texture->id;
+                    break;
+                case ROUGHNESS:
+                    materialUniform.roughnessOffset = texture->id;
+                    break;
+                case METALLIC:
+                    materialUniform.metallicOffset = texture->id;
+                    break;
+                case SPECULAR:
+                    materialUniform.specularOffset = texture->id;
+                    break;
+                case NORMAL:
+                    materialUniform.normalOffset = texture->id;
+                    break;
+            }
         }
         generated = true;
-        std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n";
     }
 
     void Material::CalculateTextureOffsets(int &allTexturesOffset) {
         std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
         materialUniform.textureIndexStart = allTexturesOffset;
-        for (int i = 0; i < materialTextures.size(); ++i)
+        for (auto& pair : materialTextures)
         {
+            pair.second->id = allTexturesOffset;
             materialUniform.texturesSizes++;
             allTexturesOffset++;
         }
         std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n";
     }
-
-    int Material::GetTexOffsetFromTexture(TEXTURE_TYPE textureType) {
-        int idToCheck= 0;
-        switch (textureType) {
-            case DIFFUSE:
-                idToCheck=this->materialUniform.diffuseOffset;
-                break;
-            case ROUGHNESS:
-                idToCheck=this->materialUniform.roughnessOffset;
-                break;
-            case METALLIC:
-                idToCheck=this->materialUniform.metallicOffset;
-                break;
-            case SPECULAR:
-                idToCheck=this->materialUniform.specularOffset;
-                break;
-            case NORMAL:
-                idToCheck=this->materialUniform.normalOffset;
-                break;
-        }
-        return idToCheck;
-    }
-
     void Material::SetTexture(TEXTURE_TYPE textureType, VKTexture *texture) {
+        
+        assert(texture->id>-1&&"A texture with invalid Id was tried to add");
         switch (textureType) {
             case DIFFUSE:
-                if (materialUniform.diffuseOffset == -1){
-                    int offset = this->materialTextures.size() + 1;
-                    materialUniform.diffuseOffset = offset;
-                    this->materialTextures.try_emplace(offset, texture);
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
                 }else{
-                    materialTextures.at(materialUniform.diffuseOffset) = texture;
+                    materialTextures.at(textureType) = texture;
                 }
+                materialUniform.diffuseOffset = texture->id;
                 break;
             case ROUGHNESS:
-                if (materialUniform.roughnessOffset == -1){
-                    int offset = this->materialTextures.size() + 1;
-                    materialUniform.roughnessOffset = offset;
-                    this->materialTextures.try_emplace(offset, texture);
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
                 }else{
-                    materialTextures.at(materialUniform.roughnessOffset) = texture;
+                    materialTextures.at(textureType) = texture;
                 }
+                materialUniform.roughnessOffset = texture->id;
                 break;
             case METALLIC:
-                if (materialUniform.metallicOffset == -1){
-                    int offset = this->materialTextures.size() + 1;
-                    materialUniform.metallicOffset = offset;
-                    this->materialTextures.try_emplace(offset, texture);
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
                 }else{
-                    materialTextures.at(materialUniform.metallicOffset) = texture;
+                    materialTextures.at(textureType) = texture;
                 }
+                materialUniform.metallicOffset = texture->id;
                 break;
             case SPECULAR:
-                if (materialUniform.specularOffset == -1){
-                    int offset = this->materialTextures.size() + 1;
-                    materialUniform.specularOffset = offset;
-                    this->materialTextures.try_emplace(offset, texture);
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
                 }else{
-                    materialTextures.at(materialUniform.specularOffset) = texture;
+                    materialTextures.at(textureType) = texture;
                 }
+                materialUniform.specularOffset = texture->id;
                 break;
             case NORMAL:
-                if (materialUniform.normalOffset == -1){
-                    int offset = this->materialTextures.size() + 1;
-                    materialUniform.normalOffset = offset;
-                    this->materialTextures.try_emplace(offset, texture);
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
                 }else{
-                    materialTextures.at(materialUniform.normalOffset) = texture;
+                    materialTextures.at(textureType) = texture;
                 }
+                materialUniform.normalOffset = texture->id;
                 break;
         }
+        ModelHandler::GetInstance()->updateMaterialData = true;
     }
 
     Material Material::Deserialize(nlohmann::json &jsonObj) {
@@ -144,7 +134,7 @@ namespace VULKAN{
         this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
         //80
 
-        this->paths = jsonObj.at("Paths").get<std::map<int,std::string>>();
+        this->paths = jsonObj.at("Paths").get<std::map<TEXTURE_TYPE,std::string>>();
         this->textureReferencePath = jsonObj.at("TextureReferencePath");
         this->targetPath = jsonObj.at("TargetPath");
         return *this;

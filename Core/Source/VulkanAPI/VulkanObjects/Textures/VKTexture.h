@@ -43,13 +43,15 @@ namespace VULKAN {
 		void CreateImageViews(VkFormat format);
 		void CreateImageViews();
 
+        int id= -1;
 		VkImage textureImage=nullptr;
 		VkSampler textureSampler= nullptr;
 		VkImageView textureImageView= nullptr;
 		VkDeviceMemory textureImageMemory=nullptr;
-		VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
+        VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 		uint32_t mipLevels=0;
-		VkDescriptorSet textureDescriptor = nullptr;
+        VkDescriptorSet textureDescriptor = nullptr;
+        //this means is not in the pool
 
 	private:
 		

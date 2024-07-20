@@ -12,11 +12,11 @@
 namespace VULKAN{
 
     enum TEXTURE_TYPE {
-        DIFFUSE,
-        ROUGHNESS,
-        METALLIC,
-        SPECULAR,
-        NORMAL
+        DIFFUSE = 0,
+        ROUGHNESS = 1,
+        METALLIC = 2,
+        SPECULAR = 3,
+        NORMAL = 4
     };
 
     struct MaterialUniformData
@@ -47,8 +47,8 @@ namespace VULKAN{
 		{
             MaterialUniformData materialUniform{};
             //the key is the texture offset in order correlate them 
-			std::map<int,std::string> paths;
-			std::map<int,VKTexture*> materialTextures;
+			std::map<TEXTURE_TYPE,std::string> paths;
+			std::map<TEXTURE_TYPE,VKTexture*> materialTextures;
             std::string textureReferencePath="";
             std::string name="";
             std::string targetPath="";
@@ -56,7 +56,6 @@ namespace VULKAN{
             int id= 0;
 			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset);
             void CalculateTextureOffsets(int& allTexturesOffset);
-            int GetTexOffsetFromTexture(TEXTURE_TYPE textureType);
             void SetTexture(TEXTURE_TYPE textureType,VKTexture* texture);
             ~Material(){
                 for (auto& pair : materialTextures) {

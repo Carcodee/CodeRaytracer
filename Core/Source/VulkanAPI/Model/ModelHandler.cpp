@@ -179,7 +179,6 @@ namespace VULKAN
         allTexturesOffset= 0;
         for (int i = 0; i < allMaterialsOnApp.size(); ++i) {
             currentMaterialsOffset ++;
-            allMaterialsOnApp.at(i).get()->CalculateTextureOffsets(allTexturesOffset);
         }
         
     }

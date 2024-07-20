@@ -25,18 +25,18 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="now materials have an inspector too">
-      <change afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" afterDir="false" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="material refactor">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -223,7 +223,7 @@
       <workItem from="1721390290390" duration="5962000" />
       <workItem from="1721413285019" duration="8244000" />
       <workItem from="1721482332423" duration="13306000" />
-      <workItem from="1721507550072" duration="4000" />
+      <workItem from="1721507550072" duration="6620000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -345,7 +345,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721421633723</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="material refactor">
+      <option name="closed" value="true" />
+      <created>1721507664534</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1721507664534</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -414,6 +422,7 @@
     <MESSAGE value="shadows implemented" />
     <MESSAGE value="changed the ImguiRenderSystem.cpp to singleton" />
     <MESSAGE value="now materials have an inspector too" />
-    <option name="LAST_COMMIT_MESSAGE" value="now materials have an inspector too" />
+    <MESSAGE value="material refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="material refactor" />
   </component>
 </project>
