@@ -71,6 +71,7 @@ namespace VULKAN
         Material materialBase{};
         std::map<int,std::shared_ptr<Material>> allMaterialsOnApp;
         std::map<int,std::shared_ptr<ModelData>> allModelsOnApp;
+        std::map<int,std::shared_ptr<VKTexture>>allTexturesOnApp;
 
 	};
 

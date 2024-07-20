@@ -28,6 +28,7 @@ file(GLOB_RECURSE VULKAN_INIT "${CORE_BASE_DIR}/VulkanAPI/VulkanInit/*.h" "${COR
 file(GLOB_RECURSE VULKAN_OBJ_BUFFERS "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Buffers/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Buffers/*.cpp")
 file(GLOB_RECURSE VULKAN_OBJ_RESOURCE_INTERFACE "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/ResourceInterface/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/ResourceInterface/*.cpp")
 file(GLOB_RECURSE VULKAN_OBJ_TEXTURES "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Textures/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Textures/*.cpp")
+file(GLOB_RECURSE VULKAN_OBJ_MATERIAL "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Materials/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Materials/*.cpp")
 file(GLOB_RECURSE VULKAN_VULKAN_PIPELINE "${CORE_BASE_DIR}/VulkanAPI/VulkanPipeline/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanPipeline/*.cpp")
 
 set(CORE_SOURCES
@@ -53,6 +54,7 @@ set(CORE_SOURCES
         ${VULKAN_OBJ_BUFFERS}
         ${VULKAN_OBJ_RESOURCE_INTERFACE}
         ${VULKAN_OBJ_TEXTURES}
+        ${VULKAN_OBJ_MATERIAL}
         ${VULKAN_VULKAN_PIPELINE}
 )
 set(IMGUI_SOURCES

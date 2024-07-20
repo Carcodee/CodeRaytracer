@@ -16,190 +16,23 @@
 #include "VulkanAPI/Model/MyModel.h"
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 #include "ISerializable.h"
+#include "VulkanAPI/VulkanObjects/Materials/Material.h"
 
 
 namespace VULKAN{
 
+    struct SimpleVertex
+    {
+        glm::vec3 pos;
+        glm::vec2 textCoord;
+    };
 
-		struct SimpleVertex
-		{
-			glm::vec3 pos;
-			glm::vec2 textCoord;
-		};
-
-		struct MaterialUniformData
-		{
-			float albedoIntensity;
-			float normalIntensity;
-			float specularIntensity;
-            float roughnessIntensity = 0.5f;
-			glm::vec3 diffuseColor;
-			float reflectivityIntensity = 0.5f;
-            //32
-            glm::vec3 baseReflection;
-            float metallicIntensity;
-            //48
-            float emissionIntensity;
-            int roughnessOffset = -1;
-            int metallicOffset = -1;
-            int specularOffset = -1;
-            //64
-			int textureIndexStart = -1;
-			int texturesSizes = 0;
-            int diffuseOffset = -1;
-            int normalOffset = -1;
-            //80
-		};
-
-		struct ModelDataUniformBuffer 
-		{
-			uint32_t materialIndex;
-			uint32_t geometryIndexStart;
-            uint32_t indexOffset;
-		};
-        enum TEXTURE_TYPE {
-            DIFFUSE,
-            ROUGHNESS,
-            METALLIC,
-            SPECULAR,
-            NORMAL
-        };
-		struct Material: ISerializable<Material>
-		{
-            
-			MaterialUniformData materialUniform{};
-            //the key is the texture offset in order correlate them 
-			std::map<int,std::string> paths;
-			std::map<int,VKTexture*> materialTextures;
-            std::string textureReferencePath="";
-            std::string name="";
-            std::string targetPath="";
-            bool generated = false;
-            int id= 0;
-			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset)
-			{
-                std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
-                if(generated)return;
-				materialUniform.textureIndexStart = allTexturesOffset;
-				for (auto& pair: paths)
-				{
-					if (!std::filesystem::exists(pair.second.c_str()))continue;
-					materialUniform.texturesSizes++;
-					VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain);
-					materialTextures.try_emplace(pair.first,texture);
-                    allTexturesOffset++;
-				}
-                generated = true;
-                std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n"; 
-			}
-            void CalculateTextureOffsets(int& allTexturesOffset)
-            {
-                std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
-                materialUniform.textureIndexStart = allTexturesOffset;
-                for (int i = 0; i < materialTextures.size(); ++i)
-                {
-                    materialUniform.texturesSizes++;
-                    allTexturesOffset++;
-                }
-                std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n";
-            }
-            void SetDiffuseTexture(VKTexture* texture){
-                
-            }
-            ~Material(){
-                for (auto& pair : materialTextures) {
-                    delete pair.second;
-                }
-            };
-            nlohmann::json Serialize() override{
-                nlohmann::json jsonData;
-                std::vector<float> diffuse;
-                diffuse.push_back(materialUniform.diffuseColor.x);
-                diffuse.push_back(materialUniform.diffuseColor.y);
-                diffuse.push_back(materialUniform.diffuseColor.z);
-                std::vector<float> baseReflection;
-                baseReflection.push_back(materialUniform.baseReflection.x);
-                baseReflection.push_back(materialUniform.baseReflection.y);
-                baseReflection.push_back(materialUniform.baseReflection.z);
-
-                jsonData = {
-                        {"ID",this->id},
-                        {"Name",this->name},
-                        {"AlbedoIntensity",this->materialUniform.albedoIntensity},
-                        {"NormalIntensity",this->materialUniform.normalIntensity},
-                        {"SpecularIntensity",this->materialUniform.specularIntensity},
-                        {"RoughnessIntensity",this->materialUniform.roughnessIntensity},
-                        //16
-                        {"DiffuseColor",diffuse},
-                        {"ReflectivityIntensity", this->materialUniform.reflectivityIntensity},
-                        //32
-                        {"BaseReflection",baseReflection},
-                        {"MetallicIntensity",this->materialUniform.metallicIntensity},
-                        //48
-                        {"EmissionIntensity",this->materialUniform.emissionIntensity},
-                        {"RoughnessOffset",this->materialUniform.roughnessOffset},
-                        {"MetallicOffset",this->materialUniform.metallicOffset},
-                        {"SpecularOffset",this->materialUniform.specularOffset},
-                        //60
-                        {"TextureIndexStart",this->materialUniform.textureIndexStart},
-                        {"TextureSizes",this->materialUniform.texturesSizes},
-                        {"DiffuseOffset",this->materialUniform.diffuseOffset},
-                        {"NormalOffset",this->materialUniform.normalOffset},
-                        //80
-                        {"Paths",this->paths},
-                        {"TextureReferencePath",this->textureReferencePath},
-                        {"TargetPath",this->targetPath}
-                };
-                return jsonData;
-//
-            }
-            Material Deserialize(nlohmann::json &jsonObj) override{
-
-                this->id = jsonObj.at("ID");
-                this->name = jsonObj.at("Name");
-                std::vector<int> diffuse;
-                std::vector<int> baseReflection;
-                this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
-                this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
-                this->materialUniform.specularIntensity = jsonObj.at("SpecularIntensity");
-                this->materialUniform.roughnessIntensity = jsonObj.at("RoughnessIntensity");
-                //16
-                diffuse = jsonObj.at("DiffuseColor").get<std::vector<int>>();
-                this->materialUniform.diffuseColor.x = diffuse[0];
-                this->materialUniform.diffuseColor.y = diffuse[1];
-                this->materialUniform.diffuseColor.z = diffuse[2];
-                this->materialUniform.reflectivityIntensity = jsonObj.at("ReflectivityIntensity");
-                //32
-
-                //base reflection
-                baseReflection = jsonObj.at("BaseReflection").get<std::vector<int>>();
-                this->materialUniform.baseReflection.x = baseReflection[0];
-                this->materialUniform.baseReflection.y = baseReflection[1];
-                this->materialUniform.baseReflection.z = baseReflection[2];
-                this->materialUniform.metallicIntensity=jsonObj.at("MetallicIntensity");
-                //48
-                this->materialUniform.emissionIntensity==jsonObj.at("EmissionIntensity");
-                this->materialUniform.roughnessOffset = jsonObj.at("RoughnessOffset");
-                this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
-                this->materialUniform.specularOffset= jsonObj.at("SpecularOffset");
-                //60
-                this->materialUniform.textureIndexStart=jsonObj.at("TextureIndexStart");
-                this->materialUniform.texturesSizes = 0;
-//                this->materialUniform.texturesSizes = jsonObj.at("TextureSizes");
-                this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
-                this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
-                //80
-                
-                this->paths = jsonObj.at("Paths").get<std::map<int,std::string>>();
-                this->textureReferencePath = jsonObj.at("TextureReferencePath");
-                this->targetPath = jsonObj.at("TargetPath");
-                return *this;
-            }
-            void SaveData() override{
-                
-            }
-		};
-
+    struct ModelDataUniformBuffer
+    {
+        uint32_t materialIndex;
+        uint32_t geometryIndexStart;
+        uint32_t indexOffset;
+    };
 		struct ModelData : ISerializable<ModelData>
 		{
             ~ModelData(){

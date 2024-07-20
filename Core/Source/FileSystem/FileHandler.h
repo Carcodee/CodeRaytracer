@@ -42,6 +42,7 @@ namespace HELPERS
 		std::filesystem::path workingDir;
 		std::filesystem::path projectPath;
 		std::filesystem::path assetPath;
+        std::filesystem::path engineResourcesPath;
 		std::filesystem::path shadersPath;
 		
 		};

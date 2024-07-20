@@ -151,7 +151,7 @@ namespace VULKAN
                 DisplayMeshInfo(modelDataRef);
             } else if(extension == AssetsHandler::GetInstance()->matFileExtension){
                 Material& materialRef = *ModelHandler::GetInstance()->allMaterialsOnApp.at(id);
-                DisplayMatInfo(materialRef);
+                DisplayMatInfo(materialRef, ImVec2{100, 100});
             }
             
         } else {
@@ -161,31 +161,60 @@ namespace VULKAN
         ImGui::PopID();
     }
 
-    void ResourcesUIHandler::DisplayMatInfo(Material &mat) {
+    void ResourcesUIHandler::DisplayMatInfo(Material &mat, ImVec2 iconSize) {
         {
             ImGui::SeparatorText("Diffuse");
+            ImGui::PushID("Diffuse");
             if (!mat.materialTextures.empty()&& mat.materialUniform.diffuseOffset>-1){
                 ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(mat.materialUniform.diffuseOffset));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.diffuseOffset)->textureDescriptor), ImVec2{100, 100});
+                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.diffuseOffset)->textureDescriptor), iconSize);
+                HandleDrag(TEXTURE_TYPE::DIFFUSE,mat);
+                
             } else{
-                ImGui::Button(mat.name.c_str(), ImVec2{100, 100});
+                if (ImGui::Button(mat.name.c_str(), iconSize)){
+                    ImGui::OpenPopup("SetTex");
+                }
             }
-            
+            if (ImGui::BeginPopup("SetTex")){
+                for (auto& pair: ModelHandler::GetInstance()->allTexturesOnApp) {
+                    ImguiRenderSystem::GetInstance()->HandleTextureCreation(pair.second.get());
+                    ImGui::Image((ImTextureID)pair.second.get()->textureDescriptor, ImVec2(10,10));
+                    ImGui::SameLine();
+                    if (ImGui::Selectable("SetText")){
+                        ModelHandler::GetInstance()->CreateMaterial(fileHandlerInstanceRef->currentPathRelativeToAssets.string());
+                        ImGui::EndPopup();
+                    }
+                }
+                ImGui::EndPopup();
+                
+            }
+            HandleDrop(TEXTURE_TYPE::DIFFUSE,mat);
+            ImGui::PopID();
+
             ImGui::SeparatorText("Normal");
+            ImGui::PushID("Normal");
             if (!mat.materialTextures.empty()&& mat.materialUniform.normalOffset>-1){
                 ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(mat.materialUniform.normalOffset));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.normalOffset)->textureDescriptor), ImVec2{100, 100});
+                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.normalOffset)->textureDescriptor), iconSize);
+                HandleDrag(TEXTURE_TYPE::NORMAL, mat);
             } else{
-                ImGui::Button(mat.name.c_str(), ImVec2{100, 100});
+                ImGui::Button(mat.name.c_str(), iconSize);
             }
-            
+            HandleDrop(TEXTURE_TYPE::NORMAL,mat);
+            ImGui::PopID();
+
             ImGui::SeparatorText("Roughness");
+            ImGui::PushID("Roughness");
             if (!mat.materialTextures.empty()&& mat.materialUniform.roughnessOffset>-1){
                 ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(mat.materialUniform.roughnessOffset));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.roughnessOffset)->textureDescriptor), ImVec2{100, 100});
+                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(mat.materialUniform.roughnessOffset)->textureDescriptor), iconSize);
+                HandleDrag(TEXTURE_TYPE::ROUGHNESS, mat);
             } else{
-                ImGui::Button(mat.name.c_str(), ImVec2{100, 100});
+                ImGui::Button(mat.name.c_str(), iconSize);
             }
+            HandleDrop(TEXTURE_TYPE::ROUGHNESS, mat);
+            ImGui::PopID();
+
         }
         {
             if(ImGui::SliderFloat("albedo intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
@@ -262,44 +291,37 @@ namespace VULKAN
                     ImGui::EndDragDropTarget();
                 }
                 ImGui::PopID();
-                if(ImGui::SliderFloat("albedo intensity",&materialReference.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                if(ImGui::SliderFloat("roughness",&materialReference.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                if(ImGui::SliderFloat("reflectivity",&materialReference.materialUniform.reflectivityIntensity, 0.0f, 3.0f,"%.3f")){
-
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                if(ImGui::SliderFloat("metalness",&materialReference.materialUniform.metallicIntensity, 0.0f, 3.0f,"%.3f")){
-
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                if(ImGui::SliderFloat("emission base",&materialReference.materialUniform.emissionIntensity, 0.0f, 3.0f,"%.3f")){
-
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                float baseReflection[3];
-                baseReflection[0]= materialReference.materialUniform.baseReflection.x;
-                baseReflection[1]= materialReference.materialUniform.baseReflection.y;
-                baseReflection[2]= materialReference.materialUniform.baseReflection.z;
-                if(ImGui::SliderFloat3("metalness",baseReflection, 0.0f, 1.0f,"%.3f")){
-                    materialReference.materialUniform.baseReflection.x=baseReflection[0];
-                    materialReference.materialUniform.baseReflection.y=baseReflection[1];
-                    materialReference.materialUniform.baseReflection.z=baseReflection[2];
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
-                if  (materialReference.materialUniform.texturesSizes<=0){
-                    float matCol[3];
-                    matCol[0]= materialReference.materialUniform.diffuseColor.x;
-                    matCol[1]= materialReference.materialUniform.diffuseColor.y;
-                    matCol[2]= materialReference.materialUniform.diffuseColor.z;
-                    ImGui::ColorEdit3("Diffuse", matCol);
-                }
+                DisplayMatInfo(materialReference, ImVec2{35, 35});
+                
                 ImGui::TreePop();
             }
         }
+    }
+
+    void ResourcesUIHandler::HandleDrop(TEXTURE_TYPE textureType, Material &mat) {
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("TEXTURE_ID")) {
+                VKTexture* data = *(VKTexture **)payload->Data;
+                mat.SetTexture(textureType, data);
+                ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+                ImGui::BeginTooltip();
+                ImGui::Text("Set Material");
+                ImGui::EndTooltip();
+            }
+            ImGui::EndDragDropTarget();
+        }
+    }
+
+    void ResourcesUIHandler::HandleDrag(TEXTURE_TYPE textureType, Material& mat) {
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            int id= mat.GetTexOffsetFromTexture(textureType);
+            assert(id>-1&&"there is no texture to drag");
+            VKTexture* tex= mat.materialTextures.at(id);
+            ImGui::SetDragDropPayload("TEXTURE_ID", &tex,  sizeof(tex));
+            ImGui::EndDragDropSource();
+        }
+
     }
 
 }

@@ -15,6 +15,7 @@ namespace HELPERS
         //TODO: fix this when is launched from exe
 		projectPath = workingDir.parent_path();
 		assetPath = projectPath / "Core"/"Source" / "Resources" / "Assets";
+        engineResourcesPath = projectPath / "Core"/"Source" / "Resources" / "EngineResources";
 		shadersPath = projectPath / "Core"/ "Source" / "Shaders";
 		currentPathRelativeToAssets = assetPath;
 

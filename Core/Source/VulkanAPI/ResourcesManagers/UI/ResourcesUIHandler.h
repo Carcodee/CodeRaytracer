@@ -18,8 +18,10 @@ namespace VULKAN
 		static ResourcesUIHandler* GetInstance();
 		void DisplayDirInfo();
         void DisplayInspectorInfo();
-        void DisplayMatInfo(Material& mat);
+        void DisplayMatInfo(Material& mat, ImVec2 iconSize);
         void DisplayMeshInfo(ModelData& modelData);
+        void HandleDrag(TEXTURE_TYPE textureType, Material& mat);
+        void HandleDrop(TEXTURE_TYPE textureType, Material& mat);
         
         std::string pathInspected ="";
 		float iconSize = 50;

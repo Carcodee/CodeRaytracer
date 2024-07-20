@@ -624,7 +624,6 @@ namespace VULKAN
             ImGui::SeparatorText("Loading...");
             ImGui::SetWindowSize(ImVec2(400, 100));
             ImGui::SetWindowPos(ImVec2(ImGui::GetContentRegionAvail().x/2,ImGui::GetContentRegionAvail().y/2));
-            
             ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(ImGui::GetFontSize() * 25, 0.0f));
             ImGui::PopID();
         }
