@@ -11,6 +11,8 @@ struct RayPayload{
     float roughness;
     float reflectivity;
     float directLightIntensity;
+    bool shadow;
+    bool emissive;
 };
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 

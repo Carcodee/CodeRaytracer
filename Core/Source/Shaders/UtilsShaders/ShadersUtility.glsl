@@ -19,10 +19,10 @@ MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	MaterialFindInfo materialFindInfo;
 	materialFindInfo.hasDiffuse= true;
 	materialFindInfo.hasNormals= true;
-	if(diffuse==vec4(-1)){
+	if(diffuse==vec4(1)){
 		materialFindInfo.hasDiffuse = false;
 	}
-	if(normal==vec4(-1)){
+	if(normal==vec4(1)){
 		materialFindInfo.hasNormals = false;
 	}
 	return materialFindInfo;

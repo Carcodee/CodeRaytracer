@@ -103,9 +103,9 @@ namespace VULKAN {
 
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { computeRenderFinishedSemaphores[currentFrame] , imageAvailableSemaphores[currentFrame] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_VERTEX_INPUT_BIT , VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 2;
+		VkSemaphore waitSemaphores[] = {/* computeRenderFinishedSemaphores[currentFrame] ,*/ imageAvailableSemaphores[currentFrame] };
+		VkPipelineStageFlags waitStages[] = {/* VK_PIPELINE_STAGE_VERTEX_INPUT_BIT ,*/ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
@@ -142,23 +142,23 @@ namespace VULKAN {
 		return VK_SUCCESS;
 	}
 
-	VkResult VulkanSwapChain::submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
-	{
-		// Compute submission
-
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = buffers;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &computeRenderFinishedSemaphores[currentFrame];
-		auto result = vkQueueSubmit(device.computeQueue_, 1, &submitInfo, computeInFlightFences[currentFrame]);
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("failed to submit compute command buffer!");
-		};
-		return result;
-	}
-
+//	VkResult VulkanSwapChain::submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
+//	{
+//		 Compute submission
+//
+//		VkSubmitInfo submitInfo = {};
+//		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+//		submitInfo.commandBufferCount = 1;
+//		submitInfo.pCommandBuffers = buffers;
+//		submitInfo.signalSemaphoreCount = 1;
+//		submitInfo.pSignalSemaphores = &computeRenderFinishedSemaphores[currentFrame];
+//		auto result = vkQueueSubmit(device.computeQueue_, 1, &submitInfo, computeInFlightFences[currentFrame]);
+//		if (result != VK_SUCCESS) {
+//			throw std::runtime_error("failed to submit compute command buffer!");
+//		};
+//		return result;
+//	}
+//
 	void VulkanSwapChain::HandleColorImage(VkImage image, 
 		VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer, 
 		VkPipelineStageFlagBits srcStageFlags,VkPipelineStageFlagBits dstStageFlags,
@@ -272,7 +272,9 @@ namespace VULKAN {
 		createDepthResources();
 		createFramebuffers();
 		createUIImageViews();
-		CreateUIRenderPass();
+		CreateDynamicRenderPass(UIRenderPass);
+        CreateDynamicRenderPass(PostProRenderPass);
+        CreateDynamicRenderPass(FinalRenderPass);
 		CreateUIFramebuffers();
 		createSyncObjects();
 	}
@@ -486,49 +488,6 @@ namespace VULKAN {
 
 	void VulkanSwapChain::createUIImageViews()
 	{
-	}
-
-	void VulkanSwapChain::CreateUIRenderPass()
-	{
-
-		VkAttachmentDescription attachment = {};
-		attachment.format = VK_FORMAT_B8G8R8A8_SRGB;
-		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		VkAttachmentReference color_attachment = {};
-		color_attachment.attachment = 0;
-		color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpass = {};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &color_attachment;
-		VkSubpassDependency dependency = {};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		VkRenderPassCreateInfo info = {};
-		info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		info.attachmentCount = 1;
-		info.pAttachments = &attachment;
-		info.subpassCount = 1;
-		info.pSubpasses = &subpass;
-		info.dependencyCount = 1;
-		info.pDependencies = &dependency;
-		if (vkCreateRenderPass(device.device(), &info, nullptr, &UIRenderPass) != VK_SUCCESS)
-		{
-
-			throw std::runtime_error("Error at UI renderpass creation");
-		}
 	}
 
 	void VulkanSwapChain::CreateUIFramebuffers()
@@ -756,5 +715,46 @@ namespace VULKAN {
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}
+
+    void VulkanSwapChain::CreateDynamicRenderPass(VkRenderPass &renderPass) {
+        VkAttachmentDescription attachment = {};
+        attachment.format = VK_FORMAT_B8G8R8A8_SRGB;
+        attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+        VkAttachmentReference color_attachment = {};
+        color_attachment.attachment = 0;
+        color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass = {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &color_attachment;
+        VkSubpassDependency dependency = {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        VkRenderPassCreateInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        info.attachmentCount = 1;
+        info.pAttachments = &attachment;
+        info.subpassCount = 1;
+        info.pSubpasses = &subpass;
+        info.dependencyCount = 1;
+        info.pDependencies = &dependency;
+        if (vkCreateRenderPass(device.device(), &info, nullptr, &renderPass) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Error at UI renderpass creation");
+        }
+    }
+
 
 }  // namespace lve

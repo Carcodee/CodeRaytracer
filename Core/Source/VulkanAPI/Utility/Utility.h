@@ -117,10 +117,8 @@ namespace VULKAN{
 			std::vector<VkDescriptorPoolSize>poolSizes;
 		};
 
-		//FROM SASCHA WILLEMS INITIALIZERS LIBRARY
 
-
-
+    //FROM SASCHA WILLEMS INITIALIZERS LIBRARY
 		namespace INITIALIZERS {
 
 			inline VkMemoryAllocateInfo memoryAllocateInfo()

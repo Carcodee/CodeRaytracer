@@ -48,8 +48,30 @@ namespace VULKAN {
 		static std::vector<VkVertexInputBindingDescription> GetBindingDescription();
 		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
 
+        static std::vector<UIVertex> GetQuad(){
+            std::vector<UIVertex> quadVertices = {
+                    // Top-left vertex
+                    {{-0.5f,  0.5f}, {0.0f, 0.0f}, 0xffffffff},
+                    // Bottom-left vertex
+                    {{-0.5f, -0.5f}, {0.0f, 1.0f}, 0xffffffff},
+                    // Bottom-right vertex
+                    {{ 0.5f, -0.5f}, {1.0f, 1.0f}, 0xffffffff},
+                    // Top-right vertex
+                    {{ 0.5f,  0.5f}, {1.0f, 0.0f}, 0xffffffff}
+            };
+            return quadVertices;
+        }
+        static std::vector<uint16_t>GetQuadIndices(){
+            std::vector<uint16_t> indices = {
+                    0, 1, 2,  // First triangle (top-left, bottom-left, bottom-right)
+                    2, 3, 0   // Second triangle (bottom-right, top-right, top-left)
+            };
+            return indices;
+        };
 
-	};
+
+
+    };
 
 	class VKBufferHandler
 	{

@@ -18,8 +18,8 @@ struct RayPayload{
     float reflectivity; 
     float directLightIntensity;
     bool shadow;
+    bool emissive;
 };
-
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
 hitAttributeEXT vec2 attribs;
@@ -107,7 +107,8 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
     uint geometryOffset[];
 };
 
-layout(set = 0,binding = 10) uniform sampler2D textures[];
+
+layout(set = 0,binding = 11) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
 
@@ -155,25 +156,24 @@ void main()
   mat3 TBN = mat3(tangent, bitTangent, normal);
 
 
-
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
   int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
   int materialTextureSizes =materials[materialIndex].textureSizes;
   
-  vec4 diffuseInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].diffuseOffset, uv);
+  vec4 diffuseInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
   vec4 normalInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].normalOffset, uv);
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
-     diffuseInMat =vec4(materials[0].diffuseColor, 1.0);
+     diffuseInMat =vec4(materials[materialIndex].diffuseColor, 1.0);
   }
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       mat3 inverseTBN = transpose(TBN);
       vec3 normalWorldSpace = normalInMat.xyz * inverseTBN;
-      finalNormal = normalize(normalWorldSpace); 
+      finalNormal = normalize(normalWorldSpace) * materials[materialIndex].normalIntensity; 
   }
   
   //FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
@@ -192,12 +192,19 @@ void main()
   materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
   finalNormal, view, lightDir, halfway);
   
- 
+    
   rayPayload.shadow = true;
   float tmin = 0.001;
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+ 
+  if(materials[materialIndex].emissionIntensity>0){
+       rayPayload.emissive = true;
+       rayPayload.shadow = false;
+  }else{
+       rayPayload.emissive = false;
+  }
   
   rayPayload.color = pbr * myLight.intensity; 
   rayPayload.distance = gl_RayTmaxEXT;
@@ -220,7 +227,7 @@ void main()
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
     if (texOffset== -1){
     
-        return vec4(-1, -1, -1, -1);
+        return vec4(1, 1, 1, 1);
     }
     vec4 texture = texture(textures[texOffset],uv);
     return texture;

@@ -15,6 +15,8 @@
 
 #include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 #include "VulkanAPI/RenderSystems/RayTracing_RS.h"
+#include "VulkanAPI/RenderSystems/PostProcessing_RS.h"
+
 
 
 namespace VULKAN {
@@ -51,6 +53,8 @@ namespace VULKAN {
 		VulkanRenderer renderer{ initWindow , myDevice };
 		Forward_RS forward_RS{renderer, myDevice};
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
+        PostProcessing_RS postProcessing_Rs{ myDevice, renderer};
+        PostProcessing_RS FinalPostProcessing_Rs{ myDevice, renderer};
 		int currentFrame;
 	    
 	private:

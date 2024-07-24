@@ -15,7 +15,7 @@ namespace VULKAN{
         {
             if (!std::filesystem::exists(pair.second.c_str()))continue;
             materialUniform.texturesSizes++;
-            VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain);
+            VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain, true);
             materialTextures.try_emplace(pair.first,texture);
             switch (pair.first) {
                 case DIFFUSE:

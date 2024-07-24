@@ -118,16 +118,14 @@ namespace VULKAN {
 		return vkGetBufferDeviceAddressKHR(myDevice.device(), &bufferDeviceAI);
 	}
 	//TODO: Create the storage image of the raytracing
-	void RayTracing_RS::CreateStorageImage()
+	void RayTracing_RS::CreateStorageImages()
 	{
-
-		storageImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
-		
+		storageImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM);
+        emissiveStoreImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,VK_FORMAT_R8G8B8A8_UNORM);
 	}
 
 	void RayTracing_RS::CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj)
 	{
-
 		//myDevice.createBuffer(
 		//	VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -190,7 +188,6 @@ namespace VULKAN {
 			accelerationStructureBuildRangeInfo.firstVertex = 0;
 			accelerationStructureBuildRangeInfo.transformOffset = 0;
 			buildRangeInfos.push_back(accelerationStructureBuildRangeInfo);
-
 
 		}
 		for (auto& buildRangeInfo : buildRangeInfos)
@@ -398,6 +395,7 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
@@ -455,7 +453,6 @@ namespace VULKAN {
 		roomText.sampler = baseTexture->textureSampler;
 		roomText.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-
 		ubo.descriptor.buffer = ubo.buffer;
 		ubo.descriptor.offset = 0;
 		ubo.descriptor.range = sizeof(UniformData);
@@ -484,6 +481,11 @@ namespace VULKAN {
         BLAsInstanceOffsetBuffer.descriptor.offset = 0;
         BLAsInstanceOffsetBuffer.descriptor.range = VK_WHOLE_SIZE;
 
+        VkDescriptorImageInfo emissiveStorageDescriptor{};
+        emissiveStorageDescriptor.imageView = emissiveStoreImage->textureImageView;
+        emissiveStorageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
 		VkWriteDescriptorSet textWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3, &roomText);
@@ -493,13 +495,28 @@ namespace VULKAN {
 		VkWriteDescriptorSet allMaterialsBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 7, &allMaterialsBuffer.descriptor);
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
+        VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
 
-		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
-		if (modelsOnScene.size()>0)
-		{
-		
-		}
-		
+        std::vector<VkDescriptorImageInfo> texturesDescriptors{};
+        if (modelsOnScene.size()>0)
+        {
+
+        }
+        if (texturesDescriptors.size()<=0)
+        {
+            VkDescriptorImageInfo descriptor{};
+            descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            descriptor.sampler = baseTexture->textureSampler;
+            descriptor.imageView = baseTexture->textureImageView;
+            texturesDescriptors.push_back(descriptor);
+        }
+        VkWriteDescriptorSet writeDescriptorImgArray{};
+        writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorImgArray.dstBinding = 11;
+        writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writeDescriptorImgArray.descriptorCount = imageCount;
+        writeDescriptorImgArray.dstSet = descriptorSet;
+        writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
 		
 		writeDescriptorSets = {
 			accelerationStructureWrite,
@@ -511,24 +528,12 @@ namespace VULKAN {
 			lightBufferWrite,
 			allMaterialsBufferWrite,
 			allModelsDataBufferWrite,
-            BLAsInstanceOffsetBufferWrite
+            BLAsInstanceOffsetBufferWrite,
+            emissiveImageWrite,
+            writeDescriptorImgArray
+            
 		};
-		if (texturesDescriptors.size()<=0)
-		{
-			VkDescriptorImageInfo descriptor{};
-			descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			descriptor.sampler = baseTexture->textureSampler;
-			descriptor.imageView = baseTexture->textureImageView;
-			texturesDescriptors.push_back(descriptor);
-		}
-		VkWriteDescriptorSet writeDescriptorImgArray{};
-		writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorImgArray.dstBinding = 10;
-		writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		writeDescriptorImgArray.descriptorCount = imageCount;
-		writeDescriptorImgArray.dstSet = descriptorSet;
-		writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
-		writeDescriptorSets.push_back(writeDescriptorImgArray);
+	   
 
 //        assert(false);
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
@@ -669,6 +674,9 @@ namespace VULKAN {
         BLAsInstanceOffsetBuffer.descriptor.offset = 0;
         BLAsInstanceOffsetBuffer.descriptor.range = sizeof(uint32_t) * instancesGeometryOffsets.size();
 
+        VkDescriptorImageInfo emissiveStorageDescriptor{};
+        emissiveStorageDescriptor.imageView = emissiveStoreImage->textureImageView;
+        emissiveStorageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
@@ -680,6 +688,7 @@ namespace VULKAN {
 		VkWriteDescriptorSet allMaterialsBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 7, &allMaterialsBuffer.descriptor);
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
+        VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
 
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
@@ -700,9 +709,23 @@ namespace VULKAN {
 			}
 
 		}
-		
-		
-		writeDescriptorSets = {
+        if (texturesDescriptors.size()<=0)
+        {
+            VkDescriptorImageInfo descriptor{};
+            descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            descriptor.sampler = baseTexture->textureSampler;
+            descriptor.imageView = baseTexture->textureImageView;
+            texturesDescriptors.push_back(descriptor);
+        }
+        VkWriteDescriptorSet writeDescriptorImgArray{};
+        writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorImgArray.dstBinding = 11;
+        writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        writeDescriptorImgArray.descriptorCount = imageCount;
+        writeDescriptorImgArray.dstSet = descriptorSet;
+        writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
+
+        writeDescriptorSets = {
 			accelerationStructureWrite,
 			resultImageWrite,
 			uniformBufferWrite,
@@ -712,24 +735,10 @@ namespace VULKAN {
 			lightBufferWrite,
 			allMaterialsBufferWrite,
 			allModelsDataBufferWrite,
-            BLAsInstanceOffsetBufferWrite
+            BLAsInstanceOffsetBufferWrite,
+            emissiveImageWrite,
+            writeDescriptorImgArray
 		};
-		if (texturesDescriptors.size()<=0)
-		{
-			VkDescriptorImageInfo descriptor{};
-			descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			descriptor.sampler = baseTexture->textureSampler;
-			descriptor.imageView = baseTexture->textureImageView;
-			texturesDescriptors.push_back(descriptor);
-		}
-		VkWriteDescriptorSet writeDescriptorImgArray{};
-		writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorImgArray.dstBinding = 10;
-		writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		writeDescriptorImgArray.descriptorCount = imageCount;
-		writeDescriptorImgArray.dstSet = descriptorSet;
-		writeDescriptorImgArray.pImageInfo = texturesDescriptors.data();
-		writeDescriptorSets.push_back(writeDescriptorImgArray);
 
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 
@@ -804,10 +813,16 @@ namespace VULKAN {
         instancesGeometryOffsetsBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         instancesGeometryOffsetsBinding.descriptorCount = 1;
         instancesGeometryOffsetsBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        
+        VkDescriptorSetLayoutBinding emissiveImageBinding{};
+        emissiveImageBinding.binding = 10;
+        emissiveImageBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        emissiveImageBinding.descriptorCount = 1;
+        emissiveImageBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 
 
         VkDescriptorSetLayoutBinding texturesBinding{};
-		texturesBinding.binding = 10;
+		texturesBinding.binding = 11;
 		texturesBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		texturesBinding.descriptorCount = 10000;
 		texturesBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
@@ -827,6 +842,7 @@ namespace VULKAN {
 			materialBinding,
 			modelDataBinding,
             instancesGeometryOffsetsBinding,
+            emissiveImageBinding,
 			texturesBinding
 			});
 
@@ -834,7 +850,7 @@ namespace VULKAN {
 
 		VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
 		setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-		setLayoutBindingFlags.bindingCount = 11;
+		setLayoutBindingFlags.bindingCount = 12;
 		std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
 			0,
 			0,
@@ -845,6 +861,7 @@ namespace VULKAN {
 			0,
 			0,
 			0,
+            0,
             0,
 			VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT
 		};
@@ -1121,45 +1138,9 @@ namespace VULKAN {
 
 	void RayTracing_RS::DrawRT(VkCommandBuffer& currentBuffer)
 	{
-		if (storageImage->currentLayout!= VK_IMAGE_LAYOUT_GENERAL)
-		{
-			VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
-			VkImageMemoryBarrier barrier{};
-
-			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.image = storageImage->textureImage;
-			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			barrier.subresourceRange.baseMipLevel = 0;
-			barrier.subresourceRange.levelCount = 1;
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount = 1;
-
-			VkPipelineStageFlags sourceStage;
-			VkPipelineStageFlags destinationStage;
-			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-			barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-
-			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-			destinationStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
-
-			vkCmdPipelineBarrier(
-				commandBuffer,
-				sourceStage, destinationStage,
-				0,
-				0, nullptr,
-				0, nullptr,
-				1, &barrier);
-
-			myDevice.endSingleTimeCommands(commandBuffer);
-			storageImage->currentLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-		}
-		
+        emissiveStoreImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
+        storageImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
+    
 		VkImageSubresourceRange imageSubresourceRange = {};
 		imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageSubresourceRange.baseMipLevel = 0;
@@ -1168,8 +1149,10 @@ namespace VULKAN {
 		imageSubresourceRange.layerCount = 1; 
 		const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
 		vkCmdClearColorImage(currentBuffer, storageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+        vkCmdClearColorImage(currentBuffer, emissiveStoreImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+       
 
-		const uint32_t handleSizeAligned = alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
+        const uint32_t handleSizeAligned = alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
 
 		VkStridedDeviceAddressRegionKHR raygenShaderSbtEntry{};
 		raygenShaderSbtEntry.deviceAddress = getBufferDeviceAddress(raygenShaderBindingTable.buffer);
@@ -1226,7 +1209,7 @@ namespace VULKAN {
 		vkGetPhysicalDeviceFeatures2(myDevice.physicalDevice, &deviceFeatures2);
 		LoadFunctionsPointers();
 		//CreateTopLevelAccelerationStructure(topLevelObjBase);
-		CreateStorageImage();
+		CreateStorageImages();
 		CreateUniformBuffer();
 		CreateRTPipeline();
 		CreateShaderBindingTable();
@@ -1245,18 +1228,19 @@ namespace VULKAN {
 		memcpy(lightBuffer.mapped, &light,sizeof(Light));
 	}
 
-	void RayTracing_RS::TransitionStorageImage()
+	void RayTracing_RS::TransitionStorageImage(VKTexture* texture,VkImageLayout oldLayout, VkImageLayout newLayout,
+                                               VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags)
 	{
 		VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
 		VkImageMemoryBarrier barrier{};
 
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
 
 		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = storageImage->textureImage;
+		barrier.image = texture->textureImage;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = 1;
@@ -1265,8 +1249,8 @@ namespace VULKAN {
 
 		VkPipelineStageFlags sourceStage;
 		VkPipelineStageFlags destinationStage;
-		barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		barrier.srcAccessMask = srcAccessFlags;
+		barrier.dstAccessMask = dstAccessFlags;
 
 		sourceStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
 		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
@@ -1280,7 +1264,7 @@ namespace VULKAN {
 			1, &barrier);
 
 		myDevice.endSingleTimeCommands(commandBuffer);
-		storageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+//		texture->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	}
 

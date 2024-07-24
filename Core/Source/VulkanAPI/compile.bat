@@ -4,6 +4,12 @@ C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\base_shader.frag -o ..\Shaders\b
 C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\Imgui\imgui_shader.vert -o ..\Shaders\Imgui\imgui_shader.vert.spv
 C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\Imgui\imgui_shader.frag -o ..\Shaders\Imgui\imgui_shader.frag.spv
 
+C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\PostPro\postpro.vert -o ..\Shaders\PostPro\postpro.vert.spv
+C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\PostPro\postpro.frag -o ..\Shaders\PostPro\postpro.frag.spv
+
+C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\OutputShader\outputshader.vert -o ..\Shaders\OutputShader\outputshader.vert.spv
+C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\OutputShader\outputshader.frag -o ..\Shaders\OutputShader\outputshader.frag.spv
+
 C:\VulkanSDK\1.3.280.0\Bin\glslc.exe ..\Shaders\ComputeShaders\compute.comp -o ..\Shaders\ComputeShaders\compute.comp.spv
 
 

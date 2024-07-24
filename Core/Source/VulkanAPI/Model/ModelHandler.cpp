@@ -176,7 +176,6 @@ namespace VULKAN
 
     void ModelHandler::ReCalculateMaterialOffsets() {
         currentMaterialsOffset=0;
-        allTexturesOffset= 0;
         for (int i = 0; i < allMaterialsOnApp.size(); ++i) {
             currentMaterialsOffset ++;
         }

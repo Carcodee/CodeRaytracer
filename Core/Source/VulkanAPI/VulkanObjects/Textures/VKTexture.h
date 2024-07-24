@@ -9,22 +9,14 @@ namespace VULKAN {
 	{
 	public:
 
-		VKTexture(const char* path, VulkanSwapChain& swapchain);
+		VKTexture(const char* path, VulkanSwapChain& swapchain, bool addShaderId = false);
         ~VKTexture() override;
 		//VKTexture(VKTexture& other);
 		//Resources handled by the swapchain;
-		VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t heigh, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat formatt);
-		VKTexture(VulkanSwapChain& swapchain);
+		VKTexture(VulkanSwapChain& swapchain, uint32_t width, uint32_t height, VkImageLayout newLayout,VkAccessFlags dstAccessMask,VkPipelineStageFlags stageFlags, VkFormat format, bool addShaderId = false);
+		VKTexture(VulkanSwapChain& swapchain, bool addShaderId = false);
 
-		VKTexture& operator=(const VKTexture& other) {
-
-            this->textureImage = other.textureImage;
-            this->textureSampler = other.textureSampler;
-            this->textureImageView = other.textureImageView;
-            this->textureImageMemory = other.textureImageMemory;
-			return *this;
-		
-		}
+		VKTexture& operator=(const VKTexture& other) = delete;
 
 		void DestroyResource() const override{
 			
@@ -34,7 +26,7 @@ namespace VULKAN {
 			vkFreeMemory(mySwapChain.device.device(), textureImageMemory, nullptr);
 		
 		}
-		void CreateStorageImage(uint32_t width, uint32_t height, VkImageLayout oldLayout, VkImageLayout newLayout, VkFormat format);
+		void CreateStorageImage(uint32_t width, uint32_t height, VkImageLayout newLayout,VkAccessFlags dstAccessMask,VkPipelineStageFlags stageFlags,VkFormat format);
 		void CreateImageFromSize(VkDeviceSize size,unsigned char* fontsData ,uint32_t width, uint32_t height, VkFormat format);
 		void CreateTextureImage();
 
@@ -42,23 +34,28 @@ namespace VULKAN {
 
 		void CreateImageViews(VkFormat format);
 		void CreateImageViews();
-
+        void TransitionTexture(VkImageLayout newLayout, VkAccessFlags dstAccessFlags, VkPipelineStageFlags dstStage, VkCommandBuffer& commandBuffer);
+        void TransitionTexture(VkImageLayout newLayout, VkAccessFlags dstAccessFlags, VkPipelineStageFlags dstStage);
+        
         int id= -1;
-		VkImage textureImage=nullptr;
+        VkImage textureImage=nullptr;
 		VkSampler textureSampler= nullptr;
 		VkImageView textureImageView= nullptr;
 		VkDeviceMemory textureImageMemory=nullptr;
-        VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
-		uint32_t mipLevels=0;
         VkDescriptorSet textureDescriptor = nullptr;
+        
         //this means is not in the pool
 
 	private:
-		
-		VkFormat format= VK_FORMAT_R8G8B8A8_SRGB;
+        
 		VulkanSwapChain& mySwapChain;
 		MyVulkanDevice& device;
 
+        VkFormat format= VK_FORMAT_R8G8B8A8_SRGB;
+        VkPipelineStageFlags currentStage=VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        VkAccessFlags currentAccessFlags=0;
+        VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
+        uint32_t mipLevels=0;
 		const char* path=nullptr;
 
 	};

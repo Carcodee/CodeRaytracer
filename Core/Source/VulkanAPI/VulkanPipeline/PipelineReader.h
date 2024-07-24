@@ -79,7 +79,6 @@ namespace VULKAN{
 		const PipelineConfigInfo& configInfo, bool DynamicRendering, VkPipelineRenderingCreateInfoKHR pipelineRenderingInfo)
 	{
 
-
 		// Pipeline cache
 		VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
 		pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -113,7 +112,6 @@ namespace VULKAN{
 		shaderStage[1].flags = 0;
 		shaderStage[1].pNext = nullptr;
 		shaderStage[1].pSpecializationInfo = nullptr;
-
 
 		auto bindingDescription = VertexData::GetBindingDescription();
 		auto attributeDescription = VertexData::GetAttributeDescription();

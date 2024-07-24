@@ -145,37 +145,27 @@ namespace VULKAN
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
-		//normalRenderingVP
-		//if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
-		//{
-		//	throw std::runtime_error("failed to allocate descriptor sets!");
-		//}
-		for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
-		{
-			
-			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
 
-			VkDescriptorImageInfo imageInfo{};
-			
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = fontTexture->textureImageView;
-			imageInfo.sampler = fontTexture->textureSampler;
+        VkWriteDescriptorSet descriptorWrite{};
 
-			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = descriptorSets;
-			descriptorWrite[0].dstBinding = 0;
-			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite[0].descriptorCount =1;
-			descriptorWrite[0].pImageInfo = &imageInfo;
-			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
+        VkDescriptorImageInfo imageInfo{};
 
-            vkUpdateDescriptorSets(myDevice->device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
-		}
-		
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = fontTexture->textureImageView;
+        imageInfo.sampler = fontTexture->textureSampler;
 
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount =1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
 
-	}
+        vkUpdateDescriptorSets(myDevice->device(), 1, &descriptorWrite, 0, nullptr);
+        
+    }
 	void ImguiRenderSystem::CreatePipeline()
 	{
 		 VkFormat format = myRenderer->GetSwapchain().getSwapChainImageFormat();
@@ -219,27 +209,24 @@ namespace VULKAN
 	}
 	void ImguiRenderSystem::CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor)
 	{
-		for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
-		{
-			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
+        VkWriteDescriptorSet descriptorWrite{};
 
-			VkDescriptorImageInfo imageInfo{};
+        VkDescriptorImageInfo imageInfo{};
 
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = myImageView;
-			imageInfo.sampler = imageSampler;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = myImageView;
+        imageInfo.sampler = imageSampler;
 
-			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = descriptor;
-			descriptorWrite[0].dstBinding = 0;
-			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite[0].descriptorCount = 1;
-			descriptorWrite[0].pImageInfo = &imageInfo;
-			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptor;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
 
-			vkUpdateDescriptorSets(myDevice->device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
-		}
+        vkUpdateDescriptorSets(myDevice->device(), 1, &descriptorWrite, 0, nullptr);
 
 	}
 
@@ -251,7 +238,6 @@ namespace VULKAN
 		ImGuiStyle& style = ImGui::GetStyle();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		style.ScaleAllSizes(1.0f);
-
 
 
 	}
@@ -296,6 +282,7 @@ namespace VULKAN
 		fontTexture->CreateImageFromSize(uploadSize, fontData, texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateImageViews(VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateTextureSample();
+        fontTexture->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 	}
 
 	void ImguiRenderSystem::CreateStyles()
@@ -483,7 +470,6 @@ namespace VULKAN
 					
 					if (currentSet != nullptr)
 					{
-						
 						vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &currentSet, 0, nullptr);
 					}
 					else
@@ -509,11 +495,18 @@ namespace VULKAN
 		if ((vertexBufferSize == 0) || (indexBufferSize == 0)) {
 			return;
 		}
+//        vkWaitForFences(
+//                myDevice->device(),
+//                1,
+//                &myRenderer->GetSwapchain().inFlightFences[myRenderer->GetSwapchain().currentFrame],
+//                VK_TRUE,
+//                std::numeric_limits<uint64_t>::max());
+//
+        vkQueueWaitIdle(myDevice->graphicsQueue());
 		if ((vertexBuffer.buffer == VK_NULL_HANDLE) || (vertexCount != imDrawData->TotalVtxCount)) {
 			vertexBuffer.unmap();
 			vertexBuffer.destroy();
 			myDevice->createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer.buffer, vertexBuffer.memory);
-
 			vertexCount = imDrawData->TotalVtxCount;
 			vertexBuffer.map();
 		}
@@ -543,7 +536,7 @@ namespace VULKAN
 	void ImguiRenderSystem::BeginFrame()
 	{
 		ImGui::NewFrame();
-
+        
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
@@ -552,7 +545,7 @@ namespace VULKAN
 
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 
-        if (viewportTexture->textureDescriptor!= nullptr){
+        if (viewportTexture != nullptr){
             ImGui::Image((ImTextureID)viewportTexture->textureDescriptor, ImVec2(viewportSize.x, viewportSize.y));
         }
 //		ImGui::Image((ImTextureID)imagesToCreate[0]->descriptor, ImVec2(viewportSize.x, viewportSize.y));

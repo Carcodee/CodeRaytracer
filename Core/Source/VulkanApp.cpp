@@ -8,6 +8,7 @@
 #include "VulkanAPI/Model/ModelHandler.h"
 #include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 #include "VulkanAPI/Utility/InputSystem/InputHandler.h"
+#include "FileSystem/FileHandler.h"
 
 
 int cicles=0;
@@ -61,8 +62,9 @@ namespace VULKAN{
 			{
 				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());
 
-				rayTracing_RS.TransitionStorageImage();
-
+//                rayTracing_RS.TransitionStorageImage(rayTracing_RS.storageImage,VK_IMAGE_LAYOUT_GENERAL,VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL , VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
+//                rayTracing_RS.TransitionStorageImage(rayTracing_RS.emissiveStoreImage,VK_IMAGE_LAYOUT_GENERAL,VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT);
+                
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
 				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, ImguiRenderSystem::GetInstance()->RotationSpeed);
@@ -127,9 +129,10 @@ namespace VULKAN{
 			}
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
-				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());	
+				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());
 
-				rayTracing_RS.TransitionStorageImage();
+                rayTracing_RS.TransitionStorageImage(rayTracing_RS.storageImage,VK_IMAGE_LAYOUT_GENERAL,VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL , VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT);
+                rayTracing_RS.TransitionStorageImage(rayTracing_RS.emissiveStoreImage,VK_IMAGE_LAYOUT_GENERAL,VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_ACCESS_SHADER_WRITE_BIT);
 
 				renderer.BeginSwapChainRenderPass(commandBuffer);
 				forward_RS.pipelineReader->bind(commandBuffer);
@@ -188,7 +191,6 @@ namespace VULKAN{
 			rayTracing_RS.light.color = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightPos);
 			rayTracing_RS.light.intensity = ImguiRenderSystem::GetInstance()->lightIntensity;
-            
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
@@ -200,92 +202,64 @@ namespace VULKAN{
                 rayTracing_RS.UpdateMeshInfo();
                 ModelHandler::GetInstance()->updateMeshData = false;
             }
+            VkClearValue clearValue{};
+            clearValue= { 0.1f, 0.1f, 0.1f, 0.1f };
             LoadQueryModels();
-			if (auto commandBuffer = renderer.BeginComputeFrame())
-			{
 
-				rayTracing_RS.DrawRT(commandBuffer);
-				forward_RS.TransitionBeforeComputeRender(renderer.GetCurrentFrame());
-
-				if (cicles==3)
-				{
-					VkImageSubresourceRange imageSubresourceRange = {};
-					imageSubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					imageSubresourceRange.baseMipLevel = 0;
-					imageSubresourceRange.levelCount = 1; // Clear only one mip level
-					imageSubresourceRange.baseArrayLayer = 0;
-					imageSubresourceRange.layerCount = 1; // Assuming the image is not an array
-					const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
-					vkCmdClearColorImage(commandBuffer, forward_RS.outputStorageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
-					cicles = 0;
-				}
-				forward_RS.CreateComputeWorkGroups(renderer.GetCurrentFrame(), commandBuffer);
-				forward_RS.UpdateUBO(renderer.GetCurrentFrame(), time);
-				renderer.EndComputeFrame();
-			}
+            ImguiRenderSystem::GetInstance()->BeginFrame();
+            ImguiRenderSystem::GetInstance()->EndFrame();
+            ImguiRenderSystem::GetInstance()->UpdateBuffers();
+            
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
-				forward_RS.TransitionBeforeForwardRender(renderer.GetCurrentFrame());
+                rayTracing_RS.DrawRT(commandBuffer);
+                VkViewport viewport{};
+                viewport.x = 0.0f;
+                viewport.y = 0.0f;
+                viewport.width = static_cast<float>(renderer.GetSwapchain().getSwapChainExtent().width);
+                viewport.height = static_cast<float>(renderer.GetSwapchain().getSwapChainExtent().height);
+                viewport.minDepth = 0.0f;
+                viewport.maxDepth = 1.0f;
+                VkRect2D scissor{ {0, 0 }, renderer.GetSwapchain().getSwapChainExtent() };
+                vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+                vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+                
+                VkRenderingInfo renderingInfoPostProc{};
+                
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
 
-				rayTracing_RS.TransitionStorageImage();
+                renderingInfoPostProc.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+                renderingInfoPostProc.layerCount = 1;
+                renderingInfoPostProc.colorAttachmentCount = 0;
+                renderingInfoPostProc.renderArea.offset = { 0,0 };
+                renderingInfoPostProc.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
+                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
+                postProcessing_Rs.Draw(commandBuffer);
+                renderer.EndDynamicRenderPass(commandBuffer);
+                
+                VkRenderingInfo renderingInfo{};
+                VkRenderingAttachmentInfo colorAttachmentInfo={};
+                colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+                colorAttachmentInfo.imageView = renderer.GetSwapchain().colorUIImageView[renderer.currentImageIndex];
+                colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+                colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+                colorAttachmentInfo.clearValue = clearValue;
 
-				renderer.BeginSwapChainRenderPass(commandBuffer);
-				forward_RS.pipelineReader->bind(commandBuffer);
-				forward_RS.renderSystemDescriptorSetHandler->UpdateUniformBuffer<UniformBufferObjectData>(renderer.GetCurrentFrame(), 1, ImguiRenderSystem::GetInstance()->RotationSpeed);
+                renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+                renderingInfo.layerCount = 1;
+                renderingInfo.colorAttachmentCount = 1;
+                renderingInfo.pColorAttachments = &colorAttachmentInfo;
+                renderingInfo.renderArea.offset = { 0,0 };
+                renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
 
-				renderer.EndSwapChainRenderPass(commandBuffer);
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
 
-				VkMemoryBarrier barrier = {};
-				barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-				barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT; // Adjust based on your needs
-				barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;  // Adjust based on your needs
-
-				vkCmdPipelineBarrier(
-					commandBuffer,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, // Source stage
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,         // Destination stage
-					0,                                             // No flags
-					1, &barrier,                                   // Memory barriers
-					0, nullptr,                                    // Buffer barriers
-					0, nullptr                                     // Image barriers
-				);
-
-
-			    VkClearValue clearValue{};
-				clearValue= { 0.1f, 0.1f, 0.1f, 0.1f };
-			
-				VkRenderingInfo renderingInfo{};
-				VkRenderingAttachmentInfo colorAttachmentInfo={};
-				colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-				colorAttachmentInfo.imageView = renderer.GetSwapchain().colorUIImageView[renderer.currentImageIndex];
-				colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-				colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-				colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-				colorAttachmentInfo.clearValue = clearValue;
-
-
-
-				renderingInfo.colorAttachmentCount = 1;
-				renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-				renderingInfo.layerCount = 1;
-				renderingInfo.colorAttachmentCount = 1;
-				renderingInfo.pColorAttachments = &colorAttachmentInfo;
-				renderingInfo.renderArea.offset = { 0,0 };
-				renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
-
-				ImguiRenderSystem::GetInstance()->WasWindowResized();
+                ImguiRenderSystem::GetInstance()->WasWindowResized();
 				renderer.BeginDynamicRenderPass(commandBuffer, renderingInfo);
-				ImguiRenderSystem::GetInstance()->BeginFrame();
-				editorContext();
-				ImguiRenderSystem::GetInstance()->EndFrame();
-				ImguiRenderSystem::GetInstance()->UpdateBuffers();
 				ImguiRenderSystem::GetInstance()->DrawFrame(commandBuffer);
 				renderer.EndDynamicRenderPass(commandBuffer);
-
-				//renderer.GetSwapchain().HandleColorImage(renderer.GetSwapchain().colorImage,
-				//	VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, commandBuffer,
-				//	VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				//	 VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+                
 				renderer.GetSwapchain().HandleColorImage(renderer.GetSwapchain().colorUIImages[renderer.currentImageIndex],
 					VK_IMAGE_LAYOUT_UNDEFINED,
                     VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
@@ -294,16 +268,14 @@ namespace VULKAN{
                     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 					VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, commandBuffer);
 				renderer.EndFrame();
-
 
 			}
 			deltaTime = (currentTime - lastDeltaTime);
 			lastDeltaTime = currentTime;
-			cicles++;
+            
 			AssetsHandler::GetInstance()->RegisterSaves();
-
-
 			InputHandler::GetInstance()->UpdateInputStates();
 
 
@@ -321,21 +293,40 @@ namespace VULKAN{
 		rayTracing_RS.Create_RT_RenderSystem();
 		forward_RS.raytracingImage = rayTracing_RS.storageImage;
 		forward_RS.InitForwardSystem();
-		LoadModels();
+        
+        std::string emissiveVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\postpro.vert.spv";
+        std::string emissiveFragPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\postpro.frag.spv";
+
+
+        LoadModels();
 		InitConfigsCache();
         ImguiRenderSystem::GetInstance(&renderer, &myDevice);
-		if (editor)
+
+        postProcessing_Rs.storageImage = rayTracing_RS.emissiveStoreImage;
+        postProcessing_Rs.renderPassRef = renderer.GetSwapchain().PostProRenderPass;
+        postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
+
+//        std::string outputVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.vert.spv";
+//        std::string outputFragPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.frag.spv";
+
+//        VKTexture* finalStorageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_FORMAT_R8G8B8A8_UNORM);
+//        FinalPostProcessing_Rs.storageImage = rayTracing_RS.emissiveStoreImage;
+//        FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass;
+//        FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
+
+        if (editor)
 		{
 			SetUpImgui();
 			ImguiRenderSystem::GetInstance()->UseDynamicRendering = DynamicRendering;
 //			ImguiRenderSystem::GetInstance()->AddSamplerAndViewForImage(rayTracing_RS.storageImage->textureSampler, rayTracing_RS.storageImage->textureImageView);
 			ImguiRenderSystem::GetInstance()->SetUpSystem(initWindow.window);
             
-            ImguiRenderSystem::GetInstance()->HandleTextureCreation(rayTracing_RS.storageImage);
-            ImguiRenderSystem::GetInstance()->viewportTexture = rayTracing_RS.storageImage;
-            
-		}
+//            ImguiRenderSystem::GetInstance()->HandleTextureCreation(rayTracing_RS.storageImage);
 
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(rayTracing_RS.emissiveStoreImage);
+            ImguiRenderSystem::GetInstance()->viewportTexture = rayTracing_RS.emissiveStoreImage;
+
+		}
 		
 	}
 
@@ -363,22 +354,6 @@ namespace VULKAN{
 	void VulkanApp::LoadModels()
 	{
 
-		//const std::vector<Vertex> vertices= {
-		//	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		//	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		//	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		//	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-		//	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		//	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-		//	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-		//	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-		//};
-		//const std::vector<uint16_t> indices = {
-		//		0, 1, 2, 2, 3, 0,
-		//		4, 5, 6, 6, 7, 4
-		//};
-		
 
 	}
 
@@ -460,7 +435,5 @@ namespace VULKAN{
             }
         }       
     }
-
-
 }
 

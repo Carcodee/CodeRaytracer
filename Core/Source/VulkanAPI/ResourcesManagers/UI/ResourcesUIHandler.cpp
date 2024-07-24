@@ -220,9 +220,6 @@ namespace VULKAN
 
         }
         {
-            if(ImGui::SliderFloat("albedo intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
             if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
@@ -242,18 +239,28 @@ namespace VULKAN
             baseReflection[0]= mat.materialUniform.baseReflection.x;
             baseReflection[1]= mat.materialUniform.baseReflection.y;
             baseReflection[2]= mat.materialUniform.baseReflection.z;
-            if(ImGui::SliderFloat3("metalness",baseReflection, 0.0f, 1.0f,"%.3f")){
+            if(ImGui::SliderFloat3("Base reflectivity",baseReflection, 0.0f, 1.0f,"%.3f")){
                 mat.materialUniform.baseReflection.x=baseReflection[0];
                 mat.materialUniform.baseReflection.y=baseReflection[1];
                 mat.materialUniform.baseReflection.z=baseReflection[2];
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if  (mat.materialUniform.texturesSizes<=0){
+            
+            if  (mat.materialUniform.diffuseOffset==-1){
                 float matCol[3];
                 matCol[0]= mat.materialUniform.diffuseColor.x;
                 matCol[1]= mat.materialUniform.diffuseColor.y;
                 matCol[2]= mat.materialUniform.diffuseColor.z;
-                ImGui::ColorEdit3("Diffuse", matCol);
+                if (ImGui::ColorEdit3("Diffuse", matCol)){
+                    mat.materialUniform.diffuseColor= glm::make_vec3(matCol);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }else{
+                if(ImGui::SliderFloat("Albedo Intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
+
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }    
             }
 
         }

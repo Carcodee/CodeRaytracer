@@ -112,12 +112,13 @@ namespace VULKAN {
 		bool updateDescriptorData = false;
 
 		VKTexture* storageImage;
+        VKTexture* emissiveStoreImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
 
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
-		void TransitionStorageImage();
+		void TransitionStorageImage(VKTexture* texture,VkImageLayout oldLayout, VkImageLayout newLayout,VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags);
 		void AddModelToPipeline(ModelData& modelData);
 		void UpdateRaytracingData();
         void UpdateMeshInfo();
@@ -129,8 +130,6 @@ namespace VULKAN {
 			glm::mat4 projInverse;
 		} uniformData;
 
-
-
 		std::vector<ModelData*>modelsOnScene;
         std::vector<uint32_t> instancesGeometryOffsets;
 		//helpers
@@ -141,7 +140,7 @@ namespace VULKAN {
 		void DeleteScratchBuffer(RayTracingScratchBuffer& scratchBuffer);
 		void CreateAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
-		void CreateStorageImage();
+		void CreateStorageImages();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
 		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();

@@ -21,17 +21,17 @@ namespace VULKAN{
 
     struct MaterialUniformData
     {
-        float albedoIntensity;
-        float normalIntensity;
-        float specularIntensity;
+        float albedoIntensity = 1;
+        float normalIntensity = 1;
+        float specularIntensity = 1;
         float roughnessIntensity = 0.5f;
         glm::vec3 diffuseColor;
         float reflectivityIntensity = 0.5f;
         //32
         glm::vec3 baseReflection;
-        float metallicIntensity;
+        float metallicIntensity = 1;
         //48
-        float emissionIntensity;
+        float emissionIntensity = 0;
         int roughnessOffset = -1;
         int metallicOffset = -1;
         int specularOffset = -1;

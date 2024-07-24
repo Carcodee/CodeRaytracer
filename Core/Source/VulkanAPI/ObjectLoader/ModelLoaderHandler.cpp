@@ -231,24 +231,25 @@ namespace VULKAN {
 		currentModelPath = currentModelPath.parent_path();
 
 		std::string texturesPath = currentModelPath.string() + "\\textures";
-		if (!std::filesystem::exists(currentModelPath))
+		if (!std::filesystem::exists(texturesPath))
 		{
-			std::cout << "The current model does not have textures relative to the folder: " << path << "\n";
+			std::cout << "The current model does not have textures relative to the folder, Creating materials at model path: " << path << "\n";
 		}
 
 		std::map<int,Material> materialsDatas;
 
 		for (const auto& material : materials)
 		{
-
 			Material materialData{};
 			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
             materialData.materialUniform.roughnessIntensity = material.roughness;
             materialData.materialUniform.metallicIntensity = material.metallic;
+            bool texturesFinded= false;
 			if (!material.diffuse_texname.empty()) {
 				std::string texturePathFinded = material.diffuse_texname;
-				FixMaterialPaths(texturePathFinded, texturesPath);
+				FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,texturePathFinded);
+                texturesFinded = true;
 			}
             if (!material.roughness_texname.empty() || !material.specular_texname.empty()|| !material.specular_highlight_texname.empty()) {
                 std::string texName;
@@ -260,29 +261,36 @@ namespace VULKAN {
                     texName=material.specular_highlight_texname;
                 }
                 std::string texturePathFinded= texName;
-                FixMaterialPaths(texturePathFinded, texturesPath);
+                FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::ROUGHNESS,texturePathFinded);
                 materialData.materialUniform.roughnessIntensity = 1.0f;
+                texturesFinded = true;
             }
             
             if (!material.metallic_texname.empty()) {
                 std::string texturePathFinded= material.metallic_texname;
-                FixMaterialPaths(texturePathFinded, texturesPath);
+                FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::METALLIC,texturePathFinded);
                 materialData.materialUniform.metallicIntensity = 1.0f;
+                texturesFinded = true;
             }
 
 			if (!material.bump_texname.empty()) {
 				std::string texturePathFinded= material.bump_texname;
-				FixMaterialPaths(texturePathFinded, texturesPath);
+				FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::NORMAL,texturePathFinded);
                 materialData.materialUniform.normalIntensity = 1.0f;
+                texturesFinded = true;
 			}
 
             materialData.textureReferencePath= texturesPath;
             materialData.name = "Material_"+std::to_string(matCount);
             materialData.id = ModelHandler::GetInstance()->currentMaterialsOffset;
-            materialData.targetPath = texturesPath +"\\"+ materialData.name + ".MATCODE";
+            if(texturesFinded){
+                materialData.targetPath = texturesPath +"\\"+ materialData.name + ".MATCODE";
+            } else{
+                materialData.targetPath = currentModelPath.string() +"\\"+ materialData.name + ".MATCODE";
+            }
 			materialsDatas.try_emplace(matCount, materialData);
             ModelHandler::GetInstance()->allMaterialsOnApp.try_emplace(materialData.id,std::make_shared<Material>(materialData));
 			matCount++;
@@ -292,14 +300,12 @@ namespace VULKAN {
 		return materialsDatas;
 	}
 
-	void ModelLoaderHandler::FixMaterialPaths(std::string& path, std::string texturesPath)
+	void ModelLoaderHandler::FixMaterialPaths(std::string& path, std::string texturesPath, std::string modelPath)
 	{
 		if (!std::filesystem::exists(texturesPath))
 		{
-			std::cout << "Filepath for textures does not exist: " << texturesPath << "\n";
-			path = "";
+			path =modelPath;
 			return;
-			
 		}
 		if (!std::filesystem::exists(path)&&path.size()>0)
 		{
@@ -338,7 +344,7 @@ namespace VULKAN {
 			if (!std::filesystem::exists(path))
 			{
 				std::cout << "Filepath does not exist: " << path <<"\n";
-				path = "";
+				path = modelPath;
 			}
 
 		}
