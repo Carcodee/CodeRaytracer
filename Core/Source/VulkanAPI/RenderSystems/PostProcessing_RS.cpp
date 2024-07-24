@@ -61,7 +61,7 @@ namespace VULKAN {
 
         std::vector<VkDescriptorSetLayoutBinding> bindings({
                resultImageLayoutBinding,
-       });
+        });
         
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI = INITIALIZERS::descriptorSetLayoutCreateInfo(bindings);
 
@@ -86,7 +86,8 @@ namespace VULKAN {
         pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         pipelineReader = std::make_unique<PipelineReader>(myVulkanDevice);
 
-        VkFormat format = myVulkanRenderer.GetSwapchain().getSwapChainImageFormat();
+//        VkFormat format = myVulkanRenderer.GetSwapchain().getSwapChainImageFormat();
+        VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
         const VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo{
                 .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
                 .colorAttachmentCount = 1,

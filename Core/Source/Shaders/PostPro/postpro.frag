@@ -21,6 +21,7 @@ void main()
             color += imageLoad(image, coord + ivec2(x, y));
         }
     }
+    
     color /= float(kernelSize);  // Normalize the color by the kernel size
-    imageStore(image, coord, vec4(vec3(0.0f), 1.0f));
+    imageStore(image, coord,color);
 }

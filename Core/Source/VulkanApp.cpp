@@ -224,20 +224,19 @@ namespace VULKAN{
                 vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
                 vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
                 
-                VkRenderingInfo renderingInfoPostProc{};
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
                 
-                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
-
+                VkRenderingInfo renderingInfoPostProc{};
                 renderingInfoPostProc.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
                 renderingInfoPostProc.layerCount = 1;
                 renderingInfoPostProc.colorAttachmentCount = 0;
-                renderingInfoPostProc.renderArea.offset = { 0,0 };
+                renderingInfoPostProc.renderArea.offset = { 0, 0};
                 renderingInfoPostProc.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
+                
                 renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
                 postProcessing_Rs.Draw(commandBuffer);
                 renderer.EndDynamicRenderPass(commandBuffer);
                 
-                VkRenderingInfo renderingInfo{};
                 VkRenderingAttachmentInfo colorAttachmentInfo={};
                 colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
                 colorAttachmentInfo.imageView = renderer.GetSwapchain().colorUIImageView[renderer.currentImageIndex];
@@ -246,11 +245,12 @@ namespace VULKAN{
                 colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
                 colorAttachmentInfo.clearValue = clearValue;
 
+                VkRenderingInfo renderingInfo{};
                 renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
                 renderingInfo.layerCount = 1;
                 renderingInfo.colorAttachmentCount = 1;
                 renderingInfo.pColorAttachments = &colorAttachmentInfo;
-                renderingInfo.renderArea.offset = { 0,0 };
+                renderingInfo.renderArea.offset = { 0, 0};
                 renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
 
                 rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
@@ -306,14 +306,14 @@ namespace VULKAN{
         postProcessing_Rs.renderPassRef = renderer.GetSwapchain().PostProRenderPass;
         postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
 
-//        std::string outputVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.vert.spv";
-//        std::string outputFragPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.frag.spv";
-
-//        VKTexture* finalStorageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_FORMAT_R8G8B8A8_UNORM);
-//        FinalPostProcessing_Rs.storageImage = rayTracing_RS.emissiveStoreImage;
-//        FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass;
-//        FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
-
+        std::string outputVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.vert.spv";
+        std::string outputFragPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.frag.spv";
+//
+        VKTexture* finalStorageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM);
+        FinalPostProcessing_Rs.storageImage = finalStorageImage;
+        FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass;
+        FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
+        
         if (editor)
 		{
 			SetUpImgui();

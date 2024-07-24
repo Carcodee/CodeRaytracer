@@ -120,33 +120,14 @@ namespace VULKAN {
 	//TODO: Create the storage image of the raytracing
 	void RayTracing_RS::CreateStorageImages()
 	{
-		storageImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM);
-        emissiveStoreImage = new VKTexture(myRenderer.GetSwapchain(), myRenderer.GetSwapchain().width(), myRenderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,VK_FORMAT_R8G8B8A8_UNORM);
+        unsigned int width = myRenderer.GetSwapchain().width();
+        unsigned int  height = myRenderer.GetSwapchain().height();
+		storageImage = new VKTexture(myRenderer.GetSwapchain(), width, height, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM);
+        emissiveStoreImage = new VKTexture(myRenderer.GetSwapchain(), width, height, VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM);
 	}
 
 	void RayTracing_RS::CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj)
 	{
-		//myDevice.createBuffer(
-		//	VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		//	&vertexBuffer,
-		//	obj.combinedMesh.vertices.size() * sizeof(Vertex),
-		//	obj.combinedMesh.vertices.data());
-		//// Index buffer
-		//myDevice.createBuffer(
-		//	VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		//	&indexBuffer,
-		//	obj.combinedMesh.indices.size() * sizeof(uint32_t),
-		//	obj.combinedMesh.indices.data());
-		//// Transform buffer
-		//myDevice.createBuffer(
-		//	VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		//	&transformBuffer,
-		//	sizeof(VkTransformMatrixKHR),
-		//	&obj.matrix);
-
 		uint32_t maxPrimCount{ 0 };
 		std::vector<uint32_t> maxPrimitiveCounts{};
 		std::vector<VkAccelerationStructureGeometryKHR> geometries;
