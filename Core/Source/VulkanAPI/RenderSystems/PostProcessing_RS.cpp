@@ -18,7 +18,7 @@ namespace VULKAN {
     void PostProcessing_RS::CreateDescriptorSets() {
         std::vector<VkDescriptorPoolSize> poolSize =
         {
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100},
         };
 
         VkDescriptorPoolCreateInfo poolInfo{};
@@ -35,33 +35,37 @@ namespace VULKAN {
         {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
-
-        VkDescriptorImageInfo emissiveStorageDescriptor{};
-        emissiveStorageDescriptor.imageView = storageImage->textureImageView;
-        emissiveStorageDescriptor.sampler = storageImage->textureSampler;
-        emissiveStorageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-        VkWriteDescriptorSet emissiveStorageImage = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &emissiveStorageDescriptor);
         
-        writeDescriptorSets={
-                emissiveStorageImage
-        };
+        std::vector<VkDescriptorImageInfo> imageInfos;
+        imageInfos.reserve(storageImages.size());
+        for (int i = 0; i < storageImages.size(); ++i) {
+
+            VkDescriptorImageInfo imageToAdd{};
+            imageToAdd.imageView = storageImages[i].imageView;
+            imageToAdd.sampler = storageImages[i].sampler;
+            imageToAdd.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            imageInfos.push_back(imageToAdd);
+            
+            VkWriteDescriptorSet imageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i, &imageInfos.back());
+            writeDescriptorSets.push_back(imageWrite);
+
+        }
+       
         
         vkUpdateDescriptorSets(myVulkanDevice.device(), writeDescriptorSets.size(),writeDescriptorSets.data(), 0, nullptr);
 
     }
 
     void PostProcessing_RS::CreatePipeline() {
-
-        VkDescriptorSetLayoutBinding resultImageLayoutBinding{};
-        resultImageLayoutBinding.binding = 0;
-        resultImageLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        resultImageLayoutBinding.descriptorCount = 1;
-        resultImageLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        std::vector<VkDescriptorSetLayoutBinding> bindings({
-               resultImageLayoutBinding,
-        });
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
+        for (int i = 0; i <storageImages.size() ; ++i) {
+            VkDescriptorSetLayoutBinding resultImageLayoutBinding{};
+            resultImageLayoutBinding.binding = i;
+            resultImageLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            resultImageLayoutBinding.descriptorCount = 1;
+            resultImageLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+            bindings.push_back(resultImageLayoutBinding);
+        }
         
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI = INITIALIZERS::descriptorSetLayoutCreateInfo(bindings);
 
@@ -87,11 +91,9 @@ namespace VULKAN {
         pipelineReader = std::make_unique<PipelineReader>(myVulkanDevice);
 
 //        VkFormat format = myVulkanRenderer.GetSwapchain().getSwapChainImageFormat();
-        VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+//        VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
         const VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo{
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-                .colorAttachmentCount = 1,
-                .pColorAttachmentFormats =&format,
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR
         };
         
         pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
@@ -135,10 +137,19 @@ namespace VULKAN {
         this->vertexPath = vertPath;
         this->fragmentPath = fragPath;
         assert(renderPassRef != VK_NULL_HANDLE && "Renderpass must not be null");
+        assert(!storageImages.empty() && "storageImages must not be null");
         CreateBuffers();
         CreatePipeline();
         CreateDescriptorSets();
         ready = true;
+    }
+
+    void PostProcessing_RS::AddTextureImageToShader(VkImageView imageView, VkSampler sampler) {
+        
+        SimpleImageData imageData{};
+        imageData.imageView = imageView;
+        imageData.sampler = sampler;
+        storageImages.push_back(imageData);
     }
 
 

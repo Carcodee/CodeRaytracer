@@ -109,8 +109,8 @@ namespace VULKAN {
 	void Forward_RS::CreateComputeDescriptorSets()
 	{
 
-		storageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM);
-		outputStorageImage =  new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(),VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM);
+		storageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
+		outputStorageImage =  new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(),VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
 
 
 

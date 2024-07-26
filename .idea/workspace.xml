@@ -25,13 +25,30 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="fixed command buffer submition order">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="Finally fixed the renderpasses">
+      <change afterPath="$PROJECT_DIR$/Core/Source/Shaders/PostPro/DownSample.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Source/Shaders/PostPro/UpSample.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Bloom_RS.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Bloom_RS.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Core/Core.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Core/Core.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/OutputShader/outputshader.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/OutputShader/outputshader.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/OutputShader/outputshader.vert" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/PostPro/postpro.frag" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/PostPro/postpro.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/DevicePipeline/Vulkan_Device.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Forward_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/Forward_RS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/PostProcessing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/PostProcessing_RS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/PostProcessing_RS.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/PostProcessing_RS.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Textures/VKTexture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/compile.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/compile.bat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +63,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CMakeLists.txt" />
+        <option value="vs-template" />
+        <option value="fs-template" />
       </list>
     </option>
   </component>
@@ -222,7 +241,12 @@
       <workItem from="1721758473222" duration="843000" />
       <workItem from="1721760674466" duration="405000" />
       <workItem from="1721819903114" duration="13625000" />
-      <workItem from="1721852134250" duration="3051000" />
+      <workItem from="1721852134250" duration="3413000" />
+      <workItem from="1721901986774" duration="16769000" />
+      <workItem from="1721936899609" duration="6118000" />
+      <workItem from="1721943583666" duration="2274000" />
+      <workItem from="1722024016920" duration="3003000" />
+      <workItem from="1722027606481" duration="3000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -368,7 +392,15 @@
       <option name="project" value="LOCAL" />
       <updated>1721838122736</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Finally fixed the renderpasses">
+      <option name="closed" value="true" />
+      <created>1721855589651</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1721855589651</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -440,6 +472,7 @@
     <MESSAGE value="material refactor" />
     <MESSAGE value="textures refactor" />
     <MESSAGE value="fixed command buffer submition order" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed command buffer submition order" />
+    <MESSAGE value="Finally fixed the renderpasses" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finally fixed the renderpasses" />
   </component>
 </project>

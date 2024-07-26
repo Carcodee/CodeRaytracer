@@ -245,22 +245,22 @@ namespace VULKAN
                 mat.materialUniform.baseReflection.z=baseReflection[2];
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            
-            if  (mat.materialUniform.diffuseOffset==-1){
-                float matCol[3];
-                matCol[0]= mat.materialUniform.diffuseColor.x;
-                matCol[1]= mat.materialUniform.diffuseColor.y;
-                matCol[2]= mat.materialUniform.diffuseColor.z;
-                if (ImGui::ColorEdit3("Diffuse", matCol)){
-                    mat.materialUniform.diffuseColor= glm::make_vec3(matCol);
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }
+
+            float matCol[3];
+            matCol[0]= mat.materialUniform.diffuseColor.x;
+            matCol[1]= mat.materialUniform.diffuseColor.y;
+            matCol[2]= mat.materialUniform.diffuseColor.z;
+            if (ImGui::ColorEdit3("Diffuse", matCol)){
+                mat.materialUniform.diffuseColor= glm::make_vec3(matCol);
                 ModelHandler::GetInstance()->updateMaterialData= true;
-            }else{
+            }
+            
+            if (mat.materialUniform.diffuseOffset > -1){
                 if(ImGui::SliderFloat("Albedo Intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
 
                     ModelHandler::GetInstance()->updateMaterialData= true;
                 }    
+                
             }
 
         }

@@ -25,7 +25,7 @@ namespace VULKAN{
         float normalIntensity = 1;
         float specularIntensity = 1;
         float roughnessIntensity = 0.5f;
-        glm::vec3 diffuseColor;
+        glm::vec3 diffuseColor = glm::vec3 (1.0f);
         float reflectivityIntensity = 0.5f;
         //32
         glm::vec3 baseReflection;

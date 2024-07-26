@@ -33,7 +33,6 @@ namespace VULKAN {
 		static constexpr int WIDTH = 1200;
 		static constexpr int HEIGHT = 900;
 
-		void Run();
 		VulkanApp(bool DynamicRendering, bool editor);
 		~VulkanApp();
 		void InitConfigsCache();
@@ -45,23 +44,22 @@ namespace VULKAN {
 
 //#ifdef IS_EDITOR
 
-		void RunEngine_EDITOR(std::function<void()>&& editorContext);
 		void RunDynamicRendering(std::function<void()>&& editorContext);
 //
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
 		VulkanRenderer renderer{ initWindow , myDevice };
-		Forward_RS forward_RS{renderer, myDevice};
+//		Forward_RS forward_RS{renderer, myDevice};
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
         PostProcessing_RS postProcessing_Rs{ myDevice, renderer};
         PostProcessing_RS FinalPostProcessing_Rs{ myDevice, renderer};
+        VKTexture* finalStorageImage;
 		int currentFrame;
 	    
 	private:
 		float deltaTime = 0.0f;
 		double lastDeltaTime = 0.0f;
 
-		void LoadModels();
 		void SetUpImgui();
         void LoadQueryModels();
 

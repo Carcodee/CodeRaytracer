@@ -140,7 +140,7 @@ class MyVulkanDevice {
 
 
   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"
-                                                      /*"VK_LAYER_LUNARG_api_dump"*/ };
+                                                      /*"VK_LAYER_LUNARG_api_dump" */};
   const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME,
                                                       VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
                                                       VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,

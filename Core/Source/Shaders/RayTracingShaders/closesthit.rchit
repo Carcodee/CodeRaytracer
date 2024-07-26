@@ -204,6 +204,7 @@ void main()
        rayPayload.shadow = false;
   }else{
        rayPayload.emissive = false;
+       
   }
   
   rayPayload.color = pbr * myLight.intensity; 
