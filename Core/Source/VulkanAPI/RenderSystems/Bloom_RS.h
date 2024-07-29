@@ -13,17 +13,16 @@
 
 namespace VULKAN{
 
-    class Bloom_RS {
+    class Bloom_RS{
 
         struct SimpleImageData {
             VkImageView imageView;
             VkSampler sampler;
         };
     public:
-        Bloom_RS(MyVulkanDevice& vulkanDevice,VulkanRenderer &vulkanRenderer);
         
+        Bloom_RS(MyVulkanDevice& vulkanDevice,VulkanRenderer &vulkanRenderer);
         void CreateDescriptorSets();
-
         void CreatePipelineDownSample();
         void CreatePipelineUpSample();
         void CreateBuffers();
@@ -32,7 +31,8 @@ namespace VULKAN{
         void AddTextureImageToShader(VkImageView imageView, VkSampler sampler);
 
         std::vector<SimpleImageData> storageImages;
-        VkRenderPass renderPassRef = VK_NULL_HANDLE;
+        VkRenderPass upSampleRenderPassRef = VK_NULL_HANDLE;
+        VkRenderPass downSampleRenderPassRef = VK_NULL_HANDLE;
         std::string vertexPath;
         std::string fragmentPathDownSample;
         std::string fragmentPathUpSample;

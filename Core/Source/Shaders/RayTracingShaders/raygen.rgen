@@ -68,23 +68,37 @@ void main()
 	    if(rayPayload.shadow && i==0){
             throughput*= 0.3f;
 	    }
+
 		if (rayPayload.distance < 0.0f) {
 			throughput=throughput * hitColor/MAX_RECURSION;
 			color = throughput;
 			break;
-		}else{ 
-            const vec4 hitPos = origin + direction * rayPayload.distance;
-            origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
-            rayPayload.origin=hitPos.xyz;
-            vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
-            vec3 randomDir= randomCosineWeightedDirection(rayPayload.normal,rayPayload.tangent, d.x, d.y);
-            //if(rand(d.x,d.y)> rayPayload.reflectivity){
-            //    direction.xyz = reflectedDir;
-           // }
-           direction.xyz = GetReflection(reflectedDir, randomDir, rayPayload.roughness);
+		}else if(rayPayload.emissive){
+		
+           const vec4 hitPos = origin + direction * rayPayload.distance;
+           origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
+           rayPayload.origin=hitPos.xyz;
+           vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
+           vec3 randomDir= randomCosineWeightedDirection(rayPayload.normal,rayPayload.tangent, d.x, d.y);
+           direction.xyz = GetReflection(reflectedDir, randomDir, 0.0f);
+           throughput*= (hitColor*1.3f)/MAX_RECURSION;
            
+        }else{ 
+        
+           const vec4 hitPos = origin + direction * rayPayload.distance;
+           origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
+           rayPayload.origin=hitPos.xyz;
+           vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
+           vec3 randomDir= randomCosineWeightedDirection(rayPayload.normal,rayPayload.tangent, d.x, d.y);
+    
+           direction.xyz = GetReflection(reflectedDir, randomDir, rayPayload.roughness);
            throughput = throughput * hitColor/MAX_RECURSION;
+           //if(rand(d.x,d.y)> rayPayload.reflectivity){
+           //    direction.xyz = reflectedDir;
+           // }
 		}
+		
+		
 
 	}
     

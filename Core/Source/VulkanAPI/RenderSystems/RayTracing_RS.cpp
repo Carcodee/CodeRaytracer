@@ -122,9 +122,9 @@ namespace VULKAN {
         unsigned int width = myRenderer.GetSwapchain().width();
         unsigned int  height = myRenderer.GetSwapchain().height();
 		storageImage = new VKTexture(myRenderer.GetSwapchain(), width, height,
-                                     VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 5);
+                                     VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 1);
         emissiveStoreImage = new VKTexture(myRenderer.GetSwapchain(), width, height,
-                                           VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 5);
+                                           VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 4);
 	}
 
 	void RayTracing_RS::CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj)

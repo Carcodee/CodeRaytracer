@@ -16,7 +16,7 @@
 #include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 #include "VulkanAPI/RenderSystems/RayTracing_RS.h"
 #include "VulkanAPI/RenderSystems/PostProcessing_RS.h"
-
+#include "VulkanAPI/RenderSystems/Bloom_RS.h."
 
 
 namespace VULKAN {
@@ -49,10 +49,10 @@ namespace VULKAN {
 //#endif
 		MyVulkanDevice myDevice{ initWindow };
 		VulkanRenderer renderer{ initWindow , myDevice };
-//		Forward_RS forward_RS{renderer, myDevice};
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
         PostProcessing_RS postProcessing_Rs{ myDevice, renderer};
         PostProcessing_RS FinalPostProcessing_Rs{ myDevice, renderer};
+        Bloom_RS bloom_Rs{myDevice, renderer};
         VKTexture* finalStorageImage;
 		int currentFrame;
 	    

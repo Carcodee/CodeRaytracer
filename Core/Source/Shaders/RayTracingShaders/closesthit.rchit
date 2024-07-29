@@ -199,15 +199,14 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
  
+  rayPayload.color = pbr * myLight.intensity; 
+  
   if(materials[materialIndex].emissionIntensity>0){
        rayPayload.emissive = true;
        rayPayload.shadow = false;
-  }else{
-       rayPayload.emissive = false;
-       
+       rayPayload.color = materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
   }
-  
-  rayPayload.color = pbr * myLight.intensity; 
+ 
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;
   rayPayload.tangent = tangent;

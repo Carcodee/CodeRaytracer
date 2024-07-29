@@ -14,6 +14,7 @@ namespace VULKAN {
 		CreateTextureImage();
 		CreateImageViews(VK_FORMAT_R8G8B8A8_SRGB);
 		CreateTextureSample();
+        
 		mySwapChain.device.deletionQueue.push_function([this]() {
             if (textureSampler== nullptr)return;
 		vkDestroySampler(device.device(), textureSampler, nullptr);});
@@ -352,17 +353,14 @@ namespace VULKAN {
         VkPipelineStageFlags currentStageTemp=currentStage;
 
         TransitionTexture(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,VK_ACCESS_TRANSFER_WRITE_BIT,VK_PIPELINE_STAGE_TRANSFER_BIT);
-
-//        mySwapChain.device.TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, mipLevels, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         
         mySwapChain.device.GenerateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB,this->textureWidth ,this-> textureHeight, mipLevels);
-
+        
         currentStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         currentAccessFlags = VK_ACCESS_SHADER_READ_BIT;
         currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         
         TransitionTexture(currentLayoutTemp,currentAccessFlagsTemp,currentStageTemp);
-
         
     }
 

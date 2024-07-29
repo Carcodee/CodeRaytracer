@@ -52,6 +52,32 @@ namespace VULKAN{
 			if (auto commandBuffer = renderer.BeginFrame())
 			{
                 rayTracing_RS.DrawRT(commandBuffer);
+               
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                
+                bloom_Rs.Draw(commandBuffer);
+                
+                VkMemoryBarrier barrier = {};
+                barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+
+                vkCmdPipelineBarrier(
+                        commandBuffer,
+                        VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                        0,
+                        1, &barrier,
+                        0, nullptr,
+                        0, nullptr);
+
+//                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
+//                postProcessing_Rs.Draw(commandBuffer);
+//                renderer.EndDynamicRenderPass(commandBuffer);
+
+
+//                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
+//                bloom_Rs.Draw(commandBuffer);
+//                renderer.EndDynamicRenderPass(commandBuffer);
                 VkViewport viewport{};
                 viewport.x = 0.0f;
                 viewport.y = 0.0f;
@@ -63,19 +89,13 @@ namespace VULKAN{
                 vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
                 vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
                 VkRenderingInfo renderingInfoPostProc{};
                 renderingInfoPostProc.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
                 renderingInfoPostProc.layerCount = 1;
                 renderingInfoPostProc.colorAttachmentCount = 0;
                 renderingInfoPostProc.renderArea.offset = { 0, 0};
                 renderingInfoPostProc.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
-                
-                
-                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
-                postProcessing_Rs.Draw(commandBuffer);
-                renderer.EndDynamicRenderPass(commandBuffer);
-                
+
                 renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
                 FinalPostProcessing_Rs.Draw(commandBuffer);
                 renderer.EndDynamicRenderPass(commandBuffer);          
@@ -141,12 +161,22 @@ namespace VULKAN{
 
 		InitConfigsCache();
         ImguiRenderSystem::GetInstance(&renderer, &myDevice);
+//
+//        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
+//        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->textureImageView, rayTracing_RS.emissiveStoreImage->textureSampler);
+//        postProcessing_Rs.renderPassRef = renderer.GetSwapchain().PostProRenderPass;
+//        postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
+//
 
-        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
-        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->textureImageView, rayTracing_RS.emissiveStoreImage->textureSampler);
-        postProcessing_Rs.renderPassRef = renderer.GetSwapchain().PostProRenderPass;
-        postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
+        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[0], rayTracing_RS.emissiveStoreImage->textureSampler);
+        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[1], rayTracing_RS.emissiveStoreImage->textureSampler);
+        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[2], rayTracing_RS.emissiveStoreImage->textureSampler);
+        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
+
+        bloom_Rs.upSampleRenderPassRef = renderer.GetSwapchain().UpSampleRenderPass;
+        bloom_Rs.downSampleRenderPassRef = renderer.GetSwapchain().DownSampleRenderPass;
         
+        bloom_Rs.InitRS();
 
         std::string outputVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\postpro.vert.spv";
         std::string outputFragPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\OutputShader\\outputshader.frag.spv";

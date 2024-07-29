@@ -29,46 +29,61 @@ namespace VULKAN {
         vkCreateDescriptorPool(myVulkanDevice.device(), &poolInfo, nullptr, &postProPool);
 
         VkDescriptorSetAllocateInfo descriptorSetAllocateInfo =INITIALIZERS::descriptorSetAllocateInfo(postProPool, &descriptorSetLayout, 1);
-        descriptors.reserve(storageImages.size());
-        for (int i = 0; i < descriptors.size(); ++i) {
+        descriptors.reserve(storageImages.size()-1);
+        for (int i = 0; i < storageImages.size()-1; ++i) {
             VkDescriptorSet descriptorSet;
             if (vkAllocateDescriptorSets(myVulkanDevice.device(), &descriptorSetAllocateInfo, &descriptorSet) != VK_SUCCESS)
             {
                 throw std::runtime_error("failed to allocate descriptor sets!");
-            }    
+            }
+
             descriptors.push_back(descriptorSet);
         }
-        
 
-        std::vector<VkDescriptorImageInfo> imageInfos;
-        imageInfos.reserve(storageImages.size());
-        for (int i = 0; i < storageImages.size(); ++i) {
 
-            VkDescriptorImageInfo imageToAdd{};
-            imageToAdd.imageView = storageImages[i].imageView;
-            imageToAdd.sampler = storageImages[i].sampler;
-            imageToAdd.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-            imageInfos.push_back(imageToAdd);
+        for (int i = 0; i < descriptors.size(); ++i) {
 
-            VkWriteDescriptorSet imageWrite = INITIALIZERS::writeDescriptorSet(descriptors[i], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i, &imageInfos.back());
-            writeDescriptorSets.push_back(imageWrite);
+            writeDescriptorSets.clear();
+            VkDescriptorImageInfo srcImage{};
+            srcImage.imageView = storageImages[i].imageView;
+            srcImage.sampler = storageImages[i].sampler;
+            srcImage.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
+            VkDescriptorImageInfo modifiedImage{};
+            modifiedImage.imageView = storageImages[i + 1].imageView;
+            modifiedImage.sampler = storageImages[i + 1].sampler;
+            modifiedImage.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            
+            VkWriteDescriptorSet srcImageWrite = INITIALIZERS::writeDescriptorSet(descriptors[i], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 0, &srcImage);
+            VkWriteDescriptorSet modifiedImageWrite = INITIALIZERS::writeDescriptorSet(descriptors[i], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &modifiedImage);
+            
+            writeDescriptorSets.push_back(srcImageWrite);
+            writeDescriptorSets.push_back(modifiedImageWrite);
+
+            vkUpdateDescriptorSets(myVulkanDevice.device(), writeDescriptorSets.size(),writeDescriptorSets.data(), 0, nullptr);
         }
 
-        vkUpdateDescriptorSets(myVulkanDevice.device(), writeDescriptorSets.size(),writeDescriptorSets.data(), 0, nullptr);
 
     }
 
     void Bloom_RS::CreatePipelineUpSample() {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
-        for (int i = 0; i <storageImages.size() ; ++i) {
-            VkDescriptorSetLayoutBinding resultImageLayoutBinding{};
-            resultImageLayoutBinding.binding = i;
-            resultImageLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            resultImageLayoutBinding.descriptorCount = 1;
-            resultImageLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-            bindings.push_back(resultImageLayoutBinding);
-        }
+        
+        VkDescriptorSetLayoutBinding srcTexBinding{};
+        
+        srcTexBinding.binding = 0;
+        srcTexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        srcTexBinding.descriptorCount = 1;
+        srcTexBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        VkDescriptorSetLayoutBinding upSampleTexBinding{};
+        upSampleTexBinding.binding = 1;
+        upSampleTexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        upSampleTexBinding.descriptorCount = 1;
+        upSampleTexBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        bindings.push_back(srcTexBinding);
+        bindings.push_back(upSampleTexBinding);
 
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI = INITIALIZERS::descriptorSetLayoutCreateInfo(bindings);
 
@@ -88,7 +103,7 @@ namespace VULKAN {
         PipelineConfigInfo pipelineConfig{};
 
         PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
-        pipelineConfig.renderPass = renderPassRef;
+        pipelineConfig.renderPass = upSampleRenderPassRef;
         pipelineConfig.pipelineLayout = pipelineLayout;
         pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         upSamplePipelineReader = std::make_unique<PipelineReader>(myVulkanDevice);
@@ -107,14 +122,21 @@ namespace VULKAN {
 
     void Bloom_RS::CreatePipelineDownSample() {
         std::vector<VkDescriptorSetLayoutBinding> bindings;
-        for (int i = 0; i <storageImages.size() ; ++i) {
-            VkDescriptorSetLayoutBinding resultImageLayoutBinding{};
-            resultImageLayoutBinding.binding = i;
-            resultImageLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            resultImageLayoutBinding.descriptorCount = 1;
-            resultImageLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-            bindings.push_back(resultImageLayoutBinding);
-        }
+        VkDescriptorSetLayoutBinding srcTexBinding{};
+        srcTexBinding.binding = 0;
+        srcTexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        srcTexBinding.descriptorCount = 1;
+        srcTexBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        VkDescriptorSetLayoutBinding upSampleTexBinding{};
+        upSampleTexBinding.binding = 1;
+        upSampleTexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        upSampleTexBinding.descriptorCount = 1;
+        upSampleTexBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        bindings.push_back(srcTexBinding);
+        bindings.push_back(upSampleTexBinding);
+        
 
         VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCI = INITIALIZERS::descriptorSetLayoutCreateInfo(bindings);
 
@@ -134,7 +156,7 @@ namespace VULKAN {
         PipelineConfigInfo pipelineConfig{};
 
         PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
-        pipelineConfig.renderPass = renderPassRef;
+        pipelineConfig.renderPass = downSampleRenderPassRef;
         pipelineConfig.pipelineLayout = pipelineLayout;
         pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         downSamplePipelineReader = std::make_unique<PipelineReader>(myVulkanDevice);
@@ -171,30 +193,96 @@ namespace VULKAN {
     void Bloom_RS::Draw(VkCommandBuffer &currentCommandBuffer) {
 
         assert(ready &&"Postprocessing is not ready to draw");
+        VkRenderingInfo renderingInfoPostProc{};
+        renderingInfoPostProc.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        renderingInfoPostProc.layerCount = 1;
+        renderingInfoPostProc.colorAttachmentCount = 0;
+        renderingInfoPostProc.renderArea.offset = { 0, 0};
+        renderingInfoPostProc.renderArea.extent = myVulkanRenderer.GetSwapchain().getSwapChainExtent();
+
+        VkMemoryBarrier barrier = {};
+        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
 
         VkDeviceSize offsets[1] = { 0 };
 
+        uint32_t currentWidth =myVulkanRenderer.GetSwapchain().getSwapChainExtent().width;
+        uint32_t currentHeight =myVulkanRenderer.GetSwapchain().getSwapChainExtent().height;
+        VkExtent2D currentExtend {currentWidth, currentHeight};
+
         downSamplePipelineReader->bind(currentCommandBuffer);
+        myVulkanRenderer.BeginDynamicRenderPass(currentCommandBuffer,renderingInfoPostProc);
         for (int i = 0; i < descriptors.size(); ++i) {
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(currentExtend.width);
+            viewport.height = static_cast<float>(currentExtend.height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            VkRect2D scissor{ {0, 0 }, currentExtend};
+            vkCmdSetViewport(currentCommandBuffer, 0, 1, &viewport);
+            vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
+
             vkCmdBindDescriptorSets(currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptors[i], 0, nullptr);
             vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, &vertexBuffer.buffer, offsets);
             vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
             vkCmdDrawIndexed(currentCommandBuffer, quadIndices.size(), 1, 0, 0, 0);
+
+            currentExtend.width /=2;
+            currentExtend.height /=2;
+            
         }
+
+        myVulkanRenderer.EndDynamicRenderPass(currentCommandBuffer);
+
+        vkCmdPipelineBarrier(
+                currentCommandBuffer,
+                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                0,
+                1, &barrier,
+                0, nullptr,
+                0, nullptr);
 
         upSamplePipelineReader->bind(currentCommandBuffer);
-        
-        for (int i = 0; i < descriptors.size(); ++i) {
+        myVulkanRenderer.BeginDynamicRenderPass(currentCommandBuffer,renderingInfoPostProc);
+        for (int i =descriptors.size()-1; i >= 0 ; --i) {
+
+            currentExtend.width *=2;
+            currentExtend.height *=2;
+            
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(currentExtend.width);
+            viewport.height = static_cast<float>(currentExtend.height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            VkRect2D scissor{ {0, 0 }, currentExtend};
+            vkCmdSetViewport(currentCommandBuffer, 0, 1, &viewport);
+            vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
+
             vkCmdBindDescriptorSets(currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptors[i], 0, nullptr);
             vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, &vertexBuffer.buffer, offsets);
             vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
             vkCmdDrawIndexed(currentCommandBuffer, quadIndices.size(), 1, 0, 0, 0);
-        }
 
+        }
+        myVulkanRenderer.EndDynamicRenderPass(currentCommandBuffer);
+
+        vkCmdPipelineBarrier(
+                currentCommandBuffer,
+                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                0,
+                1, &barrier,
+                0, nullptr,
+                0, nullptr);
     }
 
     void Bloom_RS::InitRS() {
-        assert(renderPassRef != VK_NULL_HANDLE && "Renderpass must not be null");
+        assert(upSampleRenderPassRef != VK_NULL_HANDLE && "Renderpass must not be null");
+        assert(downSampleRenderPassRef != VK_NULL_HANDLE && "Renderpass must not be null");
         assert(!storageImages.empty() && "storageImages must not be null");
         vertexPath=HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\postpro.vert.spv";
         fragmentPathDownSample=HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\DownSample.frag.spv";

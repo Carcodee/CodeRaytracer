@@ -65,6 +65,8 @@ public:
 	friend class VKTexture;
 	VkRenderPass UIRenderPass;
     VkRenderPass PostProRenderPass;
+    VkRenderPass UpSampleRenderPass;
+    VkRenderPass DownSampleRenderPass;
     VkRenderPass FinalRenderPass;
 	std::vector<VkImage> colorUIImages;
 	//VkDeviceMemory colorUIImagesMemory;

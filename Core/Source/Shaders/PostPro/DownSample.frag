@@ -13,7 +13,8 @@ layout(location = 0) in struct {
 void main()
 {
     vec4 downSampleColor = vec4(0.0f);
-    vec2 srcTexelSize = 1.0 / imageSize(srcTexture);
+    ivec2 aspectRatio =imageSize(srcTexture)/imageSize(downSample);
+    vec2 srcTexelSize = vec2(1.0f);
     float x = srcTexelSize.x;
     float y = srcTexelSize.y;
 
@@ -60,6 +61,7 @@ void main()
     downSampleColor += (a+c+g+i)*0.03125;
     downSampleColor += (b+d+f+h)*0.0625;
     downSampleColor += (j+k+l+m)*0.125;
-    imageStore(downSample, fragCoord, downSampleColor);
+//    imageStore(downSample, fragCoord, vec4(fragCoord / vec2(600.0, 450.0), 0.0f, 1.0f));
+    imageStore(downSample, fragCoord/aspectRatio, downSampleColor);
 
 }

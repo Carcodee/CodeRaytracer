@@ -274,6 +274,8 @@ namespace VULKAN {
 		createUIImageViews();
 		CreateDynamicRenderPass(UIRenderPass);
         CreateDynamicRenderPass(PostProRenderPass);
+        CreateDynamicRenderPass(UpSampleRenderPass);
+        CreateDynamicRenderPass(DownSampleRenderPass);
         CreateDynamicRenderPass(FinalRenderPass);
 		CreateUIFramebuffers();
 		createSyncObjects();
