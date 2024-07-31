@@ -20,6 +20,8 @@ struct RayPayload{
     bool shadow;
     bool emissive;
 };
+
+
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
 hitAttributeEXT vec2 attribs;
@@ -30,29 +32,6 @@ struct TexturesFinded{
     vec4 specular;
     vec4 bump;
     vec4 ambient;
-};
-struct MaterialData {
-	float albedoIntensity;
-    float normalIntensity;
-    float specularIntensity;
-    float roughnessIntensity;
-    //16
-    vec3 diffuseColor;
-    float reflectivityIntensity;
-    //32
-    vec3 baseReflection;
-    float metallicIntensity;
-    //48
-    float emissionIntensity;
-    int roughnessOffset;
-    int metallicOffset;
-    int specularOffset;
-    //64
-    int texturesIndexStart;
-    int textureSizes;
-    int diffuseOffset;
-    int normalOffset;
-    //80
 };
 
 struct MeshData {
@@ -95,9 +74,9 @@ layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
 };
 
 
-layout(set = 0, binding = 7, std140) buffer Materials {
-    MaterialData materials[];
-};
+//layout(set = 0, binding = 7, std140) buffer Materials {
+ //   MaterialData materials[];
+//};
 
 layout(set = 0, binding = 8, scalar) buffer MeshesData {
     MeshData meshesData[];
@@ -108,7 +87,7 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
 };
 
 
-layout(set = 0,binding = 11) uniform sampler2D textures[];
+//layout(set = 0,binding = 11) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
 
@@ -116,10 +95,8 @@ vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
 
 vec3 GetDiffuseColor(int materialIndex);
-void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv);
 float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity);
-vec4 GetColorOrDiffuseTex(vec2 uv);
 vec3 GetDebugCol(uint primitiveId, float primitiveCount);
 float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
 void main()
@@ -155,7 +132,6 @@ void main()
   vec3 bitTangent =cross(normal, tangent); 
   mat3 TBN = mat3(tangent, bitTangent, normal);
 
-
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
@@ -176,7 +152,6 @@ void main()
       finalNormal = normalize(normalWorldSpace) * materials[materialIndex].normalIntensity; 
   }
   
-  //FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
   
   vec4 diffuse=diffuseInMat;
 
@@ -214,6 +189,13 @@ void main()
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
   
+//  materialPayload.diffuse = diffuse.rgb;
+ // materialPayload.baseReflectiveness = materials[materialIndex].baseReflection;
+//  materialPayload.normal = finalNormal;
+//  materialPayload.directLightDir = lightDir;
+//  materialPayload.emissiveMesh = materials[materialIndex].emissionIntensity;
+//  materialPayload.roughness = materials[materialIndex].roughnessIntensity;
+//  materialPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
 }
 
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
@@ -232,40 +214,13 @@ float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intens
 	vec4 texture = texture(textures[texOffset],uv);
 	return texture.x * intensity;
 }
-void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
-
-    int textureFinishSize = texturesIndexStart + textureSizes;
-    int allTexturesIndex= 0;
-    texturesOnMaterialCount= allTexturesIndex;
-    for(int i = texturesIndexStart; i < textureFinishSize; i++){
-
-        if(allTexturesIndex>MAX_TEXTURES){
-            return;
-        }
-        CurrentMaterialTextures[allTexturesIndex] = texture(textures[i],uv); 
-        allTexturesIndex++;
-        texturesOnMaterialCount= allTexturesIndex;
-    }
-
-}
 
 vec3 GetDiffuseColor(int materialIndex){
 
    vec3 diffuse= materials[materialIndex].diffuseColor;
    return diffuse;
 }
-vec4 GetColorOrDiffuseTex(vec2 uv){
 
-    if(texturesOnMaterialCount>0){
-        vec4 diffuseText = CurrentMaterialTextures[DIFFUSE_TEX];
-        return diffuseText;
-    }else{
-        int index= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
-        vec3 diffuseCol=GetDiffuseColor(index); 
-        return vec4(diffuseCol, 1.0);
-    }
-
-}
 
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 

@@ -263,7 +263,7 @@ namespace VULKAN {
                 std::string texturePathFinded= texName;
                 FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::ROUGHNESS,texturePathFinded);
-                materialData.materialUniform.roughnessIntensity = 1.0f;
+                materialData.materialUniform.roughnessIntensity = 0.5f;
                 texturesFinded = true;
             }
             

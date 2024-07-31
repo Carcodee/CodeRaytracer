@@ -724,6 +724,7 @@ namespace VULKAN {
 		};
 
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
+        ResetAccumulatedFrames();
 
 	}
 
@@ -759,7 +760,7 @@ namespace VULKAN {
 		TextureBinding.binding = 3;
 		TextureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		TextureBinding.descriptorCount =1;
-		TextureBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		TextureBinding.stageFlags =  VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding vertexBinding{};
 		vertexBinding.binding = 4;
@@ -783,7 +784,7 @@ namespace VULKAN {
 		materialBinding.binding = 7;
 		materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		materialBinding.descriptorCount = 1;
-		materialBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+		materialBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;;
 
 		VkDescriptorSetLayoutBinding modelDataBinding{};
 		modelDataBinding.binding = 8;
@@ -1095,6 +1096,7 @@ namespace VULKAN {
             materialDatas.push_back(mat.second->materialUniform);
         }
         memcpy(allMaterialsBuffer.mapped, materialDatas.data(), sizeof (MaterialUniformData)* materialDatas.size());
+        ResetAccumulatedFrames();
 
     }
     void RayTracing_RS::UpdateMeshInfo() {
@@ -1106,6 +1108,7 @@ namespace VULKAN {
             }
         }
         memcpy(allModelDataBuffer.mapped, modelDataUniformBuffer.data(), sizeof (ModelDataUniformBuffer)* modelDataUniformBuffer.size());
+        ResetAccumulatedFrames();
     }
 
 
@@ -1130,10 +1133,7 @@ namespace VULKAN {
 
 	void RayTracing_RS::DrawRT(VkCommandBuffer& currentBuffer)
 	{
-        if (InputHandler::movingMouse){
-            currentAccumulatedFrame = 0;
-        }
-        std::cout<<"Samples: "<<currentAccumulatedFrame<<"\n"; 
+
         
         emissiveStoreImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
         storageImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
@@ -1145,9 +1145,13 @@ namespace VULKAN {
 		imageSubresourceRange.baseArrayLayer = 0;
 		imageSubresourceRange.layerCount = 1; 
 		const VkClearColorValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
-		vkCmdClearColorImage(currentBuffer, storageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+        if (InputHandler::editingGraphics){
+            ResetAccumulatedFrames();
+//            vkCmdClearColorImage(currentBuffer, storageImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
+        }
         vkCmdClearColorImage(currentBuffer, emissiveStoreImage->textureImage, VK_IMAGE_LAYOUT_GENERAL,&clearValue, 1,&imageSubresourceRange);
-       
+
+//        std::cout<<"Samples: "<<currentAccumulatedFrame<<"\n";
 
         const uint32_t handleSizeAligned = alignedSize(rayTracingPipelineProperties.shaderGroupHandleSize, rayTracingPipelineProperties.shaderGroupHandleAlignment);
 
@@ -1265,7 +1269,7 @@ namespace VULKAN {
 	}
 
     void RayTracing_RS::ResetAccumulatedFrames() {
-        currentAccumulatedFrame = 1;
+        currentAccumulatedFrame = 0;
     }
 
 

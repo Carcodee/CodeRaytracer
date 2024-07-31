@@ -76,6 +76,7 @@ namespace VULKAN
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
 		float lightCol[3] = { 1.0f, 1.0f, 1.0f };
 		float lightIntensity = 1.0f;
+        float roughnessAllMaterials = 1.0f;
 		char modelImporterText[128];
 
 	private:

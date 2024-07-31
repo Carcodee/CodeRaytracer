@@ -81,6 +81,7 @@ namespace VULKAN
 		static std::map<USER_BUTTON, INPUT_ACTION> buttonsActioned;
 		bool isMouseInsideViewport;
         static bool movingMouse;
+        static bool editingGraphics;
 	protected:
 
 		static float xInput;

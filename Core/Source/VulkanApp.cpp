@@ -29,6 +29,7 @@ namespace VULKAN{
 			rayTracing_RS.light.color = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightPos);
 			rayTracing_RS.light.intensity = ImguiRenderSystem::GetInstance()->lightIntensity;
+            
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
 
@@ -43,7 +44,6 @@ namespace VULKAN{
             VkClearValue clearValue{};
             clearValue= { 0.1f, 0.1f, 0.1f, 0.1f };
             LoadQueryModels();
-
             ImguiRenderSystem::GetInstance()->BeginFrame();
             ImguiRenderSystem::GetInstance()->EndFrame();
             ImguiRenderSystem::GetInstance()->UpdateBuffers();

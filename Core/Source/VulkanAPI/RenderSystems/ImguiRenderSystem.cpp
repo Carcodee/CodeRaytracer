@@ -591,7 +591,6 @@ namespace VULKAN
         {
             ImGui::PushID("AssetsID");
             ImGui::Begin("Configs");
-
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetWindowSize(ImVec2(400, 400));
             ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
@@ -599,9 +598,22 @@ namespace VULKAN
             ImGui::LabelText("Raytracing", "");
             ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
             ImGui::LabelText("Light", "");
-            ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f");
-            ImGui::ColorEdit3("light Col", lightCol, 0.0f);
-            ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
+            if(ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f")){
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::ColorEdit3("light Col", lightCol, 0.0f)){
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f")){
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.roughnessIntensity = roughnessAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
             ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
 //            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
             ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background

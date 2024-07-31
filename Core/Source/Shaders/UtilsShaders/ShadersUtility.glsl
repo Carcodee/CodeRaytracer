@@ -13,17 +13,44 @@ struct MaterialFindInfo{
 	bool hasDiffuse;
 	bool hasNormals;
 };
-struct Surface
-{
-	mat3 TBN;
-	vec3 baseColor;
+
+struct Surface{
+	vec3 normal;
+	vec3 tangent;
+	vec3 pos;
+	vec3 uv;
+};
+
+struct Material{
+	vec3 diffuse;
+	vec3 baseReflectiveness;
+	vec3 directLightDir;
+	float emissiveMesh;
 	float roughness;
-	float metallic;
-	vec3 emission;
-	vec3 F0;
-	float a;
-	float a2;
-	float sw;
+	float reflectivity;
+};
+struct MaterialData {
+	float albedoIntensity;
+	float normalIntensity;
+	float specularIntensity;
+	float roughnessIntensity;
+	//16
+	vec3 diffuseColor;
+	float reflectivityIntensity;
+	//32
+	vec3 baseReflection;
+	float metallicIntensity;
+	//48
+	float emissionIntensity;
+	int roughnessOffset;
+	int metallicOffset;
+	int specularOffset;
+	//64
+	int texturesIndexStart;
+	int textureSizes;
+	int diffuseOffset;
+	int normalOffset;
+	//80
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	
@@ -38,6 +65,7 @@ MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	}
 	return materialFindInfo;
 }
+
 
 vec3 LambertDiffuse(vec3 col){
 	return col/PI;

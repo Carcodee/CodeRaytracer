@@ -20,6 +20,7 @@ namespace VULKAN
 	float InputHandler::xMouseInput= 0;
 	float InputHandler::yMouseInput= 0;
     bool InputHandler::movingMouse = false;
+    bool InputHandler::editingGraphics = false;
 
 	InputHandler::InputHandler()
 	{
@@ -329,6 +330,7 @@ namespace VULKAN
 		}
 
         movingMouse = false;
+        editingGraphics = false;
 
 
 	}
