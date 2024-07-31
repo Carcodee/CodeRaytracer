@@ -214,14 +214,6 @@ void main()
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
   
-
-
-  //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
-  //vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
-  //rayPayload.color = debuging;
-  //rayPayload.color = debugGeometryIndex;
-  //rayPayload.color = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  //rayPayload.color = materials[materialIndex].;
 }
 
 vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
@@ -272,7 +264,6 @@ vec4 GetColorOrDiffuseTex(vec2 uv){
         vec3 diffuseCol=GetDiffuseColor(index); 
         return vec4(diffuseCol, 1.0);
     }
-
 
 }
 

@@ -69,6 +69,7 @@ namespace VULKAN
 		static bool GetUserInput(USER_KEY key, INPUT_ACTION action);
 		static bool GetUserInput(USER_BUTTON key, INPUT_ACTION action);
 
+        static void CheckMouse();
 		static float GetCutomInput (CUSTOM_INPUT inputType);
 		static void UpdateInputStates();
         void DisableMouse(bool value);
@@ -79,14 +80,17 @@ namespace VULKAN
 		static std::map<USER_KEY, INPUT_ACTION> keysActioned;
 		static std::map<USER_BUTTON, INPUT_ACTION> buttonsActioned;
 		bool isMouseInsideViewport;
+        static bool movingMouse;
 	protected:
 
 		static float xInput;
 		static float yInput;
-		static float xMousePos;
-		static float yMousePos;
+		static double xMousePos;
+		static double yMousePos;
 		static float xMouseInput;
 		static float yMouseInput;
+        static double lastXPos;
+        static double lastYPos;
 
 		InputHandler();
         bool mouseInsideViewport = false;

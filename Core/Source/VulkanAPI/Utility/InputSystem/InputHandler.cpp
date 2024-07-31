@@ -13,10 +13,13 @@ namespace VULKAN
 
 	float InputHandler::xInput= 0;
 	float InputHandler::yInput= 0;
-	float InputHandler::xMousePos= 0;
-	float InputHandler::yMousePos= 0;
+	double InputHandler::xMousePos= 0;
+	double InputHandler::yMousePos= 0;
+    double InputHandler::lastXPos= 0;
+    double InputHandler::lastYPos= 0;
 	float InputHandler::xMouseInput= 0;
 	float InputHandler::yMouseInput= 0;
+    bool InputHandler::movingMouse = false;
 
 	InputHandler::InputHandler()
 	{
@@ -274,12 +277,14 @@ namespace VULKAN
 	{
 		if (xpos!=xMousePos)
 		{
+            double xDiff = std::abs(xpos-xMousePos);
 			xMousePos = xpos;
 			xMouseInput = 1.0f;
 		}
 		else
 		{
 			xMouseInput = 0.0f;
+            movingMouse = false;
 		}
 		if (ypos!=yMousePos)
 		{
@@ -289,6 +294,7 @@ namespace VULKAN
 		else
 		{
 			yMouseInput = 0.0f;
+            movingMouse = false;
 		}
 	}
 
@@ -322,6 +328,7 @@ namespace VULKAN
 			}
 		}
 
+        movingMouse = false;
 
 
 	}
@@ -333,5 +340,21 @@ namespace VULKAN
             glfwSetInputMode(userWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
+
+    void InputHandler::CheckMouse() {
+        double diffX = std::abs(lastXPos - xMousePos);
+        double diffY = std::abs(lastYPos - yMousePos);
+
+        if (diffX >DBL_EPSILON){
+            lastXPos = xMousePos;
+            movingMouse= true;
+        }
+        if (diffY >DBL_EPSILON){
+            lastYPos = yMousePos;
+            movingMouse= true;
+        }
+            
+    };
+
 }
 

@@ -2,6 +2,7 @@
 
 #include "FileSystem/FileHandler.h"
 #include "VulkanAPI/Model/ModelHandler.h"
+#include "VulkanAPI/Utility/InputSystem/InputHandler.h"
 
 
 namespace VULKAN {
@@ -856,11 +857,19 @@ namespace VULKAN {
 		{
 			throw std::runtime_error("Unable to create descriptor set layouts");
 		}
-
+        
+        VkPushConstantRange pushConstantRange = {};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(uint32_t);
+        
 		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCI.setLayoutCount = 1;
 		pipelineLayoutCI.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
+        pipelineLayoutCI.pushConstantRangeCount = 1;
+        
 		if (vkCreatePipelineLayout(myDevice.device(), &pipelineLayoutCI, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Unable to create pipeline layout");
@@ -870,7 +879,7 @@ namespace VULKAN {
 		std::string path;
         
         VkSpecializationMapEntry specializationMapEntry = INITIALIZERS::specializationMapEntry(0, 0, sizeof(uint32_t));
-        uint32_t maxRecursion = 4;
+        uint32_t maxRecursion = 5;
         VkSpecializationInfo specializationInfo = INITIALIZERS::specializationInfo(1, &specializationMapEntry, sizeof(maxRecursion), &maxRecursion);
 
         std::string shaderPath= HELPERS::FileHandler::GetInstance()->GetShadersPath();
@@ -921,7 +930,8 @@ namespace VULKAN {
 			shaderGroup.intersectionShader = VK_SHADER_UNUSED_KHR;
 			this->shaderGroups.push_back(shaderGroup);
 		}
-
+        
+       
 		VkRayTracingPipelineCreateInfoKHR rayTracingPipelineCI{};
 		rayTracingPipelineCI.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
 		rayTracingPipelineCI.stageCount = static_cast<uint32_t>(shaderStages.size());
@@ -1120,6 +1130,11 @@ namespace VULKAN {
 
 	void RayTracing_RS::DrawRT(VkCommandBuffer& currentBuffer)
 	{
+        if (InputHandler::movingMouse){
+            currentAccumulatedFrame = 0;
+        }
+        std::cout<<"Samples: "<<currentAccumulatedFrame<<"\n"; 
+        
         emissiveStoreImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
         storageImage->TransitionTexture( VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, currentBuffer);
     
@@ -1158,7 +1173,8 @@ namespace VULKAN {
 		*/
 		vkCmdBindPipeline(currentBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline);
 		vkCmdBindDescriptorSets(currentBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineLayout, 0, 1, &descriptorSet, 0, 0);
-
+        
+        
 		vkCmdTraceRaysKHR(
 			currentBuffer,
 			&raygenShaderSbtEntry,
@@ -1169,9 +1185,17 @@ namespace VULKAN {
 			myRenderer.swapChain->height(),
 			1);
 
+        vkCmdPushConstants(
+                currentBuffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_RAYGEN_BIT_KHR,
+                0,
+                sizeof(uint32_t),
+                &currentAccumulatedFrame
+        );
 
 		UpdateUniformbuffers();
-	
+        currentAccumulatedFrame++;
 	}
 
 	void RayTracing_RS::Create_RT_RenderSystem()
@@ -1210,46 +1234,6 @@ namespace VULKAN {
 		memcpy(lightBuffer.mapped, &light,sizeof(Light));
 	}
 
-	void RayTracing_RS::TransitionStorageImage(VKTexture* texture,VkImageLayout oldLayout, VkImageLayout newLayout,
-                                               VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags)
-	{
-		VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
-		VkImageMemoryBarrier barrier{};
-
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = oldLayout;
-		barrier.newLayout = newLayout;
-
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = texture->textureImage;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-
-		VkPipelineStageFlags sourceStage;
-		VkPipelineStageFlags destinationStage;
-		barrier.srcAccessMask = srcAccessFlags;
-		barrier.dstAccessMask = dstAccessFlags;
-
-		sourceStage = VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-
-		vkCmdPipelineBarrier(
-			commandBuffer,
-			sourceStage, destinationStage,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier);
-
-		myDevice.endSingleTimeCommands(commandBuffer);
-//		texture->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-	}
-
 	void RayTracing_RS::SetupBottomLevelObj(ModelData& modelData)
 	{
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
@@ -1279,6 +1263,10 @@ namespace VULKAN {
 
 
 	}
+
+    void RayTracing_RS::ResetAccumulatedFrames() {
+        currentAccumulatedFrame = 1;
+    }
 
 
 }

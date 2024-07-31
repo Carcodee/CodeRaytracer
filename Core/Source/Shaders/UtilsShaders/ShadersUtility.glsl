@@ -1,5 +1,6 @@
 
 
+#include "../UtilsShaders/Random.glsl"
 
 #define DIFFUSE_TEX 0 
 #define ALPHA_TEX 1 
@@ -7,13 +8,23 @@
 #define BUMP_TEX 3 
 #define AMBIENT_TEX 4 
 
-#define PI 3.1415
 
 struct MaterialFindInfo{
 	bool hasDiffuse;
 	bool hasNormals;
 };
-
+struct Surface
+{
+	mat3 TBN;
+	vec3 baseColor;
+	float roughness;
+	float metallic;
+	vec3 emission;
+	vec3 F0;
+	float a;
+	float a2;
+	float sw;
+};
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	
 	MaterialFindInfo materialFindInfo;
@@ -100,17 +111,14 @@ vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,floa
 	vec3 outgoingLight = emissiveMesh + BRDF * lightCol;
 	return outgoingLight;
 }
-
-//raytracing indirect lightning
-float rand(float uvX, float uvY) {
+float oldRand(float uvX, float uvY) {
 	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
 }
 
-vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float uvX, float uvY) {
-	// Generate two random numbers between 0 and 1
-	float r1 = rand(uvX, uvY);
-	float r2 = rand(uvX, uvY);
+vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float idX, float idY, uint frame) {
 
+	float r1 =oldRand(idX, idY);
+	float r2 =oldRand(idX, idY);
 	// Convert to spherical coordinates
 	float theta = acos(sqrt(1.0 - r1));
 	float phi = 2.0 * PI * r2;
@@ -129,7 +137,3 @@ vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float uvX, float uv
 vec3 GetReflection(vec3 reflectedDir, vec3 randomDir, float rougness){
 	return normalize(mix(reflectedDir, randomDir, rougness));
 }
-
-
-
-

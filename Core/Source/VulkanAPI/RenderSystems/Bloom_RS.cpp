@@ -202,8 +202,8 @@ namespace VULKAN {
 
         VkMemoryBarrier barrier = {};
         barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-        barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-        barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         VkDeviceSize offsets[1] = { 0 };
 
@@ -278,6 +278,8 @@ namespace VULKAN {
                 1, &barrier,
                 0, nullptr,
                 0, nullptr);
+        
+        
     }
 
     void Bloom_RS::InitRS() {

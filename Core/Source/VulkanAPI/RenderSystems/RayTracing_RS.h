@@ -118,12 +118,13 @@ namespace VULKAN {
 
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
-		void TransitionStorageImage(VKTexture* texture,VkImageLayout oldLayout, VkImageLayout newLayout,VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags);
 		void AddModelToPipeline(ModelData& modelData);
 		void UpdateRaytracingData();
         void UpdateMeshInfo();
         void UpdateMaterialInfo();
+        void ResetAccumulatedFrames();
 
+        uint32_t currentAccumulatedFrame = 1;
 	private:
 		struct UniformData {
 			glm::mat4 viewInverse;
@@ -185,7 +186,6 @@ namespace VULKAN {
 		VkShaderModule rHitShaderModule;
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
-
 		bool invalidModelToLoad = false;
 	};
 

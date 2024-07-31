@@ -21,12 +21,11 @@ namespace VULKAN{
 		while (!initWindow.ShouldClose())
 		{
 			glfwPollEvents();
+            InputHandler::CheckMouse();
 			float currentTime = glfwGetTime();
-
 			static auto newTime = std::chrono::high_resolution_clock::now();
 			auto d = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>(d - newTime).count();
-            
 			rayTracing_RS.light.color = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightCol);
 			rayTracing_RS.light.pos = glm::make_vec3(ImguiRenderSystem::GetInstance()->lightPos);
 			rayTracing_RS.light.intensity = ImguiRenderSystem::GetInstance()->lightIntensity;

@@ -603,8 +603,9 @@ namespace VULKAN
             ImGui::ColorEdit3("light Col", lightCol, 0.0f);
             ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f");
             ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+//            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
             ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-
+            
             ImGui::End();
             ImGui::PopID();
         }

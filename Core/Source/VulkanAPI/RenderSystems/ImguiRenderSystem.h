@@ -70,6 +70,7 @@ namespace VULKAN
 		bool show_demo_window = true;
 		bool UseDynamicRendering = false;
 		float RotationSpeed=1.0f;
+        int currentFrameText=1.0f;
 		float camPos[3] = { 0.0f, 4.0f, 0.0f };
 		float modelCamPos[3] = { 1.0f, 1.0f, 1.5f };
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
