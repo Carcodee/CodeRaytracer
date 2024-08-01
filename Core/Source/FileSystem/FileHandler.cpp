@@ -220,4 +220,8 @@ namespace HELPERS
         
         return strPath;
     }
+
+    std::string FileHandler::GetEngineResourcesPath() {
+        return engineResourcesPath.string();
+    }
 }

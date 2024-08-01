@@ -388,7 +388,9 @@ namespace VULKAN {
 		};
         
         std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
-		VKTexture* baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
+        std::string environmentPath=HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+"/Images/Env.hdr";
+		baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
+        environmentTexture = new VKTexture(environmentPath.c_str(), myRenderer.GetSwapchain());
 
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
@@ -467,6 +469,11 @@ namespace VULKAN {
         VkDescriptorImageInfo emissiveStorageDescriptor{};
         emissiveStorageDescriptor.imageView = emissiveStoreImage->textureImageView;
         emissiveStorageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+        
+        VkDescriptorImageInfo environmentTextureImage{};
+        environmentTextureImage.imageView =environmentTexture->textureImageView;
+		environmentTextureImage.sampler = environmentTexture->textureSampler;
+		environmentTextureImage.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
@@ -479,12 +486,10 @@ namespace VULKAN {
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
         VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
+        VkWriteDescriptorSet environmentImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 11, &environmentTextureImage);
 
         std::vector<VkDescriptorImageInfo> texturesDescriptors{};
-        if (modelsOnScene.size()>0)
-        {
-
-        }
+   
         if (texturesDescriptors.size()<=0)
         {
             VkDescriptorImageInfo descriptor{};
@@ -495,7 +500,7 @@ namespace VULKAN {
         }
         VkWriteDescriptorSet writeDescriptorImgArray{};
         writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorImgArray.dstBinding = 11;
+        writeDescriptorImgArray.dstBinding = 12;
         writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         writeDescriptorImgArray.descriptorCount = imageCount;
         writeDescriptorImgArray.dstSet = descriptorSet;
@@ -513,8 +518,8 @@ namespace VULKAN {
 			allModelsDataBufferWrite,
             BLAsInstanceOffsetBufferWrite,
             emissiveImageWrite,
+            environmentImageWrite,
             writeDescriptorImgArray
-            
 		};
 	   
 
@@ -575,7 +580,6 @@ namespace VULKAN {
 		};
 
         std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
-        VKTexture* baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
 		if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
@@ -660,7 +664,11 @@ namespace VULKAN {
         VkDescriptorImageInfo emissiveStorageDescriptor{};
         emissiveStorageDescriptor.imageView = emissiveStoreImage->textureImageView;
         emissiveStorageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
+ 
+        VkDescriptorImageInfo environmentTextureImage{};
+        environmentTextureImage.imageView =environmentTexture->textureImageView;
+		environmentTextureImage.sampler = environmentTexture->textureSampler;
+		environmentTextureImage.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
@@ -672,7 +680,8 @@ namespace VULKAN {
 		VkWriteDescriptorSet allModelsDataBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 8, &allModelDataBuffer.descriptor);
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
         VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
-
+        VkWriteDescriptorSet environmentImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 11, &environmentTextureImage);
+        
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
@@ -702,7 +711,7 @@ namespace VULKAN {
         }
         VkWriteDescriptorSet writeDescriptorImgArray{};
         writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorImgArray.dstBinding = 11;
+        writeDescriptorImgArray.dstBinding = 12;
         writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         writeDescriptorImgArray.descriptorCount = imageCount;
         writeDescriptorImgArray.dstSet = descriptorSet;
@@ -720,6 +729,7 @@ namespace VULKAN {
 			allModelsDataBufferWrite,
             BLAsInstanceOffsetBufferWrite,
             emissiveImageWrite,
+            environmentImageWrite,
             writeDescriptorImgArray
 		};
 
@@ -778,7 +788,7 @@ namespace VULKAN {
 		lightBinding.binding = 6;
 		lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		lightBinding.descriptorCount = 1;
-		lightBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		lightBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding materialBinding{};
 		materialBinding.binding = 7;
@@ -803,10 +813,17 @@ namespace VULKAN {
         emissiveImageBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         emissiveImageBinding.descriptorCount = 1;
         emissiveImageBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        
+        VkDescriptorSetLayoutBinding environmentImageBinding{};
+        environmentImageBinding.binding = 11;
+        environmentImageBinding.descriptorType =  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        environmentImageBinding.descriptorCount = 1;
+        environmentImageBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR;
+
 
 
         VkDescriptorSetLayoutBinding texturesBinding{};
-		texturesBinding.binding = 11;
+		texturesBinding.binding = 12;
 		texturesBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		texturesBinding.descriptorCount = 10000;
 		texturesBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
@@ -827,6 +844,7 @@ namespace VULKAN {
 			modelDataBinding,
             instancesGeometryOffsetsBinding,
             emissiveImageBinding,
+            environmentImageBinding,
 			texturesBinding
 			});
 
@@ -834,7 +852,7 @@ namespace VULKAN {
 
 		VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
 		setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-		setLayoutBindingFlags.bindingCount = 12;
+		setLayoutBindingFlags.bindingCount = 13;
 		std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
 			0,
 			0,
@@ -845,6 +863,7 @@ namespace VULKAN {
 			0,
 			0,
 			0,
+            0,
             0,
             0,
 			VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT

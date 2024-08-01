@@ -4,6 +4,7 @@
 
 #include "Material.h"
 #include "VulkanAPI/Model/ModelHandler.h"
+#include "FileSystem/FileHandler.h"
 
 namespace VULKAN{
 
@@ -14,6 +15,9 @@ namespace VULKAN{
         for (auto& pair: paths)
         {
             if (!std::filesystem::exists(pair.second.c_str()))continue;
+            std::string extension = HELPERS::FileHandler::GetInstance()->GetPathExtension(pair.second);
+            
+            if (extension != ".png" && extension != ".jpeg" && extension != ".jpg")continue;
             materialUniform.texturesSizes++;
             VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain, true);
             materialTextures.try_emplace(pair.first,texture);
@@ -101,14 +105,14 @@ namespace VULKAN{
 
         this->id = jsonObj.at("ID");
         this->name = jsonObj.at("Name");
-        std::vector<int> diffuse;
-        std::vector<int> baseReflection;
+        std::vector<float> diffuse;
+        std::vector<float> baseReflection;
         this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
         this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
         this->materialUniform.specularIntensity = jsonObj.at("SpecularIntensity");
         this->materialUniform.roughnessIntensity = jsonObj.at("RoughnessIntensity");
         //16
-        diffuse = jsonObj.at("DiffuseColor").get<std::vector<int>>();
+        diffuse = jsonObj.at("DiffuseColor").get<std::vector<float>>();
         this->materialUniform.diffuseColor.x = diffuse[0];
         this->materialUniform.diffuseColor.y = diffuse[1];
         this->materialUniform.diffuseColor.z = diffuse[2];
@@ -116,7 +120,7 @@ namespace VULKAN{
         //32
 
         //base reflection
-        baseReflection = jsonObj.at("BaseReflection").get<std::vector<int>>();
+        baseReflection = jsonObj.at("BaseReflection").get<std::vector<float>>();
         this->materialUniform.baseReflection.x = baseReflection[0];
         this->materialUniform.baseReflection.y = baseReflection[1];
         this->materialUniform.baseReflection.z = baseReflection[2];

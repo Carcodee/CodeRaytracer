@@ -3,16 +3,18 @@
 
 struct RayPayload{
     vec3 color;
+    vec3 colorLit;
     float distance;
     vec3 normal;
-    vec3 tangent;
     vec3 origin;
+    vec3 direction;
     float roughness;
     float reflectivity;
-    float directLightIntensity;
     bool shadow;
     bool emissive;
+    bool isMiss;
 };
+
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
 void main()

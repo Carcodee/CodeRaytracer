@@ -187,6 +187,9 @@ namespace VULKAN {
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
 		bool invalidModelToLoad = false;
+        
+        VKTexture* baseTexture;
+        VKTexture* environmentTexture;
 	};
 
 }

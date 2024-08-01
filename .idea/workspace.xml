@@ -25,20 +25,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="less noisy and working in frame accumulation">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="frame accumulation done">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Camera/Camera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Camera/Camera.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -113,30 +113,30 @@ vec3 FresnelShilck(vec3 halfway, vec3 view, vec3 FO){
 	vec3 vecPow = powPart * (vec3(1.0)-FO);
 	return FO + vecPow;
 }
+vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float metallic,  float roughness){
 
-vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
-	float D = D_GGX(roughness, normal, halfWay);
-	float G = G(roughness, normal, view, light);
-	vec3 F = FresnelShilck(halfWay, view, baseReflectivity);
-	vec3 cookTorrence = CookTorrance(normal, view, light, D, G, F);
+	float D = D_GGX(roughness, normal, wh);
+	float G = G(roughness, normal, wo, wi);
+	vec3 F = FresnelShilck(wh, wo, FO);
+	vec3 cookTorrence = CookTorrance(normal, wo, wi, D, G, F);
 	vec3 lambert= LambertDiffuse(col);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
 	vec3 BRDF =  kd * lambert + cookTorrence;
-	vec3 outgoingLight = emissiveMesh + BRDF * lightCol * max(dot(light,normal), 0.0001);
+	return BRDF;
+}
+
+vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay, float cosThetaTangent){
+
+	vec3 BRDF = GetBRDF(normal, view, light, halfWay, col, baseReflectivity, metallic, roughness);
+	vec3 outgoingLight = emissiveMesh + BRDF * lightCol * cosThetaTangent;
 	return outgoingLight;
 }
 
 vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
-	float D = D_GGX(roughness, normal, halfWay);
-	float G = G(roughness, normal, view, light);
-	vec3 F = FresnelShilck(halfWay, view, baseReflectivity);
-	vec3 cookTorrence = CookTorrance(normal, view, light, D, G, F);
-	vec3 lambert= LambertDiffuse(col);
-	vec3 ks = F;
-	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
-	vec3 BRDF =  kd * lambert + cookTorrence;
-	vec3 outgoingLight = emissiveMesh + BRDF * lightCol;
+	vec3 BRDF = GetBRDF(normal, view, light, halfWay, col, baseReflectivity, metallic, roughness);
+	
+	vec3 outgoingLight = emissiveMesh + BRDF;
 	return outgoingLight;
 }
 float oldRand(float uvX, float uvY) {

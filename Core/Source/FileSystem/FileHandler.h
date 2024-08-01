@@ -19,6 +19,7 @@ namespace HELPERS
 
 		std::string GetShadersPath();
 		std::string GetAssetsPath();
+        std::string GetEngineResourcesPath();
 		bool IsPathInAssets(std::string path);
 		bool IsPathAbsolute(std::string path);
 		bool IsValidPath(std::string path);

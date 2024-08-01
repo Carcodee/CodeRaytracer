@@ -598,7 +598,7 @@ namespace VULKAN
             ImGui::LabelText("Raytracing", "");
             ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
             ImGui::LabelText("Light", "");
-            if(ImGui::SliderFloat3("light Pos", lightPos, -100.0f, 100.0f, "%.3f")){
+            if(ImGui::SliderFloat3("light Pos", lightPos, -10.0f, 10.0f, "%.3f")){
                 InputHandler::editingGraphics= true;
             }
             if(ImGui::ColorEdit3("light Col", lightCol, 0.0f)){
