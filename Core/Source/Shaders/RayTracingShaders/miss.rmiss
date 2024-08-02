@@ -25,7 +25,7 @@ void main()
     const vec3 gradientEnd = vec3(1.0);
     vec3 unitDir = normalize(gl_WorldRayDirectionEXT);
     // Compute spherical coordinates
-    float theta = acos(-unitDir.y);
+    float theta = acos(unitDir.y);
     float phi = atan(unitDir.z, unitDir.x) + 3.1415f; // Add PI to shift the range [0, 2*PI]
     
     // Normalize spherical coordinates to [0, 1] range for texture lookup
@@ -36,9 +36,9 @@ void main()
     
     vec3 gradientCol = (1.0-t) * gradientStart + t * gradientEnd;
     vec3 envMap=texture(environmentMap, vec2 (u,v)).rgb;
+    
 	rayPayload.color = envMap;
-	rayPayload.distance = -1.0f;
-	rayPayload.normal = vec3(0.0f);
 	rayPayload.isMiss = true;
+	rayPayload.distance = -1.0f;
 	
 }

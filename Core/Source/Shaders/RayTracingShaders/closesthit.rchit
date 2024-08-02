@@ -187,7 +187,7 @@ void main()
   if(materials[materialIndex].emissionIntensity>0){
        rayPayload.emissive = true;
        rayPayload.shadow = false;
-       rayPayload.color = materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
+       rayPayload.color = pbrLit* materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
   }
  
   rayPayload.distance = gl_RayTmaxEXT;

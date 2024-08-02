@@ -25,7 +25,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="frame accumulation done">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="fixed the direct and indirect lightning calculations">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
@@ -33,7 +33,10 @@
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -242,6 +245,9 @@
       <workItem from="1722366936030" duration="9282000" />
       <workItem from="1722388733802" duration="6678000" />
       <workItem from="1722438186821" duration="6008000" />
+      <workItem from="1722524390674" duration="16867000" />
+      <workItem from="1722563837216" duration="1967000" />
+      <workItem from="1722608649585" duration="8078000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -427,7 +433,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722396271026</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="fixed the direct and indirect lightning calculations">
+      <option name="closed" value="true" />
+      <created>1722550388850</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1722550388850</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -502,6 +516,7 @@
     <MESSAGE value="Finally fixed the renderpasses" />
     <MESSAGE value="changing the bloom to physically based bloom" />
     <MESSAGE value="less noisy and working in frame accumulation" />
-    <option name="LAST_COMMIT_MESSAGE" value="less noisy and working in frame accumulation" />
+    <MESSAGE value="fixed the direct and indirect lightning calculations" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed the direct and indirect lightning calculations" />
   </component>
 </project>

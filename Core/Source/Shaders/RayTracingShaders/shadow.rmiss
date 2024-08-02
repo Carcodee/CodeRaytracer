@@ -20,4 +20,5 @@ layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 void main()
 {
 	rayPayload.shadow = false;
+	
 }
