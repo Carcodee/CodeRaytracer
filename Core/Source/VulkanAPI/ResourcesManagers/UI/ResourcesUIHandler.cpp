@@ -272,6 +272,23 @@ namespace VULKAN
         std::filesystem::path refPath(modelData.pathToAssetReference);
         std::string text = "Mesh Selected: " + refPath.filename().string();
         ImGui::SeparatorText(text.c_str());
+        if (ImGui::SliderFloat3("Position", positionInspected,-10.0f , 10.0f, "%.3f")){
+            modelData.bottomLevelObjRef->pos = glm::make_vec3(positionInspected);
+            modelData.bottomLevelObjRef->UpdateMatrix();
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
+        if(ImGui::SliderFloat3("Rotation", rotationInspected,0.0f , 360.0f, "%.3f")){
+            modelData.bottomLevelObjRef->rot = glm::make_vec3(rotationInspected);
+            modelData.bottomLevelObjRef->UpdateMatrix();
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
+        if(ImGui::SliderFloat3("Scale", scaleInspected,-10.0f , 10.0f, "%.3f")){
+            modelData.bottomLevelObjRef->scale = glm::make_vec3(scaleInspected);
+            modelData.bottomLevelObjRef->UpdateMatrix();
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
+            
+            
 
         for (int i = 0; i < modelData.meshCount; ++i) {
 

@@ -143,10 +143,10 @@ float oldRand(float uvX, float uvY) {
 	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
 }
 
-vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float idX, float idY, uint frame) {
+vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
 
-	float r1 =oldRand(idX, idY);
-	float r2 =oldRand(idX, idY);
+	float r1 =oldRand(seed.x, seed.y);
+	float r2 =oldRand(seed.x, seed.y);
 	// Convert to spherical coordinates
 	float theta = acos(sqrt(1.0 - r1));
 	float phi = 2.0 * PI * r2;
@@ -156,12 +156,35 @@ vec3 randomCosineWeightedDirection(vec3 normal,vec3 tangent, float idX, float id
 	float y = sin(theta) * sin(phi);
 	float z = cos(theta);
 
+	vec3 tangent= cross(vec3(x,y,z), normal);
 	vec3 bitangent = cross(normal, tangent);
 	// Convert the sample to world coordinates
 	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
 	return normalize(sampleDir);
 }
+void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
+{
+	if (abs(N.z) > 0.999)
+	{
+		T = vec3(1.0, 0.0, 0.0);
+	}
+	else
+	{
+		T = normalize(cross(vec3(0.0, 0.0, 1.0), N));
+	}
+	B = cross(N, T);
+}
+vec3 TangentToWorld(vec3 sampleVec, vec3 normal)
+{
+	vec3 T, B;
+	CreateOrthonormalBasis(normal, T, B);
 
+	// TBN matrix
+	mat3 TBN = mat3(T, B, normal);
+
+	// Transform the sample vector
+	return TBN * sampleVec;
+}
 vec3 GetReflection(vec3 reflectedDir, vec3 randomDir, float rougness){
 	return normalize(mix(reflectedDir, randomDir, rougness));
 }

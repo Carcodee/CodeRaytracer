@@ -362,6 +362,14 @@ namespace VULKAN {
 		memcpy(hitShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned * 3, handleSize);
 	}
 
+    void RayTracing_RS::RecreateBLASesAndTLASes() {
+        for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
+        {
+            CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
+        }
+        CreateTopLevelAccelerationStructure(topLevelObjBase);
+
+    }
 	void RayTracing_RS::CreateDescriptorSets()
 	{
 
@@ -382,7 +390,7 @@ namespace VULKAN {
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount},
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 		};
@@ -412,6 +420,7 @@ namespace VULKAN {
 		{
 			throw std::runtime_error("Unable to create descriptorAllocateInfo");
 		}
+        
         VkAccelerationStructureKHR nullAccelerationStructure = VK_NULL_HANDLE;
         
 		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
@@ -532,11 +541,7 @@ namespace VULKAN {
         ModelHandler::GetInstance()->CreateMaterialTextures(myRenderer.GetSwapchain());
         CreateMaterialsBuffer();
         CreateAllModelsBuffer();
-        for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); i++)
-        {
-            CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
-        }
-        CreateTopLevelAccelerationStructure(topLevelObjBase);
+        RecreateBLASesAndTLASes();
         
 		uint32_t imageCount = 0;
         uint32_t materialCount =0;
@@ -565,42 +570,42 @@ namespace VULKAN {
 		{
 			materialCount = 1;
 		}
+        std::vector<VkDescriptorPoolSize> poolSizes = {
+                { VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
+        };
 
-		std::vector<VkDescriptorPoolSize> poolSizes = {
-			{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, imageCount},
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
-		};
-
-        std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
-
-		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
-		if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-		{
-			throw std::runtime_error("Unable to create descriptorPools");
-		}
-		VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
-		uint32_t variableDescCounts[] = {imageCount};
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
+        if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Unable to create descriptorPools");
+        } 
+        VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
+		uint32_t variableDescCounts[] = {  imageCount };
 		variableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
 		variableDescriptorCountAllocInfo.descriptorSetCount = 1;
 		variableDescriptorCountAllocInfo.pDescriptorCounts = variableDescCounts;
 
 
-		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = INITIALIZERS::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo =INITIALIZERS::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
 		descriptorSetAllocateInfo.pNext = &variableDescriptorCountAllocInfo;
 
+        
 		if (vkAllocateDescriptorSets(myDevice.device(), &descriptorSetAllocateInfo, &descriptorSet) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Unable to create descriptorAllocateInfo");
 		}
-
+        
+        
 		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
 		descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
 		descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
@@ -1037,6 +1042,7 @@ namespace VULKAN {
 			modelsOnScene[i]->indexBLASOffset = perModelIndexStride;
 			modelsOnScene[i]->vertexBLASOffset = perModelVertexCount;
 			modelsOnScene[i]->transformBLASOffset = i;
+            modelsOnScene[i]->bottomLevelObjRef = &ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i);
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.indexBLASOffset = perModelIndexStride;
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.vertexBLASOffset = perModelVertexCount;
             
@@ -1131,7 +1137,7 @@ namespace VULKAN {
     }
 
 
-    void RayTracing_RS::AddModelToPipeline(ModelData& modelData)
+    void RayTracing_RS::AddModelToPipeline(std::shared_ptr<ModelData> modelData)
 	{
         //TODO: here the model data pointer gets free because is a copy, maybe change this later  
 		SetupBottomLevelObj(modelData);
@@ -1257,11 +1263,11 @@ namespace VULKAN {
 		memcpy(lightBuffer.mapped, &light,sizeof(Light));
 	}
 
-	void RayTracing_RS::SetupBottomLevelObj(ModelData& modelData)
+	void RayTracing_RS::SetupBottomLevelObj(std::shared_ptr<ModelData> modelData)
 	{
 		//ModelData combinedMesh2=modelLoader.GetModelVertexAndIndicesTinyObject("C:/Users/carlo/Downloads/VikingRoom.fbx");
 //		combinedMesh.CreateAllTextures(myRenderer.GetSwapchain(), ModelHandler::GetInstance()->allTexturesOffset);
-		modelsOnScene.push_back(&modelData);
+		modelsOnScene.push_back(modelData);
 		glm::vec3 positions[3];
 		glm::vec3 rots[3];
 		glm::vec3 scales[3];
@@ -1270,6 +1276,7 @@ namespace VULKAN {
 		std::uniform_int_distribution<>dis(0, 4);
 		topLevelObjBase.pos = glm::vec3(0.0f);
 		topLevelObjBase.scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        topLevelObjBase.rot = glm::vec3(1.0f, 1.0f, 1.0f);
 		topLevelObjBase.UpdateMatrix();
 		ModelHandler::GetInstance()->AddTLAS(topLevelObjBase);
 		for (int i=0; i<1; i++)
@@ -1290,6 +1297,7 @@ namespace VULKAN {
     void RayTracing_RS::ResetAccumulatedFrames() {
         currentAccumulatedFrame = 0;
     }
+
 
 
 }

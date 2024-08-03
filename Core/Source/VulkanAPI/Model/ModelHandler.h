@@ -4,6 +4,7 @@
 
 #include "VulkanAPI/RenderSystems/RayTracing_RS.h"
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
+#include "VulkanAPI/Utility/Utility.h"
 
 namespace VULKAN
 {
@@ -49,21 +50,22 @@ namespace VULKAN
         void CreateMaterial(std::string path);
         void CreateInstance(Material& material);
 
-		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS);
-		void AddTLAS(RayTracing_RS::TopLevelObj& bottomLevelObj);
+		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, TopLevelObj& TLAS);
+		void AddTLAS(TopLevelObj& bottomLevelObj);
         
         
-		std::vector<RayTracing_RS::BottomLevelObj>& GetBLASesFromTLAS(RayTracing_RS::TopLevelObj TLAS);
-		RayTracing_RS::BottomLevelObj& GetBLASFromTLAS(RayTracing_RS::TopLevelObj TLAS, int index);
+		std::vector<BottomLevelObj>& GetBLASesFromTLAS(TopLevelObj TLAS);
+		BottomLevelObj& GetBLASFromTLAS(TopLevelObj TLAS, int index);
 		std::vector<std::string> queryModelPathsToHandle;
         std::vector<int> queryModelIdsToHandle;
 		std::vector<std::shared_ptr<ModelToLoadState>> modelsReady;
-		std::map<int,std::vector<RayTracing_RS::BottomLevelObj>> bottomLevelObjects;
+		std::map<int,std::vector<BottomLevelObj>> bottomLevelObjects;
 		std::vector<std::future<void>> futures;
 		std::mutex loadAssetMutex;
 		bool Loading = false;
         bool updateMeshData = false;
         bool updateMaterialData = false;
+        bool updateBottomLevelObj = false;
 		int TLASesCount = 0;
         int allTexturesOffset =0;
         int currentMaterialsOffset= 0;

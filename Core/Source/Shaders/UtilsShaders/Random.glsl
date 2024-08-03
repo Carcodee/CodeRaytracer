@@ -15,6 +15,7 @@ vec3 CosineSampleHemisphere(vec2 E)
     return H;
 }
 
+
 uint GetHash(uint seed)
 {
     seed = (seed ^ 61) ^ (seed >> 16);

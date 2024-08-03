@@ -179,6 +179,7 @@ namespace VULKAN
                     else if(path.extension()==codeModelFileExtension){
                         ModelData modelData{};
                         modelData.Deserialize(currentJson);
+                        assert(!ModelHandler::GetInstance()->allModelsOnApp.contains(modelData.id) &&"Two models contains the same id");
                         ModelHandler::GetInstance()->allModelsOnApp.try_emplace(modelData.id,std::make_shared<ModelData>(modelData));
                         assetsLoaded.try_emplace(path.string(), modelData.id);
                     }

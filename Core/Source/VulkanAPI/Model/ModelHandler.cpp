@@ -75,6 +75,7 @@ namespace VULKAN
 		modelsReadyToLoadVec->push_back(std::ref(modelToLoadState));
         //runtime
         modelToLoadState->model->id =allModelsOnApp.size();
+        assert(!allModelsOnApp.contains(modelToLoadState->model->id) &&"Two models contains the same id");
         allModelsOnApp.try_emplace(modelToLoadState->model->id,modelToLoadState->model);
         std::string metaFilePath=AssetsHandler::GetInstance()->HandleAssetLoad<ModelData>(*modelToLoadState->model,path, AssetsHandler::GetInstance()->codeModelFileExtension, modelToLoadState->model->id);
 	}
@@ -115,13 +116,14 @@ namespace VULKAN
             }));
         }
     }
-	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, RayTracing_RS::TopLevelObj& TLAS)
+	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, TopLevelObj& TLAS)
 	{
-			VkTransformMatrixKHR matrix = {
-			1.0f, 0.0f, 0.0f, pos.x,
-			0.0f, 1.0f, 0.0f, pos.y,
-			0.0f, 0.0f, -1.0,pos.z};
-		RayTracing_RS::BottomLevelObj bottomLevelObj{};
+        VkTransformMatrixKHR matrix = {
+                1.0f, 0.0f, 0.0f, pos.x,
+                0.0f, 1.0f, 0.0f, pos.y,
+                0.0f, 0.0f, -1.0,pos.z};
+
+		BottomLevelObj bottomLevelObj{};
 		bottomLevelObj.combinedMesh = combinedMesh;
 		bottomLevelObj.pos = pos;
 		bottomLevelObj.rot = rot;
@@ -134,21 +136,21 @@ namespace VULKAN
 		
 	}
 
-	void ModelHandler::AddTLAS(RayTracing_RS::TopLevelObj& topLevelObj)
+	void ModelHandler::AddTLAS(TopLevelObj& topLevelObj)
 	{
-		std::vector<RayTracing_RS::BottomLevelObj> BLASes;
+		std::vector<BottomLevelObj> BLASes;
 		bottomLevelObjects.try_emplace(TLASesCount,BLASes);
 		topLevelObj.topLevelInstanceCount = 1;
 		topLevelObj.TLASID = TLASesCount;
 		TLASesCount++;
 	}
 
-	std::vector<RayTracing_RS::BottomLevelObj>& ModelHandler::GetBLASesFromTLAS(RayTracing_RS::TopLevelObj TLAS)
+	std::vector<BottomLevelObj>& ModelHandler::GetBLASesFromTLAS(TopLevelObj TLAS)
 	{
 		return bottomLevelObjects.at(TLAS.TLASID);
 	}
 
-	RayTracing_RS::BottomLevelObj& ModelHandler::GetBLASFromTLAS(RayTracing_RS::TopLevelObj TLAS, int index)
+	BottomLevelObj& ModelHandler::GetBLASFromTLAS(TopLevelObj TLAS, int index)
 	{
 		return bottomLevelObjects.at(TLAS.TLASID)[index];
 	}

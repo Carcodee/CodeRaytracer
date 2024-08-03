@@ -25,18 +25,22 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="fixed the direct and indirect lightning calculations">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="fixed raybounces to the miss shader">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,7 +105,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
     &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
@@ -247,7 +251,11 @@
       <workItem from="1722438186821" duration="6008000" />
       <workItem from="1722524390674" duration="16867000" />
       <workItem from="1722563837216" duration="1967000" />
-      <workItem from="1722608649585" duration="8078000" />
+      <workItem from="1722608649585" duration="8689000" />
+      <workItem from="1722617848720" duration="6856000" />
+      <workItem from="1722690876107" duration="1677000" />
+      <workItem from="1722695437233" duration="772000" />
+      <workItem from="1722719030414" duration="2868000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -441,7 +449,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722550388850</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="fixed raybounces to the miss shader">
+      <option name="closed" value="true" />
+      <created>1722617673211</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1722617673211</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -517,6 +533,7 @@
     <MESSAGE value="changing the bloom to physically based bloom" />
     <MESSAGE value="less noisy and working in frame accumulation" />
     <MESSAGE value="fixed the direct and indirect lightning calculations" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed the direct and indirect lightning calculations" />
+    <MESSAGE value="fixed raybounces to the miss shader" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed raybounces to the miss shader" />
   </component>
 </project>

@@ -98,9 +98,9 @@ void main()
                 directLightContrib *= 0.3f;
             }
             if (rayPayload.distance < 0.0f) {
-                rayThroughput *= rayPayload.colorLit; 
-                irradiance += directLightContrib * rayThroughput; 
-                break;
+                //rayThroughput *= rayPayload.colorLit; 
+                //irradiance += directLightContrib * rayThroughput; 
+               // break;
             }else{ 
                const vec4 hitPos = origin + direction * rayPayload.distance;
                origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
@@ -108,13 +108,14 @@ void main()
                vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
                vec2 vec2Rand= NextVec2(seed);
                vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
-               direction.xyz = GetReflection(reflectedDir, randomDir, rayPayload.roughness);
+               vec3 sampledDir = TangentToWorld(rayPayload.normal,randomDir);
+               
+               direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
                rayPayload.direction = direction.xyz;
                
                float lightPdf = 1/LIGHT_SOURCES;
-               rayThroughput *= directLightContrib/lightPdf; 
+               rayThroughput *= rayPayload.colorLit; 
                irradiance += directLightContrib * rayThroughput; 
-               
                
                //if(rand(d.x,d.y)> rayPayload.reflectivity){
                //    direction.xyz = reflectedDir;

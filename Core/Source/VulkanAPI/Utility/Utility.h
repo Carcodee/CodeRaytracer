@@ -26,87 +26,168 @@ namespace VULKAN{
         glm::vec3 pos;
         glm::vec2 textCoord;
     };
-
+    struct GeometryData
+    {
+        uint64_t vertexBufferDeviceAddress;
+        uint64_t indexBufferDeviceAddress;
+        int textureIndexBaseColor;
+        int textureIndexOcclusion;
+    };
+    struct RayTracingScratchBuffer
+    {
+        uint64_t deviceAddress = 0;
+        VkBuffer handle = VK_NULL_HANDLE;
+        VkDeviceMemory memory = VK_NULL_HANDLE;
+    };
+    // Ray tracing acceleration structure
+    struct AccelerationStructure {
+        VkAccelerationStructureKHR handle;
+        uint64_t deviceAddress = 0;
+        VkDeviceMemory memory;
+        VkBuffer buffer;
+    };
+    struct RxTexture
+    {
+        Material mat;
+        VkDescriptorSet descriptorSet;
+    };
     struct ModelDataUniformBuffer
     {
         uint32_t materialIndex;
         uint32_t geometryIndexStart;
         uint32_t indexOffset;
     };
-		struct ModelData : ISerializable<ModelData>
-		{
-            ~ModelData(){
-                
+    struct BottomLevelObj;
+    
+    struct ModelData : ISerializable<ModelData>
+    {
+        ~ModelData(){
+        }
+        std::vector <Vertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<uint32_t> firstMeshIndex;
+        std::vector<uint32_t> firstMeshVertex;
+        std::vector<int> materialIds;
+        std::vector<uint32_t> meshIndexCount;
+        std::vector<uint32_t> meshVertexCount;
+        std::map<int,Material>materialDataPerMesh;
+        int meshCount = -1;
+        uint32_t indexBLASOffset = 0;
+        uint32_t vertexBLASOffset = 0;
+        uint32_t transformBLASOffset = 0;
+        BottomLevelObj* bottomLevelObjRef = nullptr;
+        std::vector<ModelDataUniformBuffer> dataUniformBuffer;
+        uint32_t id = -1;
+        bool generated= false;
+        uint32_t materialOffset= 0;
+        std::string pathToAssetReference="";
+        void CalculateMaterialsIdsOffsets(){
+            for (int i = 0; i < dataUniformBuffer.size(); ++i) {
+                dataUniformBuffer[i].materialIndex = materialIds[i];
             }
-			std::vector <Vertex> vertices;
-			std::vector<uint32_t> indices;
-            std::vector<uint32_t> firstMeshIndex;
-			std::vector<uint32_t> firstMeshVertex;
-			std::vector<int> materialIds;
-			std::vector<uint32_t> meshIndexCount;
-			std::vector<uint32_t> meshVertexCount;
-			std::map<int,Material>materialDataPerMesh;
-			int meshCount;
-			uint32_t indexBLASOffset = 0;
-			uint32_t vertexBLASOffset = 0;
-			uint32_t transformBLASOffset = 0;
-            std::vector<ModelDataUniformBuffer> dataUniformBuffer;
-            uint32_t id;
-            bool generated= false;
-            uint32_t materialOffset= 0;
-            std::string pathToAssetReference="";
-            void CalculateMaterialsIdsOffsets(){
-                for (int i = 0; i < dataUniformBuffer.size(); ++i) {
-                    dataUniformBuffer[i].materialIndex = materialIds[i];
-                }
-            }
-			void CreateAllTextures(VulkanSwapChain& swap_chain, int& allTextureOffset)
-			{
-				for (int i = 0; i < materialDataPerMesh.size(); ++i)
-				{
-					materialDataPerMesh.at(i).CreateTextures(swap_chain,allTextureOffset);
-				}
-			}
-            nlohmann::json Serialize() override{
-                nlohmann::json jsonData;
-                jsonData = {
-                        {
-                                "ModelID",this->id
-                        },
-                        {
-                                "MeshCount",this->meshCount
-                        },
-                        {
-                                "Generated",this->generated
-                        },
-                        {
-                                "MaterialsIDs",this->materialIds
-                        },
-                        {
-                                "PathToAssetReference",this->pathToAssetReference
-                        },
-                        {
-                                "MaterialOffset",this->materialOffset
-                        },
-                };
-                return jsonData;
-            }
-            ModelData Deserialize(nlohmann::json &jsonObj) override{
-                this->id = jsonObj.at("ModelID");
-                this->meshCount = jsonObj.at("MeshCount");
-                this->generated=jsonObj.at("Generated");
-                this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
-                this->pathToAssetReference = jsonObj.at("PathToAssetReference");
-                this->materialOffset = jsonObj.at("MaterialOffset");
-                return *this; 
-            }
-            void SaveData() override{
-                
-            }
-		};
-		
+        }
+        
+        nlohmann::json Serialize() override{
+            nlohmann::json jsonData;
+            jsonData = {
+                    {
+                            "ModelID",this->id
+                    },
+                    {
+                            "MeshCount",this->meshCount
+                    },
+                    {
+                            "Generated",this->generated
+                    },
+                    {
+                            "MaterialsIDs",this->materialIds
+                    },
+                    {
+                            "PathToAssetReference",this->pathToAssetReference
+                    },
+                    {
+                            "MaterialOffset",this->materialOffset
+                    },
+            };
+            return jsonData;
+        }
+        ModelData Deserialize(nlohmann::json &jsonObj) override{
+            this->id = jsonObj.at("ModelID");
+            this->meshCount = jsonObj.at("MeshCount");
+            this->generated=jsonObj.at("Generated");
+            this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
+            this->pathToAssetReference = jsonObj.at("PathToAssetReference");
+            this->materialOffset = jsonObj.at("MaterialOffset");
+            return *this;
+        }
+        void SaveData() override{
 
-		uint32_t alignedSize(uint32_t value, uint32_t alignment);
+        }
+    };
+
+
+
+    struct BottomLevelObj
+    {
+        
+        std::vector<GeometryData> geometryData;
+        ModelData combinedMesh;
+        VkTransformMatrixKHR instanceMatrix;
+        VkTransformMatrixKHR matrix;
+        std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
+        AccelerationStructure BottomLevelAs;
+        std::vector<RxTexture> materialsData;
+        uint32_t indexOffset = 0;
+
+        glm::vec3 pos;
+        glm::vec3 rot;
+        glm::vec3 scale;
+        void UpdateMatrix(){
+            instanceMatrix = {
+                    scale.x, 0.0f, 0.0f, pos.x,
+                    0.0f, scale.y, 0.0f, pos.y,
+                    0.0f, 0.0f, scale.z,pos.z};
+
+            float cosPitch = cos(glm::radians(rot.x));
+            float sinPitch = sin(glm::radians(rot.x));
+            float cosYaw = cos(glm::radians(rot.y));
+            float sinYaw = sin(glm::radians(rot.y));
+            float cosRoll = cos(glm::radians(rot.z));
+            float sinRoll = sin(glm::radians(rot.z));
+
+            instanceMatrix = {
+                    scale.x * (cosYaw * cosRoll), scale.x * (cosYaw * sinRoll), scale.x * (-sinYaw), pos.x,
+                    scale.y * (sinPitch * sinYaw * cosRoll - cosPitch * sinRoll), scale.y * (sinPitch * sinYaw * sinRoll + cosPitch * cosRoll), scale.y * (sinPitch * cosYaw), pos.y,
+                    scale.z * (cosPitch * sinYaw * cosRoll + sinPitch * sinRoll), scale.z * (cosPitch * sinYaw * sinRoll - sinPitch * cosRoll), scale.z * (cosPitch * cosYaw), pos.z
+            };
+        }
+
+        int bottomLevelId=0;
+    };
+    struct TopLevelObj
+    {
+        std::vector<Vertex>vertices;
+        std::vector<uint32_t>indices;
+
+        VkTransformMatrixKHR matrix;
+        AccelerationStructure TopLevelAsData;
+        std::vector < BottomLevelObj*> bottomLevelObjRef;
+
+        glm::vec3 pos;
+        glm::vec3 rot;
+        glm::vec3 scale;
+        int topLevelInstanceCount = 1;
+        int TLASID = 0;
+        void UpdateMatrix(){
+            matrix = {
+                    scale.x, 0.0f, 0.0f, pos.x,
+                    0.0f, scale.y, 0.0f, pos.y,
+                    0.0f, 0.0f, -scale.z,pos.z};
+        }
+    };
+
+    
+    uint32_t alignedSize(uint32_t value, uint32_t alignment);
 		size_t alignedSize(size_t value, size_t alignment);
 		VkDeviceSize alignedVkSize(VkDeviceSize value, VkDeviceSize alignment);
 

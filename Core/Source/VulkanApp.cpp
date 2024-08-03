@@ -32,7 +32,10 @@ namespace VULKAN{
             
 			rayTracing_RS.cam.Move(deltaTime);
 			rayTracing_RS.cam.UpdateCamera();
-
+            if (ModelHandler::GetInstance()->updateBottomLevelObj){
+                rayTracing_RS.UpdateRaytracingData();
+                ModelHandler::GetInstance()->updateBottomLevelObj = false;
+            }
             if (ModelHandler::GetInstance()->updateMaterialData){
                 rayTracing_RS.UpdateMaterialInfo();
                 ModelHandler::GetInstance()->updateMaterialData = false;
@@ -256,7 +259,7 @@ namespace VULKAN{
                     continue;
                 }
 
-                rayTracing_RS.AddModelToPipeline(*element.get()->model);
+                rayTracing_RS.AddModelToPipeline(element->model);
                 element.get()->state = ModelHandler::DISPACHED;
             }
             if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelIdsToHandle.size())
@@ -283,7 +286,7 @@ namespace VULKAN{
                     continue;
                 }
 
-                rayTracing_RS.AddModelToPipeline(*element.get()->model);
+                rayTracing_RS.AddModelToPipeline(element.get()->model);
                 element.get()->state = ModelHandler::DISPACHED;
             }
             if (ModelHandler::GetInstance()->modelsReady.size() == ModelHandler::GetInstance()->queryModelPathsToHandle.size())
