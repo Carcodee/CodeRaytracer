@@ -156,24 +156,34 @@ void main()
   
   vec4 diffuse=diffuseInMat;
 
-  vec3 spec = vec3(0.8f); 
-  vec3 view = normalize(pos-rayPayload.origin);
-  vec3 lightDir= normalize(myLight.pos - pos); 
+  vec3 view = normalize(pos - rayPayload.origin);
+  vec3 lightDir= normalize(pos - myLight.pos); 
   vec3 halfway =normalize(view + lightDir);
   
   vec3 lightDirTangSpace = lightDir * TBN;
   vec3 finalNormalTangSpace = finalNormal * TBN;
+  vec3 rayDirTangentSpace = normalize(pos - rayPayload.origin) * TBN;
   
   float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
+  float cosThetaTangentIndirect = max(dot(rayDirTangentSpace, finalNormalTangSpace), 0.001);
   
   float roughness =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
   float metallic =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
   
-  vec3 pbrLit= GetPBRLit(diffuse.xyz, myLight.col,
-  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
-  finalNormal, view, lightDir, halfway);
   
-  vec3 pbr = pbrLit * cosThetaTangent * myLight.intensity * myLight.col;  
+  vec3 pbrLitDirect= GetPBRLit(diffuse.xyz, myLight.col,
+  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
+  finalNormal, view, lightDirTangSpace, halfway);
+  
+  halfway =normalize(view + rayDirTangentSpace);
+  
+  //this is wrong
+  vec3 pbrLitIndirect= GetPBRLit(diffuse.xyz, myLight.col,
+  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
+  finalNormal, view, rayDirTangentSpace, halfway);
+  
+  
+  vec3 pbr = pbrLitDirect * cosThetaTangent *myLight.intensity * myLight.col;  
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -182,12 +192,12 @@ void main()
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
  
   rayPayload.color = pbr; 
-  rayPayload.colorLit = pbrLit; 
+  rayPayload.colorLit = pbrLitDirect; 
   
   if(materials[materialIndex].emissionIntensity>0){
        rayPayload.emissive = true;
        rayPayload.shadow = false;
-       rayPayload.color = pbrLit* materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
+       rayPayload.color = pbrLitDirect * materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
   }
  
   rayPayload.distance = gl_RayTmaxEXT;

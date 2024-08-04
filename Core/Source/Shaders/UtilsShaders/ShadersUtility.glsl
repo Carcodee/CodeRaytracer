@@ -162,6 +162,16 @@ vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
 	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
 	return normalize(sampleDir);
 }
+float CosinePdfHemisphere(float cosTheta)
+{
+	return cosTheta / PI;
+}
+
+float MaxComponent(vec3 v)
+{
+	return max(v.x, max(v.y, v.z));
+}
+
 void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
 {
 	if (abs(N.z) > 0.999)
