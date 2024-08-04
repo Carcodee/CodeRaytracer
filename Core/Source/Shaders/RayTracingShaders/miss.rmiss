@@ -8,6 +8,7 @@ struct RayPayload{
     vec3 normal;
     vec3 origin;
     vec3 direction;
+    vec3 sampleDir;
     float roughness;
     float reflectivity;
     bool shadow;

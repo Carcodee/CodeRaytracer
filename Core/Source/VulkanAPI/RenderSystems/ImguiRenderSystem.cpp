@@ -614,6 +614,13 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+            if(ImGui::SliderFloat("Set All materials Reflectivity", &reflectivityAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.reflectivityIntensity = reflectivityAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
             ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
 //            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
             ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
