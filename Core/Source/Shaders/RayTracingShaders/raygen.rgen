@@ -43,13 +43,15 @@ layout(binding=6) uniform light{
 layout(set = 0, binding = 10, rgba8) uniform image2D emissiveImage;
 
 
-layout(push_constant) uniform AccumulatedFrames{
+layout(push_constant) uniform pushConstantVariables{
     uint currentFrame;
+    int minBounceForIndirect;
+    float rayTerminationBias;
+    float maxVariance;
 } pc;
 
 #define SAMPLE_COUNT 5 
 #define LIGHT_SOURCES 1 
-#define MIN_RECURSION 2
 
 Material currentMaterial;
 
@@ -101,6 +103,7 @@ void main()
             
             const vec4 hitPos = origin + direction * rayPayload.distance;
             origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
+            //the current bug with light is related with the sample dir I think
             vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
             vec2 vec2Rand= NextVec2(seed);
             vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
@@ -109,20 +112,20 @@ void main()
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
             rayPayload.direction = direction.xyz;
            
-            float lightPdf = 1/LIGHT_SOURCES;
-           
+            float lightPdf = 1/LIGHT_SOURCES; 
             rayPdf = 1 * MAX_RECURSION;  
             irradiance += directLightContrib * rayThroughput; 
             rayThroughput *= rayPayload.colorLit; 
             if(NextFloat(seed) < rayPayload.reflectivity){
                     direction.xyz = reflectedDir;
             }       
-            if(i >= MIN_RECURSION){
+            if(i >= pc.minBounceForIndirect){
                 float threshold = max(0.05f,1.0f-MaxComponent(rayThroughput));
-                //if(NextFloat(seed) < threshold){
-                 //   break;
-                //}
+                if(threshold > NextFloat(seed) + pc.rayTerminationBias){
+                   break; 
+                }
                 rayThroughput /= 1.0f - threshold;
+                rayThroughput = min(vec3(pc.maxVariance), rayThroughput);
             
             }
     

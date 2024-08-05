@@ -174,10 +174,8 @@ namespace VULKAN{
         bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[1], rayTracing_RS.emissiveStoreImage->textureSampler);
         bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[2], rayTracing_RS.emissiveStoreImage->textureSampler);
         bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
-
         bloom_Rs.upSampleRenderPassRef = renderer.GetSwapchain().UpSampleRenderPass;
         bloom_Rs.downSampleRenderPassRef = renderer.GetSwapchain().DownSampleRenderPass;
-        
         bloom_Rs.InitRS();
 
         std::string outputVertPath= HELPERS::FileHandler::GetInstance()->GetShadersPath() + "\\PostPro\\postpro.vert.spv";
@@ -190,7 +188,6 @@ namespace VULKAN{
         FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.storageImage->textureImageView, rayTracing_RS.storageImage->textureSampler);
         FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass; 
         FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
-        
         if (editor)
 		{
 			SetUpImgui();
@@ -198,6 +195,7 @@ namespace VULKAN{
 			ImguiRenderSystem::GetInstance()->SetUpSystem(initWindow.window);
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(finalStorageImage);
             ImguiRenderSystem::GetInstance()->viewportTexture = finalStorageImage;
+            ImguiRenderSystem::GetInstance()->pushConstantBlockRsRef = &rayTracing_RS.pc;
 
 		}
 		

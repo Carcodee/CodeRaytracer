@@ -173,26 +173,20 @@ void main()
   float metallic =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
   
   
-  vec3 pbrLitDirect= GetPBRLit(diffuse.xyz, myLight.col,
-  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
-  finalNormal, view, lightDir, halfway);
-  
+  vec3 pbrLitDirect= GetBRDF(finalNormal, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
   halfway = normalize(rayPayload.sampleDir + view);
-  
-  vec3 pbrLitIndirect= GetPBRLit(diffuse.xyz, myLight.col,
-  materials[materialIndex].emissionIntensity, roughness, metallic, materials[materialIndex].baseReflection,
-  finalNormal, view, rayPayload.sampleDir, halfway);
-  
+    
+  float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
+  vec3 pbrLitIndirect= GetBRDF(finalNormal, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
   rayPayload.shadow = true;
   float tmin = 0.001;
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
- 
-  rayPayload.color = pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col; 
-  rayPayload.colorLit = pbrLitIndirect ; 
+  rayPayload.color = materials[materialIndex].emissionIntensity + (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
   if(materials[materialIndex].emissionIntensity>0){
        rayPayload.emissive = true;

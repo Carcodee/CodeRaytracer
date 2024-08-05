@@ -116,6 +116,7 @@ namespace VULKAN {
 			throw std::runtime_error("failed to load texture image!");
 		}
 		mipLevels = (static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1);
+        mipLevels = 1;
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -345,8 +346,8 @@ namespace VULKAN {
 
     void VKTexture::GenerateMipLevels() {
 
-//        assert(this->textureWidth < -1 &&"height or witdht must be valid for generating mipmaps");
-//        assert(this->textureHeight < -1 &&"height or witdht must be valid for generating mipmaps");
+        assert(this->textureWidth > 0 &&"height or witdht must be valid for generating mipmaps");
+        assert(this->textureHeight > 0 &&"height or witdht must be valid for generating mipmaps");
         
         VkImageLayout currentLayoutTemp=currentLayout;
         VkAccessFlags currentAccessFlagsTemp=currentAccessFlags;

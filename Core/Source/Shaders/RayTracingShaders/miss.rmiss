@@ -29,8 +29,6 @@ void main()
     float theta = acos(unitDir.y);
     float phi = atan(unitDir.z, unitDir.x) + 3.1415f; // Add PI to shift the range [0, 2*PI]
     
-    // Normalize spherical coordinates to [0, 1] range for texture lookup
-    
     float u = phi / (2.0 * 3.1415f);
     float v = theta / 3.1415;
     float t = 0.5 * (unitDir.y + 1.0);

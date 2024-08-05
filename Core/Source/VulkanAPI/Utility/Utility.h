@@ -21,6 +21,13 @@
 
 namespace VULKAN{
 
+    struct PushConstantBlock_RS{
+        uint32_t currentAccumulatedFrame = 1;
+        int minBounceForIndirect = 1;
+        float rayTerminationBias = 1.0f;
+        float maxVariance = 1.0f;
+
+    };
     struct SimpleVertex
     {
         glm::vec3 pos;
@@ -33,6 +40,7 @@ namespace VULKAN{
         int textureIndexBaseColor;
         int textureIndexOcclusion;
     };
+
     struct RayTracingScratchBuffer
     {
         uint64_t deviceAddress = 0;
@@ -46,6 +54,18 @@ namespace VULKAN{
         VkDeviceMemory memory;
         VkBuffer buffer;
     };
+    struct Sphere{
+        glm::vec3 pos = glm::vec3 (0.0f);
+        float radius = 1.0f;
+        uint32_t matId = 0;
+        uint32_t  id = 0;
+        VkTransformMatrixKHR transformMatrix={
+                1.0f, 0.0f, 0.0f, pos.x,
+                0.0f, 1.0f, 0.0f, pos.y,
+                0.0f, 0.0f, -1.0f,pos.z};
+        AccelerationStructure accelerationStructure;
+    };
+        
     struct RxTexture
     {
         Material mat;

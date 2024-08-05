@@ -328,10 +328,8 @@ namespace VULKAN
 				key.second = ACTION_HOLD;
 			}
 		}
-
         movingMouse = false;
         editingGraphics = false;
-
 
 	}
 

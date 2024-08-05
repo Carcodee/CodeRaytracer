@@ -18,6 +18,7 @@ namespace VULKAN
     {
         fileHandlerInstanceRef = HELPERS::FileHandler::GetInstance();
         assetInstanceRef= AssetsHandler::GetInstance();
+        
 
 
     }
@@ -85,17 +86,19 @@ namespace VULKAN
             std::string shortName = path.erase(0, shortNamePos + 1);
             if (element.is_directory())
             {
-                if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize)))
+                if (ImGui::ImageButton((ImTextureID)ImguiRenderSystem::GetInstance()->folderThumbnail->textureDescriptor, ImVec2(iconSize, iconSize)))
                 {
                     fileHandlerInstanceRef->currentPathRelativeToAssets = std::filesystem::path(element.path());
                 }
+                ImGui::Text(shortName.c_str());
+                
                 ImGui::NextColumn();
                 colCounter++;
             }
             else if (element.path().extension()== assetInstanceRef->codeModelFileExtension)
             {
                 if(AssetsHandler::GetInstance()->assetsLoaded.contains(element.path().string())){
-                    if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){
+                    if (ImGui::ImageButton((ImTextureID)ImguiRenderSystem::GetInstance()->modelThumbnail->textureDescriptor, ImVec2(iconSize, iconSize))){
                         pathInspected = element.path().string();
                     }
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
@@ -104,21 +107,33 @@ namespace VULKAN
                         ImGui::SetDragDropPayload("MODEL_PATH", &modelId,  sizeof(int));
                         ImGui::EndDragDropSource();
                     }
+                    ImGui::Text(shortName.c_str());
                     colCounter++;
                     ImGui::NextColumn();
                 }
             }
             else if (element.path().extension()== assetInstanceRef->matFileExtension) {
                 if(AssetsHandler::GetInstance()->assetsLoaded.contains(element.path().string())){
-                    if (ImGui::Button(shortName.c_str(), ImVec2(iconSize, iconSize))){
-                        pathInspected = element.path().string();
+                    int matId= AssetsHandler::GetInstance()->assetsLoaded.at(element.path().string());
+                    assert(ModelHandler::GetInstance()->allMaterialsOnApp.contains(matId)&&"The material is not loaded and it should");
+                    Material& matRef = *ModelHandler::GetInstance()->allMaterialsOnApp.at(matId);
+                    if(matRef.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
+                        ImguiRenderSystem::GetInstance()->HandleTextureCreation(matRef.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
+                        if (ImGui::ImageButton((ImTextureID)matRef.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor, ImVec2(iconSize, iconSize))){
+                            pathInspected = element.path().string();
+                        }      
+                    }else{
+                        if (ImGui::Button("MAT", ImVec2(iconSize, iconSize))){
+                            pathInspected = element.path().string();
+                        }
                     }
+                  
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
                     {
-                        int matId= AssetsHandler::GetInstance()->assetsLoaded.at(element.path().string());
                         ImGui::SetDragDropPayload("MATERIAL_ID", &matId,  sizeof(int));
                         ImGui::EndDragDropSource();
                     }
+                    ImGui::Text(shortName.c_str());
                     colCounter++;
                     ImGui::NextColumn();
                 }
@@ -176,17 +191,14 @@ namespace VULKAN
                 }
             }
             if (ImGui::BeginPopup("SetTex")){
-                for (auto& matOnApp: ModelHandler::GetInstance()->allMaterialsOnApp) {
-                    for (auto matTex: matOnApp.second->materialTextures) {
-                        ImguiRenderSystem::GetInstance()->HandleTextureCreation(matTex.second);
-                        ImGui::Image((ImTextureID)matTex.second->textureDescriptor, ImVec2(10,10));
-                        ImGui::SameLine();
-                        if (ImGui::Selectable("SetText")){
-                            mat.SetTexture(TEXTURE_TYPE::DIFFUSE, matTex.second);
-                            ImGui::EndPopup();
-                        }
+                for (auto& texturesOnApp: ModelHandler::GetInstance()->allTexturesOnApp) {
+                    ImguiRenderSystem::GetInstance()->HandleTextureCreation(texturesOnApp.second.get());
+                    ImGui::Image((ImTextureID)texturesOnApp.second->textureDescriptor, ImVec2(10,10));
+                    ImGui::SameLine();
+                    if (ImGui::Selectable("SetText")){
+                        mat.SetTexture(TEXTURE_TYPE::DIFFUSE, texturesOnApp.second.get());
+                        ImGui::EndPopup();
                     }
-
                 }
                 ImGui::EndPopup();
                 
@@ -350,6 +362,30 @@ namespace VULKAN
         }
 
     }
+
+    void ResourcesUIHandler::HandleDrag(VKTexture *texture) {
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            ImGui::SetDragDropPayload("TEXTURE_ID", &texture,  sizeof(texture));
+            ImGui::EndDragDropSource();
+        }
+
+    }
+    void ResourcesUIHandler::DisplayTexturesTab() {
+        ImGui::SetWindowSize(ImVec2(400, 400));
+        ImGui::Begin("Textures");
+        int counter = 0;
+        for (auto& texturesOnApp: ModelHandler::GetInstance()->allTexturesOnApp) {
+            std::string counterText = "Texture: "+std::to_string(counter);
+            ImGui::SeparatorText(counterText.c_str());
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(texturesOnApp.second.get());
+            ImGui::ImageButton((ImTextureID)texturesOnApp.second->textureDescriptor, ImVec2(100,100));
+            HandleDrag(texturesOnApp.second.get());
+            counter++;
+        }
+        ImGui::End();
+    }
+
 
 }
 

@@ -48,6 +48,7 @@ namespace VULKAN {
         VKTexture* emissiveStoreImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
+        PushConstantBlock_RS pc;
 
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
@@ -58,7 +59,6 @@ namespace VULKAN {
         void UpdateMaterialInfo();
         void ResetAccumulatedFrames();
 
-        uint32_t currentAccumulatedFrame = 1;
 	private:
 		struct UniformData {
 			glm::mat4 viewInverse;
@@ -77,6 +77,7 @@ namespace VULKAN {
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
 		void CreateStorageImages();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
+        void CreateBottomLevelAccelerationStructureSpheres(Sphere& sphere);
 		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
@@ -108,6 +109,7 @@ namespace VULKAN {
 		Buffer combinedMeshBuffer;
 		Buffer indexBuffer;
 		Buffer transformBuffer;
+        Buffer sphereTransformBuffer;
 		Buffer raygenShaderBindingTable;
 		Buffer missShaderBindingTable;
 		Buffer hitShaderBindingTable;
@@ -115,12 +117,12 @@ namespace VULKAN {
 		Buffer lightBuffer;
 		Buffer allMaterialsBuffer;
 		Buffer allModelDataBuffer;
+        Buffer allSpheresBuffer;
 
 
 		VkShaderModule rHitShaderModule;
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
-		bool invalidModelToLoad = false;
         
         VKTexture* baseTexture;
         VKTexture* environmentTexture;

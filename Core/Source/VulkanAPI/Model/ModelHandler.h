@@ -47,6 +47,7 @@ namespace VULKAN
         void CreateMaterialTextures(VulkanSwapChain& swapChain);
         void ReCalculateMaterialOffsets();
         void AddMaterial(Material& material);
+        void AddSphere();
         void CreateMaterial(std::string path);
         void CreateInstance(Material& material);
 
@@ -74,6 +75,7 @@ namespace VULKAN
         std::map<int,std::shared_ptr<Material>> allMaterialsOnApp;
         std::map<int,std::shared_ptr<ModelData>> allModelsOnApp;
         std::map<int,std::shared_ptr<VKTexture>>allTexturesOnApp;
+        std::vector<Sphere> allSpheresOnApp;
 
 	};
 

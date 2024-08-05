@@ -147,7 +147,7 @@ namespace VULKAN
 
 	std::vector<BottomLevelObj>& ModelHandler::GetBLASesFromTLAS(TopLevelObj TLAS)
 	{
-		return bottomLevelObjects.at(TLAS.TLASID);
+        return bottomLevelObjects.at(TLAS.TLASID);
 	}
 
 	BottomLevelObj& ModelHandler::GetBLASFromTLAS(TopLevelObj TLAS, int index)
@@ -204,6 +204,14 @@ namespace VULKAN
 
     void ModelHandler::CreateInstance(Material &material) {
 
+    }
+
+    void ModelHandler::AddSphere() {
+        Sphere sphere{};
+        sphere.matId= 0;
+        sphere.radius = 1;
+        sphere.pos = glm::vec3 (0.0f);
+        allSpheresOnApp.push_back(sphere);
     }
 
 }

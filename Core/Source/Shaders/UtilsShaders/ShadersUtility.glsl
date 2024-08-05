@@ -122,7 +122,7 @@ vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float meta
 	vec3 lambert= LambertDiffuse(col);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
-	vec3 BRDF =  kd * lambert + cookTorrence;
+	vec3 BRDF =  (kd * lambert) + cookTorrence;
 	return BRDF;
 }
 
@@ -136,8 +136,7 @@ vec3 GetPBR (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float m
 vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,float metallic,  vec3 baseReflectivity, vec3 normal, vec3 view,vec3 light, vec3 halfWay){
 	vec3 BRDF = GetBRDF(normal, view, light, halfWay, col, baseReflectivity, metallic, roughness);
 	
-	vec3 outgoingLight = emissiveMesh + BRDF;
-	return outgoingLight;
+	return BRDF;
 }
 float oldRand(float uvX, float uvY) {
 	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
@@ -162,6 +161,8 @@ vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
 	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
 	return normalize(sampleDir);
 }
+
+//pdf for brdf in my case
 float CosinePdfHemisphere(float cosTheta)
 {
 	return cosTheta / PI;

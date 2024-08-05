@@ -18,10 +18,13 @@ namespace VULKAN
 		static ResourcesUIHandler* GetInstance();
 		void DisplayDirInfo();
         void DisplayInspectorInfo();
+        void DisplayTexturesTab();
         void DisplayMatInfo(Material& mat, ImVec2 iconSize);
         void DisplayMeshInfo(ModelData& modelData);
         void HandleDrag(TEXTURE_TYPE textureType, Material& mat);
+        void HandleDrag(VKTexture* texture);
         void HandleDrop(TEXTURE_TYPE textureType, Material& mat);
+        
         float positionInspected[3] = {0.0f,0.0f,0.0f};
         float scaleInspected[3] = {1.0f,1.0f,1.0f};
         float rotationInspected[3] = {0.0f,0.0f,0.0f};

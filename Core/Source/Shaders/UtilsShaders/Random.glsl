@@ -33,7 +33,6 @@ uint rotl(uint x, uint k)
 uint Rand(inout uvec2 seed)
 {
     const uint result = rotl(seed.x * 0x9E3779BB, 5) * 5;
-
     seed.y ^= seed.x;
     seed.x = rotl(seed.x, 26) ^ seed.y ^ (seed.y << 9);
     seed.y = rotl(seed.y, 13);

@@ -25,17 +25,22 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="good advances on global ilumination">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="some changes but indirect reflections are giving weird resoults">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/miss.rmiss.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/shadow.rmiss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,7 +257,10 @@
       <workItem from="1722695437233" duration="772000" />
       <workItem from="1722719030414" duration="3157000" />
       <workItem from="1722741764814" duration="9606000" />
-      <workItem from="1722780773115" duration="6919000" />
+      <workItem from="1722780773115" duration="7242000" />
+      <workItem from="1722788570602" duration="3857000" />
+      <workItem from="1722816173919" duration="264000" />
+      <workItem from="1722820905815" duration="7430000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -470,7 +478,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722751551558</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="some changes but indirect reflections are giving weird resoults">
+      <option name="closed" value="true" />
+      <created>1722788104039</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1722788104039</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -549,6 +565,7 @@
     <MESSAGE value="fixed raybounces to the miss shader" />
     <MESSAGE value="some changes in the shaders" />
     <MESSAGE value="good advances on global ilumination" />
-    <option name="LAST_COMMIT_MESSAGE" value="good advances on global ilumination" />
+    <MESSAGE value="some changes but indirect reflections are giving weird resoults" />
+    <option name="LAST_COMMIT_MESSAGE" value="some changes but indirect reflections are giving weird resoults" />
   </component>
 </project>

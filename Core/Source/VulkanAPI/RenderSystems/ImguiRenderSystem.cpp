@@ -26,6 +26,7 @@ namespace VULKAN
 
 	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer* renderer, MyVulkanDevice* device ) : myRenderer(renderer) ,myDevice(device) 
 	{
+
 	}
 
 
@@ -45,32 +46,13 @@ namespace VULKAN
 
 		CreatePipelineLayout();
 		CreatePipeline();
-
-		//myDevice->deletionQueue.push_function([this]() {vertexBuffer.destroy();});
-		//myDevice->deletionQueue.push_function([this]() {indexBuffer.destroy();});
         
-		//for (size_t i = 0; i < myRenderer->GetMaxRenderInFlight(); i++)
-		//{
-		//	if (uniformBuffers.size()>0)
-		//	{
-		//		myDevice->deletionQueue.push_function([this, i]()
-		//			{
-		//				vkDestroyBuffer(myDevice->device(), uniformBuffers[i], nullptr);
-		//			});
-		//		myDevice->deletionQueue.push_function([this, i]()
-		//			{
-		//				vkFreeMemory(myDevice->device(), uniformBuffersMemory[i], nullptr);
-		//			});
-		//	}
-		//}
-		//myDevice->deletionQueue.push_function([this]()
-		//	{
-		//		vkDestroyDescriptorSetLayout(myDevice->device(), descriptorSetLayout, nullptr);
-		//	});
-		//myDevice->deletionQueue.push_function([this]()
-		//	{
-		//		vkDestroySampler(myDevice->device(), viewportSampler, nullptr);
-		//	});
+        std::string folderImagePath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath() + "\\Images\\Folder.png";
+        std::string modelThumbnailPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath() + "\\Images\\ModelImage.png";
+        folderThumbnail = new VKTexture(folderImagePath.c_str(), myRenderer->GetSwapchain(), false);
+        modelThumbnail = new VKTexture(modelThumbnailPath.c_str(), myRenderer->GetSwapchain(), false);
+        HandleTextureCreation(folderThumbnail);
+        HandleTextureCreation(modelThumbnail);
 	}
 
 
@@ -587,15 +569,19 @@ namespace VULKAN
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
         ResourcesUIHandler::GetInstance()->DisplayInspectorInfo();
+        ResourcesUIHandler::GetInstance()->DisplayTexturesTab();
         
         {
             ImGui::PushID("AssetsID");
             ImGui::Begin("Configs");
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetWindowSize(ImVec2(400, 400));
-            ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
-            ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
-            ImGui::LabelText("Raytracing", "");
+            ImGui::SeparatorText("Raytracing");
+            if(ImGui::Button("Add Sphere", ImVec2{50,50})){
+                ModelHandler::GetInstance()->AddSphere();
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+                InputHandler::editingGraphics= true;
+            }
             ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
             ImGui::LabelText("Light", "");
             if(ImGui::SliderFloat3("light Pos", lightPos, -30.0f, 30.0f, "%.3f")){
@@ -621,7 +607,13 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
-            ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+            if (pushConstantBlockRsRef != nullptr){
+                ImGui::SeparatorText("Push Constants");
+                HandlePushConstantRangeRS(*pushConstantBlockRsRef);
+            }
+            
+                
+//            ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
 //            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
             ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
             
@@ -718,7 +710,20 @@ namespace VULKAN
         if (vkTexture->textureDescriptor == nullptr){
             AddTexture(vkTexture);
         }
-            
+    }
+
+    void ImguiRenderSystem::HandlePushConstantRangeRS(PushConstantBlock_RS &pushConstantBlockRs) {
+        if (ImGui::SliderFloat("RayTermination Bias", &pushConstantBlockRs.rayTerminationBias, 0.0f, 1.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Max variance", &pushConstantBlockRs.maxVariance, 0.0f, 500.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderInt("Min bounce for Indirect", &pushConstantBlockRs.minBounceForIndirect, 0, 5)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+
+
     }
 
 
