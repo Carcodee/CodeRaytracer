@@ -156,7 +156,6 @@ void main()
   
   
   vec4 diffuse=diffuseInMat;
-
   vec3 view = normalize(-rayPayload.direction) * TBN;
   vec3 lightDir= normalize(myLight.pos - pos); 
   vec3 halfway =normalize(view + lightDir);

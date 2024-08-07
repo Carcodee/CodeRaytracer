@@ -337,6 +337,19 @@ namespace VULKAN
         }
     }
 
+    void ResourcesUIHandler::DisplayBLASesInfo() {
+
+        ImGui::SetWindowSize(ImVec2(400, 400));
+        ImGui::Begin("BLASes");
+        
+        
+
+        
+        ImGui::End();
+        
+
+    }
+
     void ResourcesUIHandler::HandleDrop(TEXTURE_TYPE textureType, Material &mat) {
         if (ImGui::BeginDragDropTarget()) {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("TEXTURE_ID")) {

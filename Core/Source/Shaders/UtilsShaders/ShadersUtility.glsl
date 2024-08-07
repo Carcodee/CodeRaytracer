@@ -72,6 +72,7 @@ vec3 LambertDiffuse(vec3 col){
 }
 
 vec3 CookTorrance(vec3 normal, vec3 view,vec3 light, float D, float G, vec3 F){
+	
 	vec3 DGF = D*G*F;
 	float dot1 = max(dot(view, normal), 0.0001);
 	float dot2 = max(dot(light, normal), 0.0001);

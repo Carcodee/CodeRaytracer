@@ -19,6 +19,7 @@ namespace VULKAN
 		void DisplayDirInfo();
         void DisplayInspectorInfo();
         void DisplayTexturesTab();
+        void DisplayBLASesInfo();
         void DisplayMatInfo(Material& mat, ImVec2 iconSize);
         void DisplayMeshInfo(ModelData& modelData);
         void HandleDrag(TEXTURE_TYPE textureType, Material& mat);
