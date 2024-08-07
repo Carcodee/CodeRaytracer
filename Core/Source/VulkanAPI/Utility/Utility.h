@@ -54,18 +54,34 @@ namespace VULKAN{
         VkDeviceMemory memory;
         VkBuffer buffer;
     };
-    struct Sphere{
+    
+    
+    struct SphereUniform{
         glm::vec3 pos = glm::vec3 (0.0f);
         float radius = 1.0f;
         uint32_t matId = 0;
         uint32_t  id = 0;
+    };
+    struct Sphere{
+        SphereUniform sphereUniform;
         VkTransformMatrixKHR transformMatrix={
-                1.0f, 0.0f, 0.0f, pos.x,
-                0.0f, 1.0f, 0.0f, pos.y,
-                0.0f, 0.0f, -1.0f,pos.z};
+                1.0f, 0.0f, 0.0f,  sphereUniform.pos.x,
+                0.0f, 1.0f, 0.0f,  sphereUniform.pos.y,
+                0.0f, 0.0f, -1.0f, sphereUniform.pos.z};
+    };
+
+    
+    struct AABBraw{
+        glm::vec3 min;
+        glm::vec3 max;
+    };
+    struct AABBObj{
+        AABBraw aabb;
+        uint32_t id= 0;
+        VkTransformMatrixKHR transformMatrix;
         AccelerationStructure accelerationStructure;
     };
-        
+
     struct RxTexture
     {
         Material mat;

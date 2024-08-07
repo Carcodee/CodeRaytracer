@@ -77,7 +77,7 @@ namespace VULKAN {
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
 		void CreateStorageImages();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
-        void CreateBottomLevelAccelerationStructureSpheres(Sphere& sphere);
+        void CreateBottomLevelAccelerationStructureSpheres(AABBObj& sphere);
 		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
@@ -118,6 +118,7 @@ namespace VULKAN {
 		Buffer allMaterialsBuffer;
 		Buffer allModelDataBuffer;
         Buffer allSpheresBuffer;
+        Buffer allAABBBuffer;
 
 
 		VkShaderModule rHitShaderModule;
@@ -126,6 +127,8 @@ namespace VULKAN {
         
         VKTexture* baseTexture;
         VKTexture* environmentTexture;
+        std::vector<AABBObj> aabbs;
+        
 	};
 
 }

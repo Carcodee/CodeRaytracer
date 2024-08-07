@@ -1,7 +1,10 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_scalar_block_layout :enable
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-hitAttributeEXT vec3 attribs;
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 
@@ -14,18 +17,11 @@ struct RayPayload{
     vec3 direction;
     vec3 sampleDir;
     float roughness;
-    float reflectivity;
+    float reflectivity; 
     bool shadow;
     bool emissive;
     bool isMiss;
 };
-
-layout(set = 0, binding = 7, std140) buffer Materials {
-    MaterialData materials[];
-};
-
-layout(location = 0) rayPayloadEXT RayPayload rayPayload;
-
 
 struct Sphere {
     vec3 center;
@@ -33,27 +29,84 @@ struct Sphere {
     uint matId;
 };
 
+layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
-bool intersectSphere(vec3 rayOrigin, vec3 rayDirection, vec3 sphereCenter, float sphereRadius, out float t) {
-    vec3 oc = rayOrigin - sphereCenter;
-    float a = dot(rayDirection, rayDirection);
-    float b = 2.0 * dot(oc, rayDirection);
-    float c = dot(oc, oc) - sphereRadius * sphereRadius;
-    float discriminant = b * b - 4 * a * c;
-    if (discriminant < 0.0) return false;
-    t = (-b - sqrt(discriminant)) / (2.0 * a);
-    return true;
+layout(binding=6) uniform light{
+    vec3 pos;
+    vec3 col;
+    float intensity;
+}myLight;
+
+layout(set = 0, binding = 7, std140) buffer Materials {
+    MaterialData materials[];
+};
+
+layout(set = 0, binding = 12, scalar) buffer Spheres {
+    Sphere spheres[];
+};
+
+
+layout(set = 0,binding = 12) uniform sampler2D textures[];
+
+#define MAX_TEXTURES 5
+
+vec4 CurrentMaterialTextures[MAX_TEXTURES];
+int texturesOnMaterialCount = 0;
+
+vec3 GetDiffuseColor(int materialIndex);
+vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv);
+float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity);
+vec3 GetDebugCol(uint primitiveId, float primitiveCount);
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
+void main()
+{
+  //materials
+  rayPayload.color = vec3(0.5f, 0.5f, 0.0f);
+  rayPayload.colorLit = vec3(0.5f, 0.5f, 0.0f);
+  rayPayload.distance;
+  rayPayload.normal = vec3(1.0f);
+  rayPayload.roughness = 1.0f;
+  rayPayload.reflectivity = 1.0f; 
+  rayPayload.shadow = false;
+  rayPayload.emissive =true;
+  rayPayload.isMiss= false; 
+ 
 }
 
-void main() {
-    vec3 rayOrigin = gl_WorldRayOriginEXT;
-    vec3 rayDirection = gl_WorldRayDirectionEXT;
-
-    uint instanceID = gl_InstanceCustomIndexEXT;
-    Sphere sphere;
-
-    float t;
-    if (intersectSphere(rayOrigin, rayDirection, sphere.center, sphere.radius, t)) {
-        //reportIntersectionEXT(t, 0);
+vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
+    if (texOffset== -1){
+    
+        return vec4(1, 1, 1, 1);
     }
+    vec4 texture = texture(textures[texOffset],uv);
+    return texture;
 }
+
+float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity){
+	if (texOffset== -1){
+		return intensity;
+	}
+	vec4 texture = texture(textures[texOffset],uv);
+	return texture.x * intensity;
+}
+
+vec3 GetDiffuseColor(int materialIndex){
+
+   vec3 diffuse= materials[materialIndex].diffuseColor;
+   return diffuse;
+}
+
+
+vec3 GetDebugCol(uint primitiveId, float primitiveCount){
+
+    float idNormalized = float(primitiveId) / primitiveCount; 
+    vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
+    return debugColor;
+}
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
+    vec3 dir= fragPos-lightPos; 
+    dir= normalize(dir);
+    float colorShading=max(dot(dir, normal),0.2);
+    return colorShading;
+}
+

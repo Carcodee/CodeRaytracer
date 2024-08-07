@@ -118,7 +118,7 @@ void main()
             rayThroughput *= rayPayload.colorLit; 
             if(NextFloat(seed) < rayPayload.reflectivity){
                     direction.xyz = reflectedDir;
-            }       
+            }
             if(i >= pc.minBounceForIndirect){
                 float threshold = max(0.05f,1.0f-MaxComponent(rayThroughput));
                 if(threshold > NextFloat(seed) + pc.rayTerminationBias){

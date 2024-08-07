@@ -128,31 +128,24 @@ namespace VULKAN {
                                            VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 4);
 	}
 
-    void RayTracing_RS::CreateBottomLevelAccelerationStructureSpheres(Sphere &sphere) {
+    void RayTracing_RS::CreateBottomLevelAccelerationStructureSpheres(AABBObj &sphere) {
         VkDeviceOrHostAddressConstKHR sphereBuffersDeviceAddress{};
         VkDeviceOrHostAddressConstKHR transformBufferDeviceAddress{};
 
-        sphereBuffersDeviceAddress.deviceAddress = getBufferDeviceAddress(allSpheresBuffer.buffer) + sphere.id * sizeof(sphere);
+        sphereBuffersDeviceAddress.deviceAddress = getBufferDeviceAddress(allAABBBuffer.buffer) + sphere.id * sizeof(AABBraw);
         transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) /*+ obj.combinedMesh.transformBLASOffset*/;
 
         VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
-        accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
         accelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
-        accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+        accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR;
         accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-        accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR; // Using AABBs to represent spheres
+        accelerationStructureGeometry.geometryType = VK_GEOMETRY_TYPE_AABBS_KHR; 
         accelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
         accelerationStructureGeometry.geometry.aabbs.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR;
         accelerationStructureGeometry.geometry.aabbs.data.deviceAddress = sphereBuffersDeviceAddress.deviceAddress;
-        accelerationStructureGeometry.geometry.aabbs.stride = sizeof(Sphere);
+        accelerationStructureGeometry.geometry.aabbs.stride = sizeof(AABBraw);
 
-
-        VkAccelerationStructureBuildRangeInfoKHR accelerationStructureBuildRangeInfo{};
-        accelerationStructureBuildRangeInfo.primitiveCount = 1;
-        accelerationStructureBuildRangeInfo.primitiveOffset =0;
-        accelerationStructureBuildRangeInfo.firstVertex = 0;
-        accelerationStructureBuildRangeInfo.transformOffset = 0;
-        
+       
         VkAccelerationStructureBuildGeometryInfoKHR accelerationsStructureBuildGeometryInfo{};
         accelerationsStructureBuildGeometryInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
         accelerationsStructureBuildGeometryInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
@@ -170,7 +163,7 @@ namespace VULKAN {
                 &accelerationsStructureBuildGeometryInfo,
                 &primitiveCount,
                 &accelerationStructureBuildSizesInfo);
-
+       
         CreateAccelerationStructureBuffer(sphere.accelerationStructure, accelerationStructureBuildSizesInfo);
 
         VkAccelerationStructureCreateInfoKHR accelerationStructureCreateInfo{};
@@ -178,22 +171,33 @@ namespace VULKAN {
         accelerationStructureCreateInfo.buffer = sphere.accelerationStructure.buffer;
         accelerationStructureCreateInfo.size = accelerationStructureBuildSizesInfo.accelerationStructureSize;
         accelerationStructureCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+        
         vkCreateAccelerationStructureKHR(myDevice.device(), &accelerationStructureCreateInfo, nullptr, &sphere.accelerationStructure.handle);
 
         // Create a small scratch buffer used during build of the bottom level acceleration structure
         RayTracingScratchBuffer scratchBuffer = CreateScratchBuffer(accelerationStructureBuildSizesInfo.buildScratchSize);
 
-        accelerationsStructureBuildGeometryInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
-        accelerationsStructureBuildGeometryInfo.dstAccelerationStructure = sphere.accelerationStructure.handle;
-        accelerationsStructureBuildGeometryInfo.scratchData.deviceAddress = scratchBuffer.deviceAddress;
 
+        VkAccelerationStructureBuildGeometryInfoKHR accelerationBuildGeometryInfo{};
+        accelerationBuildGeometryInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+        accelerationBuildGeometryInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+        accelerationBuildGeometryInfo.mode = VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR;
+        accelerationBuildGeometryInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+        accelerationBuildGeometryInfo.dstAccelerationStructure = sphere.accelerationStructure.handle;
+        accelerationBuildGeometryInfo.geometryCount = 1;
+        accelerationBuildGeometryInfo.pGeometries = &accelerationStructureGeometry;
+        accelerationBuildGeometryInfo.scratchData.deviceAddress = scratchBuffer.deviceAddress;
+
+        VkAccelerationStructureBuildRangeInfoKHR accelerationStructureBuildRangeInfo{};
+        accelerationStructureBuildRangeInfo.primitiveCount = 1;
+        
         const VkAccelerationStructureBuildRangeInfoKHR* pBuildRangeInfos[] = { &accelerationStructureBuildRangeInfo };
         VkCommandBuffer commandBuffer = myDevice.beginSingleTimeCommands();
 
         vkCmdBuildAccelerationStructuresKHR(
                 commandBuffer,
                 1,
-                &accelerationsStructureBuildGeometryInfo,
+                &accelerationBuildGeometryInfo,
                 pBuildRangeInfos);
 
         myDevice.endSingleTimeCommands(commandBuffer);
@@ -325,14 +329,14 @@ namespace VULKAN {
 		}
         
         for (int i = 0; i <ModelHandler::GetInstance()->allSpheresOnApp.size() ; ++i) {
-            Sphere& sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            assert(aabbs.size()==ModelHandler::GetInstance()->allSpheresOnApp.size() && "AABBS and spheres must have the same size");
             VkAccelerationStructureInstanceKHR instance{};
-            instance.transform = sphereRef.transformMatrix;
+            instance.transform = aabbs[i].transformMatrix;
             instance.instanceCustomIndex = 0;
             instance.mask = 0xFF;
             instance.instanceShaderBindingTableRecordOffset = 1;
-            instance.flags = VK_GEOMETRY_INSTANCE_FORCE_OPAQUE_BIT_KHR;
-            instance.accelerationStructureReference = sphereRef.accelerationStructure.deviceAddress;
+            instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
+            instance.accelerationStructureReference = aabbs[i].accelerationStructure.deviceAddress;
             instances.push_back(instance);
         }
 		Buffer instancesBuffer;
@@ -435,19 +439,22 @@ namespace VULKAN {
 		const VkMemoryPropertyFlags memoryUsageFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &raygenShaderBindingTable, handleSize);
 		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &missShaderBindingTable, handleSize * 2);
-		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &hitShaderBindingTable, handleSize);
+		myDevice.createBuffer(bufferUsageFlags, memoryUsageFlags, &hitShaderBindingTable, handleSize * 2);
         
 		// Copy handles
 		raygenShaderBindingTable.device = myDevice.device();
 		missShaderBindingTable.device = myDevice.device();
 		hitShaderBindingTable.device = myDevice.device();
+        
 
 		raygenShaderBindingTable.map();
 		missShaderBindingTable.map();
 		hitShaderBindingTable.map();
+        
 		memcpy(raygenShaderBindingTable.mapped, shaderHandleStorage.data(), handleSize);
 		memcpy(missShaderBindingTable.mapped, shaderHandleStorage.data() + (handleSizeAligned), handleSize * 2);
-		memcpy(hitShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned * 3, handleSize);
+		memcpy(hitShaderBindingTable.mapped, shaderHandleStorage.data() + handleSizeAligned * 3, handleSize * 2);
+
 	}
 
     void RayTracing_RS::RecreateBLASesAndTLASes() {
@@ -455,8 +462,9 @@ namespace VULKAN {
         {
             CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
         }
-        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
-            CreateBottomLevelAccelerationStructureSpheres(ModelHandler::GetInstance()->allSpheresOnApp[i]);
+        for (int i = 0; i < aabbs.size(); ++i) {
+           
+            CreateBottomLevelAccelerationStructureSpheres(aabbs[i]);
         }
         CreateTopLevelAccelerationStructure(topLevelObjBase);
 
@@ -474,16 +482,10 @@ namespace VULKAN {
 		}
 		std::vector<VkDescriptorPoolSize> poolSizes = {
 			{ VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 100 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 100 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 100 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
 		};
         
         std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
@@ -493,6 +495,8 @@ namespace VULKAN {
 
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
+        descriptorPoolCreateInfo.flags =VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; 
+        
 		if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Unable to create descriptorPools");
@@ -575,6 +579,11 @@ namespace VULKAN {
 		environmentTextureImage.sampler = environmentTexture->textureSampler;
 		environmentTextureImage.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+        allSpheresBuffer.descriptor.buffer = allSpheresBuffer.buffer;
+        allSpheresBuffer.descriptor.offset = 0;
+        allSpheresBuffer.descriptor.range = VK_WHOLE_SIZE;
+
+
 
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
@@ -587,6 +596,7 @@ namespace VULKAN {
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
         VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
         VkWriteDescriptorSet environmentImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 11, &environmentTextureImage);
+        VkWriteDescriptorSet allSphereBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 12, &allSpheresBuffer.descriptor);
 
         std::vector<VkDescriptorImageInfo> texturesDescriptors{};
    
@@ -600,7 +610,7 @@ namespace VULKAN {
         }
         VkWriteDescriptorSet writeDescriptorImgArray{};
         writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorImgArray.dstBinding = 12;
+        writeDescriptorImgArray.dstBinding = 13;
         writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         writeDescriptorImgArray.descriptorCount = imageCount;
         writeDescriptorImgArray.dstSet = descriptorSet;
@@ -619,6 +629,7 @@ namespace VULKAN {
             BLAsInstanceOffsetBufferWrite,
             emissiveImageWrite,
             environmentImageWrite,
+            allSphereBufferWrite,
             writeDescriptorImgArray
 		};
 	   
@@ -636,6 +647,7 @@ namespace VULKAN {
         
 		uint32_t imageCount = 0;
         uint32_t materialCount =0;
+        uint32_t meshCount =0;
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
 			for (auto& mat : ModelHandler::GetInstance()->allMaterialsOnApp)
@@ -645,51 +657,30 @@ namespace VULKAN {
                 materialCount ++/*= static_cast<uint32_t>(model.materialDataPerMesh.size())*/;
 			}
 		}
-		if (imageCount==0)
-		{
-            std::cout<<"There is no images on the materials loaded!"<<"\n";
-			imageCount = 1;
-		}
-		uint32_t meshCount =0;
-
 		for (auto model : modelsOnScene)
 		{
 			meshCount += static_cast<uint32_t>(model->meshCount);
 		}
-
+        if (imageCount==0)
+        {
+            std::cout<<"There is no images on the materials loaded!"<<"\n";
+            imageCount = 1;
+        }
 		if (materialCount == 0)
 		{
 			materialCount = 1;
 		}
-        std::vector<VkDescriptorPoolSize> poolSizes = {
-                { VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR, 1 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1},
-        };
-
-        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
-        if (vkCreateDescriptorPool(myDevice.device(), &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Unable to create descriptorPools");
-        } 
+         
         VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
 		uint32_t variableDescCounts[] = {  imageCount };
 		variableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
 		variableDescriptorCountAllocInfo.descriptorSetCount = 1;
 		variableDescriptorCountAllocInfo.pDescriptorCounts = variableDescCounts;
 
-
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo =INITIALIZERS::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
 		descriptorSetAllocateInfo.pNext = &variableDescriptorCountAllocInfo;
 
+        vkFreeDescriptorSets(myDevice.device(), descriptorPool, 1,&descriptorSet);
         
 		if (vkAllocateDescriptorSets(myDevice.device(), &descriptorSetAllocateInfo, &descriptorSet) != VK_SUCCESS)
 		{
@@ -766,6 +757,15 @@ namespace VULKAN {
 		environmentTextureImage.sampler = environmentTexture->textureSampler;
 		environmentTextureImage.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+        allSpheresBuffer.descriptor.buffer = allSpheresBuffer.buffer;
+        allSpheresBuffer.descriptor.offset = 0;
+        if (!ModelHandler::GetInstance()->allSpheresOnApp.empty()){
+            allSpheresBuffer.descriptor.range = sizeof(SphereUniform) * ModelHandler::GetInstance()->allSpheresOnApp.size();
+        } else{
+            allSpheresBuffer.descriptor.range = VK_WHOLE_SIZE;
+        }
+
+
         VkWriteDescriptorSet resultImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1, &storageImageDescriptor);
 		VkWriteDescriptorSet uniformBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, &ubo.descriptor);
 		VkWriteDescriptorSet textWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3, &roomText);
@@ -777,6 +777,7 @@ namespace VULKAN {
         VkWriteDescriptorSet BLAsInstanceOffsetBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 9, &BLAsInstanceOffsetBuffer.descriptor);
         VkWriteDescriptorSet emissiveImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10, &emissiveStorageDescriptor);
         VkWriteDescriptorSet environmentImageWrite = INITIALIZERS::writeDescriptorSet(descriptorSet,  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 11, &environmentTextureImage);
+        VkWriteDescriptorSet allSphereBufferWrite = INITIALIZERS::writeDescriptorSet(descriptorSet, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 12, &allSpheresBuffer.descriptor);
         
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
@@ -807,7 +808,7 @@ namespace VULKAN {
         }
         VkWriteDescriptorSet writeDescriptorImgArray{};
         writeDescriptorImgArray.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeDescriptorImgArray.dstBinding = 12;
+        writeDescriptorImgArray.dstBinding = 13;
         writeDescriptorImgArray.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         writeDescriptorImgArray.descriptorCount = imageCount;
         writeDescriptorImgArray.dstSet = descriptorSet;
@@ -826,6 +827,7 @@ namespace VULKAN {
             BLAsInstanceOffsetBufferWrite,
             emissiveImageWrite,
             environmentImageWrite,
+            allSphereBufferWrite,
             writeDescriptorImgArray
 		};
 
@@ -915,11 +917,15 @@ namespace VULKAN {
         environmentImageBinding.descriptorType =  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         environmentImageBinding.descriptorCount = 1;
         environmentImageBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR;
-
-
+        
+        VkDescriptorSetLayoutBinding spheresBinding{};
+        spheresBinding.binding = 12;
+        spheresBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        spheresBinding.descriptorCount = 1;
+        spheresBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR | VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
 
         VkDescriptorSetLayoutBinding texturesBinding{};
-		texturesBinding.binding = 12;
+		texturesBinding.binding = 13;
 		texturesBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		texturesBinding.descriptorCount = 10000;
 		texturesBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
@@ -941,6 +947,7 @@ namespace VULKAN {
             instancesGeometryOffsetsBinding,
             emissiveImageBinding,
             environmentImageBinding,
+            spheresBinding,
 			texturesBinding
 			});
 
@@ -948,7 +955,7 @@ namespace VULKAN {
 
 		VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
 		setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-		setLayoutBindingFlags.bindingCount = 13;
+		setLayoutBindingFlags.bindingCount = 14;
 		std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
 			0,
 			0,
@@ -959,6 +966,7 @@ namespace VULKAN {
 			0,
 			0,
 			0,
+            0,
             0,
             0,
             0,
@@ -1037,7 +1045,8 @@ namespace VULKAN {
 		{
 			path = shaderPath+ "/RayTracingShaders/closesthit.rchit.spv";
 			shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));
-			VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
+
+            VkRayTracingShaderGroupCreateInfoKHR shaderGroup{};
 			shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
 			shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 			shaderGroup.generalShader = VK_SHADER_UNUSED_KHR;
@@ -1045,8 +1054,23 @@ namespace VULKAN {
 			shaderGroup.anyHitShader = VK_SHADER_UNUSED_KHR;
 			shaderGroup.intersectionShader = VK_SHADER_UNUSED_KHR;
 			this->shaderGroups.push_back(shaderGroup);
-		}
-        
+            
+            path = shaderPath+ "/RayTracingShaders/spherehit.rchit.spv";
+            shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));
+            shaderGroup.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+            shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR;
+            shaderGroup.generalShader = VK_SHADER_UNUSED_KHR;
+            shaderGroup.closestHitShader = static_cast<uint32_t>(shaderStages.size()) - 1;
+            shaderGroup.anyHitShader = VK_SHADER_UNUSED_KHR;
+            shaderGroup.intersectionShader = VK_SHADER_UNUSED_KHR;
+            
+            path = shaderPath+ "/RayTracingShaders/sphereint.rint.spv";
+            shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_INTERSECTION_BIT_KHR, path));
+            shaderGroup.intersectionShader = static_cast<uint32_t>(shaderStages.size()) - 1;
+            
+            this->shaderGroups.push_back(shaderGroup);
+        }
+       
        
 		VkRayTracingPipelineCreateInfoKHR rayTracingPipelineCI{};
 		rayTracingPipelineCI.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
@@ -1102,7 +1126,30 @@ namespace VULKAN {
 
 	void RayTracing_RS::CreateAllModelsBuffer()
 	{
-		std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
+        for (int i = 0; i <aabbs.size() ; ++i) {
+            vkDestroyAccelerationStructureKHR( myDevice.device(), aabbs[i].accelerationStructure.handle, nullptr);
+//            vkDestroyBuffer(myDevice.device(), allAABBBuffer.buffer, nullptr);
+        }
+        for (int i = 0; i <modelsOnScene.size() ; ++i) {
+            if (modelsOnScene[i].get()->bottomLevelObjRef == nullptr) continue;
+            vkDestroyAccelerationStructureKHR( myDevice.device(), modelsOnScene[i].get()->bottomLevelObjRef->BottomLevelAs.handle, nullptr);
+//            vkDestroyBuffer(myDevice.device(), allModelDataBuffer.buffer, nullptr);
+        }
+        aabbs.clear();
+        
+        std::vector<AABBraw> aabbRaws;
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
+            Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            AABBObj aabbObj;
+            aabbObj.transformMatrix = sphereRef.transformMatrix;
+            aabbObj.id = sphereRef.sphereUniform.id;
+            aabbObj.aabb.min = sphereRef.sphereUniform.pos - glm::vec3 (sphereRef.sphereUniform.radius);
+            aabbObj.aabb.max = sphereRef.sphereUniform.pos + glm::vec3 (sphereRef.sphereUniform.radius);
+            aabbs.push_back(aabbObj);
+            aabbRaws.push_back(aabbs[i].aabb);
+
+        }
+        std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
 		std::vector <uint32_t> allModelIndices;
 		std::vector <Vertex> allModelsVertices;
 		std::vector <VkTransformMatrixKHR> allModelsTransformationMatrices;
@@ -1173,9 +1220,16 @@ namespace VULKAN {
                     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                     &allSpheresBuffer,
-                    ModelHandler::GetInstance()->allSpheresOnApp.size() * sizeof(Sphere),
+                    ModelHandler::GetInstance()->allSpheresOnApp.size() * sizeof(SphereUniform),
                     ModelHandler::GetInstance()->allSpheresOnApp.data());
             allSpheresBuffer.map();
+            
+            myDevice.createBuffer(
+                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    &allAABBBuffer,
+                    aabbRaws.size() * sizeof(AABBraw),
+                    aabbRaws.data());
 
             myDevice.createBuffer(
                     VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
@@ -1303,7 +1357,7 @@ namespace VULKAN {
 		VkStridedDeviceAddressRegionKHR hitShaderSbtEntry{};
 		hitShaderSbtEntry.deviceAddress = getBufferDeviceAddress(hitShaderBindingTable.buffer);
 		hitShaderSbtEntry.stride = handleSizeAligned;
-		hitShaderSbtEntry.size = handleSizeAligned;
+		hitShaderSbtEntry.size = handleSizeAligned * 2; 
 
 		VkStridedDeviceAddressRegionKHR callableShaderSbtEntry{};
 

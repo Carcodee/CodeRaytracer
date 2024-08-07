@@ -89,7 +89,7 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
 };
 
 
-layout(set = 0,binding = 12) uniform sampler2D textures[];
+layout(set = 0,binding = 13) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
 
