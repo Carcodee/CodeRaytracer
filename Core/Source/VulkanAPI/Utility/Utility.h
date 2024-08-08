@@ -127,9 +127,6 @@ namespace VULKAN{
                             "MeshCount",this->meshCount
                     },
                     {
-                            "Generated",this->generated
-                    },
-                    {
                             "MaterialsIDs",this->materialIds
                     },
                     {
@@ -144,7 +141,6 @@ namespace VULKAN{
         ModelData Deserialize(nlohmann::json &jsonObj) override{
             this->id = jsonObj.at("ModelID");
             this->meshCount = jsonObj.at("MeshCount");
-            this->generated=jsonObj.at("Generated");
             this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
             this->pathToAssetReference = jsonObj.at("PathToAssetReference");
             this->materialOffset = jsonObj.at("MaterialOffset");

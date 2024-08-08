@@ -49,6 +49,7 @@ namespace VULKAN
 		~AssetsHandler();
 		void RegisterSaves();
 
+        bool IsValidImageFormat(std::string extension);
         std::unordered_map<std::string, int> assetsLoaded;
         std::string codeModelFileExtension = ".CODE";
         std::string matFileExtension = ".MATCODE";

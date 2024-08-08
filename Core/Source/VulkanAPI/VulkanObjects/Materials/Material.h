@@ -31,7 +31,7 @@ namespace VULKAN{
         glm::vec3 baseReflection;
         float metallicIntensity = 1;
         //48
-        float emissionIntensity = 0;
+        float emissionIntensity = 0.0f;
         int roughnessOffset = -1;
         int metallicOffset = -1;
         int specularOffset = -1;
@@ -44,30 +44,32 @@ namespace VULKAN{
     };
 
     struct Material: ISerializable<Material>
-		{
-            MaterialUniformData materialUniform{};
-            //the key is the texture offset in order correlate them 
-			std::map<TEXTURE_TYPE,std::string> paths;
-			std::map<TEXTURE_TYPE,VKTexture*> materialTextures;
-            std::string textureReferencePath="";
-            std::string name="";
-            std::string targetPath="";
-            bool generated = false;
-            int id= 0;
-			void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset);
-            void CalculateTextureOffsets(int& allTexturesOffset);
-            void SetTexture(TEXTURE_TYPE textureType,VKTexture* texture);
-            ~Material(){
-                for (auto& pair : materialTextures) {
-                    delete pair.second;
-                }
-            };
-            nlohmann::json Serialize() override;
-            Material Deserialize(nlohmann::json &jsonObj) override;
-            void SaveData() override{
-                
+    {
+
+        void RemoveTexture(TEXTURE_TYPE textureType);
+        void CreateTextures(VulkanSwapChain& swap_chain, int& allTexturesOffset);
+        void SetTexture(TEXTURE_TYPE textureType,VKTexture* texture);
+        ~Material(){
+            for (auto& pair : materialTextures) {
+                delete pair.second;
             }
-		};
+        };
+        nlohmann::json Serialize() override;
+        Material Deserialize(nlohmann::json &jsonObj) override;
+        void SaveData() override{
+
+
+        }
+        MaterialUniformData materialUniform{};
+        //the key is the texture offset in order correlate them 
+        std::map<TEXTURE_TYPE,std::string> paths;
+        std::map<TEXTURE_TYPE,VKTexture*> materialTextures;
+        std::string textureReferencePath="";
+        std::string name="";
+        std::string targetPath="";
+        bool generated = false;
+        int id = 0;
+    };
 
 }
 #endif //EDITOR_MATERIAL_H

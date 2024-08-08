@@ -50,7 +50,7 @@ namespace VULKAN
 
 	AssetsHandler::~AssetsHandler()
 	{
-		SaveMetadata();
+//		SaveMetadata();
 	}
 
 	void AssetsHandler::SearchAllAssets(std::filesystem::path path)
@@ -105,14 +105,12 @@ namespace VULKAN
                 continue;
             }
             counter++;
-
             nlohmann::json jsonData;
             if (fileHandlerInstance->GetPathExtension(pair.first)==matFileExtension){
                 Material& data = *ModelHandler::GetInstance()->allMaterialsOnApp.at(pair.second);
                 jsonData = data.Serialize();
-                
             }
-            if (fileHandlerInstance->GetPathExtension(pair.first)==codeModelFileExtension){
+            else if (fileHandlerInstance->GetPathExtension(pair.first)==codeModelFileExtension){
                 ModelData& data = *ModelHandler::GetInstance()->allModelsOnApp.at(pair.second);
                 jsonData = data.Serialize();
             }
@@ -132,7 +130,7 @@ namespace VULKAN
 	{
 		if (InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_RIGHT_CONTROL, InputHandler::ACTION_HOLD)
 		&& InputHandler::GetInstance()->GetUserInput(InputHandler::KEY_S, InputHandler::ACTION_DOWN)){
-//			SaveMetadata();
+			SaveMetadata();
 		}
 	}
 	AssetsHandler* AssetsHandler::GetInstance()
@@ -194,7 +192,13 @@ namespace VULKAN
         }
     }
 
+    bool AssetsHandler::IsValidImageFormat(std::string extension) {
+        if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".hdr"){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 
-	
 }

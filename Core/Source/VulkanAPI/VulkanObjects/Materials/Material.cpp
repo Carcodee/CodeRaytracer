@@ -42,17 +42,6 @@ namespace VULKAN{
         generated = true;
     }
 
-    void Material::CalculateTextureOffsets(int &allTexturesOffset) {
-        std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
-        materialUniform.textureIndexStart = allTexturesOffset;
-        for (auto& pair : materialTextures)
-        {
-            pair.second->id = allTexturesOffset;
-            materialUniform.texturesSizes++;
-            allTexturesOffset++;
-        }
-        std::cout<<" New Texture sizes: "<<allTexturesOffset <<"\n";
-    }
     void Material::SetTexture(TEXTURE_TYPE textureType, VKTexture *texture) {
         
         assert(texture->id>-1&&"A texture with invalid Id was tried to add");
@@ -99,6 +88,7 @@ namespace VULKAN{
                 break;
         }
         ModelHandler::GetInstance()->updateMaterialData = true;
+        ModelHandler::GetInstance()->updateBottomLevelObj = true;
     }
 
     Material Material::Deserialize(nlohmann::json &jsonObj) {
@@ -126,14 +116,13 @@ namespace VULKAN{
         this->materialUniform.baseReflection.z = baseReflection[2];
         this->materialUniform.metallicIntensity=jsonObj.at("MetallicIntensity");
         //48
-        this->materialUniform.emissionIntensity==jsonObj.at("EmissionIntensity");
+        this->materialUniform.emissionIntensity = jsonObj.at("EmissionIntensity");
         this->materialUniform.roughnessOffset = jsonObj.at("RoughnessOffset");
         this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
         this->materialUniform.specularOffset= jsonObj.at("SpecularOffset");
         //60
         this->materialUniform.textureIndexStart=jsonObj.at("TextureIndexStart");
         this->materialUniform.texturesSizes = 0;
-//                this->materialUniform.texturesSizes = jsonObj.at("TextureSizes");
         this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
         this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
         //80
@@ -185,5 +174,30 @@ namespace VULKAN{
         };
         return jsonData;
 //
+    }
+
+    void Material::RemoveTexture(TEXTURE_TYPE textureType) {
+        if (!materialTextures.contains(textureType)){
+            return;
+        }
+        switch (textureType) {
+            case DIFFUSE:
+                materialUniform.diffuseOffset = -1;
+                break;
+            case ROUGHNESS:
+                materialUniform.roughnessOffset= -1;
+                break;
+            case METALLIC:
+                materialUniform.metallicOffset = -1;
+                break;
+            case SPECULAR:
+                materialUniform.specularOffset = -1;
+                break;
+            case NORMAL:
+                materialUniform.normalOffset = -1;
+                break;
+        }
+        materialTextures.erase(textureType);
+        ModelHandler::GetInstance()->updateMaterialData = true;
     }
 }

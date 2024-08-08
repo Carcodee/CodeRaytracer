@@ -97,8 +97,8 @@ vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
 
 vec3 GetDiffuseColor(int materialIndex);
-vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv);
-float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity);
+vec4 TryGetTex(int texOffset, vec2 uv);
+float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity);
 vec3 GetDebugCol(uint primitiveId, float primitiveCount);
 float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
 void main()
@@ -140,8 +140,8 @@ void main()
   int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
   int materialTextureSizes =materials[materialIndex].textureSizes;
   
-  vec4 diffuseInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
-  vec4 normalInMat = TryGetTex(materialIndexInTextures, materials[materialIndex].normalOffset, uv);
+  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
+  vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
@@ -168,8 +168,8 @@ void main()
   float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
   float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
   
-  float roughness =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
-  float metallic =TryGetFloatFromTex(materialIndexInTextures, materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
+  float roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+  float metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
   
   
   vec3 pbrLitDirect= GetBRDF(finalNormal, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
@@ -201,7 +201,7 @@ void main()
   
 }
 
-vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
+vec4 TryGetTex(int texOffset, vec2 uv){
     if (texOffset== -1){
     
         return vec4(1, 1, 1, 1);
@@ -210,7 +210,7 @@ vec4 TryGetTex(int texIndexStart, int texOffset, vec2 uv){
     return texture;
 }
 
-float TryGetFloatFromTex(int texIndexStart, int texOffset, vec2 uv, float intensity){
+float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 	if (texOffset== -1){
 		return intensity;
 	}

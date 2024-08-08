@@ -1,6 +1,7 @@
 #include "ModelHandler.h"
 #include "FileSystem/FileHandler.h"
 #include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
+#include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 #include <string>
 
 namespace VULKAN
@@ -8,7 +9,7 @@ namespace VULKAN
 
 	ModelHandler* ModelHandler::instance = nullptr;	
 
-	ModelHandler::ModelHandler()
+	ModelHandler::ModelHandler(VulkanRenderer* renderer)
 	{
 		ModelLoaderHandler::GetInstance();
 		baseMaterialUniformData.albedoIntensity = 0;
@@ -22,14 +23,17 @@ namespace VULKAN
         materialBase.materialUniform = baseMaterialUniformData;
         materialBase.id = 0;
         materialBase.name= "standard_mat";
+        this->renderer = renderer;
+        
 
 	}
 
-	ModelHandler *ModelHandler::GetInstance()
+	ModelHandler *ModelHandler::GetInstance(VulkanRenderer* renderer)
 	{
 		if (instance==nullptr)
 		{
-			instance = new ModelHandler;
+            assert(renderer != nullptr && "A renderer must be passed on creation");
+			instance = new ModelHandler(renderer);
 		}
 		return instance;
 	}
@@ -215,6 +219,14 @@ namespace VULKAN
         sphere.id =allSpheresOnApp.size();
         
         allSpheresOnApp.push_back(sphere);
+    }
+
+    void ModelHandler::AddTexture(std::string path) {
+
+        assert(AssetsHandler::GetInstance()->IsValidImageFormat(HELPERS::FileHandler::GetInstance()->GetPathExtension(path))
+        &&"When creating an image it must be a valid format");
+        VKTexture* texture = new VKTexture(path.c_str(), renderer->GetSwapchain(), true);
+        std::cout<<"Image added with id: " << texture->id<<"\n";
     }
 
 }

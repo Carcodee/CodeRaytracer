@@ -481,6 +481,8 @@ namespace VULKAN {
         modelData.indexBLASOffset = 0;
         modelData.vertexBLASOffset = 0;
         modelData.transformBLASOffset = 0;
+        modelData.generated = true;
+        
     }
 
 

@@ -50,7 +50,7 @@ layout(push_constant) uniform pushConstantVariables{
     float maxVariance;
 } pc;
 
-#define SAMPLE_COUNT 5 
+#define SAMPLE_COUNT 1 
 #define LIGHT_SOURCES 1 
 
 Material currentMaterial;
@@ -84,6 +84,7 @@ void main()
         vec3 rayThroughput = vec3(1.0f);
         vec3 irradiance = vec3(0.0f);
         float rayPdf = 1.0f;
+        bool sampleShadowed = false;
     
         for (int i = 0; i < MAX_RECURSION; i++) {
             
@@ -91,6 +92,9 @@ void main()
             vec3 directLightContrib = rayPayload.color;
             if(rayPayload.isMiss){
                 irradiance += directLightContrib * rayThroughput ; 
+                if(sampleShadowed){
+                    //irradiance *= 0.7f;   
+                }
                 break;
             }
             if(rayPayload.emissive && i==0){
@@ -98,7 +102,7 @@ void main()
                 imageStore(emissiveImage, ivec2(gl_LaunchIDEXT.xy), vec4(directLightContrib, 1.0f));
             }
             if(rayPayload.shadow && i==0){
-                //directLightContrib *= 0.3f;
+                sampleShadowed = true;
             }
             
             const vec4 hitPos = origin + direction * rayPayload.distance;

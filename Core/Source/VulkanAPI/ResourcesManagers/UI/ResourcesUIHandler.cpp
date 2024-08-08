@@ -18,9 +18,6 @@ namespace VULKAN
     {
         fileHandlerInstanceRef = HELPERS::FileHandler::GetInstance();
         assetInstanceRef= AssetsHandler::GetInstance();
-        
-
-
     }
 
     ResourcesUIHandler* ResourcesUIHandler::GetInstance()
@@ -50,7 +47,7 @@ namespace VULKAN
         //ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
         if(ImGui::Button("<-", ImVec2(20, 20)))
         {
-            if (fileHandlerInstanceRef->currentPathRelativeToAssets == fileHandlerInstanceRef->GetAssetsPath() )
+            if (fileHandlerInstanceRef->currentPathRelativeToAssets == fileHandlerInstanceRef->GetAssetsPath())
             {
             }
             else
@@ -163,7 +160,9 @@ namespace VULKAN
             int id = AssetsHandler::GetInstance()->assetsLoaded.at(pathInspected);
             if(extension == AssetsHandler::GetInstance()->codeModelFileExtension){
                 ModelData& modelDataRef = *ModelHandler::GetInstance()->allModelsOnApp.at(id);
-                DisplayMeshInfo(modelDataRef);
+                if (modelDataRef.generated){
+                    DisplayMeshInfo(modelDataRef);
+                }
             } else if(extension == AssetsHandler::GetInstance()->matFileExtension){
                 Material& materialRef = *ModelHandler::GetInstance()->allMaterialsOnApp.at(id);
                 DisplayMatInfo(materialRef, ImVec2{100, 100});
@@ -190,21 +189,11 @@ namespace VULKAN
                     ImGui::OpenPopup("SetTex");
                 }
             }
-            if (ImGui::BeginPopup("SetTex")){
-                for (auto& texturesOnApp: ModelHandler::GetInstance()->allTexturesOnApp) {
-                    ImguiRenderSystem::GetInstance()->HandleTextureCreation(texturesOnApp.second.get());
-                    ImGui::Image((ImTextureID)texturesOnApp.second->textureDescriptor, ImVec2(10,10));
-                    ImGui::SameLine();
-                    if (ImGui::Selectable("SetText")){
-                        mat.SetTexture(TEXTURE_TYPE::DIFFUSE, texturesOnApp.second.get());
-                        ImGui::EndPopup();
-                    }
-                }
-                ImGui::EndPopup();
-                
-            }
             HandleDrop(TEXTURE_TYPE::DIFFUSE,mat);
             ImGui::PopID();
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(TEXTURE_TYPE::DIFFUSE);
+            }
 
             ImGui::SeparatorText("Normal");
             ImGui::PushID("Normal");
@@ -217,6 +206,10 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::NORMAL,mat);
             ImGui::PopID();
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(TEXTURE_TYPE::NORMAL);
+                
+            }
 
             ImGui::SeparatorText("Roughness");
             ImGui::PushID("Roughness");
@@ -229,6 +222,9 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::ROUGHNESS, mat);
             ImGui::PopID();
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(TEXTURE_TYPE::ROUGHNESS);
+            }
 
         }
         {
@@ -280,7 +276,6 @@ namespace VULKAN
 
     void ResourcesUIHandler::DisplayMeshInfo(ModelData &modelData) {
 
-        ModelData& materialReference = *ModelHandler::GetInstance()->allModelsOnApp.at(modelData.id);
         std::filesystem::path refPath(modelData.pathToAssetReference);
         std::string text = "Mesh Selected: " + refPath.filename().string();
         ImGui::SeparatorText(text.c_str());
@@ -299,8 +294,12 @@ namespace VULKAN
             modelData.bottomLevelObjRef->UpdateMatrix();
             ModelHandler::GetInstance()->updateBottomLevelObj = true;
         }
-            
-            
+        static float overallScale = 1.0f;
+        if(ImGui::SliderFloat("Scale 3 axis", &overallScale,-10.0f , 10.0f, "%.3f")){
+            modelData.bottomLevelObjRef->scale = glm::vec3(overallScale);
+            modelData.bottomLevelObjRef->UpdateMatrix();
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
 
         for (int i = 0; i < modelData.meshCount; ++i) {
 
@@ -310,7 +309,7 @@ namespace VULKAN
                 Material &materialReference = *ModelHandler::GetInstance()->allMaterialsOnApp.at(matIndex);
                 std::string materialText = materialReference.name;
                 ImGui::PushID(materialReference.id);
-                if (!materialReference.materialTextures.empty()){
+                if (materialReference.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
                     ImguiRenderSystem::GetInstance()->HandleTextureCreation(materialReference.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
                     ImGui::ImageButton(((ImTextureID)materialReference.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), ImVec2{100, 100});
                 } else{
@@ -341,95 +340,53 @@ namespace VULKAN
 
         ImGui::SetWindowSize(ImVec2(400, 400));
         ImGui::Begin("BLASes");
+        ImGui::SeparatorText("Meshes loaded:");
+
+        static Sphere* sphereSelected= nullptr;
+        static ModelData* modelSelected= nullptr;
         
         for (auto& model :ModelHandler::GetInstance()->allModelsOnApp) {
-            
-            std::filesystem::path modelPath(model.second.get()->pathToAssetReference) ;
-            ImGui::SeparatorText(modelPath.string().c_str());
-            if (ImGui::SliderFloat3("Position", positionInspected,-10.0f , 10.0f, "%.3f")){
-                model.second->bottomLevelObjRef->pos = glm::make_vec3(positionInspected);
-                model.second->bottomLevelObjRef->UpdateMatrix();
-                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-            }
-            if(ImGui::SliderFloat3("Rotation", rotationInspected,0.0f , 360.0f, "%.3f")){
-                model.second->bottomLevelObjRef->rot = glm::make_vec3(rotationInspected);
-                model.second->bottomLevelObjRef->UpdateMatrix();
-                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-            }
-            if(ImGui::SliderFloat3("Scale", scaleInspected,-10.0f , 10.0f, "%.3f")){
-                model.second->bottomLevelObjRef->scale = glm::make_vec3(scaleInspected);
-                model.second->bottomLevelObjRef->UpdateMatrix();
-                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            std::filesystem::path modelPath(model.second.get()->pathToAssetReference);
+            if(modelSelected == nullptr){
+                if (ImGui::Selectable(modelPath.filename().string().c_str())){
+                    modelSelected = model.second.get();
+                    sphereSelected = nullptr;
+                }
+            }else{
+                if (ImGui::Selectable(modelPath.filename().string().c_str(), modelSelected == model.second.get())){
+                    modelSelected = model.second.get();
+                    sphereSelected = nullptr;
+                }               
             }
 
         }
         for (auto& sphere :ModelHandler::GetInstance()->allSpheresOnApp) {
             int id =sphere.id;
             std::string name = "Sphere: " + std::to_string(id);
-            std::string namePos = "Sphere Pos: " + std::to_string(id);
-            std::string nameRadius = "Sphere Radius: " + std::to_string(id);
+            if (sphereSelected == nullptr){
+                if (ImGui::Selectable(name.c_str())){
+                    sphereSelected = &sphere;
+                    modelSelected = nullptr;
+                }               
+            }else{
+                if (ImGui::Selectable(name.c_str(), sphereSelected == &sphere)){
+                    sphereSelected = &sphere;
+                    modelSelected = nullptr;
+                }               
+            }
 
-            ImGui::SeparatorText(name.c_str());
-            float pos [3] = {sphere.sphereUniform.pos.x, sphere.sphereUniform.pos.y, sphere.sphereUniform.pos.z};
-            if (ImGui::SliderFloat3(namePos.c_str(), pos,-10.0f , 10.0f, "%.3f")){
-                sphere.sphereUniform.pos = glm::make_vec3(pos);
-                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-            }
-            if(ImGui::SliderFloat(nameRadius.c_str(), &sphere.sphereUniform.radius,-10.0f , 10.0f, "%.3f")){
-                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-            }
+        }
+        if(modelSelected!= nullptr && sphereSelected == nullptr){
 
-            Material& material = *ModelHandler::GetInstance()->allMaterialsOnApp.at(sphere.sphereUniform.matId).get();
-            ImGui::PushID(material.id);
-            std::string materialText = material.name;
-            if (!material.materialTextures.empty()){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(material.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
-                ImGui::ImageButton(((ImTextureID)material.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), ImVec2{100, 100});
-            } else{
-                ImGui::Button(materialText.c_str(), ImVec2{100, 100});
-            }
-            if (ImGui::BeginDragDropTarget()) {
-                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("MATERIAL_ID")) {
-                    int data = *(int *) payload->Data;
+            DisplayMeshInfo(*modelSelected);
 
-                    ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
-                    ImGui::BeginTooltip();
-                    ImGui::Text("Set Material");
-                    sphere.sphereUniform.matId = data;
-                    ModelHandler::GetInstance()->updateAABBData = true;
-                    ImGui::EndTooltip();
-                }
-                ImGui::EndDragDropTarget();
-            }
-            ImGui::PopID();
-            DisplayMatInfo(material, ImVec2{50, 50});
+        }
+        else if (modelSelected== nullptr && sphereSelected != nullptr){
+            DisplayMeshInfo(*sphereSelected);
+        }else{
 
         }
 
-//        if(modelSelected!= nullptr && sphereSelected == nullptr){
-//
-//            DisplayMeshInfo(*modelSelected);
-//            
-//        }
-//        else if (modelSelected== nullptr && sphereSelected != nullptr){
-//            std::string name = "Sphere: " + std::to_string(sphereSelected->id);
-//            std::string namePos = "Sphere Pos: " + std::to_string(sphereSelected->id);
-//            std::string nameRadius = "Sphere Radius: " + std::to_string(sphereSelected->id);
-//
-//            ImGui::SeparatorText(name.c_str());
-//            float pos [3] = {sphereSelected->sphereUniform.pos.x, sphereSelected->sphereUniform.pos.y, sphereSelected->sphereUniform.pos.z};
-//            if (ImGui::SliderFloat3(namePos.c_str(), pos,-10.0f , 10.0f, "%.3f")){
-//                sphereSelected->sphereUniform.pos = glm::make_vec3(pos);
-//                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-//            }
-//            if(ImGui::SliderFloat(nameRadius.c_str(), &sphereSelected->sphereUniform.radius,-10.0f , 10.0f, "%.3f")){
-//                ModelHandler::GetInstance()->updateBottomLevelObj = true;
-//            }
-//
-//        }else{
-//            
-//        }
-//
 
         ImGui::End();
         
@@ -483,6 +440,48 @@ namespace VULKAN
             counter++;
         }
         ImGui::End();
+    }
+
+    void ResourcesUIHandler::DisplayMeshInfo(Sphere &sphereData) {
+        int id =sphereData.id;
+        std::string name = "Sphere: " + std::to_string(id);
+        std::string namePos = "Position: " + std::to_string(id);
+        std::string nameRadius = "Radius: " + std::to_string(id);
+
+        ImGui::SeparatorText(name.c_str());
+        float pos [3] = {sphereData.sphereUniform.pos.x, sphereData.sphereUniform.pos.y, sphereData.sphereUniform.pos.z};
+        if (ImGui::SliderFloat3(namePos.c_str(), pos,-10.0f , 10.0f, "%.3f")){
+            sphereData.sphereUniform.pos = glm::make_vec3(pos);
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
+        if(ImGui::SliderFloat(nameRadius.c_str(), &sphereData.sphereUniform.radius,-10.0f , 10.0f, "%.3f")){
+            ModelHandler::GetInstance()->updateBottomLevelObj = true;
+        }
+
+        Material& material = *ModelHandler::GetInstance()->allMaterialsOnApp.at(sphereData.sphereUniform.matId).get();
+        ImGui::PushID(material.id);
+        std::string materialText = material.name;
+        if (!material.materialTextures.empty()){
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(material.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
+            ImGui::ImageButton(((ImTextureID)material.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), ImVec2{100, 100});
+        } else{
+            ImGui::Button(materialText.c_str(), ImVec2{100, 100});
+        }
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("MATERIAL_ID")) {
+                int data = *(int *) payload->Data;
+
+                ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+                ImGui::BeginTooltip();
+                ImGui::Text("Set Material");
+                sphereData.sphereUniform.matId = data;
+                ModelHandler::GetInstance()->updateAABBData = true;
+                ImGui::EndTooltip();
+            }
+            ImGui::EndDragDropTarget();
+        }
+        ImGui::PopID();
+        DisplayMatInfo(material, ImVec2{50, 50});
     }
 
 

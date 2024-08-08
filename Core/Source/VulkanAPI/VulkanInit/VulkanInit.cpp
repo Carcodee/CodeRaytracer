@@ -1,4 +1,6 @@
 #include "VulkanInit.h"
+#include "FileSystem/FileHandler.h"
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 
 #include <stdexcept>
 
@@ -69,9 +71,15 @@ namespace VULKAN {
 
 	void VulkanInit::dropCallback(GLFWwindow* window, int count, const char** paths)
 	{
+        
 		for (int i = 0; i < count; ++i)
 		{
-			ModelHandler::GetInstance()->AddModelToQuery(std::string(paths[i]));
+            std::string path = std::string(paths[i]);
+            if (AssetsHandler::GetInstance()->IsValidImageFormat(HELPERS::FileHandler::GetInstance()->GetPathExtension(path))){
+                ModelHandler::GetInstance()->AddTexture(path);
+                continue;
+            }
+			ModelHandler::GetInstance()->AddModelToQuery(path);
 		}
 
 	}

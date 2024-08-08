@@ -726,12 +726,9 @@ namespace VULKAN {
         uint32_t meshCount =0;
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (auto& mat : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-                uint32_t size =static_cast<uint32_t>(mat.second->materialUniform.texturesSizes);
-				imageCount += size;
-                materialCount ++/*= static_cast<uint32_t>(model.materialDataPerMesh.size())*/;
-			}
+            imageCount = ModelHandler::GetInstance()->allTexturesOnApp.size();
+            materialCount =ModelHandler::GetInstance()->allMaterialsOnApp.size(); 
+
 		}
 		for (auto model : modelsOnScene)
 		{
@@ -860,21 +857,16 @@ namespace VULKAN {
 		std::vector<VkDescriptorImageInfo> texturesDescriptors{};
 		if (ModelHandler::GetInstance()->allMaterialsOnApp.size()>0)
 		{
-			for (auto& mat: ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-                std::map<TEXTURE_TYPE,VKTexture*>& currentTextures =mat.second->materialTextures;
-                for (auto& pair : currentTextures) {
-                    
-                    VkDescriptorImageInfo descriptor{};
-                    descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    descriptor.sampler = pair.second->textureSampler;
-                    descriptor.imageView = pair.second->textureImageView;
-                    texturesDescriptors.push_back(descriptor);
+            for (auto& pair : ModelHandler::GetInstance()->allTexturesOnApp) {
 
-                }
+                VkDescriptorImageInfo descriptor{};
+                descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                descriptor.sampler = pair.second->textureSampler;
+                descriptor.imageView = pair.second->textureImageView;
+                texturesDescriptors.push_back(descriptor);
+
+            }
                
-			}
-
 		}
         if (texturesDescriptors.size()<=0)
         {
@@ -918,7 +910,7 @@ namespace VULKAN {
 	void RayTracing_RS::CreateRTPipeline()
 	{
 		uint32_t imageCount = 0;
-		if (ModelHandler::GetInstance()->allMaterialsOnApp.size() > 0)
+		if (ModelHandler::GetInstance(&myRenderer)->allMaterialsOnApp.size() > 0)
 		{
 			imageCount = { static_cast<uint32_t>(ModelHandler::GetInstance()->allMaterialsOnApp[0].get()->materialUniform.texturesSizes) };
 		}

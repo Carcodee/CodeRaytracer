@@ -35,18 +35,12 @@ namespace VULKAN {
 
 		VulkanApp(bool DynamicRendering, bool editor);
 		~VulkanApp();
+        VulkanApp(const VulkanApp&) = delete;
+        VulkanApp& operator=(const VulkanApp&) = delete;
 		void InitConfigsCache();
-	
-		VulkanApp(const VulkanApp&) = delete;
-		VulkanApp& operator=(const VulkanApp&) = delete;
+        void RunDynamicRendering(std::function<void()>&& editorContext);
+        
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp" };
-
-
-//#ifdef IS_EDITOR
-
-		void RunDynamicRendering(std::function<void()>&& editorContext);
-//
-//#endif
 		MyVulkanDevice myDevice{ initWindow };
 		VulkanRenderer renderer{ initWindow , myDevice };
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};

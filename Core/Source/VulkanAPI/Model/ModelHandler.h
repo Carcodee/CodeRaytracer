@@ -14,8 +14,8 @@ namespace VULKAN
 	protected:
 
 		static ModelHandler* instance;
-		ModelHandler();
-
+		ModelHandler(VulkanRenderer* renderer);
+        VulkanRenderer* renderer;
 	public:
 		enum STATE
 		{
@@ -36,7 +36,7 @@ namespace VULKAN
 		ModelHandler(ModelHandler& other) = delete;
 		void operator=(const ModelHandler&) = delete;
 
-		static ModelHandler *GetInstance();
+		static ModelHandler *GetInstance(VulkanRenderer* renderer = nullptr);
 
 		void AddModelToQuery(std::string path);
         void AddIdToQuery(int id);
@@ -44,13 +44,15 @@ namespace VULKAN
         void LoadModelFromDisc(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, int id);
         void LoadAllModelsFromDisc();
 		void LoadAllModels();
-        void CreateMaterialTextures(VulkanSwapChain& swapChain);
         void ReCalculateMaterialOffsets();
         void AddMaterial(Material& material);
         void AddSphere();
+        void CreateMaterialTextures(VulkanSwapChain& swapChain);
+        
+        void AddTexture(std::string path);
         void CreateMaterial(std::string path);
+        
         void CreateInstance(Material& material);
-
 		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, TopLevelObj& TLAS);
 		void AddTLAS(TopLevelObj& bottomLevelObj);
         
