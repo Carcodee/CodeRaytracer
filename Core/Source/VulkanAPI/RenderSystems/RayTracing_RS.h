@@ -56,6 +56,7 @@ namespace VULKAN {
         void RecreateBLASesAndTLASes();
 		void UpdateRaytracingData();
         void UpdateMeshInfo();
+        void UpdateAABBsInfo();
         void UpdateMaterialInfo();
         void ResetAccumulatedFrames();
 
@@ -64,10 +65,12 @@ namespace VULKAN {
 			glm::mat4 viewInverse;
 			glm::mat4 projInverse;
 		} uniformData;
+        bool runningModels = false;
 
 		std::vector<std::shared_ptr<ModelData>>modelsOnScene;
         std::vector<uint32_t> instancesGeometryOffsets;
 		//helpers
+        void CleanBuffers();
 		void SetupBottomLevelObj(std::shared_ptr<ModelData> modelData);
 		void LoadFunctionsPointers();
 		void UpdateUniformbuffers();
@@ -77,7 +80,7 @@ namespace VULKAN {
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
 		void CreateStorageImages();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
-        void CreateBottomLevelAccelerationStructureSpheres(AABBObj& sphere);
+        void CreateBottomLevelAccelerationStructureSpheres(Sphere& sphere);
 		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
@@ -85,6 +88,8 @@ namespace VULKAN {
 		void CreateUniformBuffer();
 		void CreateMaterialsBuffer();
 		void CreateAllModelsBuffer();
+        void CreateAABBsBuffer();
+        void DestroyAccelerationStructure(AccelerationStructure& accelerationStructure);
 		uint32_t GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset, uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride);
 
 		VulkanRenderer& myRenderer;
@@ -104,21 +109,25 @@ namespace VULKAN {
 		VkDescriptorSet descriptorSet;
 		uint32_t indexCount;
 
-        Buffer BLAsInstanceOffsetBuffer;
+        //dynamic buffers
 		Buffer vertexBuffer;
-		Buffer combinedMeshBuffer;
 		Buffer indexBuffer;
 		Buffer transformBuffer;
-        Buffer sphereTransformBuffer;
+        Buffer BLAsInstanceOffsetBuffer;
+        Buffer allMaterialsBuffer;
+        Buffer allModelDataBuffer;
+        Buffer allSpheresBuffer;
+        Buffer allAABBBuffer;
+        
+        //raytracing
 		Buffer raygenShaderBindingTable;
 		Buffer missShaderBindingTable;
 		Buffer hitShaderBindingTable;
+        
+        //ubo
 		Buffer ubo;
 		Buffer lightBuffer;
-		Buffer allMaterialsBuffer;
-		Buffer allModelDataBuffer;
-        Buffer allSpheresBuffer;
-        Buffer allAABBBuffer;
+
 
 
 		VkShaderModule rHitShaderModule;
@@ -127,7 +136,7 @@ namespace VULKAN {
         
         VKTexture* baseTexture;
         VKTexture* environmentTexture;
-        std::vector<AABBObj> aabbs;
+        std::vector<AABB> aabbs;
         
 	};
 

@@ -249,6 +249,7 @@ namespace VULKAN {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,texturePathFinded);
+                materialData.materialUniform.diffuseColor = glm::vec3(1.0f);
                 texturesFinded = true;
 			}
             if (!material.roughness_texname.empty() || !material.specular_texname.empty()|| !material.specular_highlight_texname.empty()) {

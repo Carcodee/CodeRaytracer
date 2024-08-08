@@ -90,7 +90,7 @@ void main()
             traceRayEXT(topLevelAS, gl_RayFlagsOpaqueEXT, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
             vec3 directLightContrib = rayPayload.color;
             if(rayPayload.isMiss){
-                irradiance += directLightContrib * rayThroughput / rayPdf; 
+                irradiance += directLightContrib * rayThroughput ; 
                 break;
             }
             if(rayPayload.emissive && i==0){

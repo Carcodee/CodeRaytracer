@@ -184,7 +184,8 @@ void main()
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
-  rayPayload.color = materials[materialIndex].emissionIntensity + (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  
+  rayPayload.color = materials[materialIndex].emissionIntensity + ((pbrLitDirect * myLight.col)* cosThetaTangent* myLight.intensity); 
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
   if(materials[materialIndex].emissionIntensity>0){

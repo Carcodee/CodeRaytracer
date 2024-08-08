@@ -570,6 +570,8 @@ namespace VULKAN
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
         ResourcesUIHandler::GetInstance()->DisplayInspectorInfo();
         ResourcesUIHandler::GetInstance()->DisplayTexturesTab();
+        ResourcesUIHandler::GetInstance()->DisplayBLASesInfo();
+        
         
         {
             ImGui::PushID("AssetsID");

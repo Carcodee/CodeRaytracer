@@ -31,9 +31,9 @@ namespace HELPERS
 		void DeleteLinesFromFile(std::string path, const std::vector<int>& linesToDelete);
 		void operator=(const FileHandler&) = delete;
 		std::filesystem::path currentPathRelativeToAssets;
-
 		void CreateFile(std::string path,std::string data = "");
 		void AppendToFile(std::string path,std::string data);
+        
         std::string RemovePathExtension(std::filesystem::path path);
 		std::string ReadFile(std::string path);
 

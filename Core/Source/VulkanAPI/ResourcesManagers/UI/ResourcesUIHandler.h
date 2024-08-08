@@ -29,6 +29,9 @@ namespace VULKAN
         float positionInspected[3] = {0.0f,0.0f,0.0f};
         float scaleInspected[3] = {1.0f,1.0f,1.0f};
         float rotationInspected[3] = {0.0f,0.0f,0.0f};
+        Sphere* sphereSelected= nullptr;
+        ModelData* modelSelected= nullptr;
+        
         
         std::string pathInspected ="";
 		float iconSize = 50;

@@ -342,9 +342,95 @@ namespace VULKAN
         ImGui::SetWindowSize(ImVec2(400, 400));
         ImGui::Begin("BLASes");
         
-        
+        for (auto& model :ModelHandler::GetInstance()->allModelsOnApp) {
+            
+            std::filesystem::path modelPath(model.second.get()->pathToAssetReference) ;
+            ImGui::SeparatorText(modelPath.string().c_str());
+            if (ImGui::SliderFloat3("Position", positionInspected,-10.0f , 10.0f, "%.3f")){
+                model.second->bottomLevelObjRef->pos = glm::make_vec3(positionInspected);
+                model.second->bottomLevelObjRef->UpdateMatrix();
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            }
+            if(ImGui::SliderFloat3("Rotation", rotationInspected,0.0f , 360.0f, "%.3f")){
+                model.second->bottomLevelObjRef->rot = glm::make_vec3(rotationInspected);
+                model.second->bottomLevelObjRef->UpdateMatrix();
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            }
+            if(ImGui::SliderFloat3("Scale", scaleInspected,-10.0f , 10.0f, "%.3f")){
+                model.second->bottomLevelObjRef->scale = glm::make_vec3(scaleInspected);
+                model.second->bottomLevelObjRef->UpdateMatrix();
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            }
 
-        
+        }
+        for (auto& sphere :ModelHandler::GetInstance()->allSpheresOnApp) {
+            int id =sphere.id;
+            std::string name = "Sphere: " + std::to_string(id);
+            std::string namePos = "Sphere Pos: " + std::to_string(id);
+            std::string nameRadius = "Sphere Radius: " + std::to_string(id);
+
+            ImGui::SeparatorText(name.c_str());
+            float pos [3] = {sphere.sphereUniform.pos.x, sphere.sphereUniform.pos.y, sphere.sphereUniform.pos.z};
+            if (ImGui::SliderFloat3(namePos.c_str(), pos,-10.0f , 10.0f, "%.3f")){
+                sphere.sphereUniform.pos = glm::make_vec3(pos);
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            }
+            if(ImGui::SliderFloat(nameRadius.c_str(), &sphere.sphereUniform.radius,-10.0f , 10.0f, "%.3f")){
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+            }
+
+            Material& material = *ModelHandler::GetInstance()->allMaterialsOnApp.at(sphere.sphereUniform.matId).get();
+            ImGui::PushID(material.id);
+            std::string materialText = material.name;
+            if (!material.materialTextures.empty()){
+                ImguiRenderSystem::GetInstance()->HandleTextureCreation(material.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
+                ImGui::ImageButton(((ImTextureID)material.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), ImVec2{100, 100});
+            } else{
+                ImGui::Button(materialText.c_str(), ImVec2{100, 100});
+            }
+            if (ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("MATERIAL_ID")) {
+                    int data = *(int *) payload->Data;
+
+                    ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
+                    ImGui::BeginTooltip();
+                    ImGui::Text("Set Material");
+                    sphere.sphereUniform.matId = data;
+                    ModelHandler::GetInstance()->updateAABBData = true;
+                    ImGui::EndTooltip();
+                }
+                ImGui::EndDragDropTarget();
+            }
+            ImGui::PopID();
+            DisplayMatInfo(material, ImVec2{50, 50});
+
+        }
+
+//        if(modelSelected!= nullptr && sphereSelected == nullptr){
+//
+//            DisplayMeshInfo(*modelSelected);
+//            
+//        }
+//        else if (modelSelected== nullptr && sphereSelected != nullptr){
+//            std::string name = "Sphere: " + std::to_string(sphereSelected->id);
+//            std::string namePos = "Sphere Pos: " + std::to_string(sphereSelected->id);
+//            std::string nameRadius = "Sphere Radius: " + std::to_string(sphereSelected->id);
+//
+//            ImGui::SeparatorText(name.c_str());
+//            float pos [3] = {sphereSelected->sphereUniform.pos.x, sphereSelected->sphereUniform.pos.y, sphereSelected->sphereUniform.pos.z};
+//            if (ImGui::SliderFloat3(namePos.c_str(), pos,-10.0f , 10.0f, "%.3f")){
+//                sphereSelected->sphereUniform.pos = glm::make_vec3(pos);
+//                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+//            }
+//            if(ImGui::SliderFloat(nameRadius.c_str(), &sphereSelected->sphereUniform.radius,-10.0f , 10.0f, "%.3f")){
+//                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+//            }
+//
+//        }else{
+//            
+//        }
+//
+
         ImGui::End();
         
 

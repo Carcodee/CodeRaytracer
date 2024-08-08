@@ -65,6 +65,7 @@ namespace VULKAN
 		std::mutex loadAssetMutex;
 		bool Loading = false;
         bool updateMeshData = false;
+        bool updateAABBData= false;
         bool updateMaterialData = false;
         bool updateBottomLevelObj = false;
 		int TLASesCount = 0;

@@ -44,6 +44,10 @@ namespace VULKAN{
                 rayTracing_RS.UpdateMeshInfo();
                 ModelHandler::GetInstance()->updateMeshData = false;
             }
+            if (ModelHandler::GetInstance()->updateAABBData){
+                rayTracing_RS.UpdateAABBsInfo();
+                ModelHandler::GetInstance()->updateAABBData= false;
+            }
             VkClearValue clearValue{};
             clearValue= { 0.1f, 0.1f, 0.1f, 0.1f };
             LoadQueryModels();

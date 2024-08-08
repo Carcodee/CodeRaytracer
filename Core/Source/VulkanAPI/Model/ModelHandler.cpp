@@ -208,9 +208,12 @@ namespace VULKAN
 
     void ModelHandler::AddSphere() {
         Sphere sphere{};
-        sphere.sphereUniform.matId= 0;
-        sphere.sphereUniform.radius = 1;
         sphere.sphereUniform.pos = glm::vec3 (0.0f);
+        sphere.sphereUniform.radius = 1;
+        sphere.sphereUniform.matId= 0;
+        sphere.sphereUniform.instanceOffset = allModelsOnApp.size();
+        sphere.id =allSpheresOnApp.size();
+        
         allSpheresOnApp.push_back(sphere);
     }
 

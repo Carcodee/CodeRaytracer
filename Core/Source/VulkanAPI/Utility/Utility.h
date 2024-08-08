@@ -60,27 +60,20 @@ namespace VULKAN{
         glm::vec3 pos = glm::vec3 (0.0f);
         float radius = 1.0f;
         uint32_t matId = 0;
-        uint32_t  id = 0;
+        uint32_t instanceOffset = 0;
+
     };
     struct Sphere{
         SphereUniform sphereUniform;
-        VkTransformMatrixKHR transformMatrix={
-                1.0f, 0.0f, 0.0f,  sphereUniform.pos.x,
-                0.0f, 1.0f, 0.0f,  sphereUniform.pos.y,
-                0.0f, 0.0f, -1.0f, sphereUniform.pos.z};
+        uint32_t  id = 0;
+        AccelerationStructure accelerationStructure;
     };
 
-    
-    struct AABBraw{
+    struct AABB{
         glm::vec3 min;
         glm::vec3 max;
     };
-    struct AABBObj{
-        AABBraw aabb;
-        uint32_t id= 0;
-        VkTransformMatrixKHR transformMatrix;
-        AccelerationStructure accelerationStructure;
-    };
+
 
     struct RxTexture
     {
@@ -122,6 +115,7 @@ namespace VULKAN{
                 dataUniformBuffer[i].materialIndex = materialIds[i];
             }
         }
+        
         
         nlohmann::json Serialize() override{
             nlohmann::json jsonData;
@@ -220,6 +214,7 @@ namespace VULKAN{
                     0.0f, scale.y, 0.0f, pos.y,
                     0.0f, 0.0f, -scale.z,pos.z};
         }
+       
     };
 
     

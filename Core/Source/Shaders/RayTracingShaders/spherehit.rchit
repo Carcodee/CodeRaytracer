@@ -27,9 +27,12 @@ struct Sphere {
     vec3 center;
     float radius;
     uint matId;
+    uint instancesOffset;
 };
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
+
+layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 
 layout(binding=6) uniform light{
     vec3 pos;
@@ -61,14 +64,21 @@ float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
 void main()
 {
 
-  Sphere sphere = spheres[gl_InstanceID];
+  uint instancesOffset = spheres[0].instancesOffset;
+  Sphere sphere = spheres[gl_InstanceID - instancesOffset];
   
   MaterialData material = materials[sphere.matId];
   vec3 hitPos = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   
   vec3 lightDir= normalize(myLight.pos - hitPos); 
   vec3 normal = normalize(hitPos - sphere.center);
-  vec3 view = normalize(-rayPayload.direction);
+  
+  vec3 T;
+  vec3 B;
+  CreateOrthonormalBasis(normal, T, B);
+  mat3 TBN = mat3(T, B, normal);
+  vec3 view = normalize(rayPayload.direction);
+  
   vec3 halfway =normalize(view + lightDir);
   vec3 rayDirWi = normalize(hitPos - rayPayload.origin);
   
@@ -91,15 +101,24 @@ void main()
   
   vec3 pbrLitIndirect= GetBRDF(normal, view, rayPayload.sampleDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
-  
+  rayPayload.shadow = true;
+  float tmin = 0.001;
+  float tmax = 10000.0; 
+  vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
+  rayPayload.shadow = false;
+  traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+   
   rayPayload.color = material.emissionIntensity + (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
   rayPayload.colorLit = pbrLitIndirect; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;
   rayPayload.reflectivity = material.reflectivityIntensity; 
-  rayPayload.shadow = false;
+  rayPayload.distance = gl_RayTmaxEXT;
+  
   if(material.emissionIntensity>0.0f){
     rayPayload.emissive = true;
+    rayPayload.shadow = false;
+    //rayPayload.color = pbrLitDirect * material.diffuseColor * material.emissionIntensity; 
   }else{
     rayPayload.emissive = false;
   }

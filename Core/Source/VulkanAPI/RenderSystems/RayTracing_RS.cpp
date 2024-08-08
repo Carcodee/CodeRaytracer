@@ -128,12 +128,11 @@ namespace VULKAN {
                                            VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR, VK_FORMAT_R8G8B8A8_UNORM, 4);
 	}
 
-    void RayTracing_RS::CreateBottomLevelAccelerationStructureSpheres(AABBObj &sphere) {
+    void RayTracing_RS::CreateBottomLevelAccelerationStructureSpheres(Sphere& sphere) {
         VkDeviceOrHostAddressConstKHR sphereBuffersDeviceAddress{};
         VkDeviceOrHostAddressConstKHR transformBufferDeviceAddress{};
 
-        sphereBuffersDeviceAddress.deviceAddress = getBufferDeviceAddress(allAABBBuffer.buffer) + sphere.id * sizeof(AABBraw);
-        transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) /*+ obj.combinedMesh.transformBLASOffset*/;
+        sphereBuffersDeviceAddress.deviceAddress = getBufferDeviceAddress(allAABBBuffer.buffer) + sphere.id * sizeof(AABB);
 
         VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
         accelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
@@ -143,7 +142,7 @@ namespace VULKAN {
         accelerationStructureGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
         accelerationStructureGeometry.geometry.aabbs.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_AABBS_DATA_KHR;
         accelerationStructureGeometry.geometry.aabbs.data.deviceAddress = sphereBuffersDeviceAddress.deviceAddress;
-        accelerationStructureGeometry.geometry.aabbs.stride = sizeof(AABBraw);
+        accelerationStructureGeometry.geometry.aabbs.stride = sizeof(AABB);
 
        
         VkAccelerationStructureBuildGeometryInfoKHR accelerationsStructureBuildGeometryInfo{};
@@ -224,7 +223,7 @@ namespace VULKAN {
 
 			vertexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(vertexBuffer.buffer) + obj.combinedMesh.vertexBLASOffset * sizeof(Vertex);
 			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + ((obj.combinedMesh.indexBLASOffset + obj.combinedMesh.firstMeshIndex[i]) * sizeof(uint32_t));
-			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) /*+ obj.combinedMesh.transformBLASOffset*/;
+			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer)/* + obj.combinedMesh.transformBLASOffset * sizeof(VkTransformMatrixKHR)*/;
 
 			VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
 			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -327,16 +326,19 @@ namespace VULKAN {
 			instance.accelerationStructureReference = objRef.BottomLevelAs.deviceAddress;
 			instances.push_back(instance);
 		}
+        VkTransformMatrixKHR transformMatrix = {
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f }; 
         
         for (int i = 0; i <ModelHandler::GetInstance()->allSpheresOnApp.size() ; ++i) {
-            assert(aabbs.size()==ModelHandler::GetInstance()->allSpheresOnApp.size() && "AABBS and spheres must have the same size");
             VkAccelerationStructureInstanceKHR instance{};
-            instance.transform = aabbs[i].transformMatrix;
+            instance.transform = transformMatrix;
             instance.instanceCustomIndex = 0;
             instance.mask = 0xFF;
             instance.instanceShaderBindingTableRecordOffset = 1;
             instance.flags = VK_GEOMETRY_INSTANCE_TRIANGLE_FACING_CULL_DISABLE_BIT_KHR;
-            instance.accelerationStructureReference = aabbs[i].accelerationStructure.deviceAddress;
+            instance.accelerationStructureReference = ModelHandler::GetInstance()->allSpheresOnApp[i].accelerationStructure.deviceAddress;
             instances.push_back(instance);
         }
 		Buffer instancesBuffer;
@@ -462,9 +464,10 @@ namespace VULKAN {
         {
             CreateBottomLevelAccelerationStructureModel(ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase)[i]);
         }
-        for (int i = 0; i < aabbs.size(); ++i) {
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
            
-            CreateBottomLevelAccelerationStructureSpheres(aabbs[i]);
+            Sphere& currentSphere = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            CreateBottomLevelAccelerationStructureSpheres(currentSphere);
         }
         CreateTopLevelAccelerationStructure(topLevelObjBase);
 
@@ -638,10 +641,83 @@ namespace VULKAN {
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 	}
 
+    void RayTracing_RS::CleanBuffers() {
+
+        if (!runningModels){
+            return;
+        }
+        vkQueueWaitIdle(myDevice.graphicsQueue());
+
+        if(indexBuffer.buffer != nullptr){
+            indexBuffer.unmap();
+            indexBuffer.destroy();
+        }
+
+        if (vertexBuffer.buffer != nullptr){
+
+            vertexBuffer.unmap();
+            vertexBuffer.destroy();
+        }
+
+        if (transformBuffer.buffer != nullptr){
+
+            transformBuffer.unmap();
+            transformBuffer.destroy();
+        }
+
+        if(BLAsInstanceOffsetBuffer.buffer != nullptr){
+
+            BLAsInstanceOffsetBuffer.unmap();
+            BLAsInstanceOffsetBuffer.destroy();
+        }
+        
+        if(allMaterialsBuffer.buffer != nullptr){
+
+            allMaterialsBuffer.unmap();
+            allMaterialsBuffer.destroy();
+        }
+
+        if(allModelDataBuffer.buffer != nullptr){
+
+            allModelDataBuffer.unmap();
+            allModelDataBuffer.destroy();
+        }
+
+        if(allSpheresBuffer.buffer != nullptr){
+
+            allSpheresBuffer.unmap();
+            allSpheresBuffer.destroy();
+        }
+
+        if(allAABBBuffer.buffer != nullptr){
+
+            allAABBBuffer.unmap();
+            allAABBBuffer.destroy();
+        }
+
+        DestroyAccelerationStructure(topLevelObjBase.TopLevelAsData);
+        for (auto& model: ModelHandler::GetInstance()->allModelsOnApp) {
+            if (model.second->bottomLevelObjRef != nullptr){
+                if (model.second->bottomLevelObjRef->BottomLevelAs.handle != nullptr){
+                    DestroyAccelerationStructure(model.second->bottomLevelObjRef->BottomLevelAs);
+                }
+            }
+        }
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
+            if (ModelHandler::GetInstance()->allSpheresOnApp[i].accelerationStructure.handle != nullptr){
+                DestroyAccelerationStructure(ModelHandler::GetInstance()->allSpheresOnApp[i].accelerationStructure);
+            }
+        }
+        aabbs.clear();
+
+    }
+
 	void RayTracing_RS::UpdateRaytracingData()
 	{
+        CleanBuffers();
         ModelHandler::GetInstance()->CreateMaterialTextures(myRenderer.GetSwapchain());
         CreateMaterialsBuffer();
+        CreateAABBsBuffer();
         CreateAllModelsBuffer();
         RecreateBLASesAndTLASes();
         
@@ -670,17 +746,19 @@ namespace VULKAN {
 		{
 			materialCount = 1;
 		}
-         
+
+        vkFreeDescriptorSets(myDevice.device(), descriptorPool, 1,&descriptorSet);
+        
         VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variableDescriptorCountAllocInfo{};
 		uint32_t variableDescCounts[] = {  imageCount };
 		variableDescriptorCountAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
 		variableDescriptorCountAllocInfo.descriptorSetCount = 1;
 		variableDescriptorCountAllocInfo.pDescriptorCounts = variableDescCounts;
 
+       
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo =INITIALIZERS::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
 		descriptorSetAllocateInfo.pNext = &variableDescriptorCountAllocInfo;
 
-        vkFreeDescriptorSets(myDevice.device(), descriptorPool, 1,&descriptorSet);
         
 		if (vkAllocateDescriptorSets(myDevice.device(), &descriptorSetAllocateInfo, &descriptorSet) != VK_SUCCESS)
 		{
@@ -833,6 +911,7 @@ namespace VULKAN {
 
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
         ResetAccumulatedFrames();
+        runningModels = true;
 
 	}
 
@@ -1124,36 +1203,50 @@ namespace VULKAN {
         allMaterialsBuffer.map();
 	}
 
-	void RayTracing_RS::CreateAllModelsBuffer()
-	{
-        for (int i = 0; i <aabbs.size() ; ++i) {
-            vkDestroyAccelerationStructureKHR( myDevice.device(), aabbs[i].accelerationStructure.handle, nullptr);
-//            vkDestroyBuffer(myDevice.device(), allAABBBuffer.buffer, nullptr);
-        }
-        for (int i = 0; i <modelsOnScene.size() ; ++i) {
-            if (modelsOnScene[i].get()->bottomLevelObjRef == nullptr) continue;
-            vkDestroyAccelerationStructureKHR( myDevice.device(), modelsOnScene[i].get()->bottomLevelObjRef->BottomLevelAs.handle, nullptr);
-//            vkDestroyBuffer(myDevice.device(), allModelDataBuffer.buffer, nullptr);
-        }
-        aabbs.clear();
+    void RayTracing_RS::CreateAABBsBuffer() {
+        std::vector<SphereUniform> sphereUniforms;
+        sphereUniforms.reserve(ModelHandler::GetInstance()->allSpheresOnApp.size());
+        aabbs.reserve(ModelHandler::GetInstance()->allSpheresOnApp.size());
         
-        std::vector<AABBraw> aabbRaws;
         for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
             Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
-            AABBObj aabbObj;
-            aabbObj.transformMatrix = sphereRef.transformMatrix;
-            aabbObj.id = sphereRef.sphereUniform.id;
-            aabbObj.aabb.min = sphereRef.sphereUniform.pos - glm::vec3 (sphereRef.sphereUniform.radius);
-            aabbObj.aabb.max = sphereRef.sphereUniform.pos + glm::vec3 (sphereRef.sphereUniform.radius);
-            aabbs.push_back(aabbObj);
-            aabbRaws.push_back(aabbs[i].aabb);
+            AABB aabb;
+            aabb.min = sphereRef.sphereUniform.pos - glm::vec3 (sphereRef.sphereUniform.radius);
+            aabb.max = sphereRef.sphereUniform.pos + glm::vec3 (sphereRef.sphereUniform.radius);
+            aabbs.push_back(aabb);
+        }
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
+            Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            sphereUniforms.push_back(sphereRef.sphereUniform);
+        }
+
+        if (!ModelHandler::GetInstance()->allSpheresOnApp.empty()){
+            myDevice.createBuffer(
+                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    &allSpheresBuffer,
+                    sphereUniforms.size() * sizeof(SphereUniform),
+                    sphereUniforms.data());
+            allSpheresBuffer.map();
+
+            myDevice.createBuffer(
+                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    &allAABBBuffer,
+                    aabbs.size() * sizeof(AABB),
+                    aabbs.data());
 
         }
+
+
+    }
+	void RayTracing_RS::CreateAllModelsBuffer()
+	{
+       
         std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
 		std::vector <uint32_t> allModelIndices;
 		std::vector <Vertex> allModelsVertices;
 		std::vector <VkTransformMatrixKHR> allModelsTransformationMatrices;
-        std::vector <VkTransformMatrixKHR> allSphereTransformationMatrices;
         instancesGeometryOffsets.clear();
 
 		uint32_t perModelIndexStride=0;
@@ -1196,17 +1289,10 @@ namespace VULKAN {
         {
             allModelsTransformationMatrices.push_back(ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).matrix);
         }
-        for (int i = 0; i <ModelHandler::GetInstance()->allSpheresOnApp.size() ; ++i) {
-            allSphereTransformationMatrices.push_back(ModelHandler::GetInstance()->allSpheresOnApp[i].transformMatrix);
-        }
+
 
 		allModelIndices.reserve(perModelIndexStride);
 		allModelsVertices.reserve(perModelVertexCount);
-//        for (int i = 0; i < modelsOnScene.size(); ++i) {
-//            for (int j = 0; j < modelsOnScene[i]->indices.size(); ++j) {
-//               allModelIndices.push_back(modelsOnScene[i]->indexBLASOffset+modelsOnScene[i]->indices[j]);
-//            }
-//        }
         for (int i = 0; i < modelsOnScene.size(); ++i)
 		{
 			allModelIndices.insert(allModelIndices.end(), modelsOnScene[i]->indices.begin(), modelsOnScene[i]->indices.end());
@@ -1214,33 +1300,7 @@ namespace VULKAN {
 		}
 
         //shaders
-
-        if (!ModelHandler::GetInstance()->allSpheresOnApp.empty()){
-            myDevice.createBuffer(
-                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                    &allSpheresBuffer,
-                    ModelHandler::GetInstance()->allSpheresOnApp.size() * sizeof(SphereUniform),
-                    ModelHandler::GetInstance()->allSpheresOnApp.data());
-            allSpheresBuffer.map();
-            
-            myDevice.createBuffer(
-                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                    &allAABBBuffer,
-                    aabbRaws.size() * sizeof(AABBraw),
-                    aabbRaws.data());
-
-            myDevice.createBuffer(
-                    VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                    &sphereTransformBuffer,
-                    allSphereTransformationMatrices.size() * sizeof(VkTransformMatrixKHR),
-                    allModelsTransformationMatrices.data());
-
-        }
-
-            
+    
         myDevice.createBuffer(
 		VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -1290,10 +1350,31 @@ namespace VULKAN {
         {
             materialDatas.push_back(mat.second->materialUniform);
         }
-        memcpy(allMaterialsBuffer.mapped, materialDatas.data(), sizeof (MaterialUniformData)* materialDatas.size());
+        memcpy(allMaterialsBuffer.mapped, materialDatas.data(), sizeof (MaterialUniformData) * materialDatas.size());
+        
+        std::vector<SphereUniform> sphereUniforms;
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
+            Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            sphereUniforms.push_back(sphereRef.sphereUniform);
+        }
+
+        memcpy(allSpheresBuffer.mapped, sphereUniforms.data(), sizeof(SphereUniform) * sphereUniforms.size());
+        
         ResetAccumulatedFrames();
 
     }
+
+    void RayTracing_RS::UpdateAABBsInfo() {
+        std::vector<SphereUniform> sphereUniforms;
+        for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
+            Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            sphereUniforms.push_back(sphereRef.sphereUniform);
+        }
+        memcpy(allSpheresBuffer.mapped, sphereUniforms.data(), sizeof (SphereUniform)* sphereUniforms.size());
+        ResetAccumulatedFrames();
+
+    }
+
     void RayTracing_RS::UpdateMeshInfo() {
         std::vector<ModelDataUniformBuffer>modelDataUniformBuffer;
         for (int i = 0; i < modelsOnScene.size(); ++i) {
@@ -1304,6 +1385,7 @@ namespace VULKAN {
         }
         memcpy(allModelDataBuffer.mapped, modelDataUniformBuffer.data(), sizeof (ModelDataUniformBuffer)* modelDataUniformBuffer.size());
         ResetAccumulatedFrames();
+        
     }
 
 
@@ -1461,6 +1543,12 @@ namespace VULKAN {
     void RayTracing_RS::ResetAccumulatedFrames() {
          pc.currentAccumulatedFrame= 0;
          
+    }
+
+    void RayTracing_RS::DestroyAccelerationStructure(AccelerationStructure& accelerationStructure) {
+        vkDestroyAccelerationStructureKHR(myDevice.device(), accelerationStructure.handle, nullptr);
+        vkFreeMemory(myDevice.device(), accelerationStructure.memory, nullptr);
+        vkDestroyBuffer(myDevice.device(), accelerationStructure.buffer, nullptr);
     }
 
 

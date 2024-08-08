@@ -1,5 +1,9 @@
 #version 460
 #extension GL_EXT_ray_tracing : require
+#extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
 
 hitAttributeEXT vec3 attribs;
 
@@ -10,13 +14,14 @@ struct Sphere {
     vec3 center;
     float radius;
     uint matId;
+    uint instancesOffset;
 };
 
 layout(set = 0, binding = 7, std140) buffer Materials {
     MaterialData materials[];
 };
 
-layout(set = 0, binding = 12, std140) buffer Spheres {
+layout(set = 0, binding = 12, scalar) buffer Spheres {
     Sphere spheres[];
 };
 
@@ -37,7 +42,10 @@ void main() {
     vec3 rayOrigin = gl_WorldRayOriginEXT;
     vec3 rayDirection = gl_WorldRayDirectionEXT;
     uint instanceID = gl_InstanceCustomIndexEXT;
-    Sphere sphere = spheres[0];
+    
+    uint instancesOffset = spheres[0].instancesOffset;
+    Sphere sphere = spheres[gl_InstanceID - instancesOffset];
+      
     float t;
     
     if (intersectSphere(rayOrigin, rayDirection, sphere.center, sphere.radius, t)) {
