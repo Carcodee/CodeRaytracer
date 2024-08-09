@@ -92,10 +92,17 @@ namespace VULKAN {
             throw std::runtime_error("Unable to create descriptor set layouts");
         }
 
+        VkPushConstantRange pushConstantRange = {};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(PushConstantBlock_Bloom);
+
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCI.setLayoutCount = 1;
         pipelineLayoutCI.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutCI.pPushConstantRanges = &pushConstantRange;
+        pipelineLayoutCI.pushConstantRangeCount = 1;
         if (vkCreatePipelineLayout(myVulkanDevice.device(), &pipelineLayoutCI, nullptr, &pipelineLayout) != VK_SUCCESS)
         {
             throw std::runtime_error("Unable to create pipeline layout");
@@ -144,11 +151,17 @@ namespace VULKAN {
         {
             throw std::runtime_error("Unable to create descriptor set layouts");
         }
+        VkPushConstantRange pushConstantRange = {};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(PushConstantBlock_Bloom);
 
         VkPipelineLayoutCreateInfo pipelineLayoutCI{};
         pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutCI.setLayoutCount = 1;
         pipelineLayoutCI.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutCI.pushConstantRangeCount = 1;
+        pipelineLayoutCI.pPushConstantRanges = &pushConstantRange; 
         if (vkCreatePipelineLayout(myVulkanDevice.device(), &pipelineLayoutCI, nullptr, &pipelineLayout) != VK_SUCCESS)
         {
             throw std::runtime_error("Unable to create pipeline layout");
@@ -229,6 +242,15 @@ namespace VULKAN {
             vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, &vertexBuffer.buffer, offsets);
             vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
             vkCmdDrawIndexed(currentCommandBuffer, quadIndices.size(), 1, 0, 0, 0);
+            vkCmdPushConstants(
+                    currentCommandBuffer,
+                    pipelineLayout,
+                    VK_SHADER_STAGE_FRAGMENT_BIT,
+                    0,
+                    sizeof(PushConstantBlock_Bloom),
+                    &pc
+            );
+
 
             currentExtend.width /=2;
             currentExtend.height /=2;
@@ -236,6 +258,10 @@ namespace VULKAN {
         }
 
         myVulkanRenderer.EndDynamicRenderPass(currentCommandBuffer);
+//        
+//        barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+//        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+//        barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
 
         vkCmdPipelineBarrier(
                 currentCommandBuffer,
@@ -267,6 +293,14 @@ namespace VULKAN {
             vkCmdBindVertexBuffers(currentCommandBuffer, 0, 1, &vertexBuffer.buffer, offsets);
             vkCmdBindIndexBuffer(currentCommandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
             vkCmdDrawIndexed(currentCommandBuffer, quadIndices.size(), 1, 0, 0, 0);
+            vkCmdPushConstants(
+                    currentCommandBuffer,
+                    pipelineLayout,
+                    VK_SHADER_STAGE_FRAGMENT_BIT,
+                    0,
+                    sizeof(PushConstantBlock_Bloom),
+                    &pc
+            );
 
         }
         myVulkanRenderer.EndDynamicRenderPass(currentCommandBuffer);

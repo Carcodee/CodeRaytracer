@@ -203,6 +203,7 @@ namespace VULKAN
         //this data is filled in that methods, weird, I know
         material.targetPath = path +"\\"+ material.name + ".MATCODE";
         AssetsHandler::GetInstance()->HandleAssetLoad(material,material.targetPath, AssetsHandler::GetInstance()->matFileExtension, material.id);
+//        updateBottomLevelObj = true;
     }
 
     void ModelHandler::CreateInstance(Material &material) {
@@ -214,7 +215,7 @@ namespace VULKAN
         sphere.sphereUniform.pos = glm::vec3 (0.0f);
         sphere.sphereUniform.radius = 1;
         sphere.sphereUniform.matId= 0;
-        sphere.sphereUniform.instanceOffset = allModelsOnApp.size();
+        sphere.sphereUniform.instanceOffset = 0;
         sphere.id =allSpheresOnApp.size();
         
         allSpheresOnApp.push_back(sphere);

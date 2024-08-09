@@ -73,30 +73,9 @@ namespace VULKAN{
                         1, &barrier,
                         0, nullptr,
                         0, nullptr);
-                
 
                 bloom_Rs.Draw(commandBuffer);
-                
-                barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-                barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-
-                vkCmdPipelineBarrier(
-                        commandBuffer,
-                        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                        0,
-                        1, &barrier,
-                        0, nullptr,
-                        0, nullptr);
-
-//                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
-//                postProcessing_Rs.Draw(commandBuffer);
-//                renderer.EndDynamicRenderPass(commandBuffer);
-
-
-//                renderer.BeginDynamicRenderPass(commandBuffer,renderingInfoPostProc);
-//                bloom_Rs.Draw(commandBuffer);
-//                renderer.EndDynamicRenderPass(commandBuffer);
+               
                 VkViewport viewport{};
                 viewport.x = 0.0f;
                 viewport.y = 0.0f;
@@ -187,10 +166,9 @@ namespace VULKAN{
 //        postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
 //
 
-        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[0], rayTracing_RS.emissiveStoreImage->textureSampler);
-        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[1], rayTracing_RS.emissiveStoreImage->textureSampler);
-        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[2], rayTracing_RS.emissiveStoreImage->textureSampler);
-        bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
+        for (int i = 0; i < rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews.size(); ++i) {
+            bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[i], rayTracing_RS.emissiveStoreImage->textureSampler);
+        }
         bloom_Rs.upSampleRenderPassRef = renderer.GetSwapchain().UpSampleRenderPass;
         bloom_Rs.downSampleRenderPassRef = renderer.GetSwapchain().DownSampleRenderPass;
         bloom_Rs.InitRS();
@@ -213,6 +191,7 @@ namespace VULKAN{
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(finalStorageImage);
             ImguiRenderSystem::GetInstance()->viewportTexture = finalStorageImage;
             ImguiRenderSystem::GetInstance()->pushConstantBlockRsRef = &rayTracing_RS.pc;
+            ImguiRenderSystem::GetInstance()->pushConstantBlockBloom = &bloom_Rs.pc;
 
 		}
 		

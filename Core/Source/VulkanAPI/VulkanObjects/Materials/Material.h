@@ -29,7 +29,7 @@ namespace VULKAN{
         float reflectivityIntensity = 0.5f;
         //32
         glm::vec3 baseReflection;
-        float metallicIntensity = 1;
+        float metallicIntensity = 0.0f;
         //48
         float emissionIntensity = 0.0f;
         int roughnessOffset = -1;

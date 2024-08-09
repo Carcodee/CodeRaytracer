@@ -9,6 +9,9 @@ layout(location = 0) in struct {
     vec4 Color;
     vec2 UV;
 } In;
+layout(push_constant) uniform pushConstantVariables{
+    float bloomSize;
+} pc;
 
 void main()
 {

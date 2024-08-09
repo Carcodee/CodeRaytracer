@@ -1209,6 +1209,7 @@ namespace VULKAN {
         }
         for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
             Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            sphereRef.sphereUniform.instanceOffset = modelsOnScene.size();
             sphereUniforms.push_back(sphereRef.sphereUniform);
         }
 
@@ -1347,6 +1348,7 @@ namespace VULKAN {
         std::vector<SphereUniform> sphereUniforms;
         for (int i = 0; i < ModelHandler::GetInstance()->allSpheresOnApp.size(); ++i) {
             Sphere &sphereRef = ModelHandler::GetInstance()->allSpheresOnApp[i];
+            sphereRef.sphereUniform.instanceOffset = modelsOnScene.size();
             sphereUniforms.push_back(sphereRef.sphereUniform);
         }
 

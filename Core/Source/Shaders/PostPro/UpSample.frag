@@ -10,12 +10,15 @@ layout(location = 0) in struct {
     vec2 UV;
 } In;
 
+layout(push_constant) uniform pushConstantVariables{
+    float bloomSize;
+} pc;
 
 void main()
 {
     // The filter kernel is applied with a radius, specified in texture
     // coordinates, so that the radius will vary across mip resolutions.
-    float filterRadius = 4.0f;
+    float filterRadius = pc.bloomSize;
     ivec2 aspectRatio =imageSize(upSample)/imageSize(downSampledTex);
     float x = filterRadius / aspectRatio.x;
     float y = filterRadius / aspectRatio.y;

@@ -19,6 +19,7 @@ namespace VULKAN{
             VkImageView imageView;
             VkSampler sampler;
         };
+        
     public:
         
         Bloom_RS(MyVulkanDevice& vulkanDevice,VulkanRenderer &vulkanRenderer);
@@ -36,6 +37,7 @@ namespace VULKAN{
         std::string vertexPath;
         std::string fragmentPathDownSample;
         std::string fragmentPathUpSample;
+        PushConstantBlock_Bloom pc;
 
     private:
         VkDescriptorSetLayout descriptorSetLayout;

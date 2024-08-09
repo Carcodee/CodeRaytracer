@@ -613,7 +613,10 @@ namespace VULKAN
                 ImGui::SeparatorText("Push Constants");
                 HandlePushConstantRangeRS(*pushConstantBlockRsRef);
             }
-            
+            if (pushConstantBlockRsRef != nullptr){
+                ImGui::SeparatorText("Bloom");
+                HandlePushConstantRangeBloom(*pushConstantBlockBloom);
+            }
                 
 //            ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
 //            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
@@ -729,6 +732,11 @@ namespace VULKAN
         }
 
 
+    }
+
+    void ImguiRenderSystem::HandlePushConstantRangeBloom(PushConstantBlock_Bloom &pushConstantBlockBloom) {
+        if (ImGui::SliderFloat("Bloom Size", &pushConstantBlockBloom.bloomSize, 0.0f, 10.0f)){
+        }
     }
 
 

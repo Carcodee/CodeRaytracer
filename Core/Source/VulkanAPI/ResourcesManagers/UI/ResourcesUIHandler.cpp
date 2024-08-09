@@ -191,9 +191,12 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::DIFFUSE,mat);
             ImGui::PopID();
-            if (ImGui::Button("Remove Texture")){
-                mat.RemoveTexture(TEXTURE_TYPE::DIFFUSE);
+            if(mat.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
+                if (ImGui::Button("Remove Diffuse Texture")){
+                    mat.RemoveTexture(TEXTURE_TYPE::DIFFUSE);
+                }               
             }
+
 
             ImGui::SeparatorText("Normal");
             ImGui::PushID("Normal");
@@ -206,11 +209,11 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::NORMAL,mat);
             ImGui::PopID();
-            if (ImGui::Button("Remove Texture")){
-                mat.RemoveTexture(TEXTURE_TYPE::NORMAL);
-                
+            if(mat.materialTextures.contains(TEXTURE_TYPE::NORMAL)){
+                if (ImGui::Button("Remove Normal Texture")){
+                    mat.RemoveTexture(TEXTURE_TYPE::NORMAL);
+                }
             }
-
             ImGui::SeparatorText("Roughness");
             ImGui::PushID("Roughness");
             if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::ROUGHNESS)){
@@ -222,10 +225,11 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::ROUGHNESS, mat);
             ImGui::PopID();
-            if (ImGui::Button("Remove Texture")){
-                mat.RemoveTexture(TEXTURE_TYPE::ROUGHNESS);
+            if(mat.materialTextures.contains(TEXTURE_TYPE::ROUGHNESS)){
+                if (ImGui::Button("Remove Roughness Texture")){
+                    mat.RemoveTexture(TEXTURE_TYPE::ROUGHNESS);
+                }
             }
-
             ImGui::SeparatorText("Metallic");
             ImGui::PushID("Metallic");
             if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::METALLIC)){
@@ -237,10 +241,11 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::METALLIC, mat);
             ImGui::PopID();
-            if (ImGui::Button("Remove Texture")){
-                mat.RemoveTexture(TEXTURE_TYPE::METALLIC);
+            if(mat.materialTextures.contains(TEXTURE_TYPE::METALLIC)){
+                if (ImGui::Button("Remove Metallic Texture")){
+                    mat.RemoveTexture(TEXTURE_TYPE::METALLIC);
+                }
             }
-
             ImGui::SeparatorText("Emissive");
             ImGui::PushID("Emissive");
             if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::EMISSIVE)){
@@ -252,11 +257,11 @@ namespace VULKAN
             }
             HandleDrop(TEXTURE_TYPE::EMISSIVE, mat);
             ImGui::PopID();
-            if (ImGui::Button("Remove Texture")){
-                mat.RemoveTexture(TEXTURE_TYPE::EMISSIVE);
+            if(mat.materialTextures.contains(TEXTURE_TYPE::EMISSIVE)){
+                if (ImGui::Button("Remove Emissive Texture")){
+                    mat.RemoveTexture(TEXTURE_TYPE::EMISSIVE);
+                }
             }
-
-
         }
         {
             if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
@@ -354,7 +359,7 @@ namespace VULKAN
                         ImGui::BeginTooltip();
                         ImGui::Text("Set Material");
                         modelData.materialIds[i] = data;
-                        ModelHandler::GetInstance()->updateMeshData = true;
+                        ModelHandler::GetInstance()->updateBottomLevelObj = true;
                         ImGui::EndTooltip();
                     }
                     ImGui::EndDragDropTarget();
@@ -465,7 +470,7 @@ namespace VULKAN
         ImGui::Begin("Textures");
         int counter = 0;
         for (auto& texturesOnApp: ModelHandler::GetInstance()->allTexturesOnApp) {
-            std::string counterText = "Texture: "+std::to_string(counter);
+            std::string counterText = "Texture: "+ std::string(texturesOnApp.second->path);
             ImGui::SeparatorText(counterText.c_str());
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(texturesOnApp.second.get());
             ImGui::ImageButton((ImTextureID)texturesOnApp.second->textureDescriptor, ImVec2(100,100));
@@ -494,7 +499,7 @@ namespace VULKAN
         Material& material = *ModelHandler::GetInstance()->allMaterialsOnApp.at(sphereData.sphereUniform.matId).get();
         ImGui::PushID(material.id);
         std::string materialText = material.name;
-        if (!material.materialTextures.empty()){
+        if (material.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(material.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
             ImGui::ImageButton(((ImTextureID)material.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), ImVec2{100, 100});
         } else{
@@ -508,7 +513,7 @@ namespace VULKAN
                 ImGui::BeginTooltip();
                 ImGui::Text("Set Material");
                 sphereData.sphereUniform.matId = data;
-                ModelHandler::GetInstance()->updateAABBData = true;
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
                 ImGui::EndTooltip();
             }
             ImGui::EndDragDropTarget();

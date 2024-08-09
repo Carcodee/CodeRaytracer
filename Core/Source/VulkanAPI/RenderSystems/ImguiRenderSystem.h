@@ -55,6 +55,7 @@ namespace VULKAN
 		void SetUpSystem(GLFWwindow* window);
 		void CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor);
         void HandlePushConstantRangeRS(PushConstantBlock_RS& pushConstantBlockRs);
+        void HandlePushConstantRangeBloom(PushConstantBlock_Bloom& pushConstantBlockBloom);
         
 		bool transitionImage= false;
         
@@ -80,6 +81,7 @@ namespace VULKAN
         float roughnessAllMaterials = 1.0f;
         float reflectivityAllMaterials = 1.0f;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
+        PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];
         VKTexture* folderThumbnail = nullptr;
         VKTexture* modelThumbnail = nullptr;

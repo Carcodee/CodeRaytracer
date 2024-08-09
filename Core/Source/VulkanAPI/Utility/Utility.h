@@ -29,6 +29,11 @@ namespace VULKAN{
         float environmentMapIntensity= 1.0f;
 
     };
+
+    struct PushConstantBlock_Bloom{
+        float bloomSize = 4.0f;
+
+    };
     struct SimpleVertex
     {
         glm::vec3 pos;

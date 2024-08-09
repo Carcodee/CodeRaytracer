@@ -44,6 +44,7 @@ namespace VULKAN {
         uint32_t mipLevels= 1;
         uint32_t textureWidth = 0;
         uint32_t textureHeight = 0;
+        const char* path=nullptr;
         VkImage textureImage=nullptr;
 		VkSampler textureSampler= nullptr;
 		VkImageView textureImageView= nullptr;
@@ -63,7 +64,6 @@ namespace VULKAN {
         VkPipelineStageFlags currentStage=VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         VkAccessFlags currentAccessFlags=0;
         VkImageLayout currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
-		const char* path=nullptr;
 
 	};
 
