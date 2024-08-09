@@ -33,8 +33,8 @@ namespace VULKAN {
 		std::vector<VKTexture> LoadTexturesFromPath(std::string path,VulkanSwapChain& swapChain);
 		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader& reader,std::string path);
 		void FixMaterialPaths(std::string& path, std::string texturesPath, std::string modelPath);
-        glm::vec3 CalculateTangent(glm::vec3 pos1, glm::vec3 pos2,glm::vec3 pos3,
-                                    glm::vec2 uv1, glm::vec2 uv2,glm::vec2 uv3);
+        glm::vec3 CalculateTangent(glm::vec3& pos1, glm::vec3& pos2,glm::vec3& pos3,
+                                    glm::vec2& uv1, glm::vec2& uv2,glm::vec2& uv3);
 	};
 
 	//class GLTFObject

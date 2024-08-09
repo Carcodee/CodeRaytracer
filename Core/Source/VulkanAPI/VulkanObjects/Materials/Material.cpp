@@ -31,8 +31,8 @@ namespace VULKAN{
                 case METALLIC:
                     materialUniform.metallicOffset = texture->id;
                     break;
-                case SPECULAR:
-                    materialUniform.specularOffset = texture->id;
+                case EMISSIVE:
+                    materialUniform.emissionOffset = texture->id;
                     break;
                 case NORMAL:
                     materialUniform.normalOffset = texture->id;
@@ -70,13 +70,13 @@ namespace VULKAN{
                 }
                 materialUniform.metallicOffset = texture->id;
                 break;
-            case SPECULAR:
+            case EMISSIVE:
                 if (!materialTextures.contains(textureType)){
                     this->materialTextures.try_emplace(textureType, texture);
                 }else{
                     materialTextures.at(textureType) = texture;
                 }
-                materialUniform.specularOffset = texture->id;
+                materialUniform.emissionOffset = texture->id;
                 break;
             case NORMAL:
                 if (!materialTextures.contains(textureType)){
@@ -119,7 +119,7 @@ namespace VULKAN{
         this->materialUniform.emissionIntensity = jsonObj.at("EmissionIntensity");
         this->materialUniform.roughnessOffset = jsonObj.at("RoughnessOffset");
         this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
-        this->materialUniform.specularOffset= jsonObj.at("SpecularOffset");
+        this->materialUniform.emissionOffset= jsonObj.at("EmissionOffset");
         //60
         this->materialUniform.textureIndexStart=jsonObj.at("TextureIndexStart");
         this->materialUniform.texturesSizes = 0;
@@ -161,7 +161,7 @@ namespace VULKAN{
                 {"EmissionIntensity",this->materialUniform.emissionIntensity},
                 {"RoughnessOffset",this->materialUniform.roughnessOffset},
                 {"MetallicOffset",this->materialUniform.metallicOffset},
-                {"SpecularOffset",this->materialUniform.specularOffset},
+                {"EmissionOffset",this->materialUniform.emissionOffset},
                 //60
                 {"TextureIndexStart",this->materialUniform.textureIndexStart},
                 {"TextureSizes",this->materialUniform.texturesSizes},
@@ -190,8 +190,8 @@ namespace VULKAN{
             case METALLIC:
                 materialUniform.metallicOffset = -1;
                 break;
-            case SPECULAR:
-                materialUniform.specularOffset = -1;
+            case EMISSIVE:
+                materialUniform.emissionOffset = -1;
                 break;
             case NORMAL:
                 materialUniform.normalOffset = -1;

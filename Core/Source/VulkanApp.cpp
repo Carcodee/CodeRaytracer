@@ -60,9 +60,7 @@ namespace VULKAN{
                 rayTracing_RS.DrawRT(commandBuffer);
                
                 rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
-                
-                bloom_Rs.Draw(commandBuffer);
-                
+
                 VkMemoryBarrier barrier = {};
                 barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
                 barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
@@ -71,6 +69,21 @@ namespace VULKAN{
                 vkCmdPipelineBarrier(
                         commandBuffer,
                         VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                        0,
+                        1, &barrier,
+                        0, nullptr,
+                        0, nullptr);
+                
+
+                bloom_Rs.Draw(commandBuffer);
+                
+                barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+
+                vkCmdPipelineBarrier(
+                        commandBuffer,
+                        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
                         0,
                         1, &barrier,
                         0, nullptr,

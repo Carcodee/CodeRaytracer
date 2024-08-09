@@ -23,9 +23,10 @@ namespace VULKAN{
 
     struct PushConstantBlock_RS{
         uint32_t currentAccumulatedFrame = 1;
-        int minBounceForIndirect = 1;
+        int minBounceForIndirect = 0;
         float rayTerminationBias = 1.0f;
         float maxVariance = 1.0f;
+        float environmentMapIntensity= 1.0f;
 
     };
     struct SimpleVertex

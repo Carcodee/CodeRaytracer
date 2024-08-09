@@ -11,6 +11,7 @@
 struct RayPayload{
     vec3 color;
     vec3 colorLit;
+    vec3 emissionColor;
     float distance;
     vec3 normal;
     vec3 origin;
@@ -19,7 +20,6 @@ struct RayPayload{
     float roughness;
     float reflectivity; 
     bool shadow;
-    bool emissive;
     bool isMiss;
 };
 
@@ -142,10 +142,14 @@ void main()
   
   vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
   vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
+  vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
-     diffuseInMat =vec4(materials[materialIndex].diffuseColor, 1.0);
+     diffuseInMat =vec4(materials[materialIndex].diffuseColor, 1.0) * materials[materialIndex].albedoIntensity;
+  }
+  if(emissionInMat == vec4(1.0f)){
+    emissionInMat = vec4(0.0f);
   }
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
@@ -185,14 +189,19 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  rayPayload.color = materials[materialIndex].emissionIntensity + ((pbrLitDirect * myLight.col)* cosThetaTangent* myLight.intensity); 
+  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
-  if(materials[materialIndex].emissionIntensity>0){
-       rayPayload.emissive = true;
+  if(emissionInMat == vec4(0)){
+       if(materials[materialIndex].emissionIntensity>0){
+           rayPayload.shadow = false;
+           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity); 
+       }
+  }else{
        rayPayload.shadow = false;
-       rayPayload.color = pbrLitDirect * materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity; 
+       rayPayload.emissionColor = (emissionInMat.xyz * materials[materialIndex].emissionIntensity); 
   }
+  
  
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;

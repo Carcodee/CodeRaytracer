@@ -96,12 +96,11 @@ namespace VULKAN
         modelToLoadState->model->id = id;
         modelToLoadState->model->pathToAssetReference = path;
 //        modelToLoadState->model->materialIds =allModelsOnApp.at(id)->materialIds;
-        modelToLoadState->model->generated =allModelsOnApp.at(id)->generated;
-        if(!modelToLoadState->model->generated){
-            modelToLoadState->model->materialDataPerMesh=ModelLoaderHandler::GetInstance()->LoadMaterialsFromReader(reader, path); 
-        } else{
-            std::cout<< "Model already generated the materials, not doing it again for id: "<<modelToLoadState->model->id<<"\n";
-        }
+//        if(!modelToLoadState->model->generated){
+//            modelToLoadState->model->materialDataPerMesh=ModelLoaderHandler::GetInstance()->LoadMaterialsFromReader(reader, path); 
+//        } else{
+//            std::cout<< "Model already generated the materials, not doing it again for id: "<<modelToLoadState->model->id<<"\n";
+//        }
         modelToLoadState->state = LOADED;
         allModelsOnApp.at(id)=modelToLoadState->model;
         std::lock_guard<std::mutex> lock(loadAssetMutex);

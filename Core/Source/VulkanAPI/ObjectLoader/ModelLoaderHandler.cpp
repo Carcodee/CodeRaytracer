@@ -284,6 +284,13 @@ namespace VULKAN {
                 texturesFinded = true;
 			}
 
+            if (!material.emissive_texname.empty()) {
+                std::string texturePathFinded= material.bump_texname;
+                FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
+                materialData.paths.try_emplace(TEXTURE_TYPE::EMISSIVE,texturePathFinded);
+                materialData.materialUniform.emissionIntensity = 1.0f;
+                texturesFinded = true;
+            }
             materialData.textureReferencePath= texturesPath;
             materialData.name = "Material_"+std::to_string(matCount);
             materialData.id = ModelHandler::GetInstance()->currentMaterialsOffset;
@@ -486,8 +493,8 @@ namespace VULKAN {
     }
 
 
-    glm::vec3 ModelLoaderHandler::CalculateTangent(glm::vec3 pos1, glm::vec3 pos2, glm::vec3 pos3,
-                                                   glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
+    glm::vec3 ModelLoaderHandler::CalculateTangent(glm::vec3& pos1, glm::vec3& pos2, glm::vec3& pos3,
+                                                   glm::vec2& uv1, glm::vec2& uv2, glm::vec2& uv3) {
         glm::vec3 edge1 = pos2 - pos1;
         glm::vec3 edge2 = pos3 - pos1;
         glm::vec2 deltaUV1 = uv2 - uv1;

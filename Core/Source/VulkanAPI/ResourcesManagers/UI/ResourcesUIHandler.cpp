@@ -226,6 +226,37 @@ namespace VULKAN
                 mat.RemoveTexture(TEXTURE_TYPE::ROUGHNESS);
             }
 
+            ImGui::SeparatorText("Metallic");
+            ImGui::PushID("Metallic");
+            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::METALLIC)){
+                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::METALLIC));
+                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::METALLIC)->textureDescriptor), iconSize);
+                HandleDrag(TEXTURE_TYPE::METALLIC, mat);
+            } else{
+                ImGui::Button(mat.name.c_str(), iconSize);
+            }
+            HandleDrop(TEXTURE_TYPE::METALLIC, mat);
+            ImGui::PopID();
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(TEXTURE_TYPE::METALLIC);
+            }
+
+            ImGui::SeparatorText("Emissive");
+            ImGui::PushID("Emissive");
+            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::EMISSIVE)){
+                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::EMISSIVE));
+                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::EMISSIVE)->textureDescriptor), iconSize);
+                HandleDrag(TEXTURE_TYPE::EMISSIVE, mat);
+            } else{
+                ImGui::Button(mat.name.c_str(), iconSize);
+            }
+            HandleDrop(TEXTURE_TYPE::EMISSIVE, mat);
+            ImGui::PopID();
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(TEXTURE_TYPE::EMISSIVE);
+            }
+
+
         }
         {
             if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
@@ -239,7 +270,7 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if(ImGui::SliderFloat("emission base",&mat.materialUniform.emissionIntensity, 0.0f, 3.0f,"%.3f")){
+            if(ImGui::SliderFloat("emission base",&mat.materialUniform.emissionIntensity, 0.0f, 14.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
@@ -346,6 +377,8 @@ namespace VULKAN
         static ModelData* modelSelected= nullptr;
         
         for (auto& model :ModelHandler::GetInstance()->allModelsOnApp) {
+            if(!model.second->generated)continue;
+            
             std::filesystem::path modelPath(model.second.get()->pathToAssetReference);
             if(modelSelected == nullptr){
                 if (ImGui::Selectable(modelPath.filename().string().c_str())){

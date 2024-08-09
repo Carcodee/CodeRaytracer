@@ -718,7 +718,10 @@ namespace VULKAN
         if (ImGui::SliderFloat("RayTermination Bias", &pushConstantBlockRs.rayTerminationBias, 0.0f, 1.0f)){
             InputHandler::GetInstance()->editingGraphics = true;
         }
-        if (ImGui::SliderFloat("Max variance", &pushConstantBlockRs.maxVariance, 0.0f, 500.0f)){
+        if (ImGui::SliderFloat("Environment Intensity", &pushConstantBlockRs.environmentMapIntensity,0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Max variance", &pushConstantBlockRs.maxVariance, 0.0f, 20.0f)){
             InputHandler::GetInstance()->editingGraphics = true;
         }
         if (ImGui::SliderInt("Min bounce for Indirect", &pushConstantBlockRs.minBounceForIndirect, 0, 5)){

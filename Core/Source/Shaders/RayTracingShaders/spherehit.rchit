@@ -11,6 +11,7 @@
 struct RayPayload{
     vec3 color;
     vec3 colorLit;
+    vec3 emissionColor;
     float distance;
     vec3 normal;
     vec3 origin;
@@ -19,7 +20,6 @@ struct RayPayload{
     float roughness;
     float reflectivity; 
     bool shadow;
-    bool emissive;
     bool isMiss;
 };
 
@@ -86,6 +86,7 @@ void main()
 
   
   vec4 diffuseInMat = TryGetTex(material.diffuseOffset,  gl_LaunchIDEXT.xy ) * material.albedoIntensity;
+  vec4 emissionInMat = TryGetTex(material.emissionOffset, gl_LaunchIDEXT.xy); 
   float roughness =TryGetFloatFromTex(material.roughnessOffset , gl_LaunchIDEXT.xy, material.roughnessIntensity);
   float metallic =TryGetFloatFromTex(material.metallicOffset , gl_LaunchIDEXT.xy, material.metallicIntensity);
   
@@ -93,6 +94,9 @@ void main()
   
   if(!matInfo.hasDiffuse){
     diffuseInMat.xyz = material.diffuseColor;
+  }
+  if(emissionInMat == vec4(1)){
+    emissionInMat = vec4(0.0f);
   }
   
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
@@ -108,20 +112,23 @@ void main()
   rayPayload.shadow = false;
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
-  rayPayload.color = material.emissionIntensity + (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
   rayPayload.colorLit = pbrLitIndirect; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;
   rayPayload.reflectivity = material.reflectivityIntensity; 
   rayPayload.distance = gl_RayTmaxEXT;
   
-  if(material.emissionIntensity>0.0f){
-    rayPayload.emissive = true;
-    rayPayload.shadow = false;
-    //rayPayload.color = pbrLitDirect * material.diffuseColor * material.emissionIntensity; 
+  if(emissionInMat == vec4(0)){
+    if(material.emissionIntensity>0){
+        rayPayload.shadow = false;
+        rayPayload.emissionColor = (pbrLitDirect * material.diffuseColor * material.emissionIntensity); 
+    }
   }else{
-    rayPayload.emissive = false;
+       rayPayload.shadow = false;
+       rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
+ 
   rayPayload.isMiss= false; 
  
 }
