@@ -526,9 +526,11 @@ namespace VULKAN
         assert(!framebuffers.empty()&&"It must be at least one framebuffer to display");
         ImGui::SetWindowSize(ImVec2(400, 400));
         ImGui::Begin("Framebuffers");
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        float ySize = size.y/static_cast<float>(framebuffers.size());
         for (auto& framebuffer: framebuffers) {
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(framebuffer);
-            ImGui::Image((ImTextureID) framebuffer->textureDescriptor, ImVec2{500,500});
+            ImGui::Image((ImTextureID) framebuffer->textureDescriptor, ImVec2{size.x,ySize});
         }
 
         ImGui::End();

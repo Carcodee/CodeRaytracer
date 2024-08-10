@@ -110,8 +110,8 @@ void main()
             vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
             vec2 vec2Rand= NextVec2(seed);
             vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
-            rayPayload.sampleDir = randomDir;
             vec3 sampledDir = TangentToWorld(rayPayload.normal,randomDir);
+            rayPayload.sampleDir = randomDir;
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
             rayPayload.direction = direction.xyz;
            
