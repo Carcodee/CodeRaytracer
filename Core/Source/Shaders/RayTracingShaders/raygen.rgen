@@ -36,11 +36,12 @@ layout(push_constant) uniform pushConstantVariables{
     float rayTerminationBias;
     float maxVariance;
     float environmentMapIntensity;
+    float AOIntensity;
+    float AOSize;
 } pc;
 
 #define SAMPLE_COUNT 1 
 #define LIGHT_SOURCES 1 
-#define AO_THRESHOLD 0.9f 
 
 Material currentMaterial;
 
@@ -89,8 +90,10 @@ void main()
                 }
                 break;
             }
-            if(rayPayload.hitT <= AO_THRESHOLD && i == 1){
-                aoSample = rayPayload.hitT/AO_THRESHOLD;
+            if(rayPayload.hitT <= pc.AOSize && i == 1 && !rayPayload.isMiss){
+                aoSample = rayPayload.hitT/pc.AOSize;
+                
+                //aoSample = min(1.0f, aoSample* pc.AOIntensity);
             }
             
             irradiance += rayPayload.emissionColor * rayThroughput/ rayPdf; 

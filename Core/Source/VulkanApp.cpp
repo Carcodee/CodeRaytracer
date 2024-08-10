@@ -116,6 +116,9 @@ namespace VULKAN{
                 renderingInfo.renderArea.extent = renderer.GetSwapchain().getSwapChainExtent();
 
                 finalStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.storageImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.aoStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
 
                 ImguiRenderSystem::GetInstance()->WasWindowResized();
 				renderer.BeginDynamicRenderPass(commandBuffer, renderingInfo);
@@ -130,8 +133,10 @@ namespace VULKAN{
                     VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 					VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
 
-                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
                 finalStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.storageImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.aoStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
 				renderer.EndFrame();
 
 			}
@@ -181,6 +186,7 @@ namespace VULKAN{
                                                      VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
         FinalPostProcessing_Rs.AddTextureImageToShader(finalStorageImage->textureImageView, finalStorageImage->textureSampler);
         FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->textureImageView, rayTracing_RS.emissiveStoreImage->textureSampler);
+        FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.storageImage->textureImageView, rayTracing_RS.storageImage->textureSampler);
         FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.aoStorageImage->textureImageView, rayTracing_RS.aoStorageImage->textureSampler);
         FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass; 
         FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
@@ -193,6 +199,10 @@ namespace VULKAN{
             ImguiRenderSystem::GetInstance()->viewportTexture = finalStorageImage;
             ImguiRenderSystem::GetInstance()->pushConstantBlockRsRef = &rayTracing_RS.pc;
             ImguiRenderSystem::GetInstance()->pushConstantBlockBloom = &bloom_Rs.pc;
+            ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.storageImage);
+            ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.emissiveStoreImage);
+            ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.aoStorageImage);
+            
 
 		}
 		

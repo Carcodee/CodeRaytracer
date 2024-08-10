@@ -27,6 +27,8 @@ namespace VULKAN{
         float rayTerminationBias = 1.0f;
         float maxVariance = 1.0f;
         float environmentMapIntensity= 1.0f;
+        float AOIntensity = 1.0f;
+        float AOSize = 1.0f;
 
     };
 

@@ -36,7 +36,8 @@ namespace VULKAN
 		
 		vertexBuffer.device = myDevice->device();
 		indexBuffer.device = myDevice->device();
-
+        frameBuffers.reserve(MAX_FRAMEBUFFERS);
+        
 		InitImgui();
 		CreateFonts();
 		SetImgui(window);
@@ -571,6 +572,8 @@ namespace VULKAN
         ResourcesUIHandler::GetInstance()->DisplayInspectorInfo();
         ResourcesUIHandler::GetInstance()->DisplayTexturesTab();
         ResourcesUIHandler::GetInstance()->DisplayBLASesInfo();
+        ResourcesUIHandler::GetInstance()->DisplayViewportFrameBuffers(frameBuffers);
+        
         
         
         {
@@ -730,6 +733,14 @@ namespace VULKAN
         if (ImGui::SliderInt("Min bounce for Indirect", &pushConstantBlockRs.minBounceForIndirect, 0, 5)){
             InputHandler::GetInstance()->editingGraphics = true;
         }
+        if (ImGui::SliderFloat("Ambient Oclussion Intensity", &pushConstantBlockRs.AOIntensity, 0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Ambient Oclussion Size", &pushConstantBlockRs.AOSize, 0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+
+
 
 
     }
@@ -737,6 +748,10 @@ namespace VULKAN
     void ImguiRenderSystem::HandlePushConstantRangeBloom(PushConstantBlock_Bloom &pushConstantBlockBloom) {
         if (ImGui::SliderFloat("Bloom Size", &pushConstantBlockBloom.bloomSize, 0.0f, 10.0f)){
         }
+    }
+
+    void ImguiRenderSystem::AddFramebufferReference(VKTexture *texture) {
+        frameBuffers.push_back(texture);
     }
 
 

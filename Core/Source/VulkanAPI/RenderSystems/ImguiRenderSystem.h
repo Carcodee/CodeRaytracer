@@ -17,6 +17,7 @@ namespace VULKAN
 {
 	class ImguiRenderSystem
 	{
+#define MAX_FRAMEBUFFERS 100
 		struct ImguiImageInfo 
 		{
 			VkSampler sampler;
@@ -56,6 +57,7 @@ namespace VULKAN
 		void CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor);
         void HandlePushConstantRangeRS(PushConstantBlock_RS& pushConstantBlockRs);
         void HandlePushConstantRangeBloom(PushConstantBlock_Bloom& pushConstantBlockBloom);
+        void AddFramebufferReference(VKTexture* texture);
         
 		bool transitionImage= false;
         
@@ -68,8 +70,11 @@ namespace VULKAN
 		VulkanRenderer* myRenderer;
 		VKTexture* fontTexture;
         VKTexture* viewportTexture;
+        
+        std::vector<VKTexture*>frameBuffers;
 
-		bool show_demo_window = true;
+        
+        bool show_demo_window = true;
 		bool UseDynamicRendering = false;
 		float RotationSpeed=1.0f;
         int currentFrameText=1.0f;

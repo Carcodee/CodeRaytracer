@@ -521,6 +521,20 @@ namespace VULKAN
         DisplayMatInfo(material, ImVec2{50, 50});
     }
 
+    void ResourcesUIHandler::DisplayViewportFrameBuffers(std::vector<VKTexture *> framebuffers) {
+
+        assert(!framebuffers.empty()&&"It must be at least one framebuffer to display");
+        ImGui::SetWindowSize(ImVec2(400, 400));
+        ImGui::Begin("Framebuffers");
+        for (auto& framebuffer: framebuffers) {
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(framebuffer);
+            ImGui::Image((ImTextureID) framebuffer->textureDescriptor, ImVec2{500,500});
+        }
+
+        ImGui::End();
+
+    }
+
 
 }
 
