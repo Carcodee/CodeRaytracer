@@ -12,7 +12,7 @@ namespace VULKAN
 	ModelHandler::ModelHandler(VulkanRenderer* renderer)
 	{
 		ModelLoaderHandler::GetInstance();
-		baseMaterialUniformData.albedoIntensity = 0;
+		baseMaterialUniformData.albedoIntensity = 1.0f;
 		baseMaterialUniformData.normalIntensity = 0;
 		baseMaterialUniformData.specularIntensity = 0;
 		baseMaterialUniformData.diffuseColor = glm::vec3(1);
@@ -24,6 +24,7 @@ namespace VULKAN
         materialBase.id = 0;
         materialBase.name= "standard_mat";
         this->renderer = renderer;
+        allSpheresOnApp.reserve(MAX_SPHERES_ON_APP);
         
 
 	}
@@ -119,7 +120,7 @@ namespace VULKAN
             }));
         }
     }
-	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, TopLevelObj& TLAS)
+	void ModelHandler::CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData& combinedMesh, TopLevelObj& TLAS)
 	{
         VkTransformMatrixKHR matrix = {
                 1.0f, 0.0f, 0.0f, pos.x,

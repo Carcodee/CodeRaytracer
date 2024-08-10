@@ -10,7 +10,7 @@ namespace VULKAN {
         currentStage=VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         currentAccessFlags=0;
         currentLayout= VK_IMAGE_LAYOUT_UNDEFINED;
-		this->path = path;
+		this->path = std::string (path);
 		CreateTextureImage();
 		CreateImageViews(VK_FORMAT_R8G8B8A8_SRGB);
 		CreateTextureSample();
@@ -109,7 +109,7 @@ namespace VULKAN {
 	void VKTexture::CreateTextureImage()
 	{
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load(path, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 		if (!pixels) {

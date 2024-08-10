@@ -298,14 +298,12 @@ namespace VULKAN
                 mat.materialUniform.diffuseColor= glm::make_vec3(matCol);
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            
-            if (mat.materialUniform.diffuseOffset > -1){
-                if(ImGui::SliderFloat("Albedo Intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
 
-                    ModelHandler::GetInstance()->updateMaterialData= true;
-                }    
-                
+            if(ImGui::SliderFloat("Albedo Intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
             }
+
 
         }
     }
@@ -379,20 +377,20 @@ namespace VULKAN
         ImGui::SeparatorText("Meshes loaded:");
 
         static Sphere* sphereSelected= nullptr;
-        static ModelData* modelSelected= nullptr;
+        static int modelSelectedKey= -1;
         
         for (auto& model :ModelHandler::GetInstance()->allModelsOnApp) {
             if(!model.second->generated)continue;
             
             std::filesystem::path modelPath(model.second.get()->pathToAssetReference);
-            if(modelSelected == nullptr){
+            if(modelSelectedKey == -1){
                 if (ImGui::Selectable(modelPath.filename().string().c_str())){
-                    modelSelected = model.second.get();
+                    modelSelectedKey = model.first;
                     sphereSelected = nullptr;
                 }
             }else{
-                if (ImGui::Selectable(modelPath.filename().string().c_str(), modelSelected == model.second.get())){
-                    modelSelected = model.second.get();
+                if (ImGui::Selectable(modelPath.filename().string().c_str(), modelSelectedKey == model.first)){
+                    modelSelectedKey = model.first;
                     sphereSelected = nullptr;
                 }               
             }
@@ -404,22 +402,22 @@ namespace VULKAN
             if (sphereSelected == nullptr){
                 if (ImGui::Selectable(name.c_str())){
                     sphereSelected = &sphere;
-                    modelSelected = nullptr;
+                    modelSelectedKey = -1;
                 }               
             }else{
                 if (ImGui::Selectable(name.c_str(), sphereSelected == &sphere)){
                     sphereSelected = &sphere;
-                    modelSelected = nullptr;
+                    modelSelectedKey = -1;
                 }               
             }
 
         }
-        if(modelSelected!= nullptr && sphereSelected == nullptr){
-
-            DisplayMeshInfo(*modelSelected);
+        if(modelSelectedKey!= -1 && sphereSelected == nullptr){
+            assert(ModelHandler::GetInstance()->allModelsOnApp.contains(modelSelectedKey) &&"Model is not in allModels map");
+            DisplayMeshInfo(*ModelHandler::GetInstance()->allModelsOnApp.at(modelSelectedKey).get());
 
         }
-        else if (modelSelected== nullptr && sphereSelected != nullptr){
+        else if (modelSelectedKey== -1 && sphereSelected != nullptr){
             DisplayMeshInfo(*sphereSelected);
         }else{
 
@@ -470,7 +468,8 @@ namespace VULKAN
         ImGui::Begin("Textures");
         int counter = 0;
         for (auto& texturesOnApp: ModelHandler::GetInstance()->allTexturesOnApp) {
-            std::string counterText = "Texture: "+ std::string(texturesOnApp.second->path);
+            std::filesystem::path textPath(texturesOnApp.second->path);
+            std::string counterText = "Texture: "+ textPath.filename().string();
             ImGui::SeparatorText(counterText.c_str());
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(texturesOnApp.second.get());
             ImGui::ImageButton((ImTextureID)texturesOnApp.second->textureDescriptor, ImVec2(100,100));

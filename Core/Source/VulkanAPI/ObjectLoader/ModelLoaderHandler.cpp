@@ -226,6 +226,8 @@ namespace VULKAN {
 	{
 		auto& materials = reader.GetMaterials();
 
+        std::map<int,Material> materialsDatas;
+
 		int matCount = 0;
 		std::filesystem::path currentModelPath(path);
 		currentModelPath = currentModelPath.parent_path();
@@ -236,7 +238,6 @@ namespace VULKAN {
 			std::cout << "The current model does not have textures relative to the folder, Creating materials at model path: " << path << "\n";
 		}
 
-		std::map<int,Material> materialsDatas;
 
 		for (const auto& material : materials)
 		{
@@ -285,7 +286,7 @@ namespace VULKAN {
 			}
 
             if (!material.emissive_texname.empty()) {
-                std::string texturePathFinded= material.bump_texname;
+                std::string texturePathFinded= material.emissive_texname;
                 FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::EMISSIVE,texturePathFinded);
                 materialData.materialUniform.emissionIntensity = 1.0f;

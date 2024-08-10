@@ -46,6 +46,7 @@ namespace VULKAN {
 
 		VKTexture* storageImage;
         VKTexture* emissiveStoreImage;
+        VKTexture* aoStorageImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
         PushConstantBlock_RS pc;

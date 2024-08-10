@@ -44,7 +44,6 @@ namespace VULKAN {
         uint32_t mipLevels= 1;
         uint32_t textureWidth = 0;
         uint32_t textureHeight = 0;
-        const char* path=nullptr;
         VkImage textureImage=nullptr;
 		VkSampler textureSampler= nullptr;
 		VkImageView textureImageView= nullptr;
@@ -52,7 +51,8 @@ namespace VULKAN {
 		VkDeviceMemory textureImageMemory=nullptr;
         VkDescriptorSet textureDescriptor = nullptr;
         std::vector<VkImageView> mipLevelsImagesViews;
-        
+        std::string path= "";
+
         //this means is not in the pool
 
 	private:

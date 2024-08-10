@@ -60,6 +60,7 @@ namespace VULKAN{
                 rayTracing_RS.DrawRT(commandBuffer);
                
                 rayTracing_RS.emissiveStoreImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
+                rayTracing_RS.aoStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, commandBuffer);
 
                 VkMemoryBarrier barrier = {};
                 barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -180,7 +181,7 @@ namespace VULKAN{
                                                      VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
         FinalPostProcessing_Rs.AddTextureImageToShader(finalStorageImage->textureImageView, finalStorageImage->textureSampler);
         FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->textureImageView, rayTracing_RS.emissiveStoreImage->textureSampler);
-        FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.storageImage->textureImageView, rayTracing_RS.storageImage->textureSampler);
+        FinalPostProcessing_Rs.AddTextureImageToShader(rayTracing_RS.aoStorageImage->textureImageView, rayTracing_RS.aoStorageImage->textureSampler);
         FinalPostProcessing_Rs.renderPassRef = renderer.GetSwapchain().FinalRenderPass; 
         FinalPostProcessing_Rs.InitRS(outputVertPath, outputFragPath);
         if (editor)

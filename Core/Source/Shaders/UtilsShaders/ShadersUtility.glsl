@@ -8,6 +8,21 @@
 #define BUMP_TEX 3 
 #define AMBIENT_TEX 4 
 
+struct RayPayload{
+	vec3 color;
+	vec3 colorLit;
+	vec3 emissionColor;
+	float distance;
+	vec3 normal;
+	vec3 origin;
+	vec3 direction;
+	vec3 sampleDir;
+	float roughness;
+	float reflectivity;
+	float hitT;
+	bool shadow;
+	bool isMiss;
+};
 
 struct MaterialFindInfo{
 	bool hasDiffuse;

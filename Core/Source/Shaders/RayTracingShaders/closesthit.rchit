@@ -8,21 +8,6 @@
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 
-struct RayPayload{
-    vec3 color;
-    vec3 colorLit;
-    vec3 emissionColor;
-    float distance;
-    vec3 normal;
-    vec3 origin;
-    vec3 direction;
-    vec3 sampleDir;
-    float roughness;
-    float reflectivity; 
-    bool shadow;
-    bool isMiss;
-};
-
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
@@ -89,7 +74,7 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
 };
 
 
-layout(set = 0,binding = 13) uniform sampler2D textures[];
+layout(set = 0,binding = 14) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
 
@@ -202,7 +187,7 @@ void main()
        rayPayload.emissionColor = (emissionInMat.xyz * materials[materialIndex].emissionIntensity); 
   }
   
- 
+  rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = normal;
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
@@ -223,8 +208,9 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 	if (texOffset== -1){
 		return intensity;
 	}
-	vec4 texture = texture(textures[texOffset],uv);
-	return texture.x * intensity;
+	vec4 textureCol = texture(textures[texOffset],uv);
+	float texVal = MaxComponent(textureCol.xyz);
+	return texVal * intensity;
 }
 
 vec3 GetDiffuseColor(int materialIndex){

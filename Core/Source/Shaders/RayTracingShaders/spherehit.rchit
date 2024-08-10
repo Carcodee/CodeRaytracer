@@ -8,21 +8,6 @@
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 
-struct RayPayload{
-    vec3 color;
-    vec3 colorLit;
-    vec3 emissionColor;
-    float distance;
-    vec3 normal;
-    vec3 origin;
-    vec3 direction;
-    vec3 sampleDir;
-    float roughness;
-    float reflectivity; 
-    bool shadow;
-    bool isMiss;
-};
-
 struct Sphere {
     vec3 center;
     float radius;
@@ -49,7 +34,7 @@ layout(set = 0, binding = 12, scalar) buffer Spheres {
 };
 
 
-layout(set = 0,binding = 13) uniform sampler2D textures[];
+layout(set = 0,binding = 14) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
 
@@ -128,7 +113,7 @@ void main()
        rayPayload.shadow = false;
        rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
- 
+  rayPayload.hitT = gl_HitTEXT;
   rayPayload.isMiss= false; 
  
 }

@@ -6,6 +6,7 @@
 #include "VulkanAPI/VulkanInit/VulkanInit.h"
 #include "VulkanAPI/Utility/Utility.h"
 
+#define MAX_SPHERES_ON_APP 10000
 namespace VULKAN
 {
 	
@@ -53,7 +54,7 @@ namespace VULKAN
         void CreateMaterial(std::string path);
         
         void CreateInstance(Material& material);
-		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData combinedMesh, TopLevelObj& TLAS);
+		void CreateBLAS(glm::vec3 pos,glm::vec3 rot, glm::vec3 scale,ModelData& combinedMesh, TopLevelObj& TLAS);
 		void AddTLAS(TopLevelObj& bottomLevelObj);
         
         
