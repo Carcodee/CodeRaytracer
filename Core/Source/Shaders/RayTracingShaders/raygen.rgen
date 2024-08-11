@@ -93,7 +93,7 @@ void main()
             }
             if(rayPayload.hitT <= pc.AOSize && i == 1 && !rayPayload.isMiss){
                 aoSample = (rayPayload.hitT/pc.AOSize)+MaxComponent(directLightContrib);
-                //aoSample = min(1.0f, aoSample* pc.AOIntensity);
+                aoSample = min(1.0f, aoSample);
             }
             
             irradiance += rayPayload.emissionColor * rayThroughput/ rayPdf; 
@@ -110,18 +110,24 @@ void main()
             vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
             vec2 vec2Rand= NextVec2(seed);
             vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
-            vec3 sampledDir = TangentToWorldWithTangent(randomDir,rayPayload.normal, rayPayload.tangent);
+            vec3 sampledDir =randomDir;
+            if(rayPayload.tangent == vec3(0.0f)){
+                vec3 sampledDir = TangentToWorld(randomDir,rayPayload.normal);
+            }else{
+                vec3 sampledDir = TangentToWorldWithTangent(randomDir,rayPayload.normal, rayPayload.tangent);
+            }
             rayPayload.sampleDir = sampledDir;
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
-            rayPayload.direction = direction.xyz;
+            //rayPayload.direction = direction.xyz;
+            if(NextFloat(seed) < rayPayload.reflectivity){
+                    direction.xyz = reflectedDir;
+            }
            
             float lightPdf = 1/LIGHT_SOURCES; 
             rayPdf = 1 * MAX_RECURSION;  
             irradiance += directLightContrib * rayThroughput; 
             rayThroughput *= rayPayload.colorLit; 
-            if(NextFloat(seed) < rayPayload.reflectivity){
-                    direction.xyz = reflectedDir;
-            }
+            
             if(i >= pc.minBounceForIndirect){
                 float threshold = max(0.05f,1.0f-MaxComponent(rayThroughput));
                 if(threshold > NextFloat(seed) + pc.rayTerminationBias){
