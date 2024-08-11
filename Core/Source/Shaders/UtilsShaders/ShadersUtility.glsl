@@ -14,6 +14,7 @@ struct RayPayload{
 	vec3 emissionColor;
 	float distance;
 	vec3 normal;
+	vec3 tangent;
 	vec3 origin;
 	vec3 direction;
 	vec3 sampleDir;
@@ -201,6 +202,10 @@ void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
 	}
 	B = cross(N, T);
 }
+void CreateOrthonormalBasisWithTangent(in vec3 N, in vec3 T, out vec3 B)
+{
+	B = cross(N, T);
+}
 vec3 TangentToWorld(vec3 sampleVec, vec3 normal)
 {
 	vec3 T, B;
@@ -208,6 +213,17 @@ vec3 TangentToWorld(vec3 sampleVec, vec3 normal)
 
 	// TBN matrix
 	mat3 TBN = mat3(T, B, normal);
+
+	// Transform the sample vector
+	return TBN * sampleVec;
+}
+vec3 TangentToWorldWithTangent(vec3 sampleVec, vec3 normal, vec3 tangent)
+{
+	vec3 B;
+	CreateOrthonormalBasisWithTangent(normal, tangent, B);
+
+	// TBN matrix
+	mat3 TBN = mat3(tangent, B, normal);
 
 	// Transform the sample vector
 	return TBN * sampleVec;

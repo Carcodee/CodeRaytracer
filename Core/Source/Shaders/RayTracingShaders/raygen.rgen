@@ -72,6 +72,7 @@ void main()
         rayPayload.isMiss = false;
         rayPayload.direction = direction.xyz;
         rayPayload.sampleDir = direction.xyz;
+        rayPayload.tangent = vec3(0.0f);
         rayPayload.hitT = 0.0f;
         vec3 rayThroughput = vec3(1.0f);
         vec3 irradiance = vec3(0.0f);
@@ -91,8 +92,7 @@ void main()
                 break;
             }
             if(rayPayload.hitT <= pc.AOSize && i == 1 && !rayPayload.isMiss){
-                aoSample = rayPayload.hitT/pc.AOSize;
-                
+                aoSample = (rayPayload.hitT/pc.AOSize)+MaxComponent(directLightContrib);
                 //aoSample = min(1.0f, aoSample* pc.AOIntensity);
             }
             
@@ -110,8 +110,8 @@ void main()
             vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
             vec2 vec2Rand= NextVec2(seed);
             vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
-            vec3 sampledDir = TangentToWorld(rayPayload.normal,randomDir);
-            rayPayload.sampleDir = randomDir;
+            vec3 sampledDir = TangentToWorldWithTangent(randomDir,rayPayload.normal, rayPayload.tangent);
+            rayPayload.sampleDir = sampledDir;
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
             rayPayload.direction = direction.xyz;
            
