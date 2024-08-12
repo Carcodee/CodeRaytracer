@@ -115,7 +115,10 @@ void main()
   vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
   
   normal=normalize(normal);
-  
+  if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
+  {
+    normal = -normal;
+  } 
   tangent=normalize(tangent);
   vec3 bitTangent =cross(normal, tangent); 
   mat3 TBN = mat3(tangent, bitTangent, normal);
@@ -137,16 +140,14 @@ void main()
   if(emissionInMat == vec4(1.0f)){
     emissionInMat = vec4(0.0f);
   }
+
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       mat3 inverseTBN = transpose(TBN);
       vec3 normalWorldSpace = normalInMat.xyz * inverseTBN;
       finalNormal = normalize(normalWorldSpace) * materials[materialIndex].normalIntensity; 
   }
-  if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
-  {
-    finalNormal = -finalNormal;
-  }
+
   
   vec4 diffuse=diffuseInMat;
   vec3 view = normalize(-rayPayload.direction) * TBN;
@@ -193,7 +194,7 @@ void main()
   
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
-  rayPayload.normal = finalNormal;
+  rayPayload.normal =finalNormal;
   rayPayload.tangent = tangent;
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;

@@ -25,7 +25,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="AO debuging and framebuffers viewports" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="some changes in the raytracing pipeline">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/House/House.mtl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/House/House.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -258,6 +266,9 @@
       <workItem from="1723255667889" duration="4480000" />
       <workItem from="1723302223829" duration="3432000" />
       <workItem from="1723309612786" duration="4874000" />
+      <workItem from="1723338174459" duration="10243000" />
+      <workItem from="1723387166940" duration="304000" />
+      <workItem from="1723431041613" duration="5191000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -563,7 +574,23 @@
       <option name="project" value="LOCAL" />
       <updated>1723315042438</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="fixing a bit the sample dir generated">
+      <option name="closed" value="true" />
+      <created>1723343849093</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1723343849093</updated>
+    </task>
+    <task id="LOCAL-00040" summary="some changes in the raytracing pipeline">
+      <option name="closed" value="true" />
+      <created>1723348815713</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1723348815713</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -620,8 +647,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="PBR model" />
-    <MESSAGE value="PBR model changes" />
     <MESSAGE value="Fixed the path insertion" />
     <MESSAGE value="shadows implemented" />
     <MESSAGE value="changed the ImguiRenderSystem.cpp to singleton" />
@@ -645,6 +670,8 @@
     <MESSAGE value="Emission configs added" />
     <MESSAGE value="AO image" />
     <MESSAGE value="AO debuging and framebuffers viewports" />
-    <option name="LAST_COMMIT_MESSAGE" value="AO debuging and framebuffers viewports" />
+    <MESSAGE value="fixing a bit the sample dir generated" />
+    <MESSAGE value="some changes in the raytracing pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="some changes in the raytracing pipeline" />
   </component>
 </project>

@@ -68,6 +68,7 @@ namespace VULKAN {
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
+        
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
 		std::vector<uint32_t> firstIndices;
@@ -77,13 +78,14 @@ namespace VULKAN {
 		std::map<int, Material> materialsDatas;
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 		std::vector<int> materialIdsOnObject;
-
+        int meshCount = shapes.size();
+        int indexStartCounter = 0;
+        int vertexStartCouner = 0;
+        
 		attrib = reader.GetAttrib();
 		shapes = reader.GetShapes();
 		materials = reader.GetMaterials();
-		int meshCount = shapes.size();
-		int indexStartCounter = 0;
-		int vertexStartCouner = 0;
+
 		for (const auto& shape : shapes)
 		{
 			if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] < 0)
@@ -506,6 +508,36 @@ namespace VULKAN {
         tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
         tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
         return glm::normalize(tangent);
+    }
+
+    void ModelLoaderHandler::LoadGLTFModel(std::string path,  tinygltf::Model& model) {
+
+        std::string err;
+        std::string warn;
+        tinygltf::TinyGLTF gltfContext; 
+        gltfContext.LoadASCIIFromFile(&model, &err, &warn, path);
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<uint32_t> firstIndices;
+        std::vector<uint32_t> firstMeshVertex;
+        std::vector<uint32_t> meshIndexCount;
+        std::vector<uint32_t> meshVertexCount;
+        std::map<int, Material> materialsDatas;
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+        std::vector<int> materialIdsOnObject;
+        int meshCount = model.meshes.size();
+        int indexStartCounter = 0;
+        int vertexStartCouner = 0;
+        for (auto& mesh : model.meshes) {
+            
+            
+        }
+
+
+    }
+
+    void ModelLoaderHandler::LoadGLTFMaterials(tinygltf::Model &model) {
+
     }
 }
 
