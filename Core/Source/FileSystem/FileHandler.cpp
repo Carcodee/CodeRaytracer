@@ -1,7 +1,9 @@
 #include "FileHandler.h"
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 
 #include <fstream>
 #include <iostream>
+
 
 namespace HELPERS
 {
@@ -166,7 +168,7 @@ namespace HELPERS
 		{
 			return "";
 		}
-		if (extension!= ".obj")
+		if (!VULKAN::AssetsHandler::GetInstance()->IsValidModelFormat(extension))
 		{
 			std::cout << "Path is not the expected extension: " + extension << "\n";
 			return "";

@@ -200,5 +200,13 @@ namespace VULKAN
         }
     }
 
+    bool AssetsHandler::IsValidModelFormat(std::string extension) {
+        if (extension == ".obj" || extension == ".gltf"){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 
 }

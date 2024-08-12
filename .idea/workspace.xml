@@ -25,14 +25,19 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="some changes in the raytracing pipeline">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="adding gltf support">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/House/House.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/House/House.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/FileSystem/FileHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/Utility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanInit/VulkanInit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanInit/VulkanInit.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,6 +108,11 @@
   }
 }</component>
   <component name="RunManager" selected="CMake Application.Editor">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Editor" type="CMakeListConfigurationType" factoryName="CMakeListConfigurationFactory" temporary="true">
       <method v="2" />
     </configuration>
@@ -268,7 +278,8 @@
       <workItem from="1723309612786" duration="4874000" />
       <workItem from="1723338174459" duration="10243000" />
       <workItem from="1723387166940" duration="304000" />
-      <workItem from="1723431041613" duration="5191000" />
+      <workItem from="1723431041613" duration="5508000" />
+      <workItem from="1723473466079" duration="13169000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -590,7 +601,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723348815713</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="adding gltf support">
+      <option name="closed" value="true" />
+      <created>1723436662278</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1723436662278</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -647,7 +666,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed the path insertion" />
     <MESSAGE value="shadows implemented" />
     <MESSAGE value="changed the ImguiRenderSystem.cpp to singleton" />
     <MESSAGE value="now materials have an inspector too" />
@@ -672,6 +690,18 @@
     <MESSAGE value="AO debuging and framebuffers viewports" />
     <MESSAGE value="fixing a bit the sample dir generated" />
     <MESSAGE value="some changes in the raytracing pipeline" />
-    <option name="LAST_COMMIT_MESSAGE" value="some changes in the raytracing pipeline" />
+    <MESSAGE value="adding gltf support" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding gltf support" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp</url>
+          <line>550</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

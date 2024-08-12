@@ -26,6 +26,7 @@ namespace VULKAN
 			INVALID
 
 		};
+        
 		struct ModelToLoadState
 		{
 			std::shared_ptr<ModelData> model;
@@ -41,7 +42,7 @@ namespace VULKAN
 
 		void AddModelToQuery(std::string path);
         void AddIdToQuery(int id);
-		void LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path);
+		void LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path, MODEL_FORMAT modelFormat);
         void LoadModelFromDisc(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, int id);
         void LoadAllModelsFromDisc();
 		void LoadAllModels();

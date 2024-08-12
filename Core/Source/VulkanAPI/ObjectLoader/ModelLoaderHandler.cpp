@@ -69,23 +69,25 @@ namespace VULKAN {
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
         
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
-		std::vector<uint32_t> firstIndices;
-		std::vector<uint32_t> firstMeshVertex;
-		std::vector<uint32_t> meshIndexCount;
-		std::vector<uint32_t> meshVertexCount;
-		std::map<int, Material> materialsDatas;
-		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-		std::vector<int> materialIdsOnObject;
-        int meshCount = shapes.size();
-        int indexStartCounter = 0;
-        int vertexStartCouner = 0;
+
         
 		attrib = reader.GetAttrib();
 		shapes = reader.GetShapes();
 		materials = reader.GetMaterials();
 
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<uint32_t> firstIndices;
+        std::vector<uint32_t> firstMeshVertex;
+        std::vector<uint32_t> meshIndexCount;
+        std::vector<uint32_t> meshVertexCount;
+        std::map<int, Material> materialsDatas;
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+        std::vector<int> materialIdsOnObject;
+        int meshCount = shapes.size();
+        int indexStartCounter = 0;
+        int vertexStartCouner = 0;
+        
 		for (const auto& shape : shapes)
 		{
 			if (shape.mesh.material_ids.size() <= 0 || shape.mesh.material_ids[0] < 0)
@@ -510,7 +512,133 @@ namespace VULKAN {
         return glm::normalize(tangent);
     }
 
-    void ModelLoaderHandler::LoadGLTFModel(std::string path,  tinygltf::Model& model) {
+    void ModelLoaderHandler::LoadGLTFNode(tinygltf::Model& model,
+                                          tinygltf::Node node,
+                                          std::vector<uint32_t>& indices,
+                                          std::vector<Vertex>& vertices,
+                                          std::vector<uint32_t>& firstMeshIndices,
+                                          std::vector<uint32_t>& firstMeshVertces,
+                                          std::vector<uint32_t>& meshIndexCount,
+                                          std::vector<uint32_t>& meshVertexCount,
+                                          std::vector<int>& materialsIds,
+                                          int& meshCount,
+                                          int& indexStartCounter,
+                                          int& vertexStartCounter) {
+        
+        if(!node.children.empty()){
+            for (int i = 0; i < node.children.size(); ++i) {
+                tinygltf::Node& childNode= model.nodes[node.children[i]];
+                LoadGLTFNode(model, childNode,
+                             indices,vertices,
+                             firstMeshIndices,
+                             firstMeshVertces,
+                             meshIndexCount,
+                             meshVertexCount,
+                             materialsIds,
+                             meshCount,
+                             indexStartCounter,
+                             vertexStartCounter);
+                
+            }
+        }
+        if (node.mesh!= -1){
+            tinygltf::Mesh currentMesh = model.meshes[node.mesh];
+            firstMeshIndices.push_back(indices.size());
+            firstMeshVertces.push_back(vertices.size());
+            indexStartCounter =indices.size();
+            vertexStartCounter =vertices.size();
+            materialsIds.push_back(0);
+            for (int i = 0; i < currentMesh.primitives.size(); ++i) {
+                tinygltf::Primitive primitive = currentMesh.primitives[i];
+                uint32_t indexCount = 0;
+                uint32_t vertexCount = 0;
+                //vertices
+                {
+                    const float* positionBuffer = nullptr;
+                    const float* normalBuffer = nullptr;
+                    const float* textCoordBuffer = nullptr;
+                    const float* tangentBuffer = nullptr;
+
+                    if(primitive.attributes.find("POSITION") != primitive.attributes.end()){
+                        tinygltf::Accessor accessor =model.accessors[primitive.attributes.find("POSITION")->second];
+                        tinygltf::BufferView bufferView = model.bufferViews[accessor.bufferView];
+                        positionBuffer = reinterpret_cast<const float*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+                        vertexCount = accessor.count;
+
+                    }
+                    if(primitive.attributes.find("NORMAL") != primitive.attributes.end()){
+                        tinygltf::Accessor accessor =model.accessors[primitive.attributes.find("NORMAL")->second];
+                        tinygltf::BufferView bufferView = model.bufferViews[accessor.bufferView];
+                        normalBuffer = reinterpret_cast<const float*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+
+                    }
+                    if(primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()){
+                        tinygltf::Accessor accessor =model.accessors[primitive.attributes.find("TEXCOORD_0")->second];
+                        tinygltf::BufferView bufferView = model.bufferViews[accessor.bufferView];
+                        textCoordBuffer = reinterpret_cast<const float*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+
+                    }
+                    if(primitive.attributes.find("TANGENT") != primitive.attributes.end()){
+                        tinygltf::Accessor accessor =model.accessors[primitive.attributes.find("TANGENT")->second];
+                        tinygltf::BufferView bufferView = model.bufferViews[accessor.bufferView];
+                        tangentBuffer = reinterpret_cast<const float*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+                    }
+                    for (int j = 0; j < vertexCount; ++j) {
+                        Vertex vertex{};
+                        vertex.position = glm::make_vec3(&positionBuffer[j * 3]);
+                        vertex.normal =glm::normalize(normalBuffer ? glm::make_vec3(&normalBuffer[j * 3]) : glm::vec3 (1.0f));
+                        vertex.texCoord =textCoordBuffer? glm::make_vec3(&textCoordBuffer[j * 2]): glm::vec2 (0.0f);
+                        vertex.color = glm::vec3 (1.0f);
+                        vertex.tangent = tangentBuffer? glm::make_vec3(&tangentBuffer[j * 3]): glm::vec3 (1.0f);
+                        vertices.push_back(vertex);
+                    }
+                    meshVertexCount.push_back(vertexCount);
+
+                }
+                //indices
+                {
+                    tinygltf::Accessor accessor = model.accessors[primitive.indices];
+                    tinygltf::BufferView bufferView = model.bufferViews[ accessor.bufferView];
+                    indexCount+= static_cast<uint32_t>(accessor.count);
+
+                    meshIndexCount.push_back(indexCount);
+                    switch (accessor.componentType) {
+                        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+                            const uint32_t* buff = reinterpret_cast<const uint32_t*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+                            for (int j = 0; j <accessor.count; ++j) {
+                                indices.push_back(buff[j] + vertexCount);
+                            }
+                            break;
+                        }
+                        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+                            const uint16_t* buff = reinterpret_cast<const uint16_t*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+                            for (int j = 0; j <accessor.count; ++j) {
+                                indices.push_back(buff[j] + vertexCount);
+                            }
+                            break;
+                            break;
+                        }
+                        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+                            const uint8_t* buff = reinterpret_cast<const uint8_t*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+                            for (int j = 0; j <accessor.count; ++j) {
+                                indices.push_back(buff[j] + vertexCount);
+                            }
+                            break;
+                            break;
+                        }
+                        default:
+                            std::cerr << "Index component type " << accessor.componentType << " not supported!" << std::endl;
+                            return;
+                    }
+
+                }
+
+            }
+
+        }
+    }
+    
+    void ModelLoaderHandler::LoadGLTFModel(std::string path,  tinygltf::Model& model, ModelData& modelData) {
 
         std::string err;
         std::string warn;
@@ -523,21 +651,47 @@ namespace VULKAN {
         std::vector<uint32_t> meshIndexCount;
         std::vector<uint32_t> meshVertexCount;
         std::map<int, Material> materialsDatas;
-        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+//        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
         std::vector<int> materialIdsOnObject;
         int meshCount = model.meshes.size();
+        
         int indexStartCounter = 0;
         int vertexStartCouner = 0;
-        for (auto& mesh : model.meshes) {
-            
-            
+        
+        for(auto& scene : model.scenes){
+
+            for (int i = 0; i < scene.nodes.size(); ++i) {
+                LoadGLTFNode(model, model.nodes[scene.nodes[i]],
+                             indices,vertices,
+                             firstIndices, firstMeshVertex,
+                             meshIndexCount, meshVertexCount,
+                             materialIdsOnObject,
+                             meshCount,
+                             indexStartCounter,vertexStartCouner);
+
+            }
+           
         }
 
-
+        std::vector<VKTexture>allTextures;
+        modelData.vertices=vertices;
+        modelData.indices=indices;
+        modelData.firstMeshIndex=firstIndices;
+        modelData.firstMeshVertex=firstMeshVertex;
+        modelData.materialIds=materialIdsOnObject;
+        modelData.meshIndexCount=meshIndexCount;
+        modelData.meshVertexCount=meshVertexCount;
+        modelData.materialDataPerMesh=materialsDatas;
+        modelData.meshCount = meshCount;
+        modelData.indexBLASOffset = 0;
+        modelData.vertexBLASOffset = 0;
+        modelData.transformBLASOffset = 0;
+        modelData.generated = true;
     }
 
     void ModelLoaderHandler::LoadGLTFMaterials(tinygltf::Model &model) {
 
     }
+
 }
 

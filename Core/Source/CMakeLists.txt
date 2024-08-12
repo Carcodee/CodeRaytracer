@@ -30,6 +30,7 @@ file(GLOB_RECURSE VULKAN_OBJ_RESOURCE_INTERFACE "${CORE_BASE_DIR}/VulkanAPI/Vulk
 file(GLOB_RECURSE VULKAN_OBJ_TEXTURES "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Textures/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Textures/*.cpp")
 file(GLOB_RECURSE VULKAN_OBJ_MATERIAL "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Materials/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanObjects/Materials/*.cpp")
 file(GLOB_RECURSE VULKAN_VULKAN_PIPELINE "${CORE_BASE_DIR}/VulkanAPI/VulkanPipeline/*.h" "${CORE_BASE_DIR}/VulkanAPI/VulkanPipeline/*.cpp")
+file(GLOB_RECURSE TINY_GLTF "${CORE_BASE_DIR}/Libraries/tinygltf-release/*.h" "${CORE_BASE_DIR}/Libraries/tinygltf-release/*.cpp")
 
 set(CORE_SOURCES
         VulkanApp.h
@@ -119,7 +120,7 @@ set(GLM_BUILD_LIBRARY OFF)
 add_subdirectory("${CORE_BASE_DIR}/Libraries/glm")
 add_subdirectory("${CORE_BASE_DIR}/Libraries/tinyobjloader-release")
 
-#set(TINYGLTF_HEADER_ONLY ON)
+set(TINYGLTF_HEADER_ONLY OFF)
 add_subdirectory("${CORE_BASE_DIR}/Libraries/tinygltf-release")
 
 set (GLM_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/glm")
@@ -136,10 +137,11 @@ target_include_directories(Core PUBLIC
         ${IMGUI_DOCKING_INCLUDE_DIR}
         ${GLM_INCLUDE_DIR}
         ${TINY_OBJ_INCLUDE_DIR}
-        ${TINY_GLTF_INCLUDE_DIR}
         ${CORE_BASE_DIR}
+        ${TINY_GLTF_INCLUDE_DIR}
 )
 
+#${TINY_GLTF_INCLUDE_DIR}
 target_link_directories(Core PUBLIC
         ${GLFW_LIB_DIR}
         ${VULKAN_LIB_DIR}
@@ -148,5 +150,6 @@ target_link_libraries(Core PUBLIC
         glfw3
         vulkan-1
         tinyobjloader
+        tinygltf
 )
 

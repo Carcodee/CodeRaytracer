@@ -21,6 +21,10 @@
 
 namespace VULKAN{
 
+    enum MODEL_FORMAT{
+        OBJ,
+        GLTF
+    };
     struct PushConstantBlock_RS{
         uint32_t currentAccumulatedFrame = 1;
         int minBounceForIndirect = 0;

@@ -62,18 +62,34 @@ namespace VULKAN
 			Loading = true;
 			futures.push_back(std::async(std::launch::async,[this, path]()
 			{
-				LoadModel(&modelsReady, path);
+                MODEL_FORMAT format;
+                
+                if(HELPERS::FileHandler::GetInstance()->GetPathExtension(path) == ".obj"){
+                    format = OBJ;
+                } else if(HELPERS::FileHandler::GetInstance()->GetPathExtension(path) == ".gltf"){
+                    format = GLTF;
+                }
+				LoadModel(&modelsReady, path, format);
 			}));
 		}
 		
 	}
 
-	void ModelHandler::LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path)
+	void ModelHandler::LoadModel(std::vector<std::shared_ptr<ModelToLoadState>>* modelsReadyToLoadVec, std::string path, MODEL_FORMAT modelFormat)
 	{
 		//path is already cleaned
 		auto modelToLoadState = std::make_shared<ModelToLoadState>();
 		modelToLoadState->state = UNLOADED;
-		modelToLoadState->model= std::make_shared<ModelData>(ModelLoaderHandler::GetInstance()->GetModelVertexAndIndicesTinyObject(path));
+        switch (modelFormat) {
+            case OBJ:
+                modelToLoadState->model= std::make_shared<ModelData>(ModelLoaderHandler::GetInstance()->GetModelVertexAndIndicesTinyObject(path));
+                break;
+            case GLTF:
+                tinygltf::Model modelGLTF;
+                modelToLoadState->model = std::make_shared<ModelData>(); 
+                ModelLoaderHandler::GetInstance()->LoadGLTFModel(path,modelGLTF, *modelToLoadState->model);
+                break;
+        }
         modelToLoadState->model->pathToAssetReference = path;
 		modelToLoadState->state = LOADED;
         std::lock_guard<std::mutex> lock(loadAssetMutex);
