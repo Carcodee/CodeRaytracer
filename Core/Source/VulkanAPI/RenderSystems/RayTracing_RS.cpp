@@ -225,7 +225,7 @@ namespace VULKAN {
 
 			vertexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(vertexBuffer.buffer) + obj.combinedMesh.vertexBLASOffset * sizeof(Vertex);
 			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + ((obj.combinedMesh.indexBLASOffset + obj.combinedMesh.firstMeshIndex[i]) * sizeof(uint32_t));
-			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer)/* + obj.combinedMesh.transformBLASOffset * sizeof(VkTransformMatrixKHR)*/;
+			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) + ((obj.bottomLevelId + i) * sizeof(VkTransformMatrixKHR));
 
 			VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
 			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -1329,9 +1329,25 @@ namespace VULKAN {
 		}
 
 
-        for (int i = 0; i < ModelHandler::GetInstance()->GetBLASesFromTLAS(topLevelObjBase).size(); ++i)
+        for (int i = 0; i < modelsOnScene.size(); ++i)
         {
-            allModelsTransformationMatrices.push_back(ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).matrix);
+            for (int j = 0; j < modelsOnScene[i]->meshCount; ++j) {
+                if(modelsOnScene[i]->matrices.empty()){
+                    allModelsTransformationMatrices.push_back(modelsOnScene[i]->bottomLevelObjRef->matrix);
+                }else{
+                    assert(modelsOnScene[i]->matrices.size() == modelsOnScene[i]->meshCount &&" it must be the same amount of matrices than meshes");
+                    
+                    glm::mat3x4 currentMat = glm::transpose(modelsOnScene[i]->matrices[j]);
+                    VkTransformMatrixKHR matrixKhr;
+                    memcpy(&matrixKhr, (void*)&currentMat, sizeof(glm::mat3x4));
+//                    VkTransformMatrixKHR matrixKhr= {
+//                        currentMat[0][0],currentMat[0][1],currentMat[0][2],currentMat[3][0],
+//                        currentMat[1][0],currentMat[1][1],currentMat[1][2],currentMat[3][1],
+//                        currentMat[2][0],currentMat[2][1],currentMat[2][2],currentMat[3][2],
+//                    };
+                    allModelsTransformationMatrices.push_back(matrixKhr);
+                }               
+            }
         }
 
 

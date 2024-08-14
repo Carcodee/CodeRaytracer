@@ -116,6 +116,7 @@ namespace VULKAN{
         uint32_t indexBLASOffset = 0;
         uint32_t vertexBLASOffset = 0;
         uint32_t transformBLASOffset = 0;
+        std::vector<glm::mat4> matrices;
         BottomLevelObj* bottomLevelObjRef = nullptr;
         std::vector<ModelDataUniformBuffer> dataUniformBuffer;
         uint32_t id = -1;

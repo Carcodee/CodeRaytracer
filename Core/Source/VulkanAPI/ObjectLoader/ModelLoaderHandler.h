@@ -19,6 +19,11 @@ namespace VULKAN {
 	protected:
 		static ModelLoaderHandler* instance;
 
+        struct NodeChain{
+            NodeChain* parent = nullptr;
+            tinygltf::Node* node = nullptr;
+            glm::mat4 matrix = glm::mat4 (1.0f);
+        };
 
 	public:
 		
@@ -38,8 +43,10 @@ namespace VULKAN {
 
         void LoadGLTFModel(std::string path, tinygltf::Model& model, ModelData& modelData);
         void LoadGLTFMaterials(tinygltf::Model& model);
+        void TransformNodeToWorld(NodeChain* nodeChainParent, glm::mat4& mat);
         void LoadGLTFNode(tinygltf::Model& model,
-                          tinygltf::Node node,
+                          tinygltf::Node* node,
+                          NodeChain* nodeParent,
                           std::vector<uint32_t>& indices,
                           std::vector<Vertex>& vertices,
                           std::vector<uint32_t>& firstMeshIndices,
@@ -47,9 +54,8 @@ namespace VULKAN {
                           std::vector<uint32_t>& meshIndexCount,
                           std::vector<uint32_t>& meshVertexCount,
                           std::vector<int>& materialsIds,
-                          int& meshCount,
-                          int& indexStartCounter,
-                          int& vertexStartCounter);
+                          std::vector<glm::mat4>& matrices,
+                          int& meshCount);
 	};
 
 	//class GLTFObject

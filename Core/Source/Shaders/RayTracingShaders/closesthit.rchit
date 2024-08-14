@@ -194,7 +194,7 @@ void main()
   
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
-  rayPayload.normal =finalNormal;
+  rayPayload.normal = normal;
   rayPayload.tangent = tangent;
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
