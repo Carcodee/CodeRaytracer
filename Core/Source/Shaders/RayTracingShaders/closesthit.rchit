@@ -117,7 +117,7 @@ void main()
   normal=normalize(normal);
   if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
   {
-    //normal = -normal;
+    normal = -normal;
   } 
   tangent=normalize(tangent);
   vec3 bitTangent =cross(normal, tangent); 
@@ -155,7 +155,7 @@ void main()
   if(matInfo.hasNormals){
       mat3 inverseTBN = transpose(TBN);
       vec3 normalWorldSpace = normalInMat.xyz * inverseTBN;
-      finalNormal = normalize(normalWorldSpace) * materials[materialIndex].normalIntensity; 
+      finalNormal = normalize(normalWorldSpace); 
   }
 
   
@@ -174,12 +174,12 @@ void main()
   
   
   
-  vec3 pbrLitDirect= GetBRDF(finalNormal, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  vec3 pbrLitDirect= GetBRDF(finalNormal* materials[materialIndex].normalIntensity, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
   halfway = normalize(rayPayload.sampleDir + view);
     
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
-  vec3 pbrLitIndirect= GetBRDF(finalNormal, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
   rayPayload.shadow = true;
   float tmin = 0.001;

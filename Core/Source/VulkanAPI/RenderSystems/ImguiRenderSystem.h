@@ -8,16 +8,14 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_internal.h>
-//#include <WinUser.h>
-
 #include "VulkanAPI/VulkanObjects/Buffers/Buffer.h"
 
+#define MAX_FRAMEBUFFERS 100
 
 namespace VULKAN
 {
 	class ImguiRenderSystem
 	{
-#define MAX_FRAMEBUFFERS 100
 		struct ImguiImageInfo 
 		{
 			VkSampler sampler;
@@ -85,6 +83,8 @@ namespace VULKAN
 		float lightIntensity = 1.0f;
         float roughnessAllMaterials = 1.0f;
         float reflectivityAllMaterials = 1.0f;
+        float normalAllMaterials = 1.0f;
+        float metallicAllMaterials = 1.0f;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];

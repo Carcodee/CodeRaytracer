@@ -185,18 +185,22 @@ namespace VULKAN
             DisplayMatTexture(mat,EMISSIVE, iconSize, "Emissive");
         }
         {
-            if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
+            if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 2.0f,"%.3f")){
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if(ImGui::SliderFloat("reflectivity",&mat.materialUniform.reflectivityIntensity, 0.0f, 3.0f,"%.3f")){
+            if(ImGui::SliderFloat("reflectivity",&mat.materialUniform.reflectivityIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if(ImGui::SliderFloat("metalness",&mat.materialUniform.metallicIntensity, 0.0f, 3.0f,"%.3f")){
+            if(ImGui::SliderFloat("Normal",&mat.materialUniform.normalIntensity, 0.0f, 2.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if(ImGui::SliderFloat("emission base",&mat.materialUniform.emissionIntensity, 0.0f, 14.0f,"%.3f")){
+            if(ImGui::SliderFloat("metalness",&mat.materialUniform.metallicIntensity, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            if(ImGui::SliderFloat("emission base",&mat.materialUniform.emissionIntensity, 0.0f, 15.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
@@ -474,7 +478,8 @@ namespace VULKAN
         HandleDrop(textureType,mat);
         ImGui::PopID();
         if(mat.materialTextures.contains(textureType)){
-            if (ImGui::Button("Remove Texture")){
+            std::string labelTex = "Remove "+texName;
+            if (ImGui::Button(labelTex.c_str())){
                 mat.RemoveTexture(textureType);
             }
         }

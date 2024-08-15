@@ -598,7 +598,7 @@ namespace VULKAN
             if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f")){
                 InputHandler::editingGraphics= true;
             }
-            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,1.0f,"%.3f")){
+            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,2.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.roughnessIntensity = roughnessAllMaterials;
                 }
@@ -612,6 +612,21 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+            if(ImGui::SliderFloat("Set All materials Normal Intensity", &normalAllMaterials, 0.0f,2.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.normalIntensity = normalAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Metallic Intensity", &metallicAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.normalIntensity = metallicAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            
             if (pushConstantBlockRsRef != nullptr){
                 ImGui::SeparatorText("Push Constants");
                 HandlePushConstantRangeRS(*pushConstantBlockRsRef);
