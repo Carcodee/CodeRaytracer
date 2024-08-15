@@ -117,7 +117,7 @@ void main()
   normal=normalize(normal);
   if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
   {
-    normal = -normal;
+    //normal = -normal;
   } 
   tangent=normalize(tangent);
   vec3 bitTangent =cross(normal, tangent); 
@@ -194,7 +194,7 @@ void main()
   
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
-  rayPayload.normal = normal;
+  rayPayload.normal = finalNormal;
   rayPayload.tangent = tangent;
   rayPayload.roughness = materials[materialIndex].roughnessIntensity;
   rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
@@ -204,7 +204,6 @@ void main()
 
 vec4 TryGetTex(int texOffset, vec2 uv){
     if (texOffset== -1){
-    
         return vec4(1, 1, 1, 1);
     }
     vec4 texture = texture(textures[texOffset],uv);

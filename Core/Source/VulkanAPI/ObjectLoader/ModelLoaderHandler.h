@@ -42,8 +42,9 @@ namespace VULKAN {
                                     glm::vec2& uv1, glm::vec2& uv2,glm::vec2& uv3);
 
         void LoadGLTFModel(std::string path, tinygltf::Model& model, ModelData& modelData);
-        void LoadGLTFMaterials(tinygltf::Model& model);
+        void LoadGLTFMaterials(tinygltf::Model& model,std::map<int,Material>&materialDataPerMesh ,std::string modelPath);
         void TransformNodeToWorld(NodeChain* nodeChainParent, glm::mat4& mat);
+        std::string GetGltfTexturePath(std::string modelPath, std::string uriPath);
         void LoadGLTFNode(tinygltf::Model& model,
                           tinygltf::Node* node,
                           NodeChain* nodeParent,

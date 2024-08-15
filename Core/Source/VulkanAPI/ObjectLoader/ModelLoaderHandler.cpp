@@ -96,7 +96,7 @@ namespace VULKAN {
 			}
 			else
 			{
-				materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0]+ ModelHandler::GetInstance()->currentMaterialsOffset));
+				materialIdsOnObject.push_back(shape.mesh.material_ids[0]+ ModelHandler::GetInstance()->currentMaterialsOffset);
 			}
 			bool firstIndexAddedPerMesh = false;
 			bool firstVertexFinded = false;
@@ -397,8 +397,7 @@ namespace VULKAN {
             }
             else
             {
-                //TODO: this is wrong, the offset must be the one that was when was loaded
-                materialIdsOnObject.push_back(static_cast<uint32_t>(shape.mesh.material_ids[0] + modelData.materialOffset));
+                materialIdsOnObject.push_back(shape.mesh.material_ids[0] + modelData.materialOffset);
             }
             bool firstIndexAddedPerMesh = false;
             bool firstVertexFinded = false;
@@ -524,7 +523,6 @@ namespace VULKAN {
         std::vector<uint32_t> firstMeshVertex;
         std::vector<uint32_t> meshIndexCount;
         std::vector<uint32_t> meshVertexCount;
-        std::map<int, Material> materialsDatas;
 //        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
         std::vector<int> materialIdsOnObject;
         std::vector<glm::mat4> matrices;
@@ -535,7 +533,6 @@ namespace VULKAN {
         int vertexStartCouner = 0;
         
         for(auto& scene : model.scenes){
-
             for (int i = 0; i < scene.nodes.size(); ++i) {
                 LoadGLTFNode(model,
                              &model.nodes[scene.nodes[i]],
@@ -555,6 +552,9 @@ namespace VULKAN {
         }
 
         std::vector<VKTexture>allTextures;
+
+        std::filesystem::path modelPath (std::filesystem::path(path).parent_path());
+        LoadGLTFMaterials(model,modelData.materialDataPerMesh,modelPath.string());
         modelData.vertices=vertices;
         modelData.indices=indices;
         modelData.firstMeshIndex=firstIndices;
@@ -562,7 +562,7 @@ namespace VULKAN {
         modelData.materialIds=materialIdsOnObject;
         modelData.meshIndexCount=meshIndexCount;
         modelData.meshVertexCount=meshVertexCount;
-        modelData.materialDataPerMesh=materialsDatas;
+        modelData.materialDataPerMesh=modelData.materialDataPerMesh;
         modelData.meshCount = meshCount;
         modelData.indexBLASOffset = 0;
         modelData.vertexBLASOffset = 0;
@@ -632,7 +632,14 @@ namespace VULKAN {
             firstMeshVertces.push_back(vertices.size());
             uint32_t indexStartCounter = indices.size();
             uint32_t vertexStartCounter = vertices.size();
-            materialsIds.push_back(0);
+            if (currentMesh.primitives[0].material > -1)
+            {
+                materialsIds.push_back(currentMesh.primitives[0].material+ ModelHandler::GetInstance()->currentMaterialsOffset);
+            }
+            else
+            {
+                materialsIds.push_back(0);
+            }
             for (int i = 0; i < currentMesh.primitives.size(); ++i) {
                 tinygltf::Primitive primitive = currentMesh.primitives[i];
                 uint32_t indexCount = 0;
@@ -726,11 +733,88 @@ namespace VULKAN {
             currentParent = currentParent->parent;
         }
     }
-    void ModelLoaderHandler::LoadGLTFMaterials(tinygltf::Model &model) {
+    void ModelLoaderHandler::LoadGLTFMaterials(tinygltf::Model &model,std::map<int,Material>&materialDataPerMesh, std::string modelPath) {
+        
+        std::string texturesPath = modelPath+"\\"+"textures";
+        if (!std::filesystem::exists(texturesPath)){
+            texturesPath = "";
+        }
 
+        for (int i = 0; i <model.materials.size() ; ++i) {
+
+
+            bool texturesFinded = false;
+            const tinygltf::Material& gltfMaterial = model.materials[i];
+
+            Material material;
+            
+            material.materialUniform.diffuseColor = glm::vec3 (gltfMaterial.pbrMetallicRoughness.baseColorFactor[0],
+                                                               gltfMaterial.pbrMetallicRoughness.baseColorFactor[1],
+                                                               gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+            material.materialUniform.roughnessIntensity = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
+            material.materialUniform.metallicIntensity = gltfMaterial.pbrMetallicRoughness.metallicFactor;
+            
+            if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index>-1){
+                std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.pbrMetallicRoughness.baseColorTexture.index].source].uri);
+                if (path!=""){
+                    material.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,path);
+                    material.materialUniform.diffuseColor = glm::vec3(1.0f);
+                    material.materialUniform.albedoIntensity = 1.0f;
+                    texturesFinded = true;       
+                }               
+            }
+            if(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index>-1){
+                std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index].source].uri);
+//                if (path!=""){
+//                    material.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,path);
+//                    material.materialUniform.diffuseColor = glm::vec3(1.0f);
+//                    texturesFinded = true;
+//                }
+            }
+            if(gltfMaterial.normalTexture.index>-1){
+                std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.normalTexture.index].source].uri);
+                if (path!=""){
+                    material.paths.try_emplace(TEXTURE_TYPE::NORMAL,path);
+                    material.materialUniform.normalIntensity = 1.0f;
+                    texturesFinded = true;
+                }
+            }
+            if(gltfMaterial.emissiveTexture.index>-1){
+                std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.emissiveTexture.index].source].uri);
+                if (path!=""){
+                    material.paths.try_emplace(TEXTURE_TYPE::EMISSIVE,path);
+                    material.materialUniform.emissionIntensity = 1.0f;
+                    texturesFinded = true;
+                }
+
+            }
+            material.textureReferencePath= texturesPath;
+            material.name = "Material_"+std::to_string(i);
+            material.id = ModelHandler::GetInstance()->currentMaterialsOffset;
+            if(texturesFinded){
+//                material.targetPath = texturesPath +"\\"+ material.name + ".MATCODE";
+            } else{
+                material.targetPath = modelPath +"\\"+ material.name + ".MATCODE";
+            }
+
+            materialDataPerMesh.try_emplace(i, material);
+            ModelHandler::GetInstance()->allMaterialsOnApp.try_emplace(material.id,std::make_shared<Material>(material));
+            ModelHandler::GetInstance()->currentMaterialsOffset++;
+        }
     }
 
-    
+    std::string ModelLoaderHandler::GetGltfTexturePath(std::string modelPath, std::string uriPath) {
+        if (std::filesystem::exists(uriPath)){
+            return uriPath;
+        }
+        std::string path =modelPath +"\\"+ uriPath;
+        if (std::filesystem::exists(path)){
+            return path;
+        }
+        std::cout<< "there is no valid texture path on the gltf path: "<<modelPath <<"\n"; 
+        return "";
+    }
+
 
 }
 
