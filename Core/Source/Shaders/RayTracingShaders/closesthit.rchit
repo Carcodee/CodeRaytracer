@@ -126,12 +126,15 @@ void main()
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
-  int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
   int materialTextureSizes =materials[materialIndex].textureSizes;
   
   vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
   vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
   vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
+  vec4 metallicRoughness = TryGetTex(materials[materialIndex].metallicRouhgnessOffset, uv); 
+  float metallic = 0.0f;
+  float roughness = 1.0f;
+  
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
@@ -139,6 +142,13 @@ void main()
   }
   if(emissionInMat == vec4(1.0f)){
     emissionInMat = vec4(0.0f);
+  }
+  if(metallicRoughness == vec4(1.0f)){
+    metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
+    roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+  }else{
+    metallic = 0.0f;
+    roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
   }
 
   vec3 finalNormal = normal;
@@ -162,8 +172,6 @@ void main()
   float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
   float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
   
-  float roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
-  float metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
   
   
   vec3 pbrLitDirect= GetBRDF(finalNormal, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);

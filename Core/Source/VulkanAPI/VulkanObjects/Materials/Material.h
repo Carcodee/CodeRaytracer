@@ -16,7 +16,8 @@ namespace VULKAN{
         ROUGHNESS = 1,
         METALLIC = 2,
         NORMAL = 3,
-        EMISSIVE = 4 
+        EMISSIVE = 4 ,
+        METALLICROUGHNESS = 5
     };
 
     struct MaterialUniformData
@@ -36,11 +37,12 @@ namespace VULKAN{
         int metallicOffset = -1;
         int emissionOffset = -1;
         //64
-        int textureIndexStart = -1;
+        int metallicRoughnessOffset  = -1;
         int texturesSizes = 0;
         int diffuseOffset = -1;
         int normalOffset = -1;
         //80
+        
     };
 
     struct Material: ISerializable<Material>

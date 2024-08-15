@@ -177,91 +177,12 @@ namespace VULKAN
 
     void ResourcesUIHandler::DisplayMatInfo(Material &mat, ImVec2 iconSize) {
         {
-            ImGui::SeparatorText("Diffuse");
-            ImGui::PushID("Diffuse");
-            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::DIFFUSE));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::DIFFUSE)->textureDescriptor), iconSize);
-                HandleDrag(TEXTURE_TYPE::DIFFUSE,mat);
-                
-            } else{
-                if (ImGui::Button(mat.name.c_str(), iconSize)){
-                    ImGui::OpenPopup("SetTex");
-                }
-            }
-            HandleDrop(TEXTURE_TYPE::DIFFUSE,mat);
-            ImGui::PopID();
-            if(mat.materialTextures.contains(TEXTURE_TYPE::DIFFUSE)){
-                if (ImGui::Button("Remove Diffuse Texture")){
-                    mat.RemoveTexture(TEXTURE_TYPE::DIFFUSE);
-                }               
-            }
-
-
-            ImGui::SeparatorText("Normal");
-            ImGui::PushID("Normal");
-            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::NORMAL)){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::NORMAL));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::NORMAL)->textureDescriptor), iconSize);
-                HandleDrag(TEXTURE_TYPE::NORMAL, mat);
-            } else{
-                ImGui::Button(mat.name.c_str(), iconSize);
-            }
-            HandleDrop(TEXTURE_TYPE::NORMAL,mat);
-            ImGui::PopID();
-            if(mat.materialTextures.contains(TEXTURE_TYPE::NORMAL)){
-                if (ImGui::Button("Remove Normal Texture")){
-                    mat.RemoveTexture(TEXTURE_TYPE::NORMAL);
-                }
-            }
-            ImGui::SeparatorText("Roughness");
-            ImGui::PushID("Roughness");
-            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::ROUGHNESS)){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::ROUGHNESS));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::ROUGHNESS)->textureDescriptor), iconSize);
-                HandleDrag(TEXTURE_TYPE::ROUGHNESS, mat);
-            } else{
-                ImGui::Button(mat.name.c_str(), iconSize);
-            }
-            HandleDrop(TEXTURE_TYPE::ROUGHNESS, mat);
-            ImGui::PopID();
-            if(mat.materialTextures.contains(TEXTURE_TYPE::ROUGHNESS)){
-                if (ImGui::Button("Remove Roughness Texture")){
-                    mat.RemoveTexture(TEXTURE_TYPE::ROUGHNESS);
-                }
-            }
-            ImGui::SeparatorText("Metallic");
-            ImGui::PushID("Metallic");
-            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::METALLIC)){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::METALLIC));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::METALLIC)->textureDescriptor), iconSize);
-                HandleDrag(TEXTURE_TYPE::METALLIC, mat);
-            } else{
-                ImGui::Button(mat.name.c_str(), iconSize);
-            }
-            HandleDrop(TEXTURE_TYPE::METALLIC, mat);
-            ImGui::PopID();
-            if(mat.materialTextures.contains(TEXTURE_TYPE::METALLIC)){
-                if (ImGui::Button("Remove Metallic Texture")){
-                    mat.RemoveTexture(TEXTURE_TYPE::METALLIC);
-                }
-            }
-            ImGui::SeparatorText("Emissive");
-            ImGui::PushID("Emissive");
-            if (!mat.materialTextures.empty()&& mat.materialTextures.contains(TEXTURE_TYPE::EMISSIVE)){
-                ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(TEXTURE_TYPE::EMISSIVE));
-                ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(TEXTURE_TYPE::EMISSIVE)->textureDescriptor), iconSize);
-                HandleDrag(TEXTURE_TYPE::EMISSIVE, mat);
-            } else{
-                ImGui::Button(mat.name.c_str(), iconSize);
-            }
-            HandleDrop(TEXTURE_TYPE::EMISSIVE, mat);
-            ImGui::PopID();
-            if(mat.materialTextures.contains(TEXTURE_TYPE::EMISSIVE)){
-                if (ImGui::Button("Remove Emissive Texture")){
-                    mat.RemoveTexture(TEXTURE_TYPE::EMISSIVE);
-                }
-            }
+            DisplayMatTexture(mat,DIFFUSE, iconSize, "Diffuse");
+            DisplayMatTexture(mat,NORMAL, iconSize, "Normal");
+            DisplayMatTexture(mat,METALLIC, iconSize, "Metallic");
+            DisplayMatTexture(mat,ROUGHNESS, iconSize, "Roughness");
+            DisplayMatTexture(mat,METALLICROUGHNESS, iconSize, "Metallic_Roughness");
+            DisplayMatTexture(mat,EMISSIVE, iconSize, "Emissive");
         }
         {
             if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 3.0f,"%.3f")){
@@ -534,6 +455,29 @@ namespace VULKAN
         }
 
         ImGui::End();
+
+    }
+
+    void ResourcesUIHandler::DisplayMatTexture(Material &mat, TEXTURE_TYPE textureType, ImVec2& iconSize,std::string texName) {
+        ImGui::SeparatorText(texName.c_str());
+        ImGui::PushID(texName.c_str());
+        if (!mat.materialTextures.empty()&& mat.materialTextures.contains(textureType)){
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(mat.materialTextures.at(textureType));
+            ImGui::ImageButton(((ImTextureID)mat.materialTextures.at(textureType)->textureDescriptor), iconSize);
+            HandleDrag(textureType,mat);
+
+        } else{
+            if (ImGui::Button(mat.name.c_str(), iconSize)){
+                ImGui::OpenPopup("Set Texture");
+            }
+        }
+        HandleDrop(textureType,mat);
+        ImGui::PopID();
+        if(mat.materialTextures.contains(textureType)){
+            if (ImGui::Button("Remove Texture")){
+                mat.RemoveTexture(textureType);
+            }
+        }
 
     }
 

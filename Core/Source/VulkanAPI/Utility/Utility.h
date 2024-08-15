@@ -112,6 +112,7 @@ namespace VULKAN{
         std::vector<uint32_t> meshIndexCount;
         std::vector<uint32_t> meshVertexCount;
         std::map<int,Material>materialDataPerMesh;
+        MODEL_FORMAT modelFormat = OBJ;
         int meshCount = -1;
         uint32_t indexBLASOffset = 0;
         uint32_t vertexBLASOffset = 0;
@@ -137,6 +138,9 @@ namespace VULKAN{
                             "ModelID",this->id
                     },
                     {
+                            "ModelFormat",this->modelFormat
+                    },
+                    {
                             "MeshCount",this->meshCount
                     },
                     {
@@ -153,6 +157,7 @@ namespace VULKAN{
         }
         ModelData Deserialize(nlohmann::json &jsonObj) override{
             this->id = jsonObj.at("ModelID");
+            this->modelFormat = jsonObj.at("ModelFormat");
             this->meshCount = jsonObj.at("MeshCount");
             this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
             this->pathToAssetReference = jsonObj.at("PathToAssetReference");

@@ -16,7 +16,7 @@ namespace VULKAN
 		baseMaterialUniformData.normalIntensity = 0;
 		baseMaterialUniformData.specularIntensity = 0;
 		baseMaterialUniformData.diffuseColor = glm::vec3(1);
-		baseMaterialUniformData.textureIndexStart = -1;
+		baseMaterialUniformData.metallicRoughnessOffset = -1;
 		baseMaterialUniformData.texturesSizes = 0;
 		baseMaterialUniformData.diffuseOffset = -1;
         baseMaterialUniformData.normalOffset = -1;
@@ -106,18 +106,24 @@ namespace VULKAN
         std::string path = allModelsOnApp.at(id)->pathToAssetReference;
         modelToLoadState->state = UNLOADED;
         modelToLoadState->model= std::make_shared<ModelData>();
+        modelToLoadState->model->modelFormat=allModelsOnApp.at(id)->modelFormat;
+        tinygltf::Model gltfModel;
         tinyobj::ObjReader reader;
-        ModelLoaderHandler::GetInstance()->FindReader(reader,path);
+        switch (modelToLoadState->model->modelFormat) {
+            case OBJ:
+                ModelLoaderHandler::GetInstance()->FindReader(reader,path);
+                ModelLoaderHandler::GetInstance()->GetModelFromReader(reader, *modelToLoadState->model);
+                break;
+            case GLTF:
+                ModelLoaderHandler::GetInstance()->GetGLTFModel(gltfModel,path);
+                ModelLoaderHandler::GetInstance()->LoadGLTFFromModel(gltfModel, *modelToLoadState->model);
+                break;
+        }
+        
         modelToLoadState->model->materialOffset =allModelsOnApp.at(id)->materialOffset;
-        ModelLoaderHandler::GetInstance()->GetModelFromReader(reader, *modelToLoadState->model);
+        modelToLoadState->model->materialIds = allModelsOnApp.at(id)->materialIds;
         modelToLoadState->model->id = id;
         modelToLoadState->model->pathToAssetReference = path;
-//        modelToLoadState->model->materialIds =allModelsOnApp.at(id)->materialIds;
-//        if(!modelToLoadState->model->generated){
-//            modelToLoadState->model->materialDataPerMesh=ModelLoaderHandler::GetInstance()->LoadMaterialsFromReader(reader, path); 
-//        } else{
-//            std::cout<< "Model already generated the materials, not doing it again for id: "<<modelToLoadState->model->id<<"\n";
-//        }
         modelToLoadState->state = LOADED;
         allModelsOnApp.at(id)=modelToLoadState->model;
         std::lock_guard<std::mutex> lock(loadAssetMutex);

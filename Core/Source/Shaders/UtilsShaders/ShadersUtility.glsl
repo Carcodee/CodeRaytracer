@@ -62,7 +62,7 @@ struct MaterialData {
 	int metallicOffset;
 	int emissionOffset;
 	//64
-	int texturesIndexStart;
+	int metallicRouhgnessOffset;
 	int textureSizes;
 	int diffuseOffset;
 	int normalOffset;

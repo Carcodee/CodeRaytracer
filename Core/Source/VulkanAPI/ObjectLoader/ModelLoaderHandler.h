@@ -41,6 +41,9 @@ namespace VULKAN {
         glm::vec3 CalculateTangent(glm::vec3& pos1, glm::vec3& pos2,glm::vec3& pos3,
                                     glm::vec2& uv1, glm::vec2& uv2,glm::vec2& uv3);
 
+
+        void GetGLTFModel(tinygltf::Model& model, std::string path);
+        void LoadGLTFFromModel(tinygltf::Model& model, ModelData& modelData);
         void LoadGLTFModel(std::string path, tinygltf::Model& model, ModelData& modelData);
         void LoadGLTFMaterials(tinygltf::Model& model,std::map<int,Material>&materialDataPerMesh ,std::string modelPath);
         void TransformNodeToWorld(NodeChain* nodeChainParent, glm::mat4& mat);

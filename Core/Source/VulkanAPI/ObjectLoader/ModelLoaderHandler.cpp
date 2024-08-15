@@ -196,6 +196,7 @@ namespace VULKAN {
         modelData.vertexBLASOffset = 0;
         modelData.transformBLASOffset = 0;
         modelData.generated = true;
+        modelData.modelFormat = OBJ;
 		return modelData;
 	}
 
@@ -568,6 +569,7 @@ namespace VULKAN {
         modelData.vertexBLASOffset = 0;
         modelData.transformBLASOffset = 0;
         modelData.generated = true;
+        modelData.modelFormat = GLTF;
         modelData.matrices = matrices; 
     }
 
@@ -737,11 +739,9 @@ namespace VULKAN {
         
         std::string texturesPath = modelPath+"\\"+"textures";
         if (!std::filesystem::exists(texturesPath)){
-            texturesPath = "";
+            texturesPath = modelPath; 
         }
-
         for (int i = 0; i <model.materials.size() ; ++i) {
-
 
             bool texturesFinded = false;
             const tinygltf::Material& gltfMaterial = model.materials[i];
@@ -765,18 +765,18 @@ namespace VULKAN {
             }
             if(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index>-1){
                 std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index].source].uri);
-//                if (path!=""){
-//                    material.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,path);
-//                    material.materialUniform.diffuseColor = glm::vec3(1.0f);
-//                    texturesFinded = true;
-//                }
+                if (path!=""){
+                    material.paths.try_emplace(TEXTURE_TYPE::METALLICROUGHNESS,path);
+                    material.materialUniform.roughnessIntensity =  static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
+                    material.materialUniform.metallicIntensity = static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
+                    texturesFinded = true;
+                }
             }
             if(gltfMaterial.normalTexture.index>-1){
                 std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.normalTexture.index].source].uri);
                 if (path!=""){
                     material.paths.try_emplace(TEXTURE_TYPE::NORMAL,path);
                     material.materialUniform.normalIntensity = 1.0f;
-                    texturesFinded = true;
                 }
             }
             if(gltfMaterial.emissiveTexture.index>-1){
@@ -784,18 +784,13 @@ namespace VULKAN {
                 if (path!=""){
                     material.paths.try_emplace(TEXTURE_TYPE::EMISSIVE,path);
                     material.materialUniform.emissionIntensity = 1.0f;
-                    texturesFinded = true;
                 }
 
             }
             material.textureReferencePath= texturesPath;
             material.name = "Material_"+std::to_string(i);
             material.id = ModelHandler::GetInstance()->currentMaterialsOffset;
-            if(texturesFinded){
-//                material.targetPath = texturesPath +"\\"+ material.name + ".MATCODE";
-            } else{
-                material.targetPath = modelPath +"\\"+ material.name + ".MATCODE";
-            }
+            material.targetPath = texturesPath +"\\"+ material.name + ".MATCODE";
 
             materialDataPerMesh.try_emplace(i, material);
             ModelHandler::GetInstance()->allMaterialsOnApp.try_emplace(material.id,std::make_shared<Material>(material));
@@ -813,6 +808,66 @@ namespace VULKAN {
         }
         std::cout<< "there is no valid texture path on the gltf path: "<<modelPath <<"\n"; 
         return "";
+    }
+
+    void ModelLoaderHandler::GetGLTFModel( tinygltf::Model &model,std::string path) {
+        std::string err;
+        std::string warn;
+        tinygltf::TinyGLTF gltfContext;
+        gltfContext.LoadASCIIFromFile(&model, &err, &warn, path);
+    }
+
+    void ModelLoaderHandler::LoadGLTFFromModel(tinygltf::Model &model, ModelData &modelData) {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<uint32_t> firstIndices;
+        std::vector<uint32_t> firstMeshVertex;
+        std::vector<uint32_t> meshIndexCount;
+        std::vector<uint32_t> meshVertexCount;
+//        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+        std::vector<int> materialIdsOnObject;
+        std::vector<glm::mat4> matrices;
+        NodeChain nodeChain{};
+        int meshCount = model.meshes.size();
+
+        int indexStartCounter = 0;
+        int vertexStartCouner = 0;
+
+        for(auto& scene : model.scenes){
+            for (int i = 0; i < scene.nodes.size(); ++i) {
+                LoadGLTFNode(model,
+                             &model.nodes[scene.nodes[i]],
+                             &nodeChain,
+                             indices,
+                             vertices,
+                             firstIndices,
+                             firstMeshVertex,
+                             meshIndexCount,
+                             meshVertexCount,
+                             materialIdsOnObject,
+                             matrices,
+                             meshCount);
+
+            }
+
+        }
+
+        std::vector<VKTexture>allTextures;
+        modelData.vertices=vertices;
+        modelData.indices=indices;
+        modelData.firstMeshIndex=firstIndices;
+        modelData.firstMeshVertex=firstMeshVertex;
+        modelData.materialIds=materialIdsOnObject;
+        modelData.meshIndexCount=meshIndexCount;
+        modelData.meshVertexCount=meshVertexCount;
+        modelData.meshCount = meshCount;
+        modelData.indexBLASOffset = 0;
+        modelData.vertexBLASOffset = 0;
+        modelData.transformBLASOffset = 0;
+        modelData.generated = true;
+        modelData.modelFormat = GLTF;
+        modelData.matrices = matrices;
+
     }
 
 

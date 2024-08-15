@@ -11,7 +11,6 @@ namespace VULKAN{
     void Material::CreateTextures(VulkanSwapChain &swap_chain, int &allTexturesOffset) {
         std::cout<<"MaterialTexturesAlready created for: "<<name<<"\n";
         if(generated)return;
-        materialUniform.textureIndexStart = allTexturesOffset;
         for (auto& pair: paths)
         {
             if (!std::filesystem::exists(pair.second.c_str()))continue;
@@ -36,6 +35,9 @@ namespace VULKAN{
                     break;
                 case NORMAL:
                     materialUniform.normalOffset = texture->id;
+                    break;
+                case METALLICROUGHNESS:
+                    materialUniform.metallicRoughnessOffset = texture->id;
                     break;
             }
         }
@@ -86,6 +88,14 @@ namespace VULKAN{
                 }
                 materialUniform.normalOffset = texture->id;
                 break;
+            case METALLICROUGHNESS:
+                if (!materialTextures.contains(textureType)){
+                    this->materialTextures.try_emplace(textureType, texture);
+                }else{
+                    materialTextures.at(textureType) = texture;
+                }
+                materialUniform.metallicRoughnessOffset = texture->id;
+                break;
         }
         ModelHandler::GetInstance()->updateMaterialData = true;
         ModelHandler::GetInstance()->updateBottomLevelObj = true;
@@ -121,7 +131,7 @@ namespace VULKAN{
         this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
         this->materialUniform.emissionOffset= jsonObj.at("EmissionOffset");
         //60
-        this->materialUniform.textureIndexStart=jsonObj.at("TextureIndexStart");
+        this->materialUniform.metallicRoughnessOffset=jsonObj.at("MetallicRoughnessOffset");
         this->materialUniform.texturesSizes = 0;
         this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
         this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
@@ -163,7 +173,7 @@ namespace VULKAN{
                 {"MetallicOffset",this->materialUniform.metallicOffset},
                 {"EmissionOffset",this->materialUniform.emissionOffset},
                 //60
-                {"TextureIndexStart",this->materialUniform.textureIndexStart},
+                {"MetallicRoughnessOffset",this->materialUniform.metallicRoughnessOffset},
                 {"TextureSizes",this->materialUniform.texturesSizes},
                 {"DiffuseOffset",this->materialUniform.diffuseOffset},
                 {"NormalOffset",this->materialUniform.normalOffset},
@@ -195,6 +205,9 @@ namespace VULKAN{
                 break;
             case NORMAL:
                 materialUniform.normalOffset = -1;
+                break;
+            case METALLICROUGHNESS:
+                materialUniform.metallicRoughnessOffset = -1;
                 break;
         }
         materialTextures.erase(textureType);
