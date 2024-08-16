@@ -111,13 +111,15 @@ void main()
 
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
+  pos= gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
   vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
   vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
   
   normal=normalize(normal);
+  tangent = normalize(tangent);
   if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
   {
-    normal = -normal;
+    //normal = -normal;
   } 
   tangent=normalize(tangent);
   vec3 bitTangent =cross(normal, tangent); 

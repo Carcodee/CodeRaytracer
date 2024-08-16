@@ -676,14 +676,25 @@ namespace VULKAN {
                         tinygltf::Accessor& accessor =model.accessors[primitive.attributes.find("TANGENT")->second];
                         tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
                         tangentBuffer = reinterpret_cast<const float*>(&(model.buffers[bufferView.buffer].data[bufferView.byteOffset + accessor.byteOffset]));
+   
                     }
+                    glm::mat4 transposedMat = glm::transpose(nodeMat);
                     for (size_t j = 0; j < vertexCount; ++j) {
                         Vertex vertex{};
                         vertex.position = glm::make_vec3(&positionBuffer[j * 3]);
-                        vertex.normal =glm::normalize(normalBuffer ? glm::make_vec3(&normalBuffer[j * 3]) : glm::vec3 (1.0f));
+
+                        //todo: fix normal space :D
+                        vertex.normal =normalBuffer ? glm::normalize(glm::make_vec3(&normalBuffer[j * 3])): glm::vec3 (1.0f);
+                        glm::vec4 result = nodeMat * glm::vec4 (vertex.normal.x,vertex.normal.y,vertex.normal.z,1);
+                        vertex.normal =glm::vec3(result.x,result.y,result.z);
+                        
                         vertex.texCoord =textCoordBuffer? glm::make_vec3(&textCoordBuffer[j * 2]): glm::vec2 (0.0f);
                         vertex.color = glm::vec3 (1.0f);
-                        vertex.tangent = tangentBuffer? glm::make_vec3(&tangentBuffer[j * 3]): glm::vec3 (1.0f);
+                        
+                        vertex.tangent = tangentBuffer? glm::normalize(glm::make_vec3(&tangentBuffer[j * 3])): glm::vec3 (1.0f);
+                        glm::vec4 resultTang = nodeMat * glm::vec4 (vertex.tangent.x,vertex.tangent.y,vertex.tangent.z,1);
+                        vertex.tangent =glm::vec3(resultTang.x,resultTang.y,resultTang.z);
+                        
                         vertices.push_back(vertex);
                     }
                     meshVertexCount.push_back(vertexCount);
