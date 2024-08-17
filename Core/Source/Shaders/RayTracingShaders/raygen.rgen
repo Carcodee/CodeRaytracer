@@ -112,10 +112,10 @@ void main()
             vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
             vec3 sampledDir =randomDir;
             if(rayPayload.tangent == vec3(0.0f)){
-                vec3 sampledDir = TangentToWorld(randomDir,rayPayload.normal);
             }else{
-                vec3 sampledDir = TangentToWorldWithTangent(randomDir,rayPayload.normal, rayPayload.tangent);
+                //sampledDir = TangentToWorldWithTangent(randomDir, rayPayload.normal, rayPayload.tangent);
             }
+            sampledDir = TangentToWorld(randomDir,rayPayload.normal);
             rayPayload.sampleDir = sampledDir;
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
             //rayPayload.direction = direction.xyz;

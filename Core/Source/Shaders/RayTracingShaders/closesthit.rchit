@@ -112,19 +112,30 @@ void main()
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
   pos= gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
-  vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
-  vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
   
-  normal=normalize(normal);
+  vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
+  normal = normalize(normal);
+  vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
   tangent = normalize(tangent);
+  
   if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
   {
-    //normal = -normal;
-  } 
-  tangent=normalize(tangent);
-  vec3 bitTangent =cross(normal, tangent); 
-  mat3 TBN = mat3(tangent, bitTangent, normal);
-
+    normal = -normal;
+  }
+    
+  vec3 bitangent = cross(normal, tangent);
+  
+  const mat3 normalTransform = transpose(inverse(mat3(gl_ObjectToWorldEXT))); 
+  vec3 worldNormal = normalize(normalTransform * normal); 
+  vec3 worldTangent = normalize(normalTransform * tangent); 
+  vec3 worldBitangent = normalize(normalTransform * bitangent); 
+  mat3 TBN = mat3(worldTangent, worldBitangent, worldNormal);
+  
+  //normal=normalize(normal);
+  //tangent = normalize(tangent); 
+  //vec3 bitTangent =cross(normal, tangent); 
+  //mat3 TBN = mat3(tangent, bitTangent, normal); 
+  
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
@@ -153,17 +164,16 @@ void main()
     roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
   }
 
-  vec3 finalNormal = normal;
+  vec3 finalNormal = worldNormal;
   if(matInfo.hasNormals){
-      mat3 inverseTBN = transpose(TBN);
-      vec3 normalWorldSpace = normalInMat.xyz * inverseTBN;
-      finalNormal = normalize(normalWorldSpace); 
+      //mat3 inverseTBN = inverse(TBN);
+      finalNormal = normalize(TBN * normalInMat.xyz); 
   }
 
   
   vec4 diffuse=diffuseInMat;
-  vec3 view = normalize(-rayPayload.direction) * TBN;
-  vec3 lightDir= normalize(pos-myLight.pos); 
+  vec3 view = normalize(-rayPayload.direction);
+  vec3 lightDir= normalize(myLight.pos - pos); 
   vec3 halfway =normalize(view + lightDir);
   
   vec3 lightDirTangSpace = lightDir * TBN;
@@ -178,7 +188,7 @@ void main()
   
   vec3 pbrLitDirect= GetBRDF(finalNormal* materials[materialIndex].normalIntensity, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
-  halfway = normalize(rayPayload.sampleDir + view);
+  halfway = normalize((-rayPayload.sampleDir) + view);
     
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
   vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
@@ -191,6 +201,9 @@ void main()
   
   rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  
+  //rayPayload.color = finalNormal; 
+  //rayPayload.colorLit = vec3(0.0f); 
   
   if(emissionInMat == vec4(0)){
        if(materials[materialIndex].emissionIntensity>0){

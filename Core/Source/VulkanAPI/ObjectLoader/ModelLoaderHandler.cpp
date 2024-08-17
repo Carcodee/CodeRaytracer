@@ -682,19 +682,12 @@ namespace VULKAN {
                     for (size_t j = 0; j < vertexCount; ++j) {
                         Vertex vertex{};
                         vertex.position = glm::make_vec3(&positionBuffer[j * 3]);
-
-                        //todo: fix normal space :D
-                        vertex.normal =normalBuffer ? glm::normalize(glm::make_vec3(&normalBuffer[j * 3])): glm::vec3 (1.0f);
-                        glm::vec4 result = nodeMat * glm::vec4 (vertex.normal.x,vertex.normal.y,vertex.normal.z,1);
-                        vertex.normal =glm::vec3(result.x,result.y,result.z);
-                        
+                        vertex.normal =normalBuffer ? glm::make_vec3(&normalBuffer[j * 3]): glm::vec3 (0.0f);
                         vertex.texCoord =textCoordBuffer? glm::make_vec3(&textCoordBuffer[j * 2]): glm::vec2 (0.0f);
                         vertex.color = glm::vec3 (1.0f);
-                        
-                        vertex.tangent = tangentBuffer? glm::normalize(glm::make_vec3(&tangentBuffer[j * 3])): glm::vec3 (1.0f);
-                        glm::vec4 resultTang = nodeMat * glm::vec4 (vertex.tangent.x,vertex.tangent.y,vertex.tangent.z,1);
-                        vertex.tangent =glm::vec3(resultTang.x,resultTang.y,resultTang.z);
-                        
+                        glm::vec4 tangent =tangentBuffer? glm::make_vec4(&tangentBuffer[j * 4]): glm::vec4(0.0f);
+                        vertex.tangent = tangentBuffer? glm::vec3 (tangent.x,tangent.y,tangent.z) * tangent.w: glm::vec3 (0.0f);
+
                         vertices.push_back(vertex);
                     }
                     meshVertexCount.push_back(vertexCount);
