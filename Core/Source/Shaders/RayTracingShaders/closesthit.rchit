@@ -129,7 +129,7 @@ void main()
   vec3 worldNormal = normalize(normalTransform * normal); 
   vec3 worldTangent = normalize(normalTransform * tangent); 
   vec3 worldBitangent = normalize(normalTransform * bitangent); 
-  mat3 TBN = mat3(worldTangent, worldBitangent, worldNormal);
+  mat3 TBN = mat3(tangent, bitangent, normal);
   
   //normal=normalize(normal);
   //tangent = normalize(tangent); 
@@ -164,7 +164,7 @@ void main()
     roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
   }
 
-  vec3 finalNormal = worldNormal;
+  vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       //mat3 inverseTBN = inverse(TBN);
       finalNormal = normalize(TBN * normalInMat.xyz); 
