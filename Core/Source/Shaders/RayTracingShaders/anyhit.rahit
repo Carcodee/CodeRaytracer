@@ -1,0 +1,69 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_scalar_block_layout :enable
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+
+#include "../UtilsShaders/ShadersUtility.glsl"
+
+
+layout(location = 3) rayPayloadInEXT uvec2 payloadSeed;
+
+layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
+    Vertex vertices[];
+};
+
+layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
+    Indices indices[];
+};
+layout(set = 0, binding = 7, std140) buffer Materials {
+    MaterialData materials[];
+};
+
+layout(set = 0, binding = 8, scalar) buffer MeshesData {
+    MeshData meshesData[];
+};
+
+layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
+    uint geometryOffset[];
+};
+
+hitAttributeEXT vec2 attribs;
+
+void main (){
+
+  int realGeometryOffset= int(geometryOffset[gl_InstanceID]) + gl_GeometryIndexEXT; 
+
+  int primitiveIndex=int(meshesData[realGeometryOffset].geometryIndexStartOffset);
+  
+  int indexOffset=int(meshesData[realGeometryOffset].indexOffset);
+
+  int idx1= primitiveIndex + (3 * gl_PrimitiveID + 0);
+  int idx2= primitiveIndex + (3 * gl_PrimitiveID + 1);
+  int idx3= primitiveIndex + (3 * gl_PrimitiveID + 2);
+  
+  int index1= indexOffset + int(indices[idx1].index);
+  int index2= indexOffset + int(indices[idx2].index);
+  int index3= indexOffset + int(indices[idx3].index);
+
+  Vertex v1 = vertices[index1];
+  Vertex v2 = vertices[index2];
+  Vertex v3 = vertices[index3];
+  
+  const vec3 barycentricCoords = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
+
+  vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
+  vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
+  pos= gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
+  
+  MaterialData currentMaterial = materials[meshesData[realGeometryOffset].materialIndexOnShape];
+  float currentSeed = NextFloat(payloadSeed); 
+  
+  ignoreIntersectionEXT;
+  if(currentSeed> currentMaterial.roughnessIntensity){
+  }
+
+
+}

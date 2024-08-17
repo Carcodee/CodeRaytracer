@@ -21,25 +21,6 @@ struct TexturesFinded{
     vec4 ambient;
 };
 
-struct MeshData {
-    int materialIndexOnShape;
-    int geometryIndexStartOffset;
-    int indexOffset;
-};
-
-
-struct Vertex {
-    vec3 position; 
-    vec3 col;
-    vec3 normal;
-    vec3 tangent;
-    vec2 texCoords; 
-};
-
-struct Indices {
-    uint index;
-};
-
 layout(binding=6) uniform light{
     vec3 pos;
     vec3 col;
@@ -125,7 +106,8 @@ void main()
     
   vec3 bitangent = cross(normal, tangent);
   
-  const mat3 normalTransform = transpose(inverse(mat3(gl_ObjectToWorldEXT))); 
+  //todo fix transformation on shaders
+  const mat3 normalTransform = mat3(gl_ObjectToWorld3x4EXT); 
   vec3 worldNormal = normalize(normalTransform * normal); 
   vec3 worldTangent = normalize(normalTransform * tangent); 
   vec3 worldBitangent = normalize(normalTransform * bitangent); 
@@ -167,6 +149,7 @@ void main()
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       //mat3 inverseTBN = inverse(TBN);
+      //tang space to world space cus is a orthonormal basis and no transpose is needed :D
       finalNormal = normalize(TBN * normalInMat.xyz); 
   }
 
@@ -202,7 +185,7 @@ void main()
   rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
-  //rayPayload.color = finalNormal; 
+  //rayPayload.color = worldNormal; 
   //rayPayload.colorLit = vec3(0.0f); 
   
   if(emissionInMat == vec4(0)){

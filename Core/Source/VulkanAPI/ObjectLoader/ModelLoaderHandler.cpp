@@ -684,12 +684,13 @@ namespace VULKAN {
                         vertex.position = glm::make_vec3(&positionBuffer[j * 3]);
                         vertex.normal =normalBuffer ? glm::make_vec3(&normalBuffer[j * 3]): glm::vec3 (0.0f);
                         vertex.normal = glm::mat3 (nodeMat)* vertex.normal;
+                        
                         vertex.texCoord =textCoordBuffer? glm::make_vec3(&textCoordBuffer[j * 2]): glm::vec2 (0.0f);
                         vertex.color = glm::vec3 (1.0f);
+                        
                         glm::vec4 tangent =tangentBuffer? glm::make_vec4(&tangentBuffer[j * 4]): glm::vec4(0.0f);
                         vertex.tangent = tangentBuffer? glm::vec3 (tangent.x,tangent.y,tangent.z) * tangent.w: glm::vec3 (0.0f);
                         vertex.tangent = glm::mat3 (nodeMat)* vertex.tangent;
-
                         vertices.push_back(vertex);
                     }
                     meshVertexCount.push_back(vertexCount);

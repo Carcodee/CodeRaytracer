@@ -984,13 +984,13 @@ namespace VULKAN {
 		vertexBinding.binding = 4;
 		vertexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		vertexBinding.descriptorCount = 1;
-		vertexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		vertexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding indexBinding{};
 		indexBinding.binding = 5;
 		indexBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		indexBinding.descriptorCount = 1;
-		indexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		indexBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding lightBinding{};
 		lightBinding.binding = 6;
@@ -1002,19 +1002,19 @@ namespace VULKAN {
 		materialBinding.binding = 7;
 		materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		materialBinding.descriptorCount = 1;
-		materialBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;;
+		materialBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
 
 		VkDescriptorSetLayoutBinding modelDataBinding{};
 		modelDataBinding.binding = 8;
 		modelDataBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		modelDataBinding.descriptorCount = 1;
-		modelDataBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+		modelDataBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR ;
 
         VkDescriptorSetLayoutBinding instancesGeometryOffsetsBinding{};
         instancesGeometryOffsetsBinding.binding = 9;
         instancesGeometryOffsetsBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         instancesGeometryOffsetsBinding.descriptorCount = 1;
-        instancesGeometryOffsetsBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        instancesGeometryOffsetsBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_ANY_HIT_BIT_KHR ;;
         
         VkDescriptorSetLayoutBinding emissiveImageBinding{};
         emissiveImageBinding.binding = 10;
@@ -1170,9 +1170,12 @@ namespace VULKAN {
 			shaderGroup.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 			shaderGroup.generalShader = VK_SHADER_UNUSED_KHR;
 			shaderGroup.closestHitShader = static_cast<uint32_t>(shaderStages.size()) - 1;
-			shaderGroup.anyHitShader = VK_SHADER_UNUSED_KHR;
 			shaderGroup.intersectionShader = VK_SHADER_UNUSED_KHR;
-			this->shaderGroups.push_back(shaderGroup);
+            
+            path = shaderPath+ "/RayTracingShaders/anyhit.rahit.spv";
+            shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_ANY_HIT_BIT_KHR, path));
+            shaderGroup.anyHitShader = static_cast<uint32_t>(shaderStages.size()) - 1;
+            this->shaderGroups.push_back(shaderGroup);
             
             path = shaderPath+ "/RayTracingShaders/spherehit.rchit.spv";
             shaderStages.push_back(PipelineReader::CreateShaderStageModule(rHitShaderModule, myDevice, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, path));

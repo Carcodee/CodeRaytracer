@@ -25,14 +25,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="normal space on gltf loading is very broken :D">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="move norm transformation to device" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -280,6 +273,7 @@
       <workItem from="1723819836164" duration="4929000" />
       <workItem from="1723825706119" duration="7808000" />
       <workItem from="1723854444265" duration="2561000" />
+      <workItem from="1723860127439" duration="7423000" />
     </task>
     <task id="LOCAL-00001" summary="Cmake config and some changes">
       <option name="closed" value="true" />
@@ -649,7 +643,23 @@
       <option name="project" value="LOCAL" />
       <updated>1723780258975</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="fixed tangent loading, todo normal transformation">
+      <option name="closed" value="true" />
+      <created>1723867386462</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1723867386462</updated>
+    </task>
+    <task id="LOCAL-00048" summary="move norm transformation to device">
+      <option name="closed" value="true" />
+      <created>1723867639268</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1723867639268</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -706,8 +716,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="textures refactor" />
-    <MESSAGE value="fixed command buffer submition order" />
     <MESSAGE value="Finally fixed the renderpasses" />
     <MESSAGE value="changing the bloom to physically based bloom" />
     <MESSAGE value="less noisy and working in frame accumulation" />
@@ -731,6 +739,8 @@
     <MESSAGE value="Fixed import from disc" />
     <MESSAGE value="Fixed the remove texture bug, gltf loading still have normals broken" />
     <MESSAGE value="normal space on gltf loading is very broken :D" />
-    <option name="LAST_COMMIT_MESSAGE" value="normal space on gltf loading is very broken :D" />
+    <MESSAGE value="fixed tangent loading, todo normal transformation" />
+    <MESSAGE value="move norm transformation to device" />
+    <option name="LAST_COMMIT_MESSAGE" value="move norm transformation to device" />
   </component>
 </project>

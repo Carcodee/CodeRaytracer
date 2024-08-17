@@ -18,6 +18,8 @@ layout(binding = 2, set = 0) uniform CameraProperties
 
 layout(location = 0) rayPayloadEXT RayPayload rayPayload;
 
+layout(location = 3) rayPayloadEXT uvec2 payloadSeed;
+
 layout (constant_id = 0) const int MAX_RECURSION = 0;
 
 layout(binding=6) uniform light{
@@ -74,6 +76,7 @@ void main()
         rayPayload.sampleDir = direction.xyz;
         rayPayload.tangent = vec3(0.0f);
         rayPayload.hitT = 0.0f;
+        payloadSeed = seed;
         vec3 rayThroughput = vec3(1.0f);
         vec3 irradiance = vec3(0.0f);
         float rayPdf = 1.0f;

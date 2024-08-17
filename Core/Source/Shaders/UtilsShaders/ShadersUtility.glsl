@@ -24,6 +24,24 @@ struct RayPayload{
 	bool shadow;
 	bool isMiss;
 };
+struct MeshData {
+	int materialIndexOnShape;
+	int geometryIndexStartOffset;
+	int indexOffset;
+};
+
+
+struct Vertex {
+	vec3 position;
+	vec3 col;
+	vec3 normal;
+	vec3 tangent;
+	vec2 texCoords;
+};
+
+struct Indices {
+	uint index;
+};
 
 struct MaterialFindInfo{
 	bool hasDiffuse;
