@@ -25,7 +25,7 @@ layout(binding=6) uniform light{
     float intensity;
 }myLight;
 
-layout(set = 0, binding = 7, std140) buffer Materials {
+layout(set = 0, binding = 7, scalar) buffer Materials {
     MaterialData materials[];
 };
 

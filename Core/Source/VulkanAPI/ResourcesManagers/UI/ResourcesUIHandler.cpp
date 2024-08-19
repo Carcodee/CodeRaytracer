@@ -204,6 +204,20 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("Alpha",&mat.materialUniform.alphaCutoff, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            bool val2 =mat.GetConfigVal(ALPHA_AS_DIFFUSE);
+            if(ImGui::Checkbox( "Set alpha as a channel", &val2)){
+                mat.SetConfigVal(ALPHA_AS_DIFFUSE, val2);
+            }
+            bool val =mat.GetConfigVal(ALPHA_AS_A_CHANNEL);
+            if(ImGui::Checkbox( "Set alpha as a channel", &val)){
+                mat.SetConfigVal(ALPHA_AS_A_CHANNEL, val);
+            }
+
+            
             float baseReflection[3];
             baseReflection[0]= mat.materialUniform.baseReflection.x;
             baseReflection[1]= mat.materialUniform.baseReflection.y;

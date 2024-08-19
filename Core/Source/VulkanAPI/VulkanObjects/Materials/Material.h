@@ -19,6 +19,12 @@ namespace VULKAN{
         EMISSIVE = 4 ,
         METALLICROUGHNESS = 5
     };
+    enum CONFIG_TYPE{
+        ALPHA_AS_DIFFUSE,
+        ALPHA_AS_A_CHANNEL
+    };
+
+
 
     struct MaterialUniformData
     {
@@ -38,10 +44,11 @@ namespace VULKAN{
         int emissionOffset = -1;
         //64
         int metallicRoughnessOffset  = -1;
-        int texturesSizes = 0;
+        float alphaCutoff = 1.0f;
         int diffuseOffset = -1;
         int normalOffset = -1;
         //80
+        uint32_t configurations = 0;
         
     };
 
@@ -58,6 +65,9 @@ namespace VULKAN{
         };
         nlohmann::json Serialize() override;
         Material Deserialize(nlohmann::json &jsonObj) override;
+        void SetConfiguration(int configData);
+        bool GetConfigVal(CONFIG_TYPE configType);
+        void SetConfigVal(CONFIG_TYPE configType, bool value);
         void SaveData() override{
 
 

@@ -9,7 +9,7 @@
 #include "../UtilsShaders/ShadersUtility.glsl"
 
 
-layout(location = 3) rayPayloadInEXT uvec2 payloadSeed;
+layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
 layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
     Vertex vertices[];
@@ -18,7 +18,7 @@ layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
 layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
     Indices indices[];
 };
-layout(set = 0, binding = 7, std140) buffer Materials {
+layout(set = 0, binding = 7, scalar) buffer Materials {
     MaterialData materials[];
 };
 
@@ -29,6 +29,8 @@ layout(set = 0, binding = 8, scalar) buffer MeshesData {
 layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
     uint geometryOffset[];
 };
+
+layout(set = 0,binding = 14) uniform sampler2D textures[];
 
 hitAttributeEXT vec2 attribs;
 
@@ -59,11 +61,15 @@ void main (){
   pos= gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
   
   MaterialData currentMaterial = materials[meshesData[realGeometryOffset].materialIndexOnShape];
-  float currentSeed = NextFloat(payloadSeed); 
+  float rand = NextFloat(rayPayload.frameSeed); 
   
-  ignoreIntersectionEXT;
-  if(currentSeed> currentMaterial.roughnessIntensity){
+  if(currentMaterial.diffuseOffset>-1){
+      //vec4 diffuseCol = texture(textures[currentMaterial.diffuseOffset], uv);
+      if(rand > currentMaterial.alphaCutoff){
+          ignoreIntersectionEXT;
+      }   
   }
+  
 
 
 }

@@ -42,7 +42,7 @@ layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
 };
 
 
-layout(set = 0, binding = 7, std140) buffer Materials {
+layout(set = 0, binding = 7, scalar) buffer Materials {
     MaterialData materials[];
 };
 
@@ -121,7 +121,6 @@ void main()
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
-  int materialTextureSizes =materials[materialIndex].textureSizes;
   
   vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
   vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
@@ -186,6 +185,7 @@ void main()
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
   //rayPayload.color = worldNormal; 
+  //rayPayload.color = vec3(diffuseInMat.a); 
   //rayPayload.colorLit = vec3(0.0f); 
   
   if(emissionInMat == vec4(0)){

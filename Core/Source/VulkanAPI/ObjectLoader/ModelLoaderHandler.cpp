@@ -760,7 +760,15 @@ namespace VULKAN {
                                                                gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
             material.materialUniform.roughnessIntensity = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
             material.materialUniform.metallicIntensity = gltfMaterial.pbrMetallicRoughness.metallicFactor;
-            
+            if (gltfMaterial.alphaMode =="OPAQUE"){
+                material.materialUniform.alphaCutoff = 1.0f;
+            }
+            if (gltfMaterial.alphaMode =="BLEND"){
+                material.materialUniform.alphaCutoff = gltfMaterial.alphaCutoff;
+            }
+            if (gltfMaterial.alphaMode =="MASK"){
+
+            }
             if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index>-1){
                 std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.pbrMetallicRoughness.baseColorTexture.index].source].uri);
                 if (path!=""){

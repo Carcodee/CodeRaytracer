@@ -21,6 +21,7 @@ struct RayPayload{
 	float roughness;
 	float reflectivity;
 	float hitT;
+    uvec2 frameSeed;	
 	bool shadow;
 	bool isMiss;
 };
@@ -81,10 +82,11 @@ struct MaterialData {
 	int emissionOffset;
 	//64
 	int metallicRouhgnessOffset;
-	int textureSizes;
+	float alphaCutoff;
 	int diffuseOffset;
 	int normalOffset;
 	//80
+	uint configurations;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	

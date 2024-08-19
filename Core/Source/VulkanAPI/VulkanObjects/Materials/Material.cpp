@@ -17,7 +17,6 @@ namespace VULKAN{
             std::string extension = HELPERS::FileHandler::GetInstance()->GetPathExtension(pair.second);
             
             if (extension != ".png" && extension != ".jpeg" && extension != ".jpg")continue;
-            materialUniform.texturesSizes++;
             VKTexture* texture = new VKTexture(pair.second.c_str(), swap_chain, true);
             materialTextures.try_emplace(pair.first,texture);
             switch (pair.first) {
@@ -132,10 +131,11 @@ namespace VULKAN{
         this->materialUniform.emissionOffset= jsonObj.at("EmissionOffset");
         //60
         this->materialUniform.metallicRoughnessOffset=jsonObj.at("MetallicRoughnessOffset");
-        this->materialUniform.texturesSizes = 0;
+        this->materialUniform.alphaCutoff = jsonObj.at("AlphaCutoff");
         this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
         this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
         //80
+        this->materialUniform.configurations = jsonObj.at("Configurations");
 
         this->paths = jsonObj.at("Paths").get<std::map<TEXTURE_TYPE,std::string>>();
         this->textureReferencePath = jsonObj.at("TextureReferencePath");
@@ -174,10 +174,11 @@ namespace VULKAN{
                 {"EmissionOffset",this->materialUniform.emissionOffset},
                 //60
                 {"MetallicRoughnessOffset",this->materialUniform.metallicRoughnessOffset},
-                {"TextureSizes",this->materialUniform.texturesSizes},
+                {"AlphaCutoff",this->materialUniform.alphaCutoff},
                 {"DiffuseOffset",this->materialUniform.diffuseOffset},
                 {"NormalOffset",this->materialUniform.normalOffset},
                 //80
+                {"Configurations",this->materialUniform.configurations},
                 {"Paths",this->paths},
                 {"TextureReferencePath",this->textureReferencePath},
                 {"TargetPath",this->targetPath}
@@ -212,5 +213,46 @@ namespace VULKAN{
         }
         materialTextures.erase(textureType);
         ModelHandler::GetInstance()->updateMaterialData = true;
+    }
+
+    void Material::SetConfiguration(int configData) {
+        materialUniform.configurations = configData;
+    }
+
+    bool Material::GetConfigVal(CONFIG_TYPE configType) {
+        bool val;
+        uint32_t currentConfigs = materialUniform.configurations & 0x0000000F;
+        switch (configType) {
+            case ALPHA_AS_DIFFUSE:
+                val = (currentConfigs & (1 << 0)) != 0;
+                break;
+            case ALPHA_AS_A_CHANNEL:
+                
+                val = (currentConfigs & (1 << 1)) != 0;
+                break;
+            default:
+                val = false;
+                assert(val && "Provide a valid configuration type");
+        }
+        return val;
+    }
+
+    void Material::SetConfigVal(CONFIG_TYPE configType, bool value) {
+        uint32_t maskValue = 0;
+        switch (configType) {
+            case ALPHA_AS_DIFFUSE:
+                maskValue = 1 << 0;
+                break;
+            case ALPHA_AS_A_CHANNEL:
+                maskValue  = 1 << 1;
+                break;
+        }
+        if (value){
+            materialUniform.configurations |= maskValue;
+        }else{
+            materialUniform.configurations &= ~maskValue;
+        }
+
+
     }
 }
