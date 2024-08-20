@@ -1,7 +1,7 @@
 
 
 #include "../UtilsShaders/Random.glsl"
-
+#include "../UtilsShaders/DisneyShadingModel.glsl"
 #define DIFFUSE_TEX 0 
 #define ALPHA_TEX 1 
 #define SPECULAR_TEX 2 
@@ -31,6 +31,11 @@ struct MeshData {
 	int indexOffset;
 };
 
+struct MaterialConfigurations{
+	bool alphaAsDiffuse;
+	bool useAlphaChannel;
+	bool useDiffuseColorAlpha;
+};
 
 struct Vertex {
 	vec3 position;
@@ -69,23 +74,18 @@ struct MaterialData {
 	float normalIntensity;
 	float specularIntensity;
 	float roughnessIntensity;
-	//16
-	vec3 diffuseColor;
+	vec4 diffuseColor;
 	float reflectivityIntensity;
-	//32
 	vec3 baseReflection;
 	float metallicIntensity;
-	//48
 	float emissionIntensity;
 	int roughnessOffset;
 	int metallicOffset;
 	int emissionOffset;
-	//64
 	int metallicRouhgnessOffset;
 	float alphaCutoff;
 	int diffuseOffset;
 	int normalOffset;
-	//80
 	uint configurations;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
@@ -102,6 +102,11 @@ MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	return materialFindInfo;
 }
 
+void GetMatConfigs(uint configs, out MaterialConfigurations materialConfigurations){
+	materialConfigurations.alphaAsDiffuse = (configs & 1) != 0;
+	materialConfigurations.useAlphaChannel = (configs & (1 << 1)) != 0;
+	materialConfigurations.useDiffuseColorAlpha = (configs & (1 << 2)) != 0;
+}
 
 vec3 LambertDiffuse(vec3 col){
 	return col/PI;
@@ -157,9 +162,10 @@ vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float meta
 	vec3 F = FresnelShilck(wh, wo, FO);
 	vec3 cookTorrence = CookTorrance(normal, wo, wi, D, G, F);
 	vec3 lambert= LambertDiffuse(col);
+	vec3 diffuse = DisneyDiffuse(col, normal, wh, wo, wi, roughness, 0.9f);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
-	vec3 BRDF =  (kd * lambert) + cookTorrence;
+	vec3 BRDF =  (kd * diffuse) + cookTorrence;
 	return BRDF;
 }
 

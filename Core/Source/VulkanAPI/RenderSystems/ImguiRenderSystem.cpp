@@ -587,8 +587,7 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateBottomLevelObj = true;
                 InputHandler::editingGraphics= true;
             }
-            ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
-            ImGui::LabelText("Light", "");
+            ImGui::SeparatorText("Light");
             if(ImGui::SliderFloat3("light Pos", lightPos, -30.0f, 30.0f, "%.3f")){
                 InputHandler::editingGraphics= true;
             }
@@ -598,6 +597,7 @@ namespace VULKAN
             if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f")){
                 InputHandler::editingGraphics= true;
             }
+            ImGui::SeparatorText("All Materials Configs");
             if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,2.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.roughnessIntensity = roughnessAllMaterials;
@@ -615,6 +615,27 @@ namespace VULKAN
             if(ImGui::SliderFloat("Set All materials Normal Intensity", &normalAllMaterials, 0.0f,2.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.normalIntensity = normalAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Alpha Intensity", &allMaterialsAlpha, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.alphaCutoff = allMaterialsAlpha;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials emissive Intensity", &allMaterialsEmissive, 0.0f,15.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.emissionIntensity = allMaterialsEmissive;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials albededo Intensity", &allMaterialsAlbedo, 0.0f,3.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.albedoIntensity = allMaterialsAlbedo;
                 }
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;

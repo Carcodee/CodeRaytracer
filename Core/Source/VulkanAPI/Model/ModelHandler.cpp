@@ -15,7 +15,7 @@ namespace VULKAN
 		baseMaterialUniformData.albedoIntensity = 1.0f;
 		baseMaterialUniformData.normalIntensity = 0;
 		baseMaterialUniformData.specularIntensity = 0;
-		baseMaterialUniformData.diffuseColor = glm::vec3(1);
+		baseMaterialUniformData.diffuseColor = glm::vec4(1.0f);
 		baseMaterialUniformData.metallicRoughnessOffset = -1;
 		baseMaterialUniformData.alphaCutoff = 0;
 		baseMaterialUniformData.diffuseOffset = -1;

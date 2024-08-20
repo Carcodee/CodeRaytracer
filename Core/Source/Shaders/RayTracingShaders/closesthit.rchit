@@ -122,7 +122,7 @@ void main()
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
   
-  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].albedoIntensity;
+  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].diffuseColor * materials[materialIndex].albedoIntensity;
   vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
   vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
   vec4 metallicRoughness = TryGetTex(materials[materialIndex].metallicRouhgnessOffset, uv); 
@@ -132,7 +132,7 @@ void main()
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
-     diffuseInMat =vec4(materials[materialIndex].diffuseColor, 1.0) * materials[materialIndex].albedoIntensity;
+     diffuseInMat =vec4(materials[materialIndex].diffuseColor.xyz, 1.0) * materials[materialIndex].albedoIntensity;
   }
   if(emissionInMat == vec4(1.0f)){
     emissionInMat = vec4(0.0f);
@@ -172,6 +172,7 @@ void main()
   
   halfway = normalize((-rayPayload.sampleDir) + view);
     
+  float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
   vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
   
@@ -181,7 +182,7 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
+  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
   rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
   //rayPayload.color = worldNormal; 
@@ -191,7 +192,7 @@ void main()
   if(emissionInMat == vec4(0)){
        if(materials[materialIndex].emissionIntensity>0){
            rayPayload.shadow = false;
-           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor * materials[materialIndex].emissionIntensity); 
+           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor.xyz * materials[materialIndex].emissionIntensity); 
        }
   }else{
        rayPayload.shadow = false;
@@ -227,7 +228,7 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 
 vec3 GetDiffuseColor(int materialIndex){
 
-   vec3 diffuse= materials[materialIndex].diffuseColor;
+   vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
    return diffuse;
 }
 

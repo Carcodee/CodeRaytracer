@@ -225,7 +225,7 @@ namespace VULKAN {
 
 			vertexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(vertexBuffer.buffer) + obj.combinedMesh.vertexBLASOffset * sizeof(Vertex);
 			indexBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(indexBuffer.buffer) + ((obj.combinedMesh.indexBLASOffset + obj.combinedMesh.firstMeshIndex[i]) * sizeof(uint32_t));
-			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) + ((obj.bottomLevelId + i) * sizeof(VkTransformMatrixKHR));
+			transformBufferDeviceAddress.deviceAddress = getBufferDeviceAddress(transformBuffer.buffer) + ((obj.combinedMesh.transformBLASOffset + i) * sizeof(VkTransformMatrixKHR));
 
 			VkAccelerationStructureGeometryKHR accelerationStructureGeometry{};
 			accelerationStructureGeometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
@@ -1315,12 +1315,13 @@ namespace VULKAN {
                 modelDataUniformBuffer.push_back(currentModelDataUniformBuffer);
 				//modelDataUniformBuffer.insert(modelDataUniformBuffer.begin(),myModelDataUniformBuffer);
 			}
+
+            ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.transformBLASOffset = instanceMeshCountOffset;
             instancesGeometryOffsets.push_back(instanceMeshCountOffset);
             instanceMeshCountOffset += modelsOnScene[i]->meshCount;
             materialOffset += modelsOnScene[i]->materialDataPerMesh.size();
 			modelsOnScene[i]->indexBLASOffset = perModelIndexStride;
 			modelsOnScene[i]->vertexBLASOffset = perModelVertexCount;
-			modelsOnScene[i]->transformBLASOffset = i;
             modelsOnScene[i]->bottomLevelObjRef = &ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i);
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.indexBLASOffset = perModelIndexStride;
 			ModelHandler::GetInstance()->GetBLASFromTLAS(topLevelObjBase, i).combinedMesh.vertexBLASOffset = perModelVertexCount;

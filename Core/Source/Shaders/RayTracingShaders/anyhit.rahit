@@ -62,13 +62,29 @@ void main (){
   
   MaterialData currentMaterial = materials[meshesData[realGeometryOffset].materialIndexOnShape];
   float rand = NextFloat(rayPayload.frameSeed); 
+  MaterialConfigurations configs;
+  GetMatConfigs(currentMaterial.configurations, configs);
+  vec4 diffuseCol;
+  float alpha= currentMaterial.alphaCutoff;
   
   if(currentMaterial.diffuseOffset>-1){
-      //vec4 diffuseCol = texture(textures[currentMaterial.diffuseOffset], uv);
-      if(rand > currentMaterial.alphaCutoff){
-          ignoreIntersectionEXT;
-      }   
+    diffuseCol = texture(textures[currentMaterial.diffuseOffset], uv);
+  }else{
+    diffuseCol = currentMaterial.diffuseColor;
+  } 
+  if (configs.alphaAsDiffuse){
+    alpha *= MaxComponent(diffuseCol.xyz);
   }
+  if(configs.useAlphaChannel){
+    alpha *= diffuseCol.a;
+  }
+  if(configs.useDiffuseColorAlpha){
+    alpha *= currentMaterial.diffuseColor.a;
+  }
+  if(rand > alpha){
+      ignoreIntersectionEXT;
+  }
+
   
 
 

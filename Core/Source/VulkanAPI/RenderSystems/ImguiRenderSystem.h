@@ -84,6 +84,9 @@ namespace VULKAN
         float roughnessAllMaterials = 1.0f;
         float reflectivityAllMaterials = 1.0f;
         float normalAllMaterials = 1.0f;
+        float allMaterialsAlpha = 1.0f;
+        float allMaterialsEmissive = 1.0f;
+        float allMaterialsAlbedo = 1.0f;
         float metallicAllMaterials = 1.0f;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;

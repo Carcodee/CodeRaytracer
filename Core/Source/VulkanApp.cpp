@@ -202,6 +202,7 @@ namespace VULKAN{
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.storageImage);
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.emissiveStoreImage);
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.aoStorageImage);
+            ImguiRenderSystem::GetInstance()->AddFramebufferReference(finalStorageImage);
             
 
 		}

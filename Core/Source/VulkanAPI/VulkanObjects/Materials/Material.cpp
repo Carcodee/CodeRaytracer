@@ -115,6 +115,7 @@ namespace VULKAN{
         this->materialUniform.diffuseColor.x = diffuse[0];
         this->materialUniform.diffuseColor.y = diffuse[1];
         this->materialUniform.diffuseColor.z = diffuse[2];
+        this->materialUniform.diffuseColor.w = diffuse[3];
         this->materialUniform.reflectivityIntensity = jsonObj.at("ReflectivityIntensity");
         //32
 
@@ -149,6 +150,7 @@ namespace VULKAN{
         diffuse.push_back(materialUniform.diffuseColor.x);
         diffuse.push_back(materialUniform.diffuseColor.y);
         diffuse.push_back(materialUniform.diffuseColor.z);
+        diffuse.push_back(materialUniform.diffuseColor.w);
         std::vector<float> baseReflection;
         baseReflection.push_back(materialUniform.baseReflection.x);
         baseReflection.push_back(materialUniform.baseReflection.y);
@@ -226,9 +228,11 @@ namespace VULKAN{
             case ALPHA_AS_DIFFUSE:
                 val = (currentConfigs & (1 << 0)) != 0;
                 break;
-            case ALPHA_AS_A_CHANNEL:
-                
+            case USE_ALPHA_CHANNEL:
                 val = (currentConfigs & (1 << 1)) != 0;
+                break;
+            case USE_ALPHA_OF_DIFFUSE_COLOR:
+                val = (currentConfigs & (1 << 2)) != 0;
                 break;
             default:
                 val = false;
@@ -243,8 +247,11 @@ namespace VULKAN{
             case ALPHA_AS_DIFFUSE:
                 maskValue = 1 << 0;
                 break;
-            case ALPHA_AS_A_CHANNEL:
+            case USE_ALPHA_CHANNEL:
                 maskValue  = 1 << 1;
+                break;
+            case USE_ALPHA_OF_DIFFUSE_COLOR:
+                maskValue  = 1 << 2;
                 break;
         }
         if (value){
@@ -252,7 +259,6 @@ namespace VULKAN{
         }else{
             materialUniform.configurations &= ~maskValue;
         }
-
 
     }
 }

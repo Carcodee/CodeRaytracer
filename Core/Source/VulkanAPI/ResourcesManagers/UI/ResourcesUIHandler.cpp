@@ -208,16 +208,35 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            bool val2 =mat.GetConfigVal(ALPHA_AS_DIFFUSE);
-            if(ImGui::Checkbox( "Set alpha as a channel", &val2)){
-                mat.SetConfigVal(ALPHA_AS_DIFFUSE, val2);
+
+            bool value = mat.GetConfigVal(ALPHA_AS_DIFFUSE);
+            if(ImGui::Checkbox( "Use alpha as a Diffuse", &value)){
+                if(value){
+                    mat.SetConfigVal(ALPHA_AS_DIFFUSE, true);
+                    mat.SetConfigVal(USE_ALPHA_CHANNEL, false);
+                    mat.SetConfigVal(USE_ALPHA_OF_DIFFUSE_COLOR, false);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }
             }
-            bool val =mat.GetConfigVal(ALPHA_AS_A_CHANNEL);
-            if(ImGui::Checkbox( "Set alpha as a channel", &val)){
-                mat.SetConfigVal(ALPHA_AS_A_CHANNEL, val);
+            value = mat.GetConfigVal(USE_ALPHA_CHANNEL);
+            if(ImGui::Checkbox( "Use alpha channel", &value)){
+                if(value){
+                    mat.SetConfigVal(ALPHA_AS_DIFFUSE, false);
+                    mat.SetConfigVal(USE_ALPHA_CHANNEL, true);
+                    mat.SetConfigVal(USE_ALPHA_OF_DIFFUSE_COLOR, false);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }
+            }
+            value = mat.GetConfigVal(USE_ALPHA_OF_DIFFUSE_COLOR);
+            if(ImGui::Checkbox( "Use diffuse color alpha", &value)){
+                if(value){
+                    mat.SetConfigVal(ALPHA_AS_DIFFUSE, false);
+                    mat.SetConfigVal(USE_ALPHA_CHANNEL, false);
+                    mat.SetConfigVal(USE_ALPHA_OF_DIFFUSE_COLOR, true);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }
             }
 
-            
             float baseReflection[3];
             baseReflection[0]= mat.materialUniform.baseReflection.x;
             baseReflection[1]= mat.materialUniform.baseReflection.y;
@@ -229,12 +248,13 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
 
-            float matCol[3];
+            float matCol[4];
             matCol[0]= mat.materialUniform.diffuseColor.x;
             matCol[1]= mat.materialUniform.diffuseColor.y;
             matCol[2]= mat.materialUniform.diffuseColor.z;
-            if (ImGui::ColorEdit3("Diffuse", matCol)){
-                mat.materialUniform.diffuseColor= glm::make_vec3(matCol);
+            matCol[3]= mat.materialUniform.diffuseColor.w;
+            if (ImGui::ColorEdit4("Diffuse", matCol)){
+                mat.materialUniform.diffuseColor = glm::make_vec4(matCol);
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
 
@@ -469,7 +489,9 @@ namespace VULKAN
         float ySize = size.y/static_cast<float>(framebuffers.size());
         for (auto& framebuffer: framebuffers) {
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(framebuffer);
-            ImGui::Image((ImTextureID) framebuffer->textureDescriptor, ImVec2{size.x,ySize});
+            if (ImGui::ImageButton((ImTextureID) framebuffer->textureDescriptor, ImVec2{size.x,ySize})){
+                ImguiRenderSystem::GetInstance()->viewportTexture = framebuffer;
+            };
         }
 
         ImGui::End();

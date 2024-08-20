@@ -247,7 +247,7 @@ namespace VULKAN {
 		for (const auto& material : materials)
 		{
 			Material materialData{};
-			materialData.materialUniform.diffuseColor = glm::make_vec3(material.diffuse);
+			materialData.materialUniform.diffuseColor = glm::vec4(glm::make_vec3(material.diffuse), 1.0f);
             materialData.materialUniform.roughnessIntensity = material.roughness;
             materialData.materialUniform.metallicIntensity = material.metallic;
             bool texturesFinded= false;
@@ -255,7 +255,7 @@ namespace VULKAN {
 				std::string texturePathFinded = material.diffuse_texname;
 				FixMaterialPaths(texturePathFinded, texturesPath, currentModelPath.string());
                 materialData.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,texturePathFinded);
-                materialData.materialUniform.diffuseColor = glm::vec3(1.0f);
+                materialData.materialUniform.diffuseColor = glm::vec4(1.0f);
                 texturesFinded = true;
 			}
             if (!material.roughness_texname.empty() || !material.specular_texname.empty()|| !material.specular_highlight_texname.empty()) {
@@ -755,9 +755,10 @@ namespace VULKAN {
 
             Material material;
             
-            material.materialUniform.diffuseColor = glm::vec3 (gltfMaterial.pbrMetallicRoughness.baseColorFactor[0],
+            material.materialUniform.diffuseColor = glm::vec4 (gltfMaterial.pbrMetallicRoughness.baseColorFactor[0],
                                                                gltfMaterial.pbrMetallicRoughness.baseColorFactor[1],
-                                                               gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+                                                               gltfMaterial.pbrMetallicRoughness.baseColorFactor[2],
+                                                               1.0f);
             material.materialUniform.roughnessIntensity = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
             material.materialUniform.metallicIntensity = gltfMaterial.pbrMetallicRoughness.metallicFactor;
             if (gltfMaterial.alphaMode =="OPAQUE"){
@@ -773,7 +774,7 @@ namespace VULKAN {
                 std::string path = GetGltfTexturePath(modelPath, model.images[model.textures[gltfMaterial.pbrMetallicRoughness.baseColorTexture.index].source].uri);
                 if (path!=""){
                     material.paths.try_emplace(TEXTURE_TYPE::DIFFUSE,path);
-                    material.materialUniform.diffuseColor = glm::vec3(1.0f);
+                    material.materialUniform.diffuseColor = glm::vec4(1.0f);
                     material.materialUniform.albedoIntensity = 1.0f;
                     texturesFinded = true;       
                 }               

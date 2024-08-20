@@ -21,7 +21,8 @@ namespace VULKAN{
     };
     enum CONFIG_TYPE{
         ALPHA_AS_DIFFUSE,
-        ALPHA_AS_A_CHANNEL
+        USE_ALPHA_CHANNEL,
+        USE_ALPHA_OF_DIFFUSE_COLOR
     };
 
 
@@ -32,7 +33,7 @@ namespace VULKAN{
         float normalIntensity = 1;
         float specularIntensity = 1;
         float roughnessIntensity = 0.5f;
-        glm::vec3 diffuseColor = glm::vec3 (1.0f);
+        glm::vec4 diffuseColor = glm::vec4 (1.0f);
         float reflectivityIntensity = 0.5f;
         //32
         glm::vec3 baseReflection;

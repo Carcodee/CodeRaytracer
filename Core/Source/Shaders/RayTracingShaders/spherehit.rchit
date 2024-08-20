@@ -78,7 +78,7 @@ void main()
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, vec4(1));
   
   if(!matInfo.hasDiffuse){
-    diffuseInMat.xyz = material.diffuseColor;
+    diffuseInMat.xyz = material.diffuseColor.xyz;
   }
   if(emissionInMat == vec4(1)){
     emissionInMat = vec4(0.0f);
@@ -107,7 +107,7 @@ void main()
   if(emissionInMat == vec4(0)){
     if(material.emissionIntensity>0){
         rayPayload.shadow = false;
-        rayPayload.emissionColor = (pbrLitDirect * material.diffuseColor * material.emissionIntensity); 
+        rayPayload.emissionColor = (pbrLitDirect * material.diffuseColor.xyz * material.emissionIntensity); 
     }
   }else{
        rayPayload.shadow = false;
@@ -137,7 +137,7 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 
 vec3 GetDiffuseColor(int materialIndex){
 
-   vec3 diffuse= materials[materialIndex].diffuseColor;
+   vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
    return diffuse;
 }
 
