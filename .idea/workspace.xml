@@ -25,34 +25,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="adding bitmask configs for shaders">
-      <change afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added disney diffuse">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Robots.mtl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Robots.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1a_BaseColor.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1a_Glossiness.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1a_Roughness.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1bBase.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1bRough.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1cBase.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal1cRough.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal3Base.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/Robot/Textures/Wmetal3Rough.jpeg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/anyhit.rahit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/anyhit.rahit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Model/ModelHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/RayTracing_RS.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/VulkanObjects/Materials/Material.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanApp.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,15 +286,8 @@
       <workItem from="1724034114575" duration="5724000" />
       <workItem from="1724085233298" duration="9100000" />
       <workItem from="1724116106065" duration="7523000" />
-      <workItem from="1724176357031" duration="6128000" />
-    </task>
-    <task id="LOCAL-00002" summary="Cmake config and some changes">
-      <option name="closed" value="true" />
-      <created>1720286333149</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1720286333149</updated>
+      <workItem from="1724176357031" duration="6223000" />
+      <workItem from="1724194814545" duration="3846000" />
     </task>
     <task id="LOCAL-00003" summary="fixed the issue where it was not posible to use nsight">
       <option name="closed" value="true" />
@@ -703,7 +673,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724039977609</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="added disney diffuse">
+      <option name="closed" value="true" />
+      <created>1724188409737</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1724188409737</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -760,7 +738,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="less noisy and working in frame accumulation" />
     <MESSAGE value="fixed the direct and indirect lightning calculations" />
     <MESSAGE value="fixed raybounces to the miss shader" />
     <MESSAGE value="some changes in the shaders" />
@@ -785,6 +762,7 @@
     <MESSAGE value="move norm transformation to device" />
     <MESSAGE value="any hit shader added" />
     <MESSAGE value="adding bitmask configs for shaders" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding bitmask configs for shaders" />
+    <MESSAGE value="added disney diffuse" />
+    <option name="LAST_COMMIT_MESSAGE" value="added disney diffuse" />
   </component>
 </project>

@@ -165,7 +165,7 @@ vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float meta
 	vec3 diffuse = DisneyDiffuse(col, normal, wh, wo, wi, roughness, 0.9f);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
-	vec3 BRDF =  (kd * diffuse) + cookTorrence;
+	vec3 BRDF =  (kd * lambert) + cookTorrence;
 	return BRDF;
 }
 
