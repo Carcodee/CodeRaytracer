@@ -28,7 +28,7 @@ Currently, path tracing doesn't have any runtime denosing, there is just a simpl
 
 there are examples Inside "Core/Source/Resources/Assets/models", just drag and drop the model file inside the app and the model will be loaded
 
-#Running The project
+##Running The project
 
 Right there is only support for cmake projects, soon I will load a easy to build visual studio solution
 
