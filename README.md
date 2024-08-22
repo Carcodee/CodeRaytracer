@@ -1,4 +1,4 @@
-# C++ Code Ray tracer renderer
+# CodeRT
 
 ## Overview
 
