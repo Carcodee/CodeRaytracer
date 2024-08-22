@@ -18,6 +18,7 @@ It haves the capability of adding postprocessing renderpasses easily with a cust
 - Custom implementation of ImGui.
 - Asset handler and free camera movement.
 - Multiple postprocessing renderpasses visualization.
+- Input handler abstraction on top of glfw.
 
 ## Path tracing
 
