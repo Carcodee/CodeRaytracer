@@ -13,10 +13,14 @@ namespace VULKAN
 
 	float InputHandler::xInput= 0;
 	float InputHandler::yInput= 0;
-	float InputHandler::xMousePos= 0;
-	float InputHandler::yMousePos= 0;
+	double InputHandler::xMousePos= 0;
+	double InputHandler::yMousePos= 0;
+    double InputHandler::lastXPos= 0;
+    double InputHandler::lastYPos= 0;
 	float InputHandler::xMouseInput= 0;
 	float InputHandler::yMouseInput= 0;
+    bool InputHandler::movingMouse = false;
+    bool InputHandler::editingGraphics = false;
 
 	InputHandler::InputHandler()
 	{
@@ -241,26 +245,23 @@ namespace VULKAN
 		{
 			currentButton = BUTTON_MOUSE0;
 			currentActionMade = ACTION_DOWN;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 		{
 			currentButton = BUTTON_MOUSE1;
 			currentActionMade = ACTION_DOWN;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		}
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
 			currentButton = BUTTON_MOUSE0;
 			currentActionMade = ACTION_RELEASE;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
 		{
 			currentButton = BUTTON_MOUSE1;
 			currentActionMade = ACTION_RELEASE;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 		}
 
 		if (buttonsActioned.contains(currentButton))
@@ -277,12 +278,14 @@ namespace VULKAN
 	{
 		if (xpos!=xMousePos)
 		{
+            double xDiff = std::abs(xpos-xMousePos);
 			xMousePos = xpos;
 			xMouseInput = 1.0f;
 		}
 		else
 		{
 			xMouseInput = 0.0f;
+            movingMouse = false;
 		}
 		if (ypos!=yMousePos)
 		{
@@ -292,6 +295,7 @@ namespace VULKAN
 		else
 		{
 			yMouseInput = 0.0f;
+            movingMouse = false;
 		}
 	}
 
@@ -324,9 +328,33 @@ namespace VULKAN
 				key.second = ACTION_HOLD;
 			}
 		}
-
-
+        movingMouse = false;
+        editingGraphics = false;
 
 	}
+
+    void InputHandler::DisableMouse(bool value) {
+        if (value){
+            glfwSetInputMode(userWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }else{
+            glfwSetInputMode(userWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    }
+
+    void InputHandler::CheckMouse() {
+        double diffX = std::abs(lastXPos - xMousePos);
+        double diffY = std::abs(lastYPos - yMousePos);
+
+        if (diffX >DBL_EPSILON){
+            lastXPos = xMousePos;
+            movingMouse= true;
+        }
+        if (diffY >DBL_EPSILON){
+            lastYPos = yMousePos;
+            movingMouse= true;
+        }
+            
+    };
+
 }
 

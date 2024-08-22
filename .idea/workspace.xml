@@ -1,26 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="Editor" targetName="Editor" />
+      <config projectName="Editor" targetName="Core" />
+      <config projectName="Editor" targetName="uninstall" />
+      <config projectName="Editor" targetName="tinyobjloader" />
+      <config projectName="Editor" targetName="loader_example" />
+      <config projectName="Editor" targetName="tinygltf" />
+    </generated>
+  </component>
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/RenderSystems/ImguiRenderSystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ResourcesManagers/UI/ResourcesUIHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/Source/Editor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/Source/Editor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/imgui.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.ilk" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.ilk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.command.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.read.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/Editor.tlog/CL.write.1.tlog" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/ImguiSetup.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/ImguiSetup.obj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/vc143.idb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Editor/x64/Debug/vc143.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Editor/x64/Debug/vc143.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x64/Debug/Editor.exe" beforeDir="false" afterPath="$PROJECT_DIR$/x64/Debug/Editor.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/x64/Debug/Editor.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/x64/Debug/Editor.pdb" afterDir="false" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="metallic implementation">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,34 +37,121 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+        <option value="vs-template" />
+        <option value="fs-template" />
+        <option value="shader-template" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2023" />
+    <option name="minorVersion" value="2.2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2im2sJMAaytrlBTYocueCTdhfk5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/carlo/Documents/GitHub/CodeRT",
-    "settings.editor.selected.configurable": "com.maddyhome.idea.vim.ui.VimEmulationConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.advertisement.text.has.clang-format&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;CmakeBranch&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/carlo/Documents/GitHub/CodeRT_Cmake&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RunManager" selected="CMake Application.Editor">
+    <configuration name="Editor" type="CMakeListConfigurationType" factoryName="CMakeListConfigurationFactory" temporary="true">
+      <method v="2" />
+    </configuration>
+    <configuration name="Core" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="Core" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="Core">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Editor" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="true" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$/cmake-build-debug" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="Editor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="Editor">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="loader_example" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="loader_example" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Editor" RUN_TARGET_NAME="loader_example">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tinygltf" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="tinygltf" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tinyobjloader" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="tinyobjloader" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="uninstall" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Editor" TARGET_NAME="uninstall" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CppFileRunConfiguration" factoryName="CppFileRunConfiguration" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <option name="toolchainName" value="MinGW" />
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.runfile.CppFileBuildBeforeRunTaskProvider$BasicBuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.Editor" />
+      <item itemvalue="CMake Application.Core" />
+      <item itemvalue="CMake Application.loader_example" />
+      <item itemvalue="CMake Application.tinygltf" />
+      <item itemvalue="CMake Application.tinyobjloader" />
+      <item itemvalue="CMake Application.uninstall" />
+      <item itemvalue="CMake Debug.Editor" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="CMake Debug.Editor" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -67,10 +161,608 @@
       <option name="presentableId" value="Default" />
       <updated>1720081636668</updated>
       <workItem from="1720081637687" duration="140000" />
+      <workItem from="1720082123798" duration="1452000" />
+      <workItem from="1720114979856" duration="4673000" />
+      <workItem from="1720210631920" duration="7948000" />
+      <workItem from="1720218679758" duration="15000" />
+      <workItem from="1720264828047" duration="13319000" />
+      <workItem from="1720280195235" duration="222000" />
+      <workItem from="1720280432134" duration="175000" />
+      <workItem from="1720280622717" duration="99000" />
+      <workItem from="1720280733782" duration="17000" />
+      <workItem from="1720280785147" duration="343000" />
+      <workItem from="1720281988291" duration="1099000" />
+      <workItem from="1720283122317" duration="2761000" />
+      <workItem from="1720286119977" duration="230000" />
+      <workItem from="1720296213562" duration="893000" />
+      <workItem from="1720298584720" duration="1071000" />
+      <workItem from="1720299698926" duration="117000" />
+      <workItem from="1720299827178" duration="70000" />
+      <workItem from="1720300060386" duration="393000" />
+      <workItem from="1720364804429" duration="7697000" />
+      <workItem from="1720381534465" duration="599000" />
+      <workItem from="1720382165075" duration="10613000" />
+      <workItem from="1720422922453" duration="9109000" />
+      <workItem from="1720440938445" duration="1524000" />
+      <workItem from="1720458912301" duration="3901000" />
+      <workItem from="1720473437031" duration="530000" />
+      <workItem from="1720509506064" duration="5875000" />
+      <workItem from="1720527017472" duration="1796000" />
+      <workItem from="1720595289143" duration="11139000" />
+      <workItem from="1720643095097" duration="1546000" />
+      <workItem from="1720644681094" duration="2226000" />
+      <workItem from="1720681852264" duration="6478000" />
+      <workItem from="1720698632502" duration="886000" />
+      <workItem from="1720725197991" duration="4436000" />
+      <workItem from="1720819003893" duration="1939000" />
+      <workItem from="1720863876712" duration="19515000" />
+      <workItem from="1720901646112" duration="6357000" />
+      <workItem from="1720948283371" duration="672000" />
+      <workItem from="1720948996344" duration="17221000" />
+      <workItem from="1720991953294" duration="2951000" />
+      <workItem from="1721034941614" duration="12417000" />
+      <workItem from="1721066020547" duration="14807000" />
+      <workItem from="1721129930831" duration="16711000" />
+      <workItem from="1721159506650" duration="9185000" />
+      <workItem from="1721215730161" duration="10785000" />
+      <workItem from="1721244818843" duration="7092000" />
+      <workItem from="1721301531049" duration="5093000" />
+      <workItem from="1721306817572" duration="3987000" />
+      <workItem from="1721331853061" duration="11795000" />
+      <workItem from="1721390290390" duration="5962000" />
+      <workItem from="1721413285019" duration="8244000" />
+      <workItem from="1721482332423" duration="13306000" />
+      <workItem from="1721507550072" duration="6723000" />
+      <workItem from="1721562266975" duration="16486000" />
+      <workItem from="1721591737896" duration="798000" />
+      <workItem from="1721648758192" duration="19977000" />
+      <workItem from="1721679680955" duration="10236000" />
+      <workItem from="1721730364481" duration="13780000" />
+      <workItem from="1721758473222" duration="843000" />
+      <workItem from="1721760674466" duration="405000" />
+      <workItem from="1721819903114" duration="13625000" />
+      <workItem from="1721852134250" duration="3413000" />
+      <workItem from="1721901986774" duration="16769000" />
+      <workItem from="1721936899609" duration="6118000" />
+      <workItem from="1721943583666" duration="2274000" />
+      <workItem from="1722024016920" duration="3003000" />
+      <workItem from="1722027606481" duration="37000" />
+      <workItem from="1722098482390" duration="1268000" />
+      <workItem from="1722100123114" duration="1317000" />
+      <workItem from="1722201353845" duration="62000" />
+      <workItem from="1722201430646" duration="163000" />
+      <workItem from="1722201604801" duration="10230000" />
+      <workItem from="1722242557643" duration="789000" />
+      <workItem from="1722366936030" duration="9282000" />
+      <workItem from="1722388733802" duration="6678000" />
+      <workItem from="1722438186821" duration="6008000" />
+      <workItem from="1722524390674" duration="16867000" />
+      <workItem from="1722563837216" duration="1967000" />
+      <workItem from="1722608649585" duration="8689000" />
+      <workItem from="1722617848720" duration="6856000" />
+      <workItem from="1722690876107" duration="1677000" />
+      <workItem from="1722695437233" duration="772000" />
+      <workItem from="1722719030414" duration="3157000" />
+      <workItem from="1722741764814" duration="9606000" />
+      <workItem from="1722780773115" duration="7242000" />
+      <workItem from="1722788570602" duration="3857000" />
+      <workItem from="1722816173919" duration="264000" />
+      <workItem from="1722820905815" duration="7430000" />
+      <workItem from="1722869004835" duration="13303000" />
+      <workItem from="1722949661653" duration="14374000" />
+      <workItem from="1722987673431" duration="3929000" />
+      <workItem from="1723037172557" duration="16396000" />
+      <workItem from="1723083966521" duration="2227000" />
+      <workItem from="1723129694967" duration="1733000" />
+      <workItem from="1723131561933" duration="6332000" />
+      <workItem from="1723139059888" duration="7593000" />
+      <workItem from="1723210814899" duration="9381000" />
+      <workItem from="1723221467162" duration="9746000" />
+      <workItem from="1723255667889" duration="4480000" />
+      <workItem from="1723302223829" duration="3432000" />
+      <workItem from="1723309612786" duration="4874000" />
+      <workItem from="1723338174459" duration="10243000" />
+      <workItem from="1723387166940" duration="304000" />
+      <workItem from="1723431041613" duration="5508000" />
+      <workItem from="1723473466079" duration="13887000" />
+      <workItem from="1723554970483" duration="13952000" />
+      <workItem from="1723595731828" duration="158000" />
+      <workItem from="1723601158629" duration="6735000" />
+      <workItem from="1723645302839" duration="146000" />
+      <workItem from="1723662297096" duration="1431000" />
+      <workItem from="1723665510218" duration="1507000" />
+      <workItem from="1723731593830" duration="9974000" />
+      <workItem from="1723773238015" duration="7818000" />
+      <workItem from="1723819836164" duration="4929000" />
+      <workItem from="1723825706119" duration="7808000" />
+      <workItem from="1723854444265" duration="2561000" />
+      <workItem from="1723860127439" duration="7423000" />
+      <workItem from="1723906064578" duration="12775000" />
+      <workItem from="1723925382176" duration="2158000" />
+      <workItem from="1723953280737" duration="337000" />
+      <workItem from="1724003819794" duration="1946000" />
+      <workItem from="1724034114575" duration="5724000" />
+      <workItem from="1724085233298" duration="9100000" />
+      <workItem from="1724116106065" duration="7523000" />
+      <workItem from="1724176357031" duration="6223000" />
+      <workItem from="1724194814545" duration="4169000" />
+      <workItem from="1724250721592" duration="1036000" />
+      <workItem from="1724300743724" duration="1000" />
     </task>
+    <task id="LOCAL-00004" summary="asset handling for code asset and meta data">
+      <option name="closed" value="true" />
+      <created>1720644146154</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1720644146154</updated>
+    </task>
+    <task id="LOCAL-00005" summary="asset handling for code asset and meta data">
+      <option name="closed" value="true" />
+      <created>1720646943275</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1720646943275</updated>
+    </task>
+    <task id="LOCAL-00006" summary="material system kinda fixed, this is last changed before changed it all">
+      <option name="closed" value="true" />
+      <created>1720903449909</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1720903449909</updated>
+    </task>
+    <task id="LOCAL-00007" summary="material system works with saved materials and does not load more than needed">
+      <option name="closed" value="true" />
+      <created>1720956466863</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1720956466863</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Material system functional, no bugs for now">
+      <option name="closed" value="true" />
+      <created>1721047354717</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1721047354717</updated>
+    </task>
+    <task id="LOCAL-00009" summary="PBR model">
+      <option name="closed" value="true" />
+      <created>1721081841419</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1721081841419</updated>
+    </task>
+    <task id="LOCAL-00010" summary="PBR model changes">
+      <option name="closed" value="true" />
+      <created>1721082777102</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1721082777102</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Fixed the path insertion">
+      <option name="closed" value="true" />
+      <created>1721168824793</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1721168824793</updated>
+    </task>
+    <task id="LOCAL-00012" summary="shadows implemented">
+      <option name="closed" value="true" />
+      <created>1721311063465</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1721311063465</updated>
+    </task>
+    <task id="LOCAL-00013" summary="changed the ImguiRenderSystem.cpp to singleton">
+      <option name="closed" value="true" />
+      <created>1721340424521</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1721340424521</updated>
+    </task>
+    <task id="LOCAL-00014" summary="changed the ImguiRenderSystem.cpp to singleton">
+      <option name="closed" value="true" />
+      <created>1721344057799</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1721344057799</updated>
+    </task>
+    <task id="LOCAL-00015" summary="now materials have an inspector too">
+      <option name="closed" value="true" />
+      <created>1721421633723</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1721421633723</updated>
+    </task>
+    <task id="LOCAL-00016" summary="material refactor">
+      <option name="closed" value="true" />
+      <created>1721507664534</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1721507664534</updated>
+    </task>
+    <task id="LOCAL-00017" summary="textures refactor">
+      <option name="closed" value="true" />
+      <created>1721514541759</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1721514541759</updated>
+    </task>
+    <task id="LOCAL-00018" summary="fixed command buffer submition order">
+      <option name="closed" value="true" />
+      <created>1721838122736</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1721838122736</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Finally fixed the renderpasses">
+      <option name="closed" value="true" />
+      <created>1721855589651</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1721855589651</updated>
+    </task>
+    <task id="LOCAL-00020" summary="changing the bloom to physically based bloom">
+      <option name="closed" value="true" />
+      <created>1722027627959</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1722027627959</updated>
+    </task>
+    <task id="LOCAL-00021" summary="changing the bloom to physically based bloom">
+      <option name="closed" value="true" />
+      <created>1722099761964</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1722099761964</updated>
+    </task>
+    <task id="LOCAL-00022" summary="changing the bloom to physically based bloom">
+      <option name="closed" value="true" />
+      <created>1722212005066</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1722212005066</updated>
+    </task>
+    <task id="LOCAL-00023" summary="less noisy and working in frame accumulation">
+      <option name="closed" value="true" />
+      <created>1722396271026</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1722396271026</updated>
+    </task>
+    <task id="LOCAL-00024" summary="fixed the direct and indirect lightning calculations">
+      <option name="closed" value="true" />
+      <created>1722550388850</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1722550388850</updated>
+    </task>
+    <task id="LOCAL-00025" summary="fixed raybounces to the miss shader">
+      <option name="closed" value="true" />
+      <created>1722617673211</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1722617673211</updated>
+    </task>
+    <task id="LOCAL-00026" summary="some changes in the shaders">
+      <option name="closed" value="true" />
+      <created>1722722128038</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1722722128038</updated>
+    </task>
+    <task id="LOCAL-00027" summary="good advances on global ilumination">
+      <option name="closed" value="true" />
+      <created>1722751551558</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1722751551558</updated>
+    </task>
+    <task id="LOCAL-00028" summary="some changes but indirect reflections are giving weird resoults">
+      <option name="closed" value="true" />
+      <created>1722788104039</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1722788104039</updated>
+    </task>
+    <task id="LOCAL-00029" summary="implementing spheres :D">
+      <option name="closed" value="true" />
+      <created>1722885586987</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1722885586987</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Added spheres">
+      <option name="closed" value="true" />
+      <created>1722991637918</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1722991637918</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Added spheres">
+      <option name="closed" value="true" />
+      <created>1723040500786</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1723040500786</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Fixed spheres, new ui selector to do">
+      <option name="closed" value="true" />
+      <created>1723086189042</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1723086189042</updated>
+    </task>
+    <task id="LOCAL-00033" summary="A lot of ui changes">
+      <option name="closed" value="true" />
+      <created>1723148197618</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1723148197618</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Emission maps">
+      <option name="closed" value="true" />
+      <created>1723221479827</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1723221479827</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Emission configs added">
+      <option name="closed" value="true" />
+      <created>1723233340230</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1723233340230</updated>
+    </task>
+    <task id="LOCAL-00036" summary="AO image">
+      <option name="closed" value="true" />
+      <created>1723305691123</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1723305691123</updated>
+    </task>
+    <task id="LOCAL-00037" summary="AO debuging and framebuffers viewports">
+      <option name="closed" value="true" />
+      <created>1723313475577</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1723313475577</updated>
+    </task>
+    <task id="LOCAL-00038" summary="AO debuging and framebuffers viewports">
+      <option name="closed" value="true" />
+      <created>1723315042438</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1723315042438</updated>
+    </task>
+    <task id="LOCAL-00039" summary="fixing a bit the sample dir generated">
+      <option name="closed" value="true" />
+      <created>1723343849093</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1723343849093</updated>
+    </task>
+    <task id="LOCAL-00040" summary="some changes in the raytracing pipeline">
+      <option name="closed" value="true" />
+      <created>1723348815713</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1723348815713</updated>
+    </task>
+    <task id="LOCAL-00041" summary="adding gltf support">
+      <option name="closed" value="true" />
+      <created>1723436662278</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1723436662278</updated>
+    </task>
+    <task id="LOCAL-00042" summary="adding gltf support">
+      <option name="closed" value="true" />
+      <created>1723490215218</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1723490215218</updated>
+    </task>
+    <task id="LOCAL-00043" summary="fixed transformation when importing">
+      <option name="closed" value="true" />
+      <created>1723663736562</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1723663736562</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Fixed import from disc">
+      <option name="closed" value="true" />
+      <created>1723738939986</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1723738939986</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Fixed the remove texture bug, gltf loading still have normals broken">
+      <option name="closed" value="true" />
+      <created>1723749783752</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1723749783752</updated>
+    </task>
+    <task id="LOCAL-00046" summary="normal space on gltf loading is very broken :D">
+      <option name="closed" value="true" />
+      <created>1723780258975</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1723780258975</updated>
+    </task>
+    <task id="LOCAL-00047" summary="fixed tangent loading, todo normal transformation">
+      <option name="closed" value="true" />
+      <created>1723867386462</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1723867386462</updated>
+    </task>
+    <task id="LOCAL-00048" summary="move norm transformation to device">
+      <option name="closed" value="true" />
+      <created>1723867639268</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1723867639268</updated>
+    </task>
+    <task id="LOCAL-00049" summary="any hit shader added">
+      <option name="closed" value="true" />
+      <created>1723920233921</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1723920233921</updated>
+    </task>
+    <task id="LOCAL-00050" summary="adding bitmask configs for shaders">
+      <option name="closed" value="true" />
+      <created>1724039977609</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1724039977609</updated>
+    </task>
+    <task id="LOCAL-00051" summary="added disney diffuse">
+      <option name="closed" value="true" />
+      <created>1724188409737</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1724188409737</updated>
+    </task>
+    <task id="LOCAL-00052" summary="metallic implementation">
+      <option name="closed" value="true" />
+      <created>1724198996695</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1724198996696</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticEditVcpkgJson value="false" />
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticFoundErrors value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="CmakeBranch" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="CmakeBranch" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="TEXT_FILTER_SETTINGS">
+                <TextFilterSettings>
+                  <option name="MATCH_CASE" value="true" />
+                  <option name="REGEX" value="true" />
+                </TextFilterSettings>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixed raybounces to the miss shader" />
+    <MESSAGE value="some changes in the shaders" />
+    <MESSAGE value="good advances on global ilumination" />
+    <MESSAGE value="some changes but indirect reflections are giving weird resoults" />
+    <MESSAGE value="implementing spheres :D" />
+    <MESSAGE value="Added spheres" />
+    <MESSAGE value="Fixed spheres, new ui selector to do" />
+    <MESSAGE value="A lot of ui changes" />
+    <MESSAGE value="Emission maps" />
+    <MESSAGE value="Emission configs added" />
+    <MESSAGE value="AO image" />
+    <MESSAGE value="AO debuging and framebuffers viewports" />
+    <MESSAGE value="fixing a bit the sample dir generated" />
+    <MESSAGE value="some changes in the raytracing pipeline" />
+    <MESSAGE value="adding gltf support" />
+    <MESSAGE value="fixed transformation when importing" />
+    <MESSAGE value="Fixed import from disc" />
+    <MESSAGE value="Fixed the remove texture bug, gltf loading still have normals broken" />
+    <MESSAGE value="normal space on gltf loading is very broken :D" />
+    <MESSAGE value="fixed tangent loading, todo normal transformation" />
+    <MESSAGE value="move norm transformation to device" />
+    <MESSAGE value="any hit shader added" />
+    <MESSAGE value="adding bitmask configs for shaders" />
+    <MESSAGE value="added disney diffuse" />
+    <MESSAGE value="metallic implementation" />
+    <option name="LAST_COMMIT_MESSAGE" value="metallic implementation" />
   </component>
 </project>

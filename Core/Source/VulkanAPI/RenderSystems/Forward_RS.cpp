@@ -22,9 +22,8 @@ namespace VULKAN {
 		renderSystemDescriptorSetHandler = std::make_unique<MyDescriptorSets>(myDevice);
 		VKTexture* lion = new VKTexture("C:/Users/carlo/Downloads/VikkingRoomTextures.png", renderer.GetSwapchain());
 
-		myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_SRGB , 1, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
+//		myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_SRGB , 1, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+//        outputStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
 		std::array <VkDescriptorSetLayoutBinding, 4> bindings;
 		bindings[0] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0, 1);
@@ -32,7 +31,6 @@ namespace VULKAN {
 		bindings[2] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 2, 1);
 		bindings[3] = renderSystemDescriptorSetHandler->CreateDescriptorBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 3, 1);
 		renderSystemDescriptorSetHandler->CreateLayoutBinding(bindings, 1);
-
 
 		renderSystemDescriptorSetHandler->CreateUniformBuffers<UniformBufferObjectData>(1, renderer.GetMaxRenderInFlight());
 		renderSystemDescriptorSetHandler->CreateDescriptorPool(bindings, renderer.GetMaxRenderInFlight(), VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO);
@@ -58,7 +56,6 @@ namespace VULKAN {
 
 		PipelineConfigInfo pipelineConfig{};
 		PipelineReader::DefaultPipelineDefaultConfigInfo(pipelineConfig);
-
 		pipelineConfig.renderPass = renderer.GetSwapchainRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineConfig.multisampleInfo.rasterizationSamples = myDevice.msaaSamples;
@@ -66,7 +63,7 @@ namespace VULKAN {
 		std::string baseFragShaderPath = HELPERS::FileHandler::GetInstance()->GetShadersPath();
 		pipelineReader = std::make_unique<PipelineReader>(
 			myDevice,
- baseFragShaderPath+"/base_shader.vert.spv",
+            baseFragShaderPath+"/base_shader.vert.spv",
 			baseFragShaderPath+"/base_shader.frag.spv",
 			pipelineConfig
 
@@ -80,8 +77,10 @@ namespace VULKAN {
 
 	void Forward_RS::CreateComputePipeline()
 	{
-		
-		std::string path = "C:/Users/carlo/Documents/GitHub/CodeRT/Core/Source/Shaders/ComputeShaders/compute.comp.spv";
+
+
+        std::string shadersPath=HELPERS::FileHandler::GetInstance()->GetShadersPath();
+		std::string path = shadersPath+"/ComputeShaders/compute.comp.spv";
 		VkPipelineShaderStageCreateInfo pipelineConfigInfo = PipelineReader::CreateComputeStageModule(computeModule, myDevice, path);
 
 
@@ -110,8 +109,8 @@ namespace VULKAN {
 	void Forward_RS::CreateComputeDescriptorSets()
 	{
 
-		storageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
-		outputStorageImage =  new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, VK_FORMAT_R8G8B8A8_UNORM);
+		storageImage = new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(), VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
+		outputStorageImage =  new VKTexture(renderer.GetSwapchain(), renderer.GetSwapchain().width(), renderer.GetSwapchain().height(),VK_IMAGE_LAYOUT_GENERAL,VK_ACCESS_SHADER_WRITE_BIT,VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_FORMAT_R8G8B8A8_UNORM, 5);
 
 
 
@@ -276,20 +275,12 @@ namespace VULKAN {
 
 	void Forward_RS::TransitionBeforeComputeRender(uint32_t currentImage)
 	{
-		if (outputStorageImage->currentLayout!=VK_IMAGE_LAYOUT_GENERAL)
-		{
-			myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_UNORM , 1, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-			outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_GENERAL;
-		}
+//        outputStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_GENERAL, VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 	}
 
 	void Forward_RS::TransitionBeforeForwardRender(uint32_t currentImage)
 	{
-		if (outputStorageImage->currentLayout!=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		{
-			myDevice.TransitionImageLayout(outputStorageImage->textureImage,VK_FORMAT_R8G8B8A8_SRGB , 1, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			outputStorageImage->currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		}
+//        outputStorageImage->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 	}
 
 	void Forward_RS::InitForwardSystem()

@@ -9,26 +9,11 @@
 #include "VulkanAPI/Camera/Camera.h"
 #include "VulkanAPI/VulkanObjects/Buffers/VKBufferHandler.h"
 #include <random>
+
+
 namespace VULKAN {
 	// Holds data for a ray tracing scratch buffer that is used as a temporary storage
-	struct RayTracingScratchBuffer
-	{
-		uint64_t deviceAddress = 0;
-		VkBuffer handle = VK_NULL_HANDLE;
-		VkDeviceMemory memory = VK_NULL_HANDLE;
-	};
-	// Ray tracing acceleration structure
-	struct AccelerationStructure {
-		VkAccelerationStructureKHR handle;
-		uint64_t deviceAddress = 0;
-		VkDeviceMemory memory;
-		VkBuffer buffer;
-	};
-	struct RxTexture
-	{
-		Material mat;
-		VkDescriptorSet descriptorSet;
-	};
+
 	struct Light 
 	{
 		alignas(16)glm::vec3 pos;
@@ -39,59 +24,9 @@ namespace VULKAN {
 	class RayTracing_RS
 	{
 	public:
-		struct GeometryData
-		{
-			uint64_t vertexBufferDeviceAddress;
-			uint64_t indexBufferDeviceAddress;
-			int textureIndexBaseColor;
-			int textureIndexOcclusion;
-		};
-		struct BottomLevelObj
-		{
-			std::vector<GeometryData> geometryData;
-			ModelData combinedMesh;
-			VkTransformMatrixKHR instanceMatrix;
-			VkTransformMatrixKHR matrix;
-			std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
-			AccelerationStructure BottomLevelAs;
-			std::vector<RxTexture> materialsData;
-			uint32_t indexOffset = 0;
 
-			glm::vec3 pos;
-			glm::vec3 rot;
-			glm::vec3 scale;
-			void UpdateMatrix(){
-				instanceMatrix = {
-			scale.x, 0.0f, 0.0f, pos.x,
-			0.0f, scale.y, 0.0f, pos.y,
-			0.0f, 0.0f, scale.z,pos.z};
-			}
-
-			int bottomLevelId=0;
-		}bottomLevelObj;
-
-		struct TopLevelObj
-		{
-			std::vector<Vertex>vertices;
-			std::vector<uint32_t>indices;
-
-			VkTransformMatrixKHR matrix;
-			AccelerationStructure TopLevelAsData;
-			std::vector < BottomLevelObj*> bottomLevelObjRef;
-			
-			glm::vec3 pos;
-			glm::vec3 rot;
-			glm::vec3 scale;
-			int topLevelInstanceCount = 1;
-			int TLASID = 0;
-			void UpdateMatrix(){
-				matrix = {
-			scale.x, 0.0f, 0.0f, pos.x,
-			0.0f, scale.y, 0.0f, pos.y,
-			0.0f, 0.0f, -scale.z,pos.z};
-			}
-		}topLevelObjBase;
-
+        BottomLevelObj bottomLevelObj;
+        TopLevelObj topLevelObjBase;
 
 		RayTracing_RS(MyVulkanDevice& device, VulkanRenderer& renderer);
 
@@ -110,35 +45,43 @@ namespace VULKAN {
 		bool updateDescriptorData = false;
 
 		VKTexture* storageImage;
+        VKTexture* emissiveStoreImage;
+        VKTexture* aoStorageImage;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
+        PushConstantBlock_RS pc;
 
 		void Create_RT_RenderSystem();
 		void DrawRT(VkCommandBuffer& currentBuffer);
-		void TransitionStorageImage();
-
-		void AddModelToPipeline(ModelData modelData);
-		void UpdateDescriptorData();
+		void AddModelToPipeline(std::shared_ptr<ModelData> modelData);
+        void RecreateBLASesAndTLASes();
+		void UpdateRaytracingData();
+        void UpdateMeshInfo();
+        void UpdateAABBsInfo();
+        void UpdateMaterialInfo();
+        void ResetAccumulatedFrames();
 
 	private:
 		struct UniformData {
 			glm::mat4 viewInverse;
 			glm::mat4 projInverse;
 		} uniformData;
+        bool runningModels = false;
 
-
-
-		std::vector<ModelData>modelDatas;
+		std::vector<std::shared_ptr<ModelData>>modelsOnScene;
+        std::vector<uint32_t> instancesGeometryOffsets;
 		//helpers
-		void SetupBottomLevelObj(ModelData& modelData);
+        void CleanBuffers();
+		void SetupBottomLevelObj(std::shared_ptr<ModelData> modelData);
 		void LoadFunctionsPointers();
 		void UpdateUniformbuffers();
 		RayTracingScratchBuffer CreateScratchBuffer(VkDeviceSize size);
 		void DeleteScratchBuffer(RayTracingScratchBuffer& scratchBuffer);
 		void CreateAccelerationStructureBuffer(AccelerationStructure& accelerationStructure, VkAccelerationStructureBuildSizesInfoKHR buildSizeInfo);
 		uint64_t getBufferDeviceAddress(VkBuffer buffer);
-		void CreateStorageImage();
+		void CreateStorageImages();
 		void CreateBottomLevelAccelerationStructureModel(BottomLevelObj& obj);
+        void CreateBottomLevelAccelerationStructureSpheres(Sphere& sphere);
 		void CreateTopLevelAccelerationStructure(TopLevelObj& topLevelObj);
 		void CreateShaderBindingTable();
 		void CreateDescriptorSets();
@@ -146,6 +89,8 @@ namespace VULKAN {
 		void CreateUniformBuffer();
 		void CreateMaterialsBuffer();
 		void CreateAllModelsBuffer();
+        void CreateAABBsBuffer();
+        void DestroyAccelerationStructure(AccelerationStructure& accelerationStructure);
 		uint32_t GetShaderBindAdress(uint32_t hitGroupStart, uint32_t start, uint32_t offset, uint32_t stbRecordOffset, uint32_t geometryIndex, uint32_t stbRecordStride);
 
 		VulkanRenderer& myRenderer;
@@ -165,24 +110,35 @@ namespace VULKAN {
 		VkDescriptorSet descriptorSet;
 		uint32_t indexCount;
 
+        //dynamic buffers
 		Buffer vertexBuffer;
-		Buffer combinedMeshBuffer;
 		Buffer indexBuffer;
 		Buffer transformBuffer;
+        Buffer BLAsInstanceOffsetBuffer;
+        Buffer allMaterialsBuffer;
+        Buffer allModelDataBuffer;
+        Buffer allSpheresBuffer;
+        Buffer allAABBBuffer;
+        
+        //raytracing
 		Buffer raygenShaderBindingTable;
 		Buffer missShaderBindingTable;
 		Buffer hitShaderBindingTable;
+        
+        //ubo
 		Buffer ubo;
 		Buffer lightBuffer;
-		Buffer allMaterialsBuffer;
-		Buffer allModelDataBuffer;
+
 
 
 		VkShaderModule rHitShaderModule;
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
-
-		bool invalidModelToLoad = false;
+        
+        VKTexture* baseTexture;
+        VKTexture* environmentTexture;
+        std::vector<AABB> aabbs;
+        
 	};
 
 }

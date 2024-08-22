@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <vector>
 
 namespace HELPERS 
 {
@@ -18,6 +19,7 @@ namespace HELPERS
 
 		std::string GetShadersPath();
 		std::string GetAssetsPath();
+        std::string GetEngineResourcesPath();
 		bool IsPathInAssets(std::string path);
 		bool IsPathAbsolute(std::string path);
 		bool IsValidPath(std::string path);
@@ -29,9 +31,10 @@ namespace HELPERS
 		void DeleteLinesFromFile(std::string path, const std::vector<int>& linesToDelete);
 		void operator=(const FileHandler&) = delete;
 		std::filesystem::path currentPathRelativeToAssets;
-
 		void CreateFile(std::string path,std::string data = "");
 		void AppendToFile(std::string path,std::string data);
+        
+        std::string RemovePathExtension(std::filesystem::path path);
 		std::string ReadFile(std::string path);
 
 
@@ -40,6 +43,7 @@ namespace HELPERS
 		std::filesystem::path workingDir;
 		std::filesystem::path projectPath;
 		std::filesystem::path assetPath;
+        std::filesystem::path engineResourcesPath;
 		std::filesystem::path shadersPath;
 		
 		};

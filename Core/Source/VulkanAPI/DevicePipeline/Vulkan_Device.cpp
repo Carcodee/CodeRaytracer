@@ -104,10 +104,19 @@ namespace VULKAN {
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if (enableValidationLayers) {
+
+            VkValidationFeaturesEXT validationFeatures = {};
+            validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+            validationFeatures.enabledValidationFeatureCount = 1;
+            VkValidationFeatureEnableEXT enableSyncValidation = VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT;
+            validationFeatures.pEnabledValidationFeatures = &enableSyncValidation;
+            
+            debugCreateInfo.pNext = &validationFeatures;
+            
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 
-			populateDebugMessengerCreateInfo(debugCreateInfo);
+            populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
 		else {
@@ -195,7 +204,6 @@ namespace VULKAN {
 		}
 
 		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &graphicsQueue_);
-		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &computeQueue_);
 		vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
 	}
 
@@ -747,7 +755,6 @@ namespace VULKAN {
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
 
-
 		if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 			throw std::runtime_error("texture image format does not support linear blitting!");
 		}
@@ -811,12 +818,12 @@ namespace VULKAN {
 				0, nullptr,
 				0, nullptr,
 				1, &barrier);
-
 			if (mipWidth > 1) mipWidth /= 2;
 			if (mipHeight > 1) mipHeight /= 2;
 		}
 
 
+        
 		barrier.subresourceRange.baseMipLevel = mipLevels - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -874,6 +881,7 @@ namespace VULKAN {
 
 		VkPhysicalDeviceFeatures deviceFeatures = {};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
+        deviceFeatures.fragmentStoresAndAtomics = VK_TRUE; 
 
 
 		VkDeviceCreateInfo createInfo = {};
@@ -893,17 +901,18 @@ namespace VULKAN {
 			&accelFeature,
 			VK_TRUE
 		};
-
-		//VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
-		//	 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-		//	 &rtPipelineFeature,
-		//	 VK_TRUE,
-		//};
+// Set up validation features
+        VkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesEXT vkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesExt{
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_UNUSED_ATTACHMENTS_FEATURES_EXT,
+                &rtPipelineFeature,
+                VK_TRUE
+        };
+        
 		VkPhysicalDeviceRobustness2FeaturesEXT robustness2features{};
 		robustness2features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
 		robustness2features.nullDescriptor = VK_TRUE;
-		robustness2features.pNext = &rtPipelineFeature;
-
+		robustness2features.pNext = &vkPhysicalDeviceDynamicRenderingUnusedAttachmentsFeaturesExt;
+        
 		VkPhysicalDeviceVulkan12Features vulkan12Features{};
 		vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		vulkan12Features.runtimeDescriptorArray = VK_TRUE; 
@@ -940,7 +949,6 @@ namespace VULKAN {
 		}
 
 		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &graphicsQueue_);
-		vkGetDeviceQueue(device_, indices.graphicsAndComputeFamily, 0, &computeQueue_);
 		vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
 	}
 

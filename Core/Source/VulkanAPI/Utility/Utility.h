@@ -8,88 +8,231 @@
 #endif
 
 
+
+
 #include <filesystem>
 #include <map>
 
 #include "VulkanAPI/Model/MyModel.h"
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
+#include "ISerializable.h"
+#include "VulkanAPI/VulkanObjects/Materials/Material.h"
 
 
 namespace VULKAN{
 
+    enum MODEL_FORMAT{
+        OBJ,
+        GLTF
+    };
+    struct PushConstantBlock_RS{
+        uint32_t currentAccumulatedFrame = 1;
+        int minBounceForIndirect = 0;
+        float rayTerminationBias = 1.0f;
+        float maxVariance = 1.0f;
+        float environmentMapIntensity= 1.0f;
+        float AOIntensity = 1.0f;
+        float AOSize = 1.0f;
 
-		struct SimpleVertex
-		{
-			glm::vec3 pos;
-			glm::vec2 textCoord;
-		};
+    };
 
-		struct MaterialUniformData
-		{
-			float albedoIntensity;
-			float normalIntensity;
-			float specularIntensity;
-			float padding1;
-			glm::vec3 diffuseColor;
-			float padding2;
-			int textureIndexStart = -1;
-			int texturesSizes = 0;
-			int meshIndex = -1;
-			int padding3;
-		};
+    struct PushConstantBlock_Bloom{
+        float bloomSize = 4.0f;
 
-		struct ModelDataUniformBuffer 
-		{
-			uint32_t materialIndex;
-			uint32_t geometryIndexStart;
-		};
-		struct Material
-		{
-			MaterialUniformData materialUniform{};
-			std::vector<std::string> paths;
-			std::vector<VKTexture> modelTextures;
-			void CreateTextures(VulkanSwapChain& swap_chain, std::vector<VKTexture>& allTextures, int& textureSizes)
-			{
-				materialUniform.textureIndexStart = allTextures.size();
-				for (int i = 0; i < paths.size(); ++i)
-				{
-					if (!std::filesystem::exists(paths[i].c_str()))continue;
-					materialUniform.texturesSizes++;
-					VKTexture texture(paths[i].c_str(), swap_chain);
-					modelTextures.push_back(texture);
-					allTextures.push_back(texture);
-					textureSizes++;
-				}
-			}
-		};
+    };
+    struct SimpleVertex
+    {
+        glm::vec3 pos;
+        glm::vec2 textCoord;
+    };
+    struct GeometryData
+    {
+        uint64_t vertexBufferDeviceAddress;
+        uint64_t indexBufferDeviceAddress;
+        int textureIndexBaseColor;
+        int textureIndexOcclusion;
+    };
 
-		struct ModelData 
-		{
-			std::vector <Vertex> vertices;
-			std::vector<uint32_t> indices;
-			std::vector<uint32_t> firstMeshIndex;
-			std::vector<uint32_t> firstMeshVertex;
-			std::vector<int> materialIds;
-			std::vector<uint32_t> meshIndexCount;
-			std::vector<uint32_t> meshVertexCount;
-			std::map<int,Material>materialDataPerMesh;
-			std::vector<VKTexture>allTextures;
-			int textureSizes;
-			int meshCount;
-			uint32_t indexBLASOffset = 0;
-			uint32_t vertexBLASOffset = 0;
-			uint32_t transformBLASOffset = 0;
-			void CreateAllTextures(VulkanSwapChain& swap_chain)
-			{
-				for (int i = 0; i < materialDataPerMesh.size(); ++i)
-				{
-					materialDataPerMesh.at(i).CreateTextures(swap_chain, allTextures, textureSizes);
-				}
-			}
-		};
-		
+    struct RayTracingScratchBuffer
+    {
+        uint64_t deviceAddress = 0;
+        VkBuffer handle = VK_NULL_HANDLE;
+        VkDeviceMemory memory = VK_NULL_HANDLE;
+    };
+    // Ray tracing acceleration structure
+    struct AccelerationStructure {
+        VkAccelerationStructureKHR handle;
+        uint64_t deviceAddress = 0;
+        VkDeviceMemory memory;
+        VkBuffer buffer;
+    };
+    
+    
+    struct SphereUniform{
+        glm::vec3 pos = glm::vec3 (0.0f);
+        float radius = 1.0f;
+        uint32_t matId = 0;
+        uint32_t instanceOffset = 0;
 
-		uint32_t alignedSize(uint32_t value, uint32_t alignment);
+    };
+    struct Sphere{
+        SphereUniform sphereUniform;
+        uint32_t  id = 0;
+        AccelerationStructure accelerationStructure;
+    };
+
+    struct AABB{
+        glm::vec3 min;
+        glm::vec3 max;
+    };
+
+
+    struct RxTexture
+    {
+        Material mat;
+        VkDescriptorSet descriptorSet;
+    };
+    struct ModelDataUniformBuffer
+    {
+        uint32_t materialIndex;
+        uint32_t geometryIndexStart;
+        uint32_t indexOffset;
+    };
+    struct BottomLevelObj;
+    
+    struct ModelData : ISerializable<ModelData>
+    {
+        ~ModelData(){
+        }
+        std::vector <Vertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<uint32_t> firstMeshIndex;
+        std::vector<uint32_t> firstMeshVertex;
+        std::vector<int> materialIds;
+        std::vector<uint32_t> meshIndexCount;
+        std::vector<uint32_t> meshVertexCount;
+        std::map<int,Material>materialDataPerMesh;
+        MODEL_FORMAT modelFormat = OBJ;
+        int meshCount = -1;
+        uint32_t indexBLASOffset = 0;
+        uint32_t vertexBLASOffset = 0;
+        uint32_t transformBLASOffset = 0;
+        std::vector<glm::mat4> matrices;
+        BottomLevelObj* bottomLevelObjRef = nullptr;
+        std::vector<ModelDataUniformBuffer> dataUniformBuffer;
+        uint32_t id = -1;
+        bool generated= false;
+        uint32_t materialOffset= 0;
+        std::string pathToAssetReference="";
+        void CalculateMaterialsIdsOffsets(){
+            for (int i = 0; i < dataUniformBuffer.size(); ++i) {
+                dataUniformBuffer[i].materialIndex = materialIds[i];
+            }
+        }
+        
+        
+        nlohmann::json Serialize() override{
+            nlohmann::json jsonData;
+            jsonData = {
+                    {
+                            "ModelID",this->id
+                    },
+                    {
+                            "ModelFormat",this->modelFormat
+                    },
+                    {
+                            "MeshCount",this->meshCount
+                    },
+                    {
+                            "MaterialsIDs",this->materialIds
+                    },
+                    {
+                            "PathToAssetReference",this->pathToAssetReference
+                    },
+                    {
+                            "MaterialOffset",this->materialOffset
+                    },
+            };
+            return jsonData;
+        }
+        ModelData Deserialize(nlohmann::json &jsonObj) override{
+            this->id = jsonObj.at("ModelID");
+            this->modelFormat = jsonObj.at("ModelFormat");
+            this->meshCount = jsonObj.at("MeshCount");
+            this->materialIds = jsonObj.at("MaterialsIDs").get<std::vector<int>>();
+            this->pathToAssetReference = jsonObj.at("PathToAssetReference");
+            this->materialOffset = jsonObj.at("MaterialOffset");
+            return *this;
+        }
+        void SaveData() override{
+
+        }
+    };
+
+
+
+    struct BottomLevelObj
+    {
+        
+        std::vector<GeometryData> geometryData;
+        ModelData combinedMesh;
+        VkTransformMatrixKHR instanceMatrix;
+        VkTransformMatrixKHR matrix;
+        std::vector<std::reference_wrapper<VkAccelerationStructureKHR>> totalTopLevelHandles;
+        AccelerationStructure BottomLevelAs;
+        std::vector<RxTexture> materialsData;
+        uint32_t indexOffset = 0;
+
+        glm::vec3 pos;
+        glm::vec3 rot;
+        glm::vec3 scale;
+        void UpdateMatrix(){
+            instanceMatrix = {
+                    scale.x, 0.0f, 0.0f, pos.x,
+                    0.0f, scale.y, 0.0f, pos.y,
+                    0.0f, 0.0f, scale.z,pos.z};
+
+            float cosPitch = cos(glm::radians(rot.x));
+            float sinPitch = sin(glm::radians(rot.x));
+            float cosYaw = cos(glm::radians(rot.y));
+            float sinYaw = sin(glm::radians(rot.y));
+            float cosRoll = cos(glm::radians(rot.z));
+            float sinRoll = sin(glm::radians(rot.z));
+
+            instanceMatrix = {
+                    scale.x * (cosYaw * cosRoll), scale.x * (cosYaw * sinRoll), scale.x * (-sinYaw), pos.x,
+                    scale.y * (sinPitch * sinYaw * cosRoll - cosPitch * sinRoll), scale.y * (sinPitch * sinYaw * sinRoll + cosPitch * cosRoll), scale.y * (sinPitch * cosYaw), pos.y,
+                    scale.z * (cosPitch * sinYaw * cosRoll + sinPitch * sinRoll), scale.z * (cosPitch * sinYaw * sinRoll - sinPitch * cosRoll), scale.z * (cosPitch * cosYaw), pos.z
+            };
+        }
+
+        int bottomLevelId=0;
+    };
+    struct TopLevelObj
+    {
+        std::vector<Vertex>vertices;
+        std::vector<uint32_t>indices;
+
+        VkTransformMatrixKHR matrix;
+        AccelerationStructure TopLevelAsData;
+        std::vector < BottomLevelObj*> bottomLevelObjRef;
+
+        glm::vec3 pos;
+        glm::vec3 rot;
+        glm::vec3 scale;
+        int topLevelInstanceCount = 1;
+        int TLASID = 0;
+        void UpdateMatrix(){
+            matrix = {
+                    scale.x, 0.0f, 0.0f, pos.x,
+                    0.0f, scale.y, 0.0f, pos.y,
+                    0.0f, 0.0f, -scale.z,pos.z};
+        }
+       
+    };
+
+    
+    uint32_t alignedSize(uint32_t value, uint32_t alignment);
 		size_t alignedSize(size_t value, size_t alignment);
 		VkDeviceSize alignedVkSize(VkDeviceSize value, VkDeviceSize alignment);
 
@@ -100,10 +243,8 @@ namespace VULKAN{
 			std::vector<VkDescriptorPoolSize>poolSizes;
 		};
 
-		//FROM SASCHA WILLEMS INITIALIZERS LIBRARY
 
-
-
+    //FROM SASCHA WILLEMS INITIALIZERS LIBRARY
 		namespace INITIALIZERS {
 
 			inline VkMemoryAllocateInfo memoryAllocateInfo()

@@ -47,7 +47,7 @@ public:
 
 	VkResult acquireNextImage(uint32_t *imageIndex);
 	VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
-	VkResult submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+//	VkResult submitComputeCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
 	void HandleColorImage(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer, VkPipelineStageFlagBits sourceStageFlags,VkPipelineStageFlagBits dstStageFlags,VkAccessFlagBits accessMask,VkAccessFlagBits dstAccessMask=VK_ACCESS_NONE);
 	void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tilling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties
@@ -64,6 +64,10 @@ public:
 	std::vector<VkImageView> swapChainImageViews;
 	friend class VKTexture;
 	VkRenderPass UIRenderPass;
+    VkRenderPass PostProRenderPass;
+    VkRenderPass UpSampleRenderPass;
+    VkRenderPass DownSampleRenderPass;
+    VkRenderPass FinalRenderPass;
 	std::vector<VkImage> colorUIImages;
 	//VkDeviceMemory colorUIImagesMemory;
 	std::vector<VkImageView> colorUIImageView;
@@ -74,6 +78,8 @@ public:
 	VkImageView colorImageView;
 
 	bool activateMsaa=false;
+
+    std::vector<VkFence> inFlightFences;
 private:
 
 	void Init();
@@ -83,7 +89,7 @@ private:
 	void createRenderPass();
 	void createFramebuffers();
 	void createUIImageViews();
-	void CreateUIRenderPass();
+    void CreateDynamicRenderPass(VkRenderPass& renderPass);
 	void CreateUIFramebuffers();
 	void createSyncObjects();
 	void CreateColorResources();
@@ -114,7 +120,6 @@ private:
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
 	std::vector<VkFence> imagesInFlight;
 
 	std::vector<VkSemaphore> computeRenderFinishedSemaphores;

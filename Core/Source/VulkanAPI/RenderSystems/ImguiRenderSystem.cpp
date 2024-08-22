@@ -12,13 +12,19 @@
 
 namespace VULKAN
 {
+    ImguiRenderSystem* ImguiRenderSystem::instance = nullptr;
+
+    ImguiRenderSystem *ImguiRenderSystem::GetInstance(VulkanRenderer* renderer, MyVulkanDevice* myDevice) {
+        if (instance== nullptr){
+            instance =new ImguiRenderSystem(renderer, myDevice);
+        }
+        return instance;
+    }   
 	ImguiRenderSystem::~ImguiRenderSystem()
 	{
-		AssetsHandler::GetInstance()->~AssetsHandler();
-
 	}
 
-	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer& renderer, MyVulkanDevice& device ) : myRenderer(renderer) ,myDevice(device) 
+	ImguiRenderSystem::ImguiRenderSystem(VulkanRenderer* renderer, MyVulkanDevice* device ) : myRenderer(renderer) ,myDevice(device) 
 	{
 
 	}
@@ -28,52 +34,26 @@ namespace VULKAN
 	{
 		this->myWindow= window;
 		
-		vertexBuffer.device = myDevice.device();
-		indexBuffer.device = myDevice.device();
-
+		vertexBuffer.device = myDevice->device();
+		indexBuffer.device = myDevice->device();
+        frameBuffers.reserve(MAX_FRAMEBUFFERS);
+        
 		InitImgui();
 		CreateFonts();
 		SetImgui(window);
 
-		myRenderer.GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
-		vpImageView= myRenderer.GetSwapchain().colorImageView;
+		myRenderer->GetSwapchain().CreateImageSamples(viewportSampler, 1.0f);
+		vpImageView= myRenderer->GetSwapchain().colorImageView;
 
-		//AddSamplerAndViewForImage(viewportSampler,vpImageView);
 		CreatePipelineLayout();
-
-		//CreateImguiImage(viewportSampler, vpImageView, vpDescriptorSet);
-
-		for (auto& image : imagesToCreate)
-		{
-			AddImage(image.sampler, image.imageView, image.descriptor);
-		}
 		CreatePipeline();
-
-		//myDevice.deletionQueue.push_function([this]() {vertexBuffer.destroy();});
-		//myDevice.deletionQueue.push_function([this]() {indexBuffer.destroy();});
         
-		//for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
-		//{
-		//	if (uniformBuffers.size()>0)
-		//	{
-		//		myDevice.deletionQueue.push_function([this, i]()
-		//			{
-		//				vkDestroyBuffer(myDevice.device(), uniformBuffers[i], nullptr);
-		//			});
-		//		myDevice.deletionQueue.push_function([this, i]()
-		//			{
-		//				vkFreeMemory(myDevice.device(), uniformBuffersMemory[i], nullptr);
-		//			});
-		//	}
-		//}
-		//myDevice.deletionQueue.push_function([this]()
-		//	{
-		//		vkDestroyDescriptorSetLayout(myDevice.device(), descriptorSetLayout, nullptr);
-		//	});
-		//myDevice.deletionQueue.push_function([this]()
-		//	{
-		//		vkDestroySampler(myDevice.device(), viewportSampler, nullptr);
-		//	});
+        std::string folderImagePath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath() + "\\Images\\Folder.png";
+        std::string modelThumbnailPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath() + "\\Images\\ModelImage.png";
+        folderThumbnail = new VKTexture(folderImagePath.c_str(), myRenderer->GetSwapchain(), false);
+        modelThumbnail = new VKTexture(modelThumbnailPath.c_str(), myRenderer->GetSwapchain(), false);
+        HandleTextureCreation(folderThumbnail);
+        HandleTextureCreation(modelThumbnail);
 	}
 
 
@@ -95,98 +75,83 @@ namespace VULKAN
 		layoutInfo.bindingCount = static_cast<uint32_t>(descriptorSetLayoutBindings.size());
 		layoutInfo.pBindings = descriptorSetLayoutBindings.data();
 
-		if (vkCreateDescriptorSetLayout(myDevice.device(), &layoutInfo, nullptr, &descriptorSetLayout)!= VK_SUCCESS)
+		if (vkCreateDescriptorSetLayout(myDevice->device(), &layoutInfo, nullptr, &descriptorSetLayout)!= VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create descriptor set layout!");
 		}
 
 		VkDeviceSize bufferSize = sizeof(UIVertex);
 
-		uniformBuffers.resize(myRenderer.GetMaxRenderInFlight());
-		uniformBuffersMemory.resize(myRenderer.GetMaxRenderInFlight());
-		uniformBuffersMapped.resize(myRenderer.GetMaxRenderInFlight());
-		for (size_t j = 0; j < myRenderer.GetMaxRenderInFlight(); j++)
+		uniformBuffers.resize(myRenderer->GetMaxRenderInFlight());
+		uniformBuffersMemory.resize(myRenderer->GetMaxRenderInFlight());
+		uniformBuffersMapped.resize(myRenderer->GetMaxRenderInFlight());
+		for (size_t j = 0; j < myRenderer->GetMaxRenderInFlight(); j++)
 		{
-			myDevice.createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			myDevice->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 				uniformBuffers[j], uniformBuffersMemory[j]);
 
-			vkMapMemory(myDevice.device(), uniformBuffersMemory[j], 0, bufferSize, 0, &uniformBuffersMapped[j]);
+			vkMapMemory(myDevice->device(), uniformBuffersMemory[j], 0, bufferSize, 0, &uniformBuffersMapped[j]);
 
 		}
 
-
-		std::array<VkDescriptorPoolSize, 1> poolSize{};
-		for (size_t i = 0; i < descriptorSetLayoutBindings.size(); i++)
-		{
-			poolSize[i].type = descriptorSetLayoutBindings[i].descriptorType;
-			if (poolSize[i].type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			{
-				poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-				continue;
-			}
-			poolSize[i].descriptorCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
-
-		}
+        std::vector<VkDescriptorPoolSize> poolSize =
+                {
+                        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+                };
+        
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSize.size());
 		poolInfo.pPoolSizes = poolSize.data();
-		poolInfo.maxSets = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight()*(imagesToCreate.size()+2));
-		vkCreateDescriptorPool(myDevice.device(), &poolInfo, nullptr, &imguiPool);
+		poolInfo.maxSets = 1000;
+        
+		vkCreateDescriptorPool(myDevice->device(), &poolInfo, nullptr, &imguiPool);
 
-		std::vector<VkDescriptorSetLayout> layouts(myRenderer.GetMaxRenderInFlight(), descriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(myRenderer->GetMaxRenderInFlight(), descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = imguiPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer.GetMaxRenderInFlight());
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer->GetMaxRenderInFlight());
 		allocInfo.pSetLayouts = layouts.data();
-		if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
+		if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &descriptorSets) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
-		//normalRenderingVP
-		//if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &vpDescriptorSet) != VK_SUCCESS)
-		//{
-		//	throw std::runtime_error("failed to allocate descriptor sets!");
-		//}
-		for (auto& descriptor : imagesToCreate)
-		{
-			if (vkAllocateDescriptorSets(myDevice.device(), &allocInfo, &descriptor.descriptor) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to allocate descriptor sets!");
-			}
-		}
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
-		{
-			
-			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
-			
 
-			VkDescriptorImageInfo imageInfo{};
-			
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = fontTexture->textureImageView;
-			imageInfo.sampler = fontTexture->textureSampler;
+        VkWriteDescriptorSet descriptorWrite{};
 
-			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = descriptorSets;
-			descriptorWrite[0].dstBinding = 0;
-			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite[0].descriptorCount =1;
-			descriptorWrite[0].pImageInfo = &imageInfo;
-			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
+        VkDescriptorImageInfo imageInfo{};
 
-            vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
-		}
-		
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = fontTexture->textureImageView;
+        imageInfo.sampler = fontTexture->textureSampler;
 
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount =1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
 
-	}
+        vkUpdateDescriptorSets(myDevice->device(), 1, &descriptorWrite, 0, nullptr);
+        
+    }
 	void ImguiRenderSystem::CreatePipeline()
 	{
-		 VkFormat format = myRenderer.GetSwapchain().getSwapChainImageFormat();
+		 VkFormat format = myRenderer->GetSwapchain().getSwapChainImageFormat();
 		const VkPipelineRenderingCreateInfoKHR pipeline_rendering_create_info{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
 			.colorAttachmentCount = 1,
@@ -204,7 +169,7 @@ namespace VULKAN
 		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(myDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(myDevice->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create pipeline layout");
 		}
@@ -213,41 +178,38 @@ namespace VULKAN
 		PipelineConfigInfo pipelineConfig{};
 
 		PipelineReader::UIPipelineDefaultConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = myRenderer.GetSwapchain().UIRenderPass;
+		pipelineConfig.renderPass = myRenderer->GetSwapchain().UIRenderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		pipelineConfig.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-		pipelineReader = std::make_unique<PipelineReader>(myDevice);
+		pipelineReader = std::make_unique<PipelineReader>(*myDevice);
+        
+        std::string shaderPath=HELPERS::FileHandler::GetInstance()->GetShadersPath();  
 		pipelineReader->CreateFlexibleGraphicPipeline<UIVertex>(
-			"../Core/Source/Shaders/Imgui/imgui_shader.vert.spv",
-			"../Core/Source/Shaders/Imgui/imgui_shader.frag.spv",
+			shaderPath+"/Imgui/imgui_shader.vert.spv",
+            shaderPath+"/Imgui/imgui_shader.frag.spv",
 			pipelineConfig, UseDynamicRendering, pipeline_rendering_create_info);
 		std::cout << "You are using dynamic rendering" << "\n";
 	}
-	void ImguiRenderSystem::CreateImguiImage(VkSampler imageSampler, VkImageView myImageView, VkDescriptorSet& descriptor)
+	void ImguiRenderSystem::CreateImguiImage(VkSampler& imageSampler, VkImageView& myImageView, VkDescriptorSet& descriptor)
 	{
+        VkWriteDescriptorSet descriptorWrite{};
 
-		for (size_t i = 0; i < myRenderer.GetMaxRenderInFlight(); i++)
-		{
+        VkDescriptorImageInfo imageInfo{};
 
-			std::array<VkWriteDescriptorSet, 1> descriptorWrite{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = myImageView;
+        imageInfo.sampler = imageSampler;
 
-			VkDescriptorImageInfo imageInfo{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptor;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pImageInfo = &imageInfo;
+        descriptorWrite.pTexelBufferView = nullptr; // Optional
 
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = myImageView;
-			imageInfo.sampler = imageSampler;
-
-			descriptorWrite[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite[0].dstSet = descriptor;
-			descriptorWrite[0].dstBinding = 0;
-			descriptorWrite[0].dstArrayElement = 0;
-			descriptorWrite[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrite[0].descriptorCount = 1;
-			descriptorWrite[0].pImageInfo = &imageInfo;
-			descriptorWrite[0].pTexelBufferView = nullptr; // Optional
-
-			vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
-		}
+        vkUpdateDescriptorSets(myDevice->device(), 1, &descriptorWrite, 0, nullptr);
 
 	}
 
@@ -259,7 +221,6 @@ namespace VULKAN
 		ImGuiStyle& style = ImGui::GetStyle();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		style.ScaleAllSizes(1.0f);
-
 
 
 	}
@@ -300,23 +261,11 @@ namespace VULKAN
 		int texWidth, texHeight;
 		io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
 		VkDeviceSize uploadSize = texWidth * texHeight * 4 * sizeof(char);
-		fontTexture=new VKTexture(myRenderer.GetSwapchain());
+		fontTexture=new VKTexture(myRenderer->GetSwapchain());
 		fontTexture->CreateImageFromSize(uploadSize, fontData, texWidth, texHeight, VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateImageViews(VK_FORMAT_R8G8B8A8_UNORM);
 		fontTexture->CreateTextureSample();
-	}
-
-	void ImguiRenderSystem::AddImage(VkSampler sampler, VkImageView image, VkDescriptorSet& descriptor)
-	{
-		CreateImguiImage(sampler, image, descriptor);
-	}
-
-	void ImguiRenderSystem::AddSamplerAndViewForImage(VkSampler sampler, VkImageView view)
-	{
-		VkDescriptorSet newSet{};
-		ImguiImageInfo image{sampler,view, newSet};
-		
-		imagesToCreate.push_back(image);	
+        fontTexture->TransitionTexture(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 	}
 
 	void ImguiRenderSystem::CreateStyles()
@@ -474,7 +423,7 @@ namespace VULKAN
 		myPushConstBlock.translate = glm::vec2( - 1.0f);
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MyPushConstBlock), &myPushConstBlock);
 		ImDrawData* imDrawData = ImGui::GetDrawData();
-
+        
 		int32_t vertexOffset = 0;
 		int32_t indexOffset = 0;
 
@@ -497,14 +446,13 @@ namespace VULKAN
 					scissorRect.extent.height = (uint32_t)(pcmd->ClipRect.w - pcmd->ClipRect.y);
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissorRect);
 	
-					//myDevice.TransitionImageLayout(myRenderer.GetSwapchain().colorImage, myRenderer.GetSwapchain().getSwapChainImageFormat(), 1,
+					//myDevice->TransitionImageLayout(myRenderer->GetSwapchain().colorImage, myRenderer->GetSwapchain().getSwapChainImageFormat(), 1,
 					//	VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 					VkDescriptorSet currentSet= static_cast<VkDescriptorSet>(pcmd->TextureId);
 					
 					if (currentSet != nullptr)
 					{
-						
 						vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &currentSet, 0, nullptr);
 					}
 					else
@@ -530,18 +478,25 @@ namespace VULKAN
 		if ((vertexBufferSize == 0) || (indexBufferSize == 0)) {
 			return;
 		}
+//        vkWaitForFences(
+//                myDevice->device(),
+//                1,
+//                &myRenderer->GetSwapchain().inFlightFences[myRenderer->GetSwapchain().currentFrame],
+//                VK_TRUE,
+//                std::numeric_limits<uint64_t>::max());
+//
+        vkQueueWaitIdle(myDevice->graphicsQueue());
 		if ((vertexBuffer.buffer == VK_NULL_HANDLE) || (vertexCount != imDrawData->TotalVtxCount)) {
 			vertexBuffer.unmap();
 			vertexBuffer.destroy();
-			myDevice.createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer.buffer, vertexBuffer.memory);
-
+			myDevice->createBuffer(vertexBufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, vertexBuffer.buffer, vertexBuffer.memory);
 			vertexCount = imDrawData->TotalVtxCount;
 			vertexBuffer.map();
 		}
 		if ((indexBuffer.buffer == VK_NULL_HANDLE) || (indexCount < imDrawData->TotalIdxCount)) {
 			indexBuffer.unmap();
 			indexBuffer.destroy();
-			myDevice.createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, indexBuffer.buffer, indexBuffer.memory);
+			myDevice->createBuffer(indexBufferSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, indexBuffer.buffer, indexBuffer.memory);
 			indexCount = imDrawData->TotalIdxCount;
 			indexBuffer.map();
 		}
@@ -564,45 +519,39 @@ namespace VULKAN
 	void ImguiRenderSystem::BeginFrame()
 	{
 		ImGui::NewFrame();
-
-		// Start the Dear ImGui frame
-		int width = 0;
-		int height = 0;
-		//ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar ;
-		//window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		//window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		
-
+        
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-		/*ImGuiID dockspace_id = ImGui::GetID("DockSpaceDemo");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);*/
-
-		//ImGui::Begin("DockSpace Demo", nullptr);
-		//glfwGetWindowSize(myWindow,&width,&height);
-		//ImGui::SetWindowSize(ImVec2(width, height));
-		//ImGui::SetWindowPos(ImVec2(0, 0));
-		//ImGui::End();
-
-		
 		ImGui::Begin("ViewportImage", nullptr);
 		ImGui::PushID("viewport");
 
 		ImVec2 viewportSize=ImGui::GetContentRegionAvail();
 
+        if (viewportTexture != nullptr){
+            ImGui::Image((ImTextureID)viewportTexture->textureDescriptor, ImVec2(viewportSize.x, viewportSize.y));
+        }
+//		ImGui::Image((ImTextureID)imagesToCreate[0]->descriptor, ImVec2(viewportSize.x, viewportSize.y));
+        
+        if  (ImGui::IsItemHovered()){
+            InputHandler::GetInstance()->isMouseInsideViewport= true;
+        }else{
+            InputHandler::GetInstance()->isMouseInsideViewport= false;
+            
+        }
 
-		ImGui::Image((ImTextureID)imagesToCreate[0].descriptor, ImVec2(viewportSize.x, viewportSize.y));
-		if (ImGui::BeginDragDropTarget())
+        if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("MODEL_PATH"))
 			{
-				const char* data = (const char*)payload->Data;
+//				const char* data = (const char*)payload->Data;
+                int data = *(int*)payload->Data;
 
-				std::filesystem::path pathToAppend(data);
-				std::filesystem::path newPath = HELPERS::FileHandler::GetInstance()->GetAssetsPath() / pathToAppend;
+//				std::filesystem::path pathToAppend(data);
+//				std::filesystem::path newPath = HELPERS::FileHandler::GetInstance()->GetAssetsPath() / pathToAppend;
 
-				ModelHandler::GetInstance()->AddModelToQuery(newPath.string());
+//				ModelHandler::GetInstance()->AddModelToQuery(newPath.string());
+				ModelHandler::GetInstance()->AddIdToQuery(data);
 
 
 				ImGui::SetMouseCursor(ImGuiMouseCursor_NotAllowed);
@@ -615,43 +564,118 @@ namespace VULKAN
 			ImGui::EndDragDropTarget();
 		}
 
-		ImGui::PopID();
+
+
+        ImGui::PopID();
 
 		ResourcesUIHandler::GetInstance()->DisplayDirInfo();
-
-		
-		//ImGui::DockSpace(dockSpaceId, ImVec2(0, 0),ImGuiWindowFlags_NoMove);
-		ImGui::PushID("AssetsID");
-
-		ImGui::Begin("Configs");
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetWindowSize(ImVec2(400, 400));
-		ImGui::SliderFloat("Speed", &RotationSpeed, 0.0f, 10.0f, "%.3f");
-		ImGui::SliderFloat3("ModelCam Pos", modelCamPos, -10.0f, 10.0f, "%.3f");
-		ImGui::LabelText("Raytracing", "");
-		ImGui::SliderFloat3("Rt Cam Pos", camPos, -10.0f, 10.0f, "%.3f");
-		ImGui::LabelText("Light", "");
-		ImGui::SliderFloat3("light Pos", lightPos, -50.0f, 50.0f, "%.3f");
-		ImGui::ColorEdit3("light Col", lightCol, 0.0f);
-		ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,20.0f,"%.3f");
-		ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
-
-		if (ImGui::Button("Confirm"))
-		{
-			ModelHandler::GetInstance()->AddModelToQuery(modelImporterText);
-		}
-
-		ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
-
-		ImGui::End();
-		ImGui::PopID();
-
+        ResourcesUIHandler::GetInstance()->DisplayInspectorInfo();
+        ResourcesUIHandler::GetInstance()->DisplayTexturesTab();
+        ResourcesUIHandler::GetInstance()->DisplayBLASesInfo();
+        ResourcesUIHandler::GetInstance()->DisplayViewportFrameBuffers(frameBuffers);
+        
+        
+        
+        {
+            ImGui::PushID("AssetsID");
+            ImGui::Begin("Configs");
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetWindowSize(ImVec2(400, 400));
+            ImGui::SeparatorText("Raytracing");
+            if(ImGui::Button("Add Sphere", ImVec2{50,50})){
+                ModelHandler::GetInstance()->AddSphere();
+                ModelHandler::GetInstance()->updateBottomLevelObj = true;
+                InputHandler::editingGraphics= true;
+            }
+            ImGui::SeparatorText("Light");
+            if(ImGui::SliderFloat3("light Pos", lightPos, -30.0f, 30.0f, "%.3f")){
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::ColorEdit3("light Col", lightCol, 0.0f)){
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f")){
+                InputHandler::editingGraphics= true;
+            }
+            ImGui::SeparatorText("All Materials Configs");
+            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,2.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.roughnessIntensity = roughnessAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Reflectivity", &reflectivityAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.reflectivityIntensity = reflectivityAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Normal Intensity", &normalAllMaterials, 0.0f,2.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.normalIntensity = normalAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Alpha Intensity", &allMaterialsAlpha, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.alphaCutoff = allMaterialsAlpha;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials emissive Intensity", &allMaterialsEmissive, 0.0f,15.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.emissionIntensity = allMaterialsEmissive;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials albededo Intensity", &allMaterialsAlbedo, 0.0f,3.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.albedoIntensity = allMaterialsAlbedo;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Metallic Intensity", &metallicAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.normalIntensity = metallicAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            
+            if (pushConstantBlockRsRef != nullptr){
+                ImGui::SeparatorText("Push Constants");
+                HandlePushConstantRangeRS(*pushConstantBlockRsRef);
+            }
+            if (pushConstantBlockRsRef != nullptr){
+                ImGui::SeparatorText("Bloom");
+                HandlePushConstantRangeBloom(*pushConstantBlockBloom);
+            }
+                
+//            ImGui::InputText("Import a model from path:", modelImporterText,IM_ARRAYSIZE(modelImporterText));
+//            ImGui::SliderInt("CurrentFrameTest", &currentFrameText, 0, 100);
+            ImGui::SetNextWindowBgAlpha(0.0f); // Transparent background
+            
+            ImGui::End();
+            ImGui::PopID();
+        }
 		ImGui::End(); 
+        
+        
+        if(ModelHandler::GetInstance()->Loading){
 
-		for (int i= 1; i < imagesToCreate.size(); i++)
-		{
-			ImGui::Image((ImTextureID)imagesToCreate[i].descriptor, ImVec2(viewportSize.x, viewportSize.y));
-		}
+            ImGui::PushID("Loading");
+            ImGui::SeparatorText("Loading...");
+            ImGui::SetWindowSize(ImVec2(400, 100));
+            ImGui::SetWindowPos(ImVec2(ImGui::GetContentRegionAvail().x/2,ImGui::GetContentRegionAvail().y/2));
+            ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(ImGui::GetFontSize() * 25, 0.0f));
+            ImGui::PopID();
+        }
 
 		bool open = true;
 		ImGui::ShowDemoWindow(&open);
@@ -671,7 +695,7 @@ namespace VULKAN
 
 	void ImguiRenderSystem::WasWindowResized()
 	{
-		if (myRenderer.GetSwapchain().colorImageView!=vpImageView)
+		if (myRenderer->GetSwapchain().colorImageView!=vpImageView)
 		{
 			SetUpSystem(myWindow);
 			
@@ -708,5 +732,63 @@ namespace VULKAN
 		//io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
 		//io.KeyMap[ImGuiKey_Delete] =GLFW_KEY_DELETE;
 	}
+
+    void ImguiRenderSystem::AddTexture(VKTexture *vkTexture) {
+
+        std::vector<VkDescriptorSetLayout> layouts(myRenderer->GetMaxRenderInFlight(), descriptorSetLayout);
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = imguiPool;
+
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(myRenderer->GetMaxRenderInFlight());
+        allocInfo.pSetLayouts = layouts.data();
+        if (vkAllocateDescriptorSets(myDevice->device(), &allocInfo, &vkTexture->textureDescriptor) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to allocate descriptor sets!");
+        }
+        CreateImguiImage(vkTexture->textureSampler , vkTexture->textureImageView, vkTexture->textureDescriptor);
+
+    }
+
+    void ImguiRenderSystem::HandleTextureCreation(VKTexture *vkTexture) {
+        if (vkTexture->textureDescriptor == nullptr){
+            AddTexture(vkTexture);
+        }
+    }
+
+    void ImguiRenderSystem::HandlePushConstantRangeRS(PushConstantBlock_RS &pushConstantBlockRs) {
+        if (ImGui::SliderFloat("RayTermination Bias", &pushConstantBlockRs.rayTerminationBias, 0.0f, 1.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Environment Intensity", &pushConstantBlockRs.environmentMapIntensity,0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Max variance", &pushConstantBlockRs.maxVariance, 0.0f, 20.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderInt("Min bounce for Indirect", &pushConstantBlockRs.minBounceForIndirect, 0, 5)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Ambient Oclussion Intensity", &pushConstantBlockRs.AOIntensity, 0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+        if (ImGui::SliderFloat("Ambient Oclussion Size", &pushConstantBlockRs.AOSize, 0.0f, 2.0f)){
+            InputHandler::GetInstance()->editingGraphics = true;
+        }
+
+
+
+
+    }
+
+    void ImguiRenderSystem::HandlePushConstantRangeBloom(PushConstantBlock_Bloom &pushConstantBlockBloom) {
+        if (ImGui::SliderFloat("Bloom Size", &pushConstantBlockBloom.bloomSize, 0.0f, 10.0f)){
+        }
+    }
+
+    void ImguiRenderSystem::AddFramebufferReference(VKTexture *texture) {
+        frameBuffers.push_back(texture);
+    }
+
 
 }

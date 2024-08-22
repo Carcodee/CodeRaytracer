@@ -1,5 +1,5 @@
 #version 460
-#extension GL_EXT_ray_tracing : enable
+#extension GL_EXT_ray_tracing : require
 #extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_scalar_block_layout :enable
 #extension GL_EXT_buffer_reference2 : require
@@ -8,41 +8,17 @@
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 
+
+layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
+
+hitAttributeEXT vec2 attribs;
+
 struct TexturesFinded{
     vec4 diffuse;
     vec4 alpha;
     vec4 specular;
     vec4 bump;
     vec4 ambient;
-};
-struct MaterialData {
-	float albedoIntensity;
-	float normalIntensity;
-	float specularIntensity;
-    float padding1;
-    vec3 diffuseColor;
-    float padding2;
-	int texturesIndexStart; 
-	int textureSizes; 
-	int meshIndex; 
-    int padding3;
-};
-
-struct MeshData {
-    int materialIndexOnShape;
-    int geometryIndexStartOffset;
-};
-
-
-struct Vertex {
-    vec3 position; 
-    vec3 col;
-    vec3 normal;
-    vec2 texCoords; 
-};
-
-struct Indices {
-    uint index;
 };
 
 layout(binding=6) uniform light{
@@ -52,8 +28,7 @@ layout(binding=6) uniform light{
 }myLight;
 
 
-layout(location = 0) rayPayloadInEXT vec3 hitValue;
-hitAttributeEXT vec2 attribs;
+layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
 
@@ -67,7 +42,7 @@ layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
 };
 
 
-layout(set = 0, binding = 7, std140) buffer Materials {
+layout(set = 0, binding = 7, scalar) buffer Materials {
     MaterialData materials[];
 };
 
@@ -75,49 +50,39 @@ layout(set = 0, binding = 8, scalar) buffer MeshesData {
     MeshData meshesData[];
 };
 
-layout(set = 0,binding = 9) uniform sampler2D textures[];
+layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
+    uint geometryOffset[];
+};
 
-vec3 GetDebugCol(uint primitiveId, float primitiveCount){
 
-    float idNormalized = float(primitiveId) / primitiveCount; 
-    vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
-    return debugColor;
-}
-float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
-    
-    vec3 dir= fragPos-lightPos; 
-    dir= normalize(dir);
-    float colorShading=max(dot(dir, normal),0.2);
-    return colorShading;
-
-}
+layout(set = 0,binding = 14) uniform sampler2D textures[];
 
 #define MAX_TEXTURES 5
-#define DIFFUSE_TEX 0 
-#define ALPHA_TEX 1 
-#define SPECULAR_TEX 2 
-#define BUMP_TEX 3 
-#define AMBIENT_TEX 4 
 
 vec4 CurrentMaterialTextures[MAX_TEXTURES];
 int texturesOnMaterialCount = 0;
 
 vec3 GetDiffuseColor(int materialIndex);
-void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv);
-vec4 GetColorOrDiffuseTex(vec2 uv);
-
+vec4 TryGetTex(int texOffset, vec2 uv);
+float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity);
+vec3 GetDebugCol(uint primitiveId, float primitiveCount);
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
 void main()
 {
     
+  int realGeometryOffset= int(geometryOffset[gl_InstanceID]) + gl_GeometryIndexEXT; 
 
-  int primitiveIndex=int(meshesData[gl_GeometryIndexEXT].geometryIndexStartOffset);
+  int primitiveIndex=int(meshesData[realGeometryOffset].geometryIndexStartOffset);
+  
+  int indexOffset=int(meshesData[realGeometryOffset].indexOffset);
 
   int idx1= primitiveIndex + (3 * gl_PrimitiveID + 0);
   int idx2= primitiveIndex + (3 * gl_PrimitiveID + 1);
   int idx3= primitiveIndex + (3 * gl_PrimitiveID + 2);
-  int index1= int(indices[idx1].index);
-  int index2= int(indices[idx2].index);
-  int index3= int(indices[idx3].index);
+  
+  int index1= indexOffset + int(indices[idx1].index);
+  int index2= indexOffset + int(indices[idx2].index);
+  int index3= indexOffset + int(indices[idx3].index);
 
   Vertex v1 = vertices[index1];
   Vertex v2 = vertices[index2];
@@ -127,78 +92,157 @@ void main()
 
   vec2 uv = barycentricCoords.x * v1.texCoords + barycentricCoords.y * v2.texCoords + barycentricCoords.z * v3.texCoords;
   vec3 pos= barycentricCoords.x * v1.position + barycentricCoords.y * v2.position + barycentricCoords.z * v3.position;
+  pos= gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
+  
   vec3 normal= barycentricCoords.x * v1.normal + barycentricCoords.y * v2.normal + barycentricCoords.z * v3.normal;
-  normal=normalize(normal);
-
+  normal = normalize(normal);
+  vec3 tangent= barycentricCoords.x * v1.tangent + barycentricCoords.y * v2.tangent + barycentricCoords.z * v3.tangent;
+  tangent = normalize(tangent);
+  
+  if (gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT)
+  {
+    normal = -normal;
+  }
+    
+  vec3 bitangent = cross(normal, tangent);
+  
+  //todo fix transformation on shaders
+  const mat3 normalTransform = mat3(gl_ObjectToWorld3x4EXT); 
+  vec3 worldNormal = normalize(normalTransform * normal); 
+  vec3 worldTangent = normalize(normalTransform * tangent); 
+  vec3 worldBitangent = normalize(normalTransform * bitangent); 
+  mat3 TBN = mat3(tangent, bitangent, normal);
+  
+  //normal=normalize(normal);
+  //tangent = normalize(tangent); 
+  //vec3 bitTangent =cross(normal, tangent); 
+  //mat3 TBN = mat3(tangent, bitTangent, normal); 
+  
   //materials
 
-  int materialIndex= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
-  int materialIndexInTextures=materials[materialIndex].texturesIndexStart;
-  int materialTextureSizes =materials[materialIndex].textureSizes;
-
-  FillTexturesFromMaterial(materialIndexInTextures, materialTextureSizes, uv); 
+  int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
   
-  vec4 diffuse=GetColorOrDiffuseTex(uv);
+  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].diffuseColor * materials[materialIndex].albedoIntensity;
+  vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
+  vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
+  vec4 metallicRoughness = TryGetTex(materials[materialIndex].metallicRouhgnessOffset, uv); 
+  float metallic = 0.0f;
+  float roughness = 1.0f;
+  
+  MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
+  
+  if(!matInfo.hasDiffuse){
+     diffuseInMat =vec4(materials[materialIndex].diffuseColor.xyz, 1.0) * materials[materialIndex].albedoIntensity;
+  }
+  if(emissionInMat == vec4(1.0f)){
+    emissionInMat = vec4(0.0f);
+  }
+  if(metallicRoughness == vec4(1.0f)){
+    metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
+    roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+  }else{
+    metallic = 0.0f;
+    roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
+  }
+
+  vec3 finalNormal = normal;
+  if(matInfo.hasNormals){
+      //mat3 inverseTBN = inverse(TBN);
+      //tang space to world space cus is a orthonormal basis and no transpose is needed :D
+      finalNormal = normalize(TBN * normalInMat.xyz); 
+  }
 
   
-  float shadingIntensity= GetLightShadingIntensity(pos, myLight.pos, normal);
-  hitValue = (diffuse.xyz * myLight.col) * shadingIntensity * myLight.intensity;
-  //hitValue = diffuse.xyz;
-  //1724928
-  //550091
-//
-//  if(gl_GeometryIndexEXT == 21){
-//  
-//    hitValue = vec3(1.0, 0.0, 0.0);
-//    if(primitiveIndex>=1724928){
-//        hitValue = vec3(0.0, 0.0, 1.0);
-//    }
-//  }
-//  else{
-//    hitValue = vec3(0.0); 
-//  }
-
-  //vec3 debuging=GetDebugCol(primitiveIndex,  575262.0);
-  //vec3 debugGeometryIndex=GetDebugCol(materialIndex,  4);
-  //hitValue = debuging;
-  //hitValue = debugGeometryIndex;
-  //hitValue = normal * 0.5 + 0.5; // Uncomment for normal debugging
-  //hitValue = normDebug;
+  vec4 diffuse=diffuseInMat;
+  vec3 view = normalize(-rayPayload.direction);
+  vec3 lightDir= normalize(myLight.pos - pos); 
+  vec3 halfway =normalize(view + lightDir);
+  
+  vec3 lightDirTangSpace = lightDir * TBN;
+  vec3 finalNormalTangSpace = finalNormal * TBN;
+  vec3 rayDirWi = normalize(pos - rayPayload.origin);
+  vec3 rayDirTangentSpace = rayDirWi * TBN;
+  
+  float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
+  float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
+  
+  
+  
+  vec3 pbrLitDirect= GetBRDF(finalNormal* materials[materialIndex].normalIntensity, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  
+  halfway = normalize((-rayPayload.sampleDir) + view);
+    
+  float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
+  float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  
+  rayPayload.shadow = true;
+  float tmin = 0.001;
+  float tmax = 10000.0; 
+  vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
+  traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+  
+  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  
+  //rayPayload.color = worldNormal; 
+  //rayPayload.color = vec3(diffuseInMat.a); 
+  //rayPayload.colorLit = vec3(0.0f); 
+  
+  if(emissionInMat == vec4(0)){
+       if(materials[materialIndex].emissionIntensity>0){
+           rayPayload.shadow = false;
+           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor.xyz * materials[materialIndex].emissionIntensity); 
+       }
+  }else{
+       rayPayload.shadow = false;
+       rayPayload.emissionColor = (emissionInMat.xyz * materials[materialIndex].emissionIntensity); 
+  }
+  
+  rayPayload.hitT = gl_HitTEXT;
+  rayPayload.distance = gl_RayTmaxEXT;
+  rayPayload.normal = finalNormal;
+  rayPayload.tangent = tangent;
+  rayPayload.roughness = materials[materialIndex].roughnessIntensity;
+  rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
+    
+  
 }
 
-void FillTexturesFromMaterial(int texturesIndexStart, int textureSizes, vec2 uv){
-
-    int textureFinishSize = texturesIndexStart + textureSizes;
-    int allTexturesIndex= 0;
-    texturesOnMaterialCount= allTexturesIndex;
-    for(int i = texturesIndexStart; i < textureFinishSize; i++){
-
-        if(allTexturesIndex>MAX_TEXTURES){
-            return;
-        }
-        CurrentMaterialTextures[allTexturesIndex] = texture(textures[i],uv); 
-        allTexturesIndex++;
-        texturesOnMaterialCount= allTexturesIndex;
+vec4 TryGetTex(int texOffset, vec2 uv){
+    if (texOffset== -1){
+        return vec4(1, 1, 1, 1);
     }
+    vec4 texture = texture(textures[texOffset],uv);
+    return texture;
+}
 
+float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
+	if (texOffset== -1){
+		return intensity;
+	}
+	vec4 textureCol = texture(textures[texOffset],uv);
+	float texVal = MaxComponent(textureCol.xyz);
+	return texVal * intensity;
 }
 
 vec3 GetDiffuseColor(int materialIndex){
 
-   vec3 diffuse= materials[materialIndex].diffuseColor;
+   vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
    return diffuse;
 }
-vec4 GetColorOrDiffuseTex(vec2 uv){
-
-    if(texturesOnMaterialCount>0){
-        vec4 diffuseText = CurrentMaterialTextures[DIFFUSE_TEX];
-        return diffuseText;
-    }else{
-        int index= meshesData[gl_GeometryIndexEXT].materialIndexOnShape;
-        vec3 diffuseCol=GetDiffuseColor(index); 
-        return vec4(diffuseCol, 1.0);
-    }
 
 
+vec3 GetDebugCol(uint primitiveId, float primitiveCount){
+
+    float idNormalized = float(primitiveId) / primitiveCount; 
+    vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
+    return debugColor;
+}
+float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
+    vec3 dir= fragPos-lightPos; 
+    dir= normalize(dir);
+    float colorShading=max(dot(dir, normal),0.2);
+    return colorShading;
 }
 

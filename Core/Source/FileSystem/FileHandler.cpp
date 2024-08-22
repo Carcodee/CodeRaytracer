@@ -1,7 +1,9 @@
 #include "FileHandler.h"
+#include "VulkanAPI/ResourcesManagers/Assets/AssetsHandler.h"
 
 #include <fstream>
 #include <iostream>
+
 
 namespace HELPERS
 {
@@ -12,8 +14,10 @@ namespace HELPERS
 	{
 
 		workingDir = std::filesystem::current_path();
+        //TODO: fix this when is launched from exe
 		projectPath = workingDir.parent_path();
 		assetPath = projectPath / "Core"/"Source" / "Resources" / "Assets";
+        engineResourcesPath = projectPath / "Core"/"Source" / "Resources" / "EngineResources";
 		shadersPath = projectPath / "Core"/ "Source" / "Shaders";
 		currentPathRelativeToAssets = assetPath;
 
@@ -80,6 +84,8 @@ namespace HELPERS
 		if (!outFile)
 		{
 			std::cout << "filename: " << path << " could not be created \n";
+            outFile.close();
+            return;
 		}
 		outFile << data << "\n";
 
@@ -95,6 +101,8 @@ namespace HELPERS
 		if (!outFile)
 		{
 			std::cout << "filename: " << path << " could not be appended \n";
+            outFile.close();
+            return;
 		}
 		outFile << data << "\n";
 
@@ -160,7 +168,7 @@ namespace HELPERS
 		{
 			return "";
 		}
-		if (extension!= ".obj")
+		if (!VULKAN::AssetsHandler::GetInstance()->IsValidModelFormat(extension))
 		{
 			std::cout << "Path is not the expected extension: " + extension << "\n";
 			return "";
@@ -205,4 +213,17 @@ namespace HELPERS
 		return size;
 
 	}
+
+    std::string FileHandler::RemovePathExtension(std::filesystem::path path) {
+        std::string strPath= path.string();
+        
+        size_t extensionPos= strPath.find_last_of(".");
+        strPath = strPath.substr(0, extensionPos);
+        
+        return strPath;
+    }
+
+    std::string FileHandler::GetEngineResourcesPath() {
+        return engineResourcesPath.string();
+    }
 }

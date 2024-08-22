@@ -15,6 +15,8 @@
 
 #include "VulkanAPI/RenderSystems/ImguiRenderSystem.h"
 #include "VulkanAPI/RenderSystems/RayTracing_RS.h"
+#include "VulkanAPI/RenderSystems/PostProcessing_RS.h"
+#include "VulkanAPI/RenderSystems/Bloom_RS.h."
 
 
 namespace VULKAN {
@@ -31,43 +33,29 @@ namespace VULKAN {
 		static constexpr int WIDTH = 1200;
 		static constexpr int HEIGHT = 900;
 
-		void Run();
 		VulkanApp(bool DynamicRendering, bool editor);
 		~VulkanApp();
+        VulkanApp(const VulkanApp&) = delete;
+        VulkanApp& operator=(const VulkanApp&) = delete;
 		void InitConfigsCache();
-	
-		VulkanApp(const VulkanApp&) = delete;
-		VulkanApp& operator=(const VulkanApp&) = delete;
+        void RunDynamicRendering(std::function<void()>&& editorContext);
+        
 		VulkanInit initWindow{ WIDTH, HEIGHT, "MyVulkanApp" };
-
-
-//#ifdef IS_EDITOR
-
-		void RunEngine_EDITOR(std::function<void()>&& editorContext);
-		void RunDynamicRendering(std::function<void()>&& editorContext);
-		VkDescriptorPool imguiDescriptorPool;
-//
-//#endif
 		MyVulkanDevice myDevice{ initWindow };
 		VulkanRenderer renderer{ initWindow , myDevice };
-		Forward_RS forward_RS{renderer, myDevice};
-		ImguiRenderSystem imgui_RS{ renderer, myDevice };
 		RayTracing_RS rayTracing_RS{ myDevice, renderer};
+        PostProcessing_RS postProcessing_Rs{ myDevice, renderer};
+        PostProcessing_RS FinalPostProcessing_Rs{ myDevice, renderer};
+        Bloom_RS bloom_Rs{myDevice, renderer};
+        VKTexture* finalStorageImage;
 		int currentFrame;
 	    
 	private:
 		float deltaTime = 0.0f;
 		double lastDeltaTime = 0.0f;
 
-		void LoadModels();
 		void SetUpImgui();
-
-       
-
-
-
-
-
+        void LoadQueryModels();
 
 		
 

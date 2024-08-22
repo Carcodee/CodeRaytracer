@@ -329,11 +329,6 @@ namespace VULKAN
             descriptorWrite[3].pImageInfo = &imageInfo3;
             descriptorWrite[3].pTexelBufferView = nullptr; // Optional
                        
-
-
-            
-
-
             vkUpdateDescriptorSets(myDevice.device(), descriptorWrite.size(), descriptorWrite.data(), 0, nullptr);
         }
 

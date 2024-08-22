@@ -11,7 +11,6 @@
 #include "VulkanAPI/VulkanObjects/Textures/VKTexture.h"
 #include <glm/gtc/type_ptr.hpp>
 
-
 namespace VULKAN {
 	class ModelLoaderHandler
 	{
@@ -20,6 +19,11 @@ namespace VULKAN {
 	protected:
 		static ModelLoaderHandler* instance;
 
+        struct NodeChain{
+            NodeChain* parent = nullptr;
+            tinygltf::Node* node = nullptr;
+            glm::mat4 matrix = glm::mat4 (1.0f);
+        };
 
 	public:
 		
@@ -28,11 +32,34 @@ namespace VULKAN {
 
 
 
+        void FindReader(tinyobj::ObjReader& reader,std::string path);
 		ModelData GetModelVertexAndIndicesTinyObject(std::string path);
+        void GetModelFromReader(tinyobj::ObjReader& reader, ModelData& modelData);
 		std::vector<VKTexture> LoadTexturesFromPath(std::string path,VulkanSwapChain& swapChain);
-		std::map<int,Material> LoadMaterialsFromObject(std::string path, int& texturesSizes);
-		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader reader,std::string path, int& texturesSizes);
-		void FixMaterialPaths(std::string& path, std::string texturesPath);
+		std::map<int,Material> LoadMaterialsFromReader(tinyobj::ObjReader& reader,std::string path);
+		void FixMaterialPaths(std::string& path, std::string texturesPath, std::string modelPath);
+        glm::vec3 CalculateTangent(glm::vec3& pos1, glm::vec3& pos2,glm::vec3& pos3,
+                                    glm::vec2& uv1, glm::vec2& uv2,glm::vec2& uv3);
+
+
+        void GetGLTFModel(tinygltf::Model& model, std::string path);
+        void LoadGLTFFromModel(tinygltf::Model& model, ModelData& modelData);
+        void LoadGLTFModel(std::string path, tinygltf::Model& model, ModelData& modelData);
+        void LoadGLTFMaterials(tinygltf::Model& model,std::map<int,Material>&materialDataPerMesh ,std::string modelPath);
+        void TransformNodeToWorld(NodeChain* nodeChainParent, glm::mat4& mat);
+        std::string GetGltfTexturePath(std::string modelPath, std::string uriPath);
+        void LoadGLTFNode(tinygltf::Model& model,
+                          tinygltf::Node* node,
+                          NodeChain* nodeParent,
+                          std::vector<uint32_t>& indices,
+                          std::vector<Vertex>& vertices,
+                          std::vector<uint32_t>& firstMeshIndices,
+                          std::vector<uint32_t>& firstMeshVertces,
+                          std::vector<uint32_t>& meshIndexCount,
+                          std::vector<uint32_t>& meshVertexCount,
+                          std::vector<int>& materialsIds,
+                          std::vector<glm::mat4>& matrices,
+                          int& meshCount);
 	};
 
 	//class GLTFObject
