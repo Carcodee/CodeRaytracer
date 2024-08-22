@@ -1,4 +1,5 @@
 
+#define N 1.5 
 // w out is view dir, could change later
 float CosthetaTangent(vec3 v1, vec3 v2){
     return max(dot(v1, v2), 0.001);
@@ -85,13 +86,13 @@ float GDenom(float roughness, float anisotropic, vec3 wl, float alphaX, float al
     sqrtPart = sqrt(1.0f + sqrtPart) - 1.0f;
     return sqrtPart/2.0f;
 }
-float G(float roughness, float anisotropic, vec3 wl, float alphaX,float alphaY){
+float Gw(float roughness, float anisotropic, vec3 wl, float alphaX,float alphaY){
     float gDenom = GDenom(roughness, anisotropic, wl, alphaX, alphaY);
     return 1 / (1 + gDenom);
 }
 float Gm(float roughness, float anisotropic, vec3 wlIn, vec3 wlOut, float alphaX, float alphaY){
-    float GIn = G(roughness, anisotropic, wlIn, alphaX, alphaY);
-    float GOut = G(roughness, anisotropic, wlOut, alphaX, alphaY);
+    float GIn =Gw(roughness, anisotropic, wlIn, alphaX, alphaY);
+    float GOut = Gw(roughness, anisotropic, wlOut, alphaX, alphaY);
     return GIn*GOut;
 }
 
@@ -102,10 +103,33 @@ vec3 DisneyMetallic(vec3 baseCol, float roughness, float anisotropic, vec3 halfw
     vec3 fm =Fm(baseCol, view, halfway);
     float dm = Dm(roughness, anisotropic, hl, alphaX, alphaY);
     float gm= Gm(roughness, anisotropic, wlIn, wlOut, alphaX, alphaY);
-    float num = fm*dm*gm;
+    vec3 num = fm*dm*gm;
     float denom = 4* CosthetaTangent(normal, lightDir);
     return num/denom;
 }
 
+float Ro(float n){
+    float ro= pow(n - 1.0f,2.0)/pow(n + 1.0f,2.0);
+    return ro;
+}
+// clearcoat
+float Fc (vec3 halfway, vec3 view){
+    float ro = Ro(N);
+    float costhetaTangent= CosthetaTangent(halfway, view);
+    float powPart= (1- ro) * pow(1 - costhetaTangent, 5.0f);
+    float result = ro + powPart;
+    return result;
+}
+float GetClearcoatGloss(float clearcoatGlossParam){
+    float result = ((1.0f - clearcoatGlossParam) * 0.1f) + (clearcoatGlossParam* 0.001);
+    return result;
+};
+float Dc(float clearcoatGloss, vec3 hl){
+    float clearcoatGlossPow = pow(clearcoatGloss, 2.0f);
+    float hlzPow = pow(hl.z, 2.0f);
 
+    float num = clearcoatGlossPow - 1.0f;
+    float denom = (3.14 * log(clearcoatGlossPow)) * (1.0f + ((clearcoatGlossPow - 1)*(hlzPow)));
+    return num / denom;
+};
  

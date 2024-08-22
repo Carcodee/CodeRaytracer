@@ -25,11 +25,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added disney diffuse">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="metallic implementation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -287,15 +285,9 @@
       <workItem from="1724085233298" duration="9100000" />
       <workItem from="1724116106065" duration="7523000" />
       <workItem from="1724176357031" duration="6223000" />
-      <workItem from="1724194814545" duration="3846000" />
-    </task>
-    <task id="LOCAL-00003" summary="fixed the issue where it was not posible to use nsight">
-      <option name="closed" value="true" />
-      <created>1720460310004</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1720460310004</updated>
+      <workItem from="1724194814545" duration="4169000" />
+      <workItem from="1724250721592" duration="1036000" />
+      <workItem from="1724300743724" duration="1000" />
     </task>
     <task id="LOCAL-00004" summary="asset handling for code asset and meta data">
       <option name="closed" value="true" />
@@ -681,7 +673,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724188409737</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="metallic implementation">
+      <option name="closed" value="true" />
+      <created>1724198996695</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1724198996696</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -738,7 +738,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed the direct and indirect lightning calculations" />
     <MESSAGE value="fixed raybounces to the miss shader" />
     <MESSAGE value="some changes in the shaders" />
     <MESSAGE value="good advances on global ilumination" />
@@ -763,6 +762,7 @@
     <MESSAGE value="any hit shader added" />
     <MESSAGE value="adding bitmask configs for shaders" />
     <MESSAGE value="added disney diffuse" />
-    <option name="LAST_COMMIT_MESSAGE" value="added disney diffuse" />
+    <MESSAGE value="metallic implementation" />
+    <option name="LAST_COMMIT_MESSAGE" value="metallic implementation" />
   </component>
 </project>
