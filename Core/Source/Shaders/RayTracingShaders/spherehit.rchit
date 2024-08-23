@@ -7,6 +7,7 @@
 
 
 #include "../UtilsShaders/ShadersUtility.glsl"
+#include "../UtilsShaders/DisneyShadingModel.glsl"
 
 struct Sphere {
     vec3 center;
@@ -61,7 +62,7 @@ void main()
   vec3 T;
   vec3 B;
   CreateOrthonormalBasis(normal, T, B);
-  mat3 TBN = mat3(T, B, normal);
+  mat3 inverseTBN = transpose(mat3(T, B, normal));
   vec3 view = normalize(rayPayload.direction);
   
   vec3 halfway =normalize(view + lightDir);
@@ -84,6 +85,12 @@ void main()
     emissionInMat = vec4(0.0f);
   }
   
+  vec3 hl = inverseTBN * halfway;
+  vec3 wlIn = inverseTBN * lightDir;
+  vec3 wlOut = inverseTBN * view;
+  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
+                                  metallic, material.specularTransmissionIntensity,
+                                  halfway, view, lightDir, normal, hl, wlIn, wlOut);
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize(rayPayload.sampleDir + view);
@@ -98,6 +105,7 @@ void main()
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
   rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  rayPayload.color = DisneyBSDF; 
   rayPayload.colorLit = pbrLitIndirect; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;

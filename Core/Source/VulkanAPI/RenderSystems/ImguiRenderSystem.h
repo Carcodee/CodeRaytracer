@@ -88,6 +88,9 @@ namespace VULKAN
         float allMaterialsEmissive = 1.0f;
         float allMaterialsAlbedo = 1.0f;
         float metallicAllMaterials = 1.0f;
+        float anisotropicAllMaterials = 1.0f;
+        float clearcoatAllMaterials = 1.0f;
+        float specularTransmissionAllMaterials = 1.0f;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];

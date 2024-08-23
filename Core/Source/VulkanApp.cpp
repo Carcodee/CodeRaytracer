@@ -165,12 +165,6 @@ namespace VULKAN{
 
 		InitConfigsCache();
         ImguiRenderSystem::GetInstance(&renderer, &myDevice);
-//
-//        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[3], rayTracing_RS.emissiveStoreImage->textureSampler);
-//        postProcessing_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->textureImageView, rayTracing_RS.emissiveStoreImage->textureSampler);
-//        postProcessing_Rs.renderPassRef = renderer.GetSwapchain().PostProRenderPass;
-//        postProcessing_Rs.InitRS(emissiveVertPath, emissiveFragPath);
-//
 
         for (int i = 0; i < rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews.size(); ++i) {
             bloom_Rs.AddTextureImageToShader(rayTracing_RS.emissiveStoreImage->mipLevelsImagesViews[i], rayTracing_RS.emissiveStoreImage->textureSampler);

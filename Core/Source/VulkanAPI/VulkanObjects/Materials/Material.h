@@ -50,6 +50,9 @@ namespace VULKAN{
         int normalOffset = -1;
         //80
         uint32_t configurations = 0;
+        float anisotropicIntensity = 0.5f;
+        float clearcoatIntensity = 0.5f;
+        float specularTransmissionIntensity= 0.999f;
         
     };
 

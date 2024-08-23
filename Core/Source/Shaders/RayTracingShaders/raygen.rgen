@@ -99,7 +99,7 @@ void main()
             
             irradiance += rayPayload.emissionColor * rayThroughput/ rayPdf; 
             if(i==0){
-                imageStore(emissiveImage, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.emissionColor, 1.0f));
+                //imageStore(emissiveImage, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.emissionColor, 1.0f));
             }
             
             if(rayPayload.shadow && i==0){

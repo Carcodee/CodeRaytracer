@@ -7,6 +7,7 @@
 
 
 #include "../UtilsShaders/ShadersUtility.glsl"
+#include "../UtilsShaders/DisneyShadingModel.glsl"
 
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
@@ -121,28 +122,29 @@ void main()
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
+  MaterialData material = materials[materialIndex];
   
-  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].diffuseColor * materials[materialIndex].albedoIntensity;
-  vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
-  vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
-  vec4 metallicRoughness = TryGetTex(materials[materialIndex].metallicRouhgnessOffset, uv); 
+  vec4 diffuseInMat = TryGetTex(material.diffuseOffset, uv) * material.diffuseColor * material.albedoIntensity;
+  vec4 normalInMat = TryGetTex(material.normalOffset, uv);
+  vec4 emissionInMat = TryGetTex(material.emissionOffset, uv); 
+  vec4 metallicRoughness = TryGetTex(material.metallicRouhgnessOffset, uv); 
   float metallic = 0.0f;
   float roughness = 1.0f;
   
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
-     diffuseInMat =vec4(materials[materialIndex].diffuseColor.xyz, 1.0) * materials[materialIndex].albedoIntensity;
+     diffuseInMat =vec4(material.diffuseColor.xyz, 1.0) * material.albedoIntensity;
   }
   if(emissionInMat == vec4(1.0f)){
     emissionInMat = vec4(0.0f);
   }
   if(metallicRoughness == vec4(1.0f)){
-    metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
-    roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+    metallic =TryGetFloatFromTex(material.metallicOffset ,uv, material.metallicIntensity);
+    roughness =TryGetFloatFromTex(material.roughnessOffset ,uv, material.roughnessIntensity);
   }else{
     metallic = 0.0f;
-    roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
+    roughness = metallicRoughness.g * material.roughnessIntensity;
   }
 
   vec3 finalNormal = normal;
@@ -166,15 +168,28 @@ void main()
   float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
   float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
   
+    
+  mat3 inverseTBN = transpose(TBN);
+  vec3 hl = halfway * TBN ;
+  vec3 wlIn = lightDir * TBN ;
+  vec3 wlInSample = rayPayload.sampleDir * TBN ;
+  vec3 wlOut = view * TBN ;
+  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
+                                  metallic, material.specularTransmissionIntensity,
+                                  halfway, view, lightDir, finalNormal, hl, wlIn, wlOut);
   
-  
-  vec3 pbrLitDirect= GetBRDF(finalNormal* materials[materialIndex].normalIntensity, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
+  hl = inverseTBN * halfway;
     
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
-  vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+  vec3 DisneyBSDFIndirect = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
+                                metallic, material.specularTransmissionIntensity,
+                                halfway, view, lightDir, finalNormal, hl, wlInSample, wlOut);
+
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -182,29 +197,31 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  //rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+  rayPayload.color = DisneyBSDF * myLight.intensity * myLight.col/ pdfDirect; 
+  //rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  rayPayload.colorLit = DisneyBSDFIndirect; 
   
   //rayPayload.color = worldNormal; 
   //rayPayload.color = vec3(diffuseInMat.a); 
   //rayPayload.colorLit = vec3(0.0f); 
   
   if(emissionInMat == vec4(0)){
-       if(materials[materialIndex].emissionIntensity>0){
+       if(material.emissionIntensity>0){
            rayPayload.shadow = false;
-           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor.xyz * materials[materialIndex].emissionIntensity); 
+           rayPayload.emissionColor = (pbrLitDirect * material.diffuseColor.xyz * material.emissionIntensity); 
        }
   }else{
        rayPayload.shadow = false;
-       rayPayload.emissionColor = (emissionInMat.xyz * materials[materialIndex].emissionIntensity); 
+       rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
   
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;
   rayPayload.tangent = tangent;
-  rayPayload.roughness = materials[materialIndex].roughnessIntensity;
-  rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
+  rayPayload.roughness = material.roughnessIntensity;
+  rayPayload.reflectivity = material.reflectivityIntensity;
     
   
 }
@@ -227,7 +244,7 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 }
 
 vec3 GetDiffuseColor(int materialIndex){
-
+   
    vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
    return diffuse;
 }

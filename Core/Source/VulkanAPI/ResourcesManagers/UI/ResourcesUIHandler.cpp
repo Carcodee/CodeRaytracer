@@ -204,6 +204,7 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+           
             if(ImGui::SliderFloat("Alpha",&mat.materialUniform.alphaCutoff, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
@@ -259,6 +260,20 @@ namespace VULKAN
             }
 
             if(ImGui::SliderFloat("Albedo Intensity",&mat.materialUniform.albedoIntensity, 0.0f, 3.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+
+            ImGui::SeparatorText("Test");
+            if(ImGui::SliderFloat("Anisotropic",&mat.materialUniform.anisotropicIntensity, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            if(ImGui::SliderFloat("Clearcoat",&mat.materialUniform.clearcoatIntensity, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            if(ImGui::SliderFloat("specularTransmission",&mat.materialUniform.specularTransmissionIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }

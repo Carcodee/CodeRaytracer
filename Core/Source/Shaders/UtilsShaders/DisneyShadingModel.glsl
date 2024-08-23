@@ -1,5 +1,5 @@
 
-#define N 1.5 
+#define NConst 1.5 
 // w out is view dir, could change later
 float CosthetaTangent(vec3 v1, vec3 v2){
     return max(dot(v1, v2), 0.001);
@@ -108,13 +108,13 @@ vec3 DisneyMetallic(vec3 baseCol, float roughness, float anisotropic, vec3 halfw
     return num/denom;
 }
 
+// clearcoat
 float Ro(float n){
     float ro= pow(n - 1.0f,2.0)/pow(n + 1.0f,2.0);
     return ro;
 }
-// clearcoat
 float Fc (vec3 halfway, vec3 view){
-    float ro = Ro(N);
+    float ro = Ro(NConst);
     float costhetaTangent= CosthetaTangent(halfway, view);
     float powPart= (1- ro) * pow(1 - costhetaTangent, 5.0f);
     float result = ro + powPart;
@@ -124,7 +124,8 @@ float GetClearcoatGloss(float clearcoatGlossParam){
     float result = ((1.0f - clearcoatGlossParam) * 0.1f) + (clearcoatGlossParam* 0.001);
     return result;
 };
-float Dc(float clearcoatGloss, vec3 hl){
+float Dc(float clearcoatGlossParam, vec3 hl){
+    float clearcoatGloss = GetClearcoatGloss(clearcoatGlossParam);
     float clearcoatGlossPow = pow(clearcoatGloss, 2.0f);
     float hlzPow = pow(hl.z, 2.0f);
 
@@ -133,3 +134,43 @@ float Dc(float clearcoatGloss, vec3 hl){
     return num / denom;
 };
  
+float AcW(vec3 wl){
+    float wlpowX = pow(wl.x * 0.25f, 2.0f);
+    float wlpowY = pow(wl.y * 0.25f, 2.0f);
+    float wlpowZ = pow(wl.z, 2.0f);
+    float sqroot =sqrt(1 + ((wlpowX*wlpowY)/wlpowZ));
+    float num = (sqroot-1);
+    return num/2;
+}
+float GcW(float acw){
+    return 1 / (1 + acw);
+}
+float Gc(vec3 wlIn, vec3 wlOut){
+    float AcIn = AcW(wlIn);
+    float AcOut = AcW(wlOut);
+    float GcIn= GcW(AcIn);
+    float GcOut= GcW(AcOut);
+    return GcIn*GcOut;
+}
+
+float DisneyClearcoat(vec3 halfway, vec3 view, vec3 hl, vec3 wlIn, vec3 wlOut, vec3 normal, vec3 lightDir, float clearcloatGlossParam){
+    float fc = Fc(halfway, view);
+    float dc = Dc(clearcloatGlossParam, hl);
+    float gc = Gc(wlIn, wlOut);
+    float num = fc*dc*gc;
+    float denom = 4.0f * CosthetaTangent(lightDir, normal);
+    return num/denom;
+}
+
+//test 
+
+vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic, float clearcoatGlossParam, float metallic, float specularTransmission,
+                   vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
+    vec3 fd = DisneyFS(baseCol, normal, halfway, view, lightDir, roughness);
+    vec3 fm = DisneyMetallic(baseCol, roughness, anisotropic, halfway, view, lightDir, normal,hl,wlIn, wlOut);
+    float fc = DisneyClearcoat(halfway, view, hl, wlIn, wlOut, normal, lightDir, clearcoatGlossParam);
+    vec3 val = ((1.0f - specularTransmission)*(1 - metallic) * fd) +
+               ((1.0f -specularTransmission)* (1 - metallic) * fm) +
+               ((0.25f * clearcoatGlossParam) * fc);
+    return val;
+}

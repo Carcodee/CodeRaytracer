@@ -1,7 +1,6 @@
 
 
 #include "../UtilsShaders/Random.glsl"
-#include "../UtilsShaders/DisneyShadingModel.glsl"
 #define DIFFUSE_TEX 0 
 #define ALPHA_TEX 1 
 #define SPECULAR_TEX 2 
@@ -87,6 +86,10 @@ struct MaterialData {
 	int diffuseOffset;
 	int normalOffset;
 	uint configurations;
+	// disney bsdf
+	float anisotropicIntensity;
+	float clearcoatIntensity;
+	float specularTransmissionIntensity;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	
@@ -120,7 +123,6 @@ vec3 CookTorrance(vec3 normal, vec3 view,vec3 light, float D, float G, vec3 F){
 	float dotProducts= 4 * dot1 * dot2;
 	return DGF/dotProducts;
 }
-
 
 
 float D_GGX(float roughness, vec3 normal, vec3 halfway){
@@ -162,7 +164,6 @@ vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float meta
 	vec3 F = FresnelShilck(wh, wo, FO);
 	vec3 cookTorrence = CookTorrance(normal, wo, wi, D, G, F);
 	vec3 lambert= LambertDiffuse(col);
-	vec3 diffuse = DisneyDiffuse(col, normal, wh, wo, wi, roughness, 0.9f);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
 	vec3 BRDF =  (kd * lambert) + cookTorrence;

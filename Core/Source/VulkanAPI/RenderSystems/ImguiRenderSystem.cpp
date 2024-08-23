@@ -642,7 +642,28 @@ namespace VULKAN
             }
             if(ImGui::SliderFloat("Set All materials Metallic Intensity", &metallicAllMaterials, 0.0f,1.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
-                    pair.second->materialUniform.normalIntensity = metallicAllMaterials;
+                    pair.second->materialUniform.metallicIntensity = metallicAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Anisotropic Intensity", &anisotropicAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.anisotropicIntensity = anisotropicAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Clearcoat Intensity", &clearcoatAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.clearcoatIntensity = clearcoatAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials SpecularTransmission Intensity", &specularTransmissionAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.specularTransmissionIntensity = specularTransmissionAllMaterials;
                 }
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
