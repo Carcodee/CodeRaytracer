@@ -227,7 +227,8 @@ vec3 DisneySheen(vec3 baseCol, vec3 sheenTint, vec3 halfway, vec3 view, vec3 nor
 
 //test 
 
-vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic, float clearcoatGlossParam, float metallic,
+vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic,float clearcoatParam, 
+                   float clearcoatGlossParam, float metallic,
                    float specularTransmission, vec3 sheenTint, float sheen, float refraction,
                    vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
     vec3 fd = DisneyFS(baseCol, normal, halfway, view, lightDir, roughness);
@@ -238,7 +239,7 @@ vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic, float clear
     vec3 val = ((1.0f - specularTransmission) * (1 - metallic) * fd) +
                ((1.0f - metallic) * sheen * fs) +
                ((1.0f - specularTransmission) * (1 - metallic) * fm) +
-               ((0.25f * clearcoatGlossParam) * fc) +
+               ((0.25f * clearcoatParam) * fc) +
                ((1.0f - metallic) * specularTransmission * fg);
     
     return val;

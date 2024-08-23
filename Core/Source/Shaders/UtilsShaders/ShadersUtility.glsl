@@ -89,6 +89,7 @@ struct MaterialData {
 	// disney bsdf
 	float anisotropicIntensity;
 	float clearcoatIntensity;
+	float clearcoatGlossIntensity;
 	float specularTransmissionIntensity;
 	float refraction;
 	float sheen;

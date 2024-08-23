@@ -273,6 +273,10 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("Clearcoat Gloss",&mat.materialUniform.clearcoatGlossIntensity, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
             if(ImGui::SliderFloat("specularTransmission",&mat.materialUniform.specularTransmissionIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;

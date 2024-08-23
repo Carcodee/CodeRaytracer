@@ -52,6 +52,7 @@ namespace VULKAN{
         uint32_t configurations = 0;
         float anisotropicIntensity = 0.5f;
         float clearcoatIntensity = 0.5f;
+        float clearcoatGlossIntensity = 0.5f;
         float specularTransmissionIntensity= 0.999f;
         float refraction = 1.5f;
         float sheen = 0.0f;

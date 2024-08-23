@@ -143,7 +143,8 @@ void main()
     metallic =TryGetFloatFromTex(material.metallicOffset ,uv, material.metallicIntensity);
     roughness =TryGetFloatFromTex(material.roughnessOffset ,uv, material.roughnessIntensity);
   }else{
-    metallic = 0.0f;
+    //metallic = 0.0f;
+    metallic = metallicRoughness.r * material.metallicIntensity;
     roughness = metallicRoughness.g * material.roughnessIntensity;
   }
 
@@ -174,12 +175,23 @@ void main()
   vec3 wlIn = lightDir * TBN ;
   vec3 wlInSample = rayPayload.sampleDir * TBN ;
   vec3 wlOut = view * TBN ;
- 
+  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
+                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
+                                  metallic, material.specularTransmissionIntensity,
+                                  material.sheenTint, material.sheen, material.refraction,
+                                  halfway, view, lightDir, finalNormal, hl, wlIn, wlOut);
+                                    
   vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
   hl = inverseTBN * halfway;
-    
+  
+  vec3 DisneyBSDFInd = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
+                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
+                                  metallic, material.specularTransmissionIntensity,
+                                  material.sheenTint, material.sheen, material.refraction,
+                                  halfway, view, rayPayload.sampleDir, finalNormal, hl, wlIn, wlOut);
+                                        
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
 
@@ -192,8 +204,10 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  //rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+  rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity/ pdfDirect; 
+  //rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  rayPayload.colorLit = DisneyBSDFInd /pdf; 
   
   //rayPayload.color = worldNormal; 
   //rayPayload.color = vec3(diffuseInMat.a); 

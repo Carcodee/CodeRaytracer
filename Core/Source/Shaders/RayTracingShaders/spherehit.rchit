@@ -89,7 +89,8 @@ void main()
   vec3 wlIn = inverseTBN * lightDir;
   vec3 wlOut = inverseTBN * view;
   
-  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
+  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
+                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
                                   metallic, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
                                   halfway, view, lightDir, normal, hl, wlIn, wlOut);
