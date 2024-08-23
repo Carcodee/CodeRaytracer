@@ -53,6 +53,9 @@ namespace VULKAN{
         float anisotropicIntensity = 0.5f;
         float clearcoatIntensity = 0.5f;
         float specularTransmissionIntensity= 0.999f;
+        float refraction = 1.5f;
+        float sheen = 0.0f;
+        glm::vec3 sheenTint = glm::vec3 (0.0f);
         
     };
 

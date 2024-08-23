@@ -277,6 +277,25 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("refraction",&mat.materialUniform.refraction, 1.0f, 2.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            if(ImGui::SliderFloat("Sheen",&mat.materialUniform.sheen, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            float sheenTint[3];
+            sheenTint[0]= mat.materialUniform.sheenTint.x;
+            sheenTint[1]= mat.materialUniform.sheenTint.y;
+            sheenTint[2]= mat.materialUniform.sheenTint.z;
+            if (ImGui::ColorEdit3("Sheen Tint", sheenTint)){
+                mat.materialUniform.sheenTint = glm::make_vec3(sheenTint);
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+
+
+
 
 
         }

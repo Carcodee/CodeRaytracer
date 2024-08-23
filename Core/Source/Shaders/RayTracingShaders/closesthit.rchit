@@ -174,10 +174,7 @@ void main()
   vec3 wlIn = lightDir * TBN ;
   vec3 wlInSample = rayPayload.sampleDir * TBN ;
   vec3 wlOut = view * TBN ;
-  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
-                                  metallic, material.specularTransmissionIntensity,
-                                  halfway, view, lightDir, finalNormal, hl, wlIn, wlOut);
-  
+ 
   vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
@@ -185,9 +182,7 @@ void main()
     
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
-  vec3 DisneyBSDFIndirect = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
-                                metallic, material.specularTransmissionIntensity,
-                                halfway, view, lightDir, finalNormal, hl, wlInSample, wlOut);
+
 
   vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
@@ -197,10 +192,8 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  //rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-  rayPayload.color = DisneyBSDF * myLight.intensity * myLight.col/ pdfDirect; 
-  //rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
-  rayPayload.colorLit = DisneyBSDFIndirect; 
+  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   
   //rayPayload.color = worldNormal; 
   //rayPayload.color = vec3(diffuseInMat.a); 

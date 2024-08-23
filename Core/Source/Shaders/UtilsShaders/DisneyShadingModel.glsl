@@ -1,5 +1,4 @@
 
-#define NConst 1.5 
 // w out is view dir, could change later
 float CosthetaTangent(vec3 v1, vec3 v2){
     return max(dot(v1, v2), 0.001);
@@ -113,8 +112,8 @@ float Ro(float n){
     float ro= pow(n - 1.0f,2.0)/pow(n + 1.0f,2.0);
     return ro;
 }
-float Fc (vec3 halfway, vec3 view){
-    float ro = Ro(NConst);
+float Fc (vec3 halfway, vec3 view, float refraction){
+    float ro = Ro(refraction);
     float costhetaTangent= CosthetaTangent(halfway, view);
     float powPart= (1- ro) * pow(1 - costhetaTangent, 5.0f);
     float result = ro + powPart;
@@ -153,8 +152,8 @@ float Gc(vec3 wlIn, vec3 wlOut){
     return GcIn*GcOut;
 }
 
-float DisneyClearcoat(vec3 halfway, vec3 view, vec3 hl, vec3 wlIn, vec3 wlOut, vec3 normal, vec3 lightDir, float clearcloatGlossParam){
-    float fc = Fc(halfway, view);
+float DisneyClearcoat(vec3 halfway, vec3 view, vec3 hl, vec3 wlIn, vec3 wlOut, vec3 normal, vec3 lightDir, float clearcloatGlossParam, float refraction){
+    float fc = Fc(halfway, view, refraction);
     float dc = Dc(clearcloatGlossParam, hl);
     float gc = Gc(wlIn, wlOut);
     float num = fc*dc*gc;
@@ -162,15 +161,85 @@ float DisneyClearcoat(vec3 halfway, vec3 view, vec3 hl, vec3 wlIn, vec3 wlOut, v
     return num/denom;
 }
 
+//glass
+
+float Rs(vec3 halfway, vec3 wIn, vec3 wOut, float refraction){
+    float num = CosthetaTangent(halfway, wIn) - (refraction * CosthetaTangent(halfway, wOut));
+    float denom = CosthetaTangent(halfway, wIn) + (refraction * CosthetaTangent(halfway, wOut));
+    return num/denom;
+}
+float Rp(vec3 halfway, vec3 wIn, vec3 wOut, float refraction){
+    float num = (refraction *CosthetaTangent(halfway, wIn)) - CosthetaTangent(halfway, wOut);
+    float denom = (refraction *CosthetaTangent(halfway, wIn)) + CosthetaTangent(halfway, wOut);
+    return num/denom;
+}
+float Fg(vec3 halfway, vec3 wIn, vec3 wOut, float refraction){
+    float rs = Rs(halfway, wIn, wOut, refraction);
+    float rp = Rp(halfway, wIn, wOut, refraction);
+    return (1/2) * (pow(rs, 2.0f) + pow(rp, 2.0f));
+}
+vec3 DisneyGlass(vec3 baseCol, float roughness, float anisotropic, float refraction, vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
+    float alphaX;
+    float alphaY;
+    GetAlphas(alphaX, alphaY, anisotropic, roughness);
+    float fg = Fg(halfway, wlIn, wlOut, refraction);
+    float dg = Dm(roughness,anisotropic, hl, alphaX, alphaY);
+    float gg = Gm(roughness, anisotropic, wlIn, wlOut, alphaX, alphaY);
+    float costhetaLight = CosthetaTangent(lightDir, normal);
+    float costhetaView = CosthetaTangent(view, normal);
+    vec3 result;
+    if(costhetaLight * costhetaView > 0){
+        vec3 num = baseCol * fg * dg * gg;
+        float denom = 4 * costhetaLight;
+        result = num/denom;
+    }else{
+        vec3 num = sqrt(baseCol) * (1 - fg)* dg * gg * CosthetaTangent(halfway, lightDir)*CosthetaTangent(halfway, view);
+        float denom = costhetaLight * pow(dot(halfway, lightDir) + (refraction * dot(halfway, view)),2.0f);
+        result= num/denom;
+    }
+    return result;
+}
+
+float Luminance(vec3 baseCol){
+    return 0.2126*baseCol.r +0.7152* baseCol.g +0.0722* baseCol.b;
+}
+//sheen
+vec3 Ctint (vec3 baseCol){
+    float luminance= Luminance(baseCol);
+    if(luminance>0){
+        return baseCol / luminance; 
+    }else{
+        return vec3(1);
+    }
+}
+vec3 Csheen(vec3 baseCol, vec3 sheenTint){
+    vec3 cTint = Ctint(baseCol);
+    vec3 result = (vec3(1) - sheenTint) + (sheenTint * cTint);
+    return result;
+}
+vec3 DisneySheen(vec3 baseCol, vec3 sheenTint, vec3 halfway, vec3 view, vec3 normal){
+    vec3 cSheen = Csheen(baseCol, sheenTint);
+    float costhetaHalfway = CosthetaTangent(halfway, view);
+    float costhetaView = CosthetaTangent(view, normal);
+    vec3 result = cSheen * pow((1 - costhetaHalfway), 5.0f) * costhetaView;
+    return result;
+}
+
 //test 
 
-vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic, float clearcoatGlossParam, float metallic, float specularTransmission,
+vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic, float clearcoatGlossParam, float metallic,
+                   float specularTransmission, vec3 sheenTint, float sheen, float refraction,
                    vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
     vec3 fd = DisneyFS(baseCol, normal, halfway, view, lightDir, roughness);
     vec3 fm = DisneyMetallic(baseCol, roughness, anisotropic, halfway, view, lightDir, normal,hl,wlIn, wlOut);
-    float fc = DisneyClearcoat(halfway, view, hl, wlIn, wlOut, normal, lightDir, clearcoatGlossParam);
-    vec3 val = ((1.0f - specularTransmission)*(1 - metallic) * fd) +
-               ((1.0f -specularTransmission)* (1 - metallic) * fm) +
-               ((0.25f * clearcoatGlossParam) * fc);
+    float fc = DisneyClearcoat(halfway, view, hl, wlIn, wlOut, normal, lightDir, clearcoatGlossParam, refraction);
+    vec3 fg = DisneyGlass(baseCol, roughness, anisotropic, refraction, halfway, view, lightDir, normal,hl,wlIn, wlOut);
+    vec3 fs = DisneySheen(baseCol, sheenTint, halfway, view, normal);
+    vec3 val = ((1.0f - specularTransmission) * (1 - metallic) * fd) +
+               ((1.0f - metallic) * sheen * fs) +
+               ((1.0f - specularTransmission) * (1 - metallic) * fm) +
+               ((0.25f * clearcoatGlossParam) * fc) +
+               ((1.0f - metallic) * specularTransmission * fg);
+    
     return val;
 }

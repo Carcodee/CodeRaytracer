@@ -90,6 +90,9 @@ struct MaterialData {
 	float anisotropicIntensity;
 	float clearcoatIntensity;
 	float specularTransmissionIntensity;
+	float refraction;
+	float sheen;
+	vec3 sheenTint;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	

@@ -88,9 +88,12 @@ void main()
   vec3 hl = inverseTBN * halfway;
   vec3 wlIn = inverseTBN * lightDir;
   vec3 wlOut = inverseTBN * view;
+  
   vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity, material.clearcoatIntensity, 
                                   metallic, material.specularTransmissionIntensity,
+                                  material.sheenTint, material.sheen, material.refraction,
                                   halfway, view, lightDir, normal, hl, wlIn, wlOut);
+                                   
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize(rayPayload.sampleDir + view);
