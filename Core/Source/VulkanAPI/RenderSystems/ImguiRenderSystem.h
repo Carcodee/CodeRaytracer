@@ -91,6 +91,7 @@ namespace VULKAN
         float anisotropicAllMaterials = 1.0f;
         float clearcoatAllMaterials = 1.0f;
         float specularTransmissionAllMaterials = 1.0f;
+        bool UseDisneyBSDF = false;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];

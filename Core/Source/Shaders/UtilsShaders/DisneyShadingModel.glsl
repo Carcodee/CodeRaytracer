@@ -3,6 +3,22 @@
 float CosthetaTangent(vec3 v1, vec3 v2){
     return max(dot(v1, v2), 0.001);
 }
+
+float Luminance(vec3 baseCol){
+    return 0.2126*baseCol.r +0.7152* baseCol.g +0.0722* baseCol.b;
+}
+vec3 Ctint (vec3 baseCol){
+    float luminance= Luminance(baseCol);
+    if(luminance>0){
+        return baseCol / luminance;
+    }else{
+        return vec3(1);
+    }
+}
+float Ro(float n){
+    float ro = pow((n - 1.0f) / (n + 1.0f), 2.0f);
+    return ro;
+}
 //difuse
 float FD90(float roughness, vec3 halfway, vec3 normal){
     float costhetaTangent = CosthetaTangent(halfway, normal);
@@ -66,6 +82,22 @@ vec3 Fm (vec3 baseCol, vec3 view, vec3 halfway){
     return fm;
 }
 
+vec3 Ks(vec3 baseCol, vec3 specularTint){
+    vec3 cTint= Ctint(baseCol);
+    return (vec3(1.0f) - specularTint) + (specularTint * cTint);
+}
+vec3 Co(vec3 baseCol, vec3 specularTint, float specular, float metallic, float refraction){
+    float ro = Ro(refraction);
+    vec3 ks = Ks(baseCol, specularTint);
+    return (specular * ro * (1 - metallic) * ks) + (metallic * baseCol);
+    
+}
+vec3 FmHat (vec3 baseCol, vec3 view, vec3 halfway, vec3 specularTint, float specular, float metallic, float refraction){
+    vec3 co = Co(baseCol, specularTint, specular, metallic, refraction);
+    vec3 result = co + ((vec3(1.0f) - co) * pow((1 - dot(halfway, view)), 5.0f));
+    return result;
+}
+
 //hl is halfway in tangent space
 float Dm(float roughness,float anisotropic, vec3 hl, float alphaX, float alphaY){
     float hlpowX = pow(hl.x, 2.0f);
@@ -95,11 +127,11 @@ float Gm(float roughness, float anisotropic, vec3 wlIn, vec3 wlOut, float alphaX
     return GIn*GOut;
 }
 
-vec3 DisneyMetallic(vec3 baseCol, float roughness, float anisotropic, vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
+vec3 DisneyMetallic(vec3 baseCol, vec3 specularTint, float roughness, float anisotropic, float metallic,float refraction, float specular, vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
     float alphaX;
     float alphaY;
     GetAlphas(alphaX, alphaY, anisotropic, roughness);
-    vec3 fm =Fm(baseCol, view, halfway);
+    vec3 fm =FmHat(baseCol, view, halfway, specularTint, specular, metallic, refraction);
     float dm = Dm(roughness, anisotropic, hl, alphaX, alphaY);
     float gm= Gm(roughness, anisotropic, wlIn, wlOut, alphaX, alphaY);
     vec3 num = fm*dm*gm;
@@ -108,10 +140,7 @@ vec3 DisneyMetallic(vec3 baseCol, float roughness, float anisotropic, vec3 halfw
 }
 
 // clearcoat
-float Ro(float n){
-    float ro= pow(n - 1.0f,2.0)/pow(n + 1.0f,2.0);
-    return ro;
-}
+
 float Fc (vec3 halfway, vec3 view, float refraction){
     float ro = Ro(refraction);
     float costhetaTangent= CosthetaTangent(halfway, view);
@@ -200,18 +229,8 @@ vec3 DisneyGlass(vec3 baseCol, float roughness, float anisotropic, float refract
     return result;
 }
 
-float Luminance(vec3 baseCol){
-    return 0.2126*baseCol.r +0.7152* baseCol.g +0.0722* baseCol.b;
-}
 //sheen
-vec3 Ctint (vec3 baseCol){
-    float luminance= Luminance(baseCol);
-    if(luminance>0){
-        return baseCol / luminance; 
-    }else{
-        return vec3(1);
-    }
-}
+
 vec3 Csheen(vec3 baseCol, vec3 sheenTint){
     vec3 cTint = Ctint(baseCol);
     vec3 result = (vec3(1) - sheenTint) + (sheenTint * cTint);
@@ -228,11 +247,11 @@ vec3 DisneySheen(vec3 baseCol, vec3 sheenTint, vec3 halfway, vec3 view, vec3 nor
 //test 
 
 vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float anisotropic,float clearcoatParam, 
-                   float clearcoatGlossParam, float metallic,
+                   float clearcoatGlossParam, float metallic, float specular, vec3 specularTint,
                    float specularTransmission, vec3 sheenTint, float sheen, float refraction,
                    vec3 halfway, vec3 view, vec3 lightDir, vec3 normal,vec3 hl,vec3 wlIn, vec3 wlOut){
     vec3 fd = DisneyFS(baseCol, normal, halfway, view, lightDir, roughness);
-    vec3 fm = DisneyMetallic(baseCol, roughness, anisotropic, halfway, view, lightDir, normal,hl,wlIn, wlOut);
+    vec3 fm = DisneyMetallic(baseCol, specularTint, roughness, anisotropic, metallic,refraction, specular, halfway, view, lightDir, normal,hl,wlIn, wlOut);
     float fc = DisneyClearcoat(halfway, view, hl, wlIn, wlOut, normal, lightDir, clearcoatGlossParam, refraction);
     vec3 fg = DisneyGlass(baseCol, roughness, anisotropic, refraction, halfway, view, lightDir, normal,hl,wlIn, wlOut);
     vec3 fs = DisneySheen(baseCol, sheenTint, halfway, view, normal);

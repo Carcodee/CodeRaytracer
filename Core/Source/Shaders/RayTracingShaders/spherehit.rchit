@@ -91,7 +91,7 @@ void main()
   
   vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specularTransmissionIntensity,
+                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
                                   halfway, view, lightDir, normal, hl, wlIn, wlOut);
                                    

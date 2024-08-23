@@ -185,7 +185,7 @@ namespace VULKAN
             DisplayMatTexture(mat,EMISSIVE, iconSize, "Emissive");
         }
         {
-            if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 2.0f,"%.3f")){
+            if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 1.0f,"%.3f")){
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
             if(ImGui::SliderFloat("reflectivity",&mat.materialUniform.reflectivityIntensity, 0.0f, 1.0f,"%.3f")){
@@ -289,6 +289,19 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("Specular",&mat.materialUniform.specular, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            float specularTint[3];
+            specularTint[0]= mat.materialUniform.specularTint.x;
+            specularTint[1]= mat.materialUniform.specularTint.y;
+            specularTint[2]= mat.materialUniform.specularTint.z;
+            if (ImGui::ColorEdit3("Specular Tint", specularTint)){
+                mat.materialUniform.specularTint = glm::make_vec3(specularTint);
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+
             float sheenTint[3];
             sheenTint[0]= mat.materialUniform.sheenTint.x;
             sheenTint[1]= mat.materialUniform.sheenTint.y;

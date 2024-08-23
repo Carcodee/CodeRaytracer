@@ -598,7 +598,13 @@ namespace VULKAN
                 InputHandler::editingGraphics= true;
             }
             ImGui::SeparatorText("All Materials Configs");
-            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,2.0f,"%.3f")){
+            if(ImGui::Checkbox( "Use Disney BSDF", &UseDisneyBSDF)){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->SetConfigVal(USE_DISNEY_BSDF, UseDisneyBSDF);
+                }
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
+            if(ImGui::SliderFloat("Set All materials roughness", &roughnessAllMaterials, 0.0f,1.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.roughnessIntensity = roughnessAllMaterials;
                 }
@@ -668,6 +674,7 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+
             
             if (pushConstantBlockRsRef != nullptr){
                 ImGui::SeparatorText("Push Constants");

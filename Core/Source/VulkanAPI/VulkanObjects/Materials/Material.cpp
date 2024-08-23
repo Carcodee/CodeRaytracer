@@ -234,6 +234,9 @@ namespace VULKAN{
             case USE_ALPHA_OF_DIFFUSE_COLOR:
                 val = (currentConfigs & (1 << 2)) != 0;
                 break;
+            case USE_DISNEY_BSDF:
+                val = (currentConfigs & (1 << 3)) != 0;
+                break;
             default:
                 val = false;
                 assert(val && "Provide a valid configuration type");
@@ -252,6 +255,9 @@ namespace VULKAN{
                 break;
             case USE_ALPHA_OF_DIFFUSE_COLOR:
                 maskValue  = 1 << 2;
+                break;
+            case USE_DISNEY_BSDF:
+                maskValue  = 1 << 3;
                 break;
         }
         if (value){

@@ -177,7 +177,7 @@ void main()
   vec3 wlOut = view * TBN ;
   vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specularTransmissionIntensity,
+                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
                                   halfway, view, lightDir, finalNormal, hl, wlIn, wlOut);
                                     
@@ -185,12 +185,12 @@ void main()
   
   halfway = normalize((-rayPayload.sampleDir) + view);
   hl = inverseTBN * halfway;
-  
   vec3 DisneyBSDFInd = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specularTransmissionIntensity,
+                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
-                                  halfway, view, rayPayload.sampleDir, finalNormal, hl, wlIn, wlOut);
+                                  halfway, view, rayPayload.sampleDir, finalNormal, hl, wlIn, wlOut); 
+ 
                                         
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
@@ -204,10 +204,17 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  //rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-  rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity/ pdfDirect; 
-  //rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
-  rayPayload.colorLit = DisneyBSDFInd /pdf; 
+  
+  MaterialConfigurations configs;
+  GetMatConfigs(material.configurations, configs);
+  
+  if(configs.useDisneyBSDF){
+    rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity / pdfDirect; 
+  }else{
+    rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+  }
+  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+  //rayPayload.colorLit = DisneyBSDFInd /pdf; 
   
   //rayPayload.color = worldNormal; 
   //rayPayload.color = vec3(diffuseInMat.a); 
