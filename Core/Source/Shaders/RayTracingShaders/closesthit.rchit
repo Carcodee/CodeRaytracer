@@ -175,7 +175,7 @@ void main()
   vec3 wlIn = lightDir * TBN ;
   vec3 wlInSample = rayPayload.sampleDir * TBN ;
   vec3 wlOut = view * TBN ;
-  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
+  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
                                   metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
@@ -185,7 +185,7 @@ void main()
   
   halfway = normalize((-rayPayload.sampleDir) + view);
   hl = inverseTBN * halfway;
-  vec3 DisneyBSDFInd = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.anisotropicIntensity,
+  vec3 DisneyBSDFInd = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
                                   metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
                                   material.sheenTint, material.sheen, material.refraction,
@@ -210,11 +210,12 @@ void main()
   
   if(configs.useDisneyBSDF){
     rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity / pdfDirect; 
+    rayPayload.colorLit = DisneyBSDFInd /pdf; 
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
+    rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   }
-  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
-  //rayPayload.colorLit = DisneyBSDFInd /pdf; 
+  
   
   //rayPayload.color = worldNormal; 
   //rayPayload.color = vec3(diffuseInMat.a); 

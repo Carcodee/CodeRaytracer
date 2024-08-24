@@ -89,14 +89,15 @@ struct MaterialData {
 	uint configurations;
 	// disney bsdf
 	float anisotropicIntensity;
+	float subSurfaceIntensity;
 	float clearcoatIntensity;
 	float clearcoatGlossIntensity;
 	float specularTransmissionIntensity;
 	float refraction;
 	float sheen;
 	float specular;
-    vec3 specularTint;
-	vec3 sheenTint;
+    float specularTint;
+	float sheenTint;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	

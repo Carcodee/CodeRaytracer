@@ -594,7 +594,7 @@ namespace VULKAN
             if(ImGui::ColorEdit3("light Col", lightCol, 0.0f)){
                 InputHandler::editingGraphics= true;
             }
-            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,100.0f,"%.3f")){
+            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,1.0f,"%.3f")){
                 InputHandler::editingGraphics= true;
             }
             ImGui::SeparatorText("All Materials Configs");
@@ -653,9 +653,17 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+            ImGui::SeparatorText("Disney BSDF");
             if(ImGui::SliderFloat("Set All materials Anisotropic Intensity", &anisotropicAllMaterials, 0.0f,1.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.anisotropicIntensity = anisotropicAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Subsurface Intensity", &subSurfaceAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.subSurfaceIntensity = subSurfaceAllMaterials;
                 }
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
@@ -667,6 +675,49 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+            if(ImGui::SliderFloat("Set All materials ClearcoatGloss Intensity", &clearcoatGlossAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.clearcoatGlossIntensity = clearcoatGlossAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Refraction Intensity", &refractionAllMaterials, 1.0f,2.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.refraction = refractionAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Specular Intensity", &specularAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.specular = specularAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Specular Tint Intensity", &specularTintAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.specularTint = specularTintAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Sheen Intensity", &sheenAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.sheen = sheenAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            if(ImGui::SliderFloat("Set All materials Sheen Tint Intensity", &sheenTintAllMaterials, 0.0f,1.0f,"%.3f")){
+                for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
+                    pair.second->materialUniform.sheenTint = sheenTintAllMaterials;
+                }
+                ModelHandler::GetInstance()->updateMaterialData = true;
+                InputHandler::editingGraphics= true;
+            }
+            
             if(ImGui::SliderFloat("Set All materials SpecularTransmission Intensity", &specularTransmissionAllMaterials, 0.0f,1.0f,"%.3f")){
                 for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp) {
                     pair.second->materialUniform.specularTransmissionIntensity = specularTransmissionAllMaterials;
@@ -674,6 +725,7 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData = true;
                 InputHandler::editingGraphics= true;
             }
+            
 
             
             if (pushConstantBlockRsRef != nullptr){

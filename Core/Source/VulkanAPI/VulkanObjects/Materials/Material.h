@@ -52,14 +52,15 @@ namespace VULKAN{
         //80
         uint32_t configurations = 0;
         float anisotropicIntensity = 0.5f;
+        float subSurfaceIntensity = 0.5f;
         float clearcoatIntensity = 0.0f;
         float clearcoatGlossIntensity = 0.5f;
         float specularTransmissionIntensity= 0.999f;
         float refraction = 1.5f;
         float sheen = 0.0f;
         float specular = 0.5f;
-        glm::vec3 specularTint = glm::vec3 (1.0f);
-        glm::vec3 sheenTint = glm::vec3 (1.0f);
+        float specularTint = 1.0f;
+        float sheenTint = 1.0f;
         
     };
 

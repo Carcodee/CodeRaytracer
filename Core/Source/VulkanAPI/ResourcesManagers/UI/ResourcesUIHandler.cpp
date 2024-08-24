@@ -269,6 +269,10 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("Subsurface",&mat.materialUniform.subSurfaceIntensity, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
             if(ImGui::SliderFloat("Clearcoat",&mat.materialUniform.clearcoatIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
@@ -289,27 +293,20 @@ namespace VULKAN
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
+            if(ImGui::SliderFloat("Sheen tint",&mat.materialUniform.sheenTint, 0.0f, 1.0f,"%.3f")){
+
+                ModelHandler::GetInstance()->updateMaterialData= true;
+            }
             if(ImGui::SliderFloat("Specular",&mat.materialUniform.specular, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            float specularTint[3];
-            specularTint[0]= mat.materialUniform.specularTint.x;
-            specularTint[1]= mat.materialUniform.specularTint.y;
-            specularTint[2]= mat.materialUniform.specularTint.z;
-            if (ImGui::ColorEdit3("Specular Tint", specularTint)){
-                mat.materialUniform.specularTint = glm::make_vec3(specularTint);
+            if(ImGui::SliderFloat("Specular tint",&mat.materialUniform.specularTint, 0.0f, 1.0f,"%.3f")){
+
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
 
-            float sheenTint[3];
-            sheenTint[0]= mat.materialUniform.sheenTint.x;
-            sheenTint[1]= mat.materialUniform.sheenTint.y;
-            sheenTint[2]= mat.materialUniform.sheenTint.z;
-            if (ImGui::ColorEdit3("Sheen Tint", sheenTint)){
-                mat.materialUniform.sheenTint = glm::make_vec3(sheenTint);
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
+
 
 
 

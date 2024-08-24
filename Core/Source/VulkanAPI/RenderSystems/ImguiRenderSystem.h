@@ -88,8 +88,16 @@ namespace VULKAN
         float allMaterialsEmissive = 1.0f;
         float allMaterialsAlbedo = 1.0f;
         float metallicAllMaterials = 1.0f;
+        //disney bsdf
         float anisotropicAllMaterials = 1.0f;
+        float subSurfaceAllMaterials = 1.0f;
         float clearcoatAllMaterials = 1.0f;
+        float clearcoatGlossAllMaterials = 1.0f;
+        float refractionAllMaterials = 1.5f;
+        float specularAllMaterials = 0.5f;
+        float specularTintAllMaterials = 0.5f;
+        float sheenAllMaterials = 0.5f;
+        float sheenTintAllMaterials = 0.5f;
         float specularTransmissionAllMaterials = 1.0f;
         bool UseDisneyBSDF = false;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
