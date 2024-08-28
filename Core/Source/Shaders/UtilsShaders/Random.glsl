@@ -1,6 +1,14 @@
 
 
+#ifndef RANDOM 
+#define RANDOM 
+
 #define PI 3.1415
+
+float CosinePdfHemisphere(float cosTheta)
+{
+    return cosTheta / PI;
+}
 
 vec3 CosineSampleHemisphere(vec2 E)
 {
@@ -64,3 +72,5 @@ vec3 NextVec3(inout uvec2 seed)
 {
     return vec3(NextFloat(seed), NextFloat(seed), NextFloat(seed));
 }
+
+#endif 

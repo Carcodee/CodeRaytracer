@@ -216,10 +216,6 @@ vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
 }
 
 //pdf for brdf in my case
-float CosinePdfHemisphere(float cosTheta)
-{
-	return cosTheta / PI;
-}
 
 float MaxComponent(vec3 v)
 {

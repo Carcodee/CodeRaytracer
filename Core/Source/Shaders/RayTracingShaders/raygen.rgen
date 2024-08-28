@@ -146,6 +146,8 @@ void main()
         result += irradiance; 
     }
     result = result/SAMPLE_COUNT;
+    //result = pow(result, vec3(1.0/2.2));
+    
     AOResult = AOResult/SAMPLE_COUNT;
     
     if(pc.currentFrame>0){

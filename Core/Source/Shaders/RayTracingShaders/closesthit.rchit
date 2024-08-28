@@ -151,7 +151,6 @@ void main()
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       //mat3 inverseTBN = inverse(TBN);
-      //tang space to world space cus is a orthonormal basis and no transpose is needed :D
       finalNormal = normalize(TBN * normalInMat.xyz); 
   }
 
@@ -171,10 +170,10 @@ void main()
   
     
   mat3 inverseTBN = transpose(TBN);
-  vec3 hl = halfway * TBN ;
-  vec3 wlIn = lightDir * TBN ;
-  vec3 wlInSample = rayPayload.sampleDir * TBN ;
-  vec3 wlOut = view * TBN ;
+  vec3 hl = inverseTBN * halfway;
+  vec3 wlIn = inverseTBN * lightDir ;
+  vec3 wlInSample =inverseTBN * rayPayload.sampleDir;
+  vec3 wlOut = inverseTBN * view ;
   vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
                                   material.clearcoatIntensity, material.clearcoatGlossIntensity,
                                   metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
@@ -209,8 +208,8 @@ void main()
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
-    rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity / pdfDirect; 
-    rayPayload.colorLit = DisneyBSDFInd /pdf; 
+    rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity; 
+    rayPayload.colorLit = DisneyBSDFInd; 
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 

@@ -36,6 +36,10 @@ float FSSW(vec3 halfway, vec3 view, vec3 w, vec3 normal, float roughness){
     float result = (1.0f + ((fss90 - 1)*(pow(1 - costhetaTangent, 5.0f))));
     return result;
 }
+float FDDiffuse(float fd90, float costheta){
+    float result = 1.0f + ((fd90 - 1.0f) * pow(1 - costheta, 2.0f));
+    return result;
+}
 
 vec3 DisneyFS(vec3 baseCol, vec3 normal, vec3 halfway, vec3 view, vec3 lightDir, float rougness){
     
@@ -54,13 +58,12 @@ vec3 DisneyFD(vec3 baseCol, vec3 normal, vec3 halfway, vec3 view, vec3 lightDir,
     vec3 lambert = baseCol/3.14f;
     float costhetaLight = CosthetaTangent(lightDir, normal);
     float costhetaView = CosthetaTangent(view, normal);
-    float FD90Val = FD90(rougness, halfway, normal);
-    float fdPart = FD90Val - 1.0f;
-    float viewPart = pow(1.0f - costhetaView, 5.0f);
-    float lightPart = pow(1.0f - costhetaLight, 5.0f);
-    vec3 fd = lambert*(1.0f + (fdPart * lightPart))*(1.0f + (fdPart * viewPart));
+    float fd90 = FD90(rougness, halfway, normal);
+    float fdView = FDDiffuse(fd90, costhetaView);
+    float fdLight = FDDiffuse(fd90, costhetaLight);
+    vec3 result = lambert * fdView * fdLight * costhetaView;
     
-    return fd;
+    return result;
 };
 
 vec3 DisneyDiffuse(vec3 baseCol, vec3 normal, vec3 halfway, vec3 view, vec3 lightDir, float rougness, float subsurface){
@@ -71,9 +74,9 @@ vec3 DisneyDiffuse(vec3 baseCol, vec3 normal, vec3 halfway, vec3 view, vec3 ligh
 }
 
 void GetAlphas(out float alphaX, out float alphaY, float anisotropic, float roughness){
-    float aspect = sqrt(1.0f - (0.9f*(max(anisotropic, 0.001f))));
-    alphaX = max(pow(roughness, 2)/aspect,0.001f);
-    alphaY = max(pow(roughness, 2)*aspect,0.001f);
+    float aspect = sqrt(1.0f - (0.9f*(anisotropic)));
+    alphaX = max(pow(roughness, 2.0f)/aspect,0.001f);
+    alphaY = max(pow(roughness, 2.0f)*aspect,0.001f);
 }
 
 //metallic
@@ -133,11 +136,12 @@ vec3 DisneyMetallic(vec3 baseCol, float specularTint, float roughness, float ani
     GetAlphas(alphaX, alphaY, anisotropic, roughness);
     vec3 fm =FmHat(baseCol, view, halfway, specularTint, specular, metallic, refraction);
     float dm = Dm(roughness, anisotropic, hl, alphaX, alphaY);
-    float gm= Gm(roughness, anisotropic, wlIn, wlOut, alphaX, alphaY);
+    //light dir and view maybe are both wl terms
+    float gm= Gm(roughness, anisotropic, lightDir, view, alphaX, alphaY);
     vec3 num = fm*gm*dm;
-    float denom = 4* CosthetaTangent(normal, lightDir);
+    float denom = 4* CosthetaTangent(lightDir, normal);
     return num/denom;
-}
+} 
 
 // clearcoat
 
@@ -246,6 +250,7 @@ vec3 DisneySheen(vec3 baseCol, float sheenTint, vec3 halfway, vec3 view, vec3 no
 
 //test 
 
+//good for spheres but is not working
 vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float subSurface, float anisotropic,float clearcoatParam, 
                    float clearcoatGlossParam, float metallic, float specular, float specularTint,
                    float specularTransmission, float sheenTint, float sheen, float refraction,
@@ -257,15 +262,11 @@ vec3 GetDisneyBSDF(vec3 baseCol, float roughness, float subSurface, float anisot
     vec3 fg = DisneyGlass(baseCol, roughness, anisotropic, refraction, halfway, view, lightDir, normal,hl,wlIn, wlOut);
     
     
-//    vec3 val = ((1.0f - specularTransmission) * (1 - metallic) * fd) +
-//               ((1.0f - metallic) * sheen * fs) +
-//               ((1.0f - specularTransmission) * (1 - metallic) * fm) +
-//               ((0.25f * clearcoatParam) * fc) +
-//               ((1.0f - metallic) * specularTransmission * fg);
-//    
     vec3 val = ((1.0f - specularTransmission) * (1 - metallic) * fd) +
                ((1.0f - metallic) * sheen * fs) +
-               ((1.0f - (specularTransmission * (1 - metallic))) * fm);
+               ((1.0f - specularTransmission) * (1 - metallic) * fm) +
+               ((0.25f * clearcoatParam) * fc);
+//               ((1.0f - metallic) * specularTransmission * fg);
 
     return val;
 }
