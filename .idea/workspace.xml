@@ -25,11 +25,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="starting new implementation and some helper funtions">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -298,14 +295,9 @@
       <workItem from="1724726468797" duration="1213000" />
       <workItem from="1724771928275" duration="14868000" />
       <workItem from="1724879400615" duration="45000" />
-    </task>
-    <task id="LOCAL-00011" summary="Fixed the path insertion">
-      <option name="closed" value="true" />
-      <created>1721168824793</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1721168824793</updated>
+      <workItem from="1724940982439" duration="5730000" />
+      <workItem from="1724963121115" duration="6000" />
+      <workItem from="1724963447143" duration="1000" />
     </task>
     <task id="LOCAL-00012" summary="shadows implemented">
       <option name="closed" value="true" />
@@ -691,7 +683,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724815326140</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="starting new implementation and some helper funtions">
+      <option name="closed" value="true" />
+      <created>1724946957161</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1724946957161</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -748,7 +748,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="some changes but indirect reflections are giving weird resoults" />
     <MESSAGE value="implementing spheres :D" />
     <MESSAGE value="Added spheres" />
     <MESSAGE value="Fixed spheres, new ui selector to do" />
@@ -773,6 +772,7 @@
     <MESSAGE value="bsdf still on progress" />
     <MESSAGE value="BSDF implemented but not fully functional" />
     <MESSAGE value="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one" />
-    <option name="LAST_COMMIT_MESSAGE" value="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one" />
+    <MESSAGE value="starting new implementation and some helper funtions" />
+    <option name="LAST_COMMIT_MESSAGE" value="starting new implementation and some helper funtions" />
   </component>
 </project>
