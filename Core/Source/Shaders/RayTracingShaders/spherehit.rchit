@@ -88,12 +88,6 @@ void main()
   vec3 hl = inverseTBN * halfway;
   vec3 wlIn = inverseTBN * lightDir;
   vec3 wlOut = inverseTBN * view;
-  
-  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
-                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
-                                  material.sheenTint, material.sheen, material.refraction,
-                                  halfway, view, lightDir, normal, hl, wlIn, wlOut);
                                    
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
@@ -109,7 +103,6 @@ void main()
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
   rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
-  rayPayload.color = DisneyBSDF * myLight.intensity * myLight.col; 
   rayPayload.colorLit = pbrLitIndirect; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;

@@ -1,11 +1,9 @@
 
 
 #include "../UtilsShaders/Random.glsl"
-#define DIFFUSE_TEX 0 
-#define ALPHA_TEX 1 
-#define SPECULAR_TEX 2 
-#define BUMP_TEX 3 
-#define AMBIENT_TEX 4 
+
+#ifndef Utils 
+#define Utils 
 
 struct RayPayload{
 	vec3 color;
@@ -88,11 +86,11 @@ struct MaterialData {
 	int normalOffset;
 	uint configurations;
 	// disney bsdf
-	float anisotropicIntensity;
-	float subSurfaceIntensity;
-	float clearcoatIntensity;
-	float clearcoatGlossIntensity;
-	float specularTransmissionIntensity;
+	float anisotropic;
+	float subSurface;
+	float clearcoat;
+	float clearcoatGloss;
+	float specularTransmission;
 	float refraction;
 	float sheen;
 	float specular;
@@ -263,3 +261,5 @@ vec3 TangentToWorldWithTangent(vec3 sampleVec, vec3 normal, vec3 tangent)
 vec3 GetReflection(vec3 reflectedDir, vec3 randomDir, float rougness){
 	return normalize(mix(reflectedDir, randomDir, rougness));
 }
+
+#endif 

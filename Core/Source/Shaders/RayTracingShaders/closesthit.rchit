@@ -174,22 +174,13 @@ void main()
   vec3 wlIn = inverseTBN * lightDir ;
   vec3 wlInSample =inverseTBN * rayPayload.sampleDir;
   vec3 wlOut = inverseTBN * view ;
-  vec3 DisneyBSDF = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
-                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
-                                  material.sheenTint, material.sheen, material.refraction,
-                                  halfway, view, lightDir, finalNormal, hl, wlIn, wlOut);
+                                    
                                     
   vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
   hl = inverseTBN * halfway;
-  vec3 DisneyBSDFInd = GetDisneyBSDF(diffuseInMat.xyz, roughness, material.subSurfaceIntensity, material.anisotropicIntensity,
-                                  material.clearcoatIntensity, material.clearcoatGlossIntensity,
-                                  metallic, material.specular, material.specularTint, material.specularTransmissionIntensity,
-                                  material.sheenTint, material.sheen, material.refraction,
-                                  halfway, view, rayPayload.sampleDir, finalNormal, hl, wlIn, wlOut); 
- 
+
                                         
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
@@ -208,8 +199,6 @@ void main()
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
-    rayPayload.color = DisneyBSDF * myLight.col * myLight.intensity; 
-    rayPayload.colorLit = DisneyBSDFInd; 
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 

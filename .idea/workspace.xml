@@ -25,15 +25,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="BSDF implemented but not fully functional">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Random.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/ObjectLoader/ModelLoaderHandler.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -300,15 +296,8 @@
       <workItem from="1724453432995" duration="2106000" />
       <workItem from="1724470785723" duration="9705000" />
       <workItem from="1724726468797" duration="1213000" />
-      <workItem from="1724771928275" duration="14280000" />
-    </task>
-    <task id="LOCAL-00010" summary="PBR model changes">
-      <option name="closed" value="true" />
-      <created>1721082777102</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1721082777102</updated>
+      <workItem from="1724771928275" duration="14868000" />
+      <workItem from="1724879400615" duration="45000" />
     </task>
     <task id="LOCAL-00011" summary="Fixed the path insertion">
       <option name="closed" value="true" />
@@ -694,7 +683,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724481760400</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one">
+      <option name="closed" value="true" />
+      <created>1724815326139</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1724815326140</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -751,7 +748,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="good advances on global ilumination" />
     <MESSAGE value="some changes but indirect reflections are giving weird resoults" />
     <MESSAGE value="implementing spheres :D" />
     <MESSAGE value="Added spheres" />
@@ -776,6 +772,7 @@
     <MESSAGE value="metallic implementation" />
     <MESSAGE value="bsdf still on progress" />
     <MESSAGE value="BSDF implemented but not fully functional" />
-    <option name="LAST_COMMIT_MESSAGE" value="BSDF implemented but not fully functional" />
+    <MESSAGE value="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one" />
+    <option name="LAST_COMMIT_MESSAGE" value="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one" />
   </component>
 </project>
