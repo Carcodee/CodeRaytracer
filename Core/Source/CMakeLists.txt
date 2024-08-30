@@ -123,7 +123,7 @@ add_subdirectory("${CORE_BASE_DIR}/Libraries/tinyobjloader-release")
 set(TINYGLTF_HEADER_ONLY OFF)
 add_subdirectory("${CORE_BASE_DIR}/Libraries/tinygltf-release")
 
-set (GLM_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/glm")
+set (GLM_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries")
 set (TINY_OBJ_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/tinyobjloader-release")
 set (TINY_GLTF_INCLUDE_DIR "${CORE_BASE_DIR}/Libraries/tinygltf-release")
 
@@ -141,7 +141,6 @@ target_include_directories(Core PUBLIC
         ${TINY_GLTF_INCLUDE_DIR}
 )
 
-#${TINY_GLTF_INCLUDE_DIR}
 target_link_directories(Core PUBLIC
         ${GLFW_LIB_DIR}
         ${VULKAN_LIB_DIR}
