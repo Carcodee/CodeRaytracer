@@ -138,7 +138,7 @@ void main()
                 rayThroughput = min(vec3(pc.maxVariance), rayThroughput);
             
             }
-    
+    //
 
         }
         
