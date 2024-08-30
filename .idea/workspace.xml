@@ -297,15 +297,8 @@
       <workItem from="1724879400615" duration="45000" />
       <workItem from="1724940982439" duration="5730000" />
       <workItem from="1724963121115" duration="6000" />
-      <workItem from="1724963447143" duration="1000" />
-    </task>
-    <task id="LOCAL-00012" summary="shadows implemented">
-      <option name="closed" value="true" />
-      <created>1721311063465</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1721311063465</updated>
+      <workItem from="1724963447143" duration="48000" />
+      <workItem from="1725029543593" duration="2000" />
     </task>
     <task id="LOCAL-00013" summary="changed the ImguiRenderSystem.cpp to singleton">
       <option name="closed" value="true" />
@@ -691,7 +684,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724946957161</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="starting new implementation and some helper funtions">
+      <option name="closed" value="true" />
+      <created>1724963480205</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1724963480206</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
