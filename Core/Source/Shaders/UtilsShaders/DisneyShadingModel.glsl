@@ -30,6 +30,7 @@ void CalculateLobePdfs(MaterialData material,float pSpecular, float pDiffuse, fl
 }
 
 
+//Sheen
 //=============================================================================================================================
 vec3 CalculateTint(vec3 baseColor)
 {
@@ -46,4 +47,25 @@ vec3 EvaluateSheen(MaterialData material, vec3 wo, vec3 wl, vec3 wi)
     float dotHL = dot(wl, wi);
     vec3 tint = CalculateTint(material.diffuseColor.xyz);
     return material.sheen * Lerp(vec3(1.0f), tint, material.sheenTint) * SchlickWeight(dotHL);
+}
+
+//Clearcoat
+//===================================================================================================================
+float GTR1(float absDotHL, float a)
+{
+    if(a >= 1) {
+        return INV_PI;
+    }
+
+    float a2 = a * a;
+    return (a2 - 1.0f) / (PI * log2(a2) * (1.0f + (a2 - 1.0f) * absDotHL * absDotHL));
+}
+
+//===================================================================================================================
+float SeparableSmithGGXG1(vec3 w,vec3 n, float a)
+{
+    float a2 = a * a;
+    float absDotNV = AbsCosTheta(w, n);
+
+    return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
 }

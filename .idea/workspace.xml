@@ -28,15 +28,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="starting new implementation and some helper funtions">
-      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="Added some missing folders">
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/Utility/InputSystem/InputHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/VulkanAPI/compile.bat" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/VulkanAPI/compile.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Shading.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Shading.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,17 +112,12 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CPPToolchains&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RunManager" selected="CMake Application.Editor">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Editor" type="CMakeListConfigurationType" factoryName="CMakeListConfigurationFactory" temporary="true">
       <method v="2" />
     </configuration>
@@ -167,8 +158,8 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="CMake Application.Editor" />
       <item itemvalue="CMake Application.Core" />
+      <item itemvalue="CMake Application.Editor" />
       <item itemvalue="CMake Application.loader_example" />
       <item itemvalue="CMake Application.tinygltf" />
       <item itemvalue="CMake Application.tinyobjloader" />
@@ -329,22 +320,10 @@
       <workItem from="1724963121115" duration="6000" />
       <workItem from="1724963447143" duration="48000" />
       <workItem from="1725029543593" duration="2000" />
-    </task>
-    <task id="LOCAL-00013" summary="changed the ImguiRenderSystem.cpp to singleton">
-      <option name="closed" value="true" />
-      <created>1721340424521</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1721340424521</updated>
-    </task>
-    <task id="LOCAL-00014" summary="changed the ImguiRenderSystem.cpp to singleton">
-      <option name="closed" value="true" />
-      <created>1721344057799</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1721344057799</updated>
+      <workItem from="1725049744894" duration="533000" />
+      <workItem from="1725050291500" duration="57000" />
+      <workItem from="1725050369983" duration="1236000" />
+      <workItem from="1725052188510" duration="399000" />
     </task>
     <task id="LOCAL-00015" summary="now materials have an inspector too">
       <option name="closed" value="true" />
@@ -722,7 +701,23 @@
       <option name="project" value="LOCAL" />
       <updated>1724963480206</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="Added some missing folders">
+      <option name="closed" value="true" />
+      <created>1725034768119</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1725034768119</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Added some missing folders">
+      <option name="closed" value="true" />
+      <created>1725034773293</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1725034773293</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -778,7 +773,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="implementing spheres :D" />
     <MESSAGE value="Added spheres" />
     <MESSAGE value="Fixed spheres, new ui selector to do" />
     <MESSAGE value="A lot of ui changes" />
@@ -803,6 +797,7 @@
     <MESSAGE value="BSDF implemented but not fully functional" />
     <MESSAGE value="After testing the bsdf is not working as expected, I will change the whole implementation for a more stable one" />
     <MESSAGE value="starting new implementation and some helper funtions" />
-    <option name="LAST_COMMIT_MESSAGE" value="starting new implementation and some helper funtions" />
+    <MESSAGE value="Added some missing folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added some missing folders" />
   </component>
 </project>
