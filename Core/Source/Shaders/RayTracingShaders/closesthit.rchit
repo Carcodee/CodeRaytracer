@@ -188,6 +188,14 @@ void main()
 
   vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
+  float forwardPdfD;
+  float forwardPdfI;
+  bool thin = true;
+  vec3 disneyDirect= DisneyEval(material, view, lightDir, finalNormal,  forwardPdfD);
+  float pdfI;
+  vec3 sampleDir = DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
+  vec3 disneyIndirect= DisneyEval(material, view, sampleDir, finalNormal, forwardPdfI);
+  
   rayPayload.shadow = true;
   float tmin = 0.001;
   float tmax = 10000.0; 
@@ -199,6 +207,8 @@ void main()
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
+    rayPayload.color = disneyDirect * myLight.col  * myLight.intensity; 
+    rayPayload.colorLit = disneyIndirect; 
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 

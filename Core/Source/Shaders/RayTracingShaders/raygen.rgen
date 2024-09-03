@@ -114,10 +114,9 @@ void main()
             vec3 sampledDir =randomDir;
             if(rayPayload.tangent == vec3(0.0f)){
             }else{
-                //sampledDir = TangentToWorldWithTangent(randomDir, rayPayload.normal, rayPayload.tangent);
+                sampledDir = TangentToWorldWithTangent(randomDir, rayPayload.normal, rayPayload.tangent);
             }
             sampledDir = TangentToWorld(randomDir,rayPayload.normal);
-            rayPayload.sampleDir = sampledDir;
             direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
             //rayPayload.direction = direction.xyz;
             if(NextFloat(seed) < rayPayload.reflectivity){

@@ -88,12 +88,25 @@ void main()
   vec3 hl = inverseTBN * halfway;
   vec3 wlIn = inverseTBN * lightDir;
   vec3 wlOut = inverseTBN * view;
+  
+  
+                                   
+  float forwardPdfD;
+  float forwardPdfI;
+  bool thin = true;
+  
+  vec3 disneyDirect= DisneyEval(material, view, lightDir, normal,  forwardPdfD);
+  
+  float pdfI;
+  vec3 sampleDir = DisneySample(material, rayPayload.frameSeed, view, normal, lightDir, pdfI);
+  vec3 disneyIndirect= DisneyEval(material, view, sampleDir, normal, forwardPdfI);
+                                   
                                    
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize(rayPayload.sampleDir + view);
   
-  vec3 pbrLitIndirect= GetBRDF(normal, view, rayPayload.sampleDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
+  vec3 pbrLitIndirect= GetBRDF(normal, view, rayPayload.sampleDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness)/pdfI;
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -102,8 +115,11 @@ void main()
   rayPayload.shadow = false;
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
-  rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
-  rayPayload.colorLit = pbrLitIndirect; 
+  //rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  rayPayload.color = (disneyDirect * myLight.intensity * myLight.col); 
+  //rayPayload.colorLit = pbrLitIndirect; 
+  rayPayload.colorLit = disneyIndirect; 
+  rayPayload.sampleDir = sampleDir; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;
   rayPayload.reflectivity = material.reflectivityIntensity; 

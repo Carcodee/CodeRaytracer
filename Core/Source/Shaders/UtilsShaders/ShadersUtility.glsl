@@ -1,6 +1,7 @@
 
 
 #include "../UtilsShaders/Random.glsl"
+#include "../UtilsShaders/Functions.glsl"
 
 #ifndef Utils 
 #define Utils 
@@ -91,7 +92,7 @@ struct MaterialData {
 	float clearcoat;
 	float clearcoatGloss;
 	float specularTransmission;
-	float refraction;
+	float ior;
 	float sheen;
 	float specular;
     float specularTint;
@@ -220,18 +221,7 @@ float MaxComponent(vec3 v)
 	return max(v.x, max(v.y, v.z));
 }
 
-void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
-{
-	if (abs(N.z) > 0.999)
-	{
-		T = vec3(1.0, 0.0, 0.0);
-	}
-	else
-	{
-		T = normalize(cross(vec3(0.0, 0.0, 1.0), N));
-	}
-	B = cross(N, T);
-}
+
 void CreateOrthonormalBasisWithTangent(in vec3 N, in vec3 T, out vec3 B)
 {
 	B = cross(N, T);
