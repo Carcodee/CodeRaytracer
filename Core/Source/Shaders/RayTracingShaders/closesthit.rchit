@@ -8,6 +8,7 @@
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 #include "../UtilsShaders/DisneyShadingModel.glsl"
+#include "../UtilsShaders/PersonalDisney.glsl"
 
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
@@ -167,34 +168,26 @@ void main()
   
   float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
   float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
-  
     
   mat3 inverseTBN = transpose(TBN);
-  vec3 hl = inverseTBN * halfway;
-  vec3 wlIn = inverseTBN * lightDir ;
-  vec3 wlInSample =inverseTBN * rayPayload.sampleDir;
-  vec3 wlOut = inverseTBN * view ;
-                                    
                                     
   vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
-  hl = inverseTBN * halfway;
-
                                         
   float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
 
-
-  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
+  float pdfI;
+  vec3 indirectSample= DisneySample(material, rayPayload.frameSeed, view, normal, lightDir, pdfI);
+  
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   float forwardPdfD;
   float forwardPdfI;
   bool thin = true;
   vec3 disneyDirect= DisneyEval(material, view, lightDir, finalNormal,  forwardPdfD);
-  float pdfI;
-  vec3 sampleDir = DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
-  vec3 disneyIndirect= DisneyEval(material, view, sampleDir, finalNormal, forwardPdfI);
+  //vec3 disneyIndirect= DisneyEval(material, view, lightDir, finalNormal, forwardPdfI);
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -202,13 +195,12 @@ void main()
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
   
-  
   MaterialConfigurations configs;
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
     rayPayload.color = disneyDirect * myLight.col  * myLight.intensity; 
-    rayPayload.colorLit = disneyIndirect; 
+    rayPayload.colorLit = indirectSample; 
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
@@ -229,6 +221,7 @@ void main()
        rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
   
+  rayPayload.sampleDir = lightDir;
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;

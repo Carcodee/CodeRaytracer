@@ -3,6 +3,9 @@
 #include "../UtilsShaders/Functions.glsl"
 #include "../UtilsShaders/Shading.glsl"
 
+#ifndef DISNEYBSDF 
+#define DISNEYBSDF 
+
 vec2 GetAnisotropic(float roughness, float anisotropic) {
     float aspect = sqrt(1.0 - 0.9 * anisotropic);
     float roughness_sqr = roughness * roughness;
@@ -520,6 +523,7 @@ vec3 DisneySample(in MaterialData material,uvec2 seed,vec3 V, vec3 N, inout vec3
     }
     else
     {
+
         if (NextFloat(seed) < diffuseRatio)
         {
             L = CosineSampleHemisphere(NextVec2(seed));
@@ -563,9 +567,10 @@ vec3 DisneySample(in MaterialData material,uvec2 seed,vec3 V, vec3 N, inout vec3
             }
         }
 
-        f *= (1.0 - transWeight);
-        pdf *= (1.0 - transWeight);
     }
+    f *= (1.0 - transWeight);
+    pdf *= (1.0 - transWeight);
 
     return f;
 }
+#endif 

@@ -123,6 +123,7 @@ void main()
                     direction.xyz = reflectedDir;
             }
            
+            direction.xyz = rayPayload.sampleDir;
             float lightPdf = 1/LIGHT_SOURCES; 
             rayPdf = 1 * MAX_RECURSION;  
             irradiance += directLightContrib * rayThroughput; 

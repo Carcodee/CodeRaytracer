@@ -28,7 +28,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="Some progress in the disney bsdf">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="Added a new disney bsdf">
+      <change afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/PersonalDisney.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
@@ -36,9 +37,6 @@
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/raygen.rgen.spv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/DisneyShadingModel.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Functions.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Functions.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/ShadersUtility.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Shading.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/UtilsShaders/Shading.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -331,15 +329,7 @@
       <workItem from="1725050369983" duration="1236000" />
       <workItem from="1725052188510" duration="680000" />
       <workItem from="1725308748956" duration="6567000" />
-      <workItem from="1725367907949" duration="12341000" />
-    </task>
-    <task id="LOCAL-00016" summary="material refactor">
-      <option name="closed" value="true" />
-      <created>1721507664534</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1721507664534</updated>
+      <workItem from="1725367907949" duration="20747000" />
     </task>
     <task id="LOCAL-00017" summary="textures refactor">
       <option name="closed" value="true" />
@@ -725,7 +715,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725052815164</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="Added a new disney bsdf">
+      <option name="closed" value="true" />
+      <created>1725381375384</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1725381375385</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -781,7 +779,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed spheres, new ui selector to do" />
     <MESSAGE value="A lot of ui changes" />
     <MESSAGE value="Emission maps" />
     <MESSAGE value="Emission configs added" />
@@ -806,6 +803,7 @@
     <MESSAGE value="starting new implementation and some helper funtions" />
     <MESSAGE value="Added some missing folders" />
     <MESSAGE value="Some progress in the disney bsdf" />
-    <option name="LAST_COMMIT_MESSAGE" value="Some progress in the disney bsdf" />
+    <MESSAGE value="Added a new disney bsdf" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a new disney bsdf" />
   </component>
 </project>

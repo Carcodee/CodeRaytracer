@@ -8,6 +8,7 @@
 
 #include "../UtilsShaders/ShadersUtility.glsl"
 #include "../UtilsShaders/DisneyShadingModel.glsl"
+#include "../UtilsShaders/PersonalDisney.glsl"
 
 struct Sphere {
     vec3 center;
@@ -98,15 +99,14 @@ void main()
   vec3 disneyDirect= DisneyEval(material, view, lightDir, normal,  forwardPdfD);
   
   float pdfI;
-  vec3 sampleDir = DisneySample(material, rayPayload.frameSeed, view, normal, lightDir, pdfI);
-  vec3 disneyIndirect= DisneyEval(material, view, sampleDir, normal, forwardPdfI);
+  vec3 sampleIndirect = DisneySample(material, rayPayload.frameSeed, view, normal, lightDir, pdfI);
                                    
                                    
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
-  halfway = normalize(rayPayload.sampleDir + view);
+  halfway = normalize(lightDir + view);
   
-  vec3 pbrLitIndirect= GetBRDF(normal, view, rayPayload.sampleDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness)/pdfI;
+  vec3 pbrLitIndirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness)/pdfI;
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -118,8 +118,8 @@ void main()
   //rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
   rayPayload.color = (disneyDirect * myLight.intensity * myLight.col); 
   //rayPayload.colorLit = pbrLitIndirect; 
-  rayPayload.colorLit = disneyIndirect; 
-  rayPayload.sampleDir = sampleDir; 
+  rayPayload.colorLit = sampleIndirect; 
+  rayPayload.sampleDir = lightDir; 
   rayPayload.normal = normal;
   rayPayload.roughness = roughness;
   rayPayload.reflectivity = material.reflectivityIntensity; 
