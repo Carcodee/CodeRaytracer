@@ -28,7 +28,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="Added a new disney bsdf">
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added some libs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -323,15 +323,7 @@
       <workItem from="1725052188510" duration="680000" />
       <workItem from="1725308748956" duration="6567000" />
       <workItem from="1725367907949" duration="21418000" />
-      <workItem from="1725409963048" duration="352000" />
-    </task>
-    <task id="LOCAL-00018" summary="fixed command buffer submition order">
-      <option name="closed" value="true" />
-      <created>1721838122736</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1721838122736</updated>
+      <workItem from="1725409963048" duration="1165000" />
     </task>
     <task id="LOCAL-00019" summary="Finally fixed the renderpasses">
       <option name="closed" value="true" />
@@ -717,7 +709,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725392335043</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="added some libs">
+      <option name="closed" value="true" />
+      <created>1725410791762</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1725410791763</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -773,7 +773,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="A lot of ui changes" />
     <MESSAGE value="Emission maps" />
     <MESSAGE value="Emission configs added" />
     <MESSAGE value="AO image" />
@@ -798,6 +797,7 @@
     <MESSAGE value="Added some missing folders" />
     <MESSAGE value="Some progress in the disney bsdf" />
     <MESSAGE value="Added a new disney bsdf" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added a new disney bsdf" />
+    <MESSAGE value="added some libs" />
+    <option name="LAST_COMMIT_MESSAGE" value="added some libs" />
   </component>
 </project>
