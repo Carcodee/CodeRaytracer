@@ -48,6 +48,11 @@ namespace VULKAN{
                 rayTracing_RS.UpdateAABBsInfo();
                 ModelHandler::GetInstance()->updateAABBData= false;
             }
+			if (ImguiRenderSystem::GetInstance()->environmentSelected->path != rayTracing_RS.environmentTexture->path)
+			{
+				rayTracing_RS.environmentTexture = ImguiRenderSystem::GetInstance()->environmentSelected;
+                rayTracing_RS.UpdateRaytracingData();
+			}
             VkClearValue clearValue{};
             clearValue= { 0.1f, 0.1f, 0.1f, 0.1f };
             LoadQueryModels();
@@ -190,13 +195,22 @@ namespace VULKAN{
 			ImguiRenderSystem::GetInstance()->UseDynamicRendering = DynamicRendering;
 			ImguiRenderSystem::GetInstance()->SetUpSystem(initWindow.window);
             ImguiRenderSystem::GetInstance()->HandleTextureCreation(finalStorageImage);
+        	
             ImguiRenderSystem::GetInstance()->viewportTexture = finalStorageImage;
             ImguiRenderSystem::GetInstance()->pushConstantBlockRsRef = &rayTracing_RS.pc;
             ImguiRenderSystem::GetInstance()->pushConstantBlockBloom = &bloom_Rs.pc;
+        	
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.storageImage);
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.emissiveStoreImage);
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(rayTracing_RS.aoStorageImage);
             ImguiRenderSystem::GetInstance()->AddFramebufferReference(finalStorageImage);
+        	
+            ImguiRenderSystem::GetInstance()->environmentSelected=rayTracing_RS.environmentTexture;
+        	
+			for (auto& env : rayTracing_RS.environments)
+			{
+				ImguiRenderSystem::GetInstance()->AddEnvReference(env);
+			}
             
 
 		}

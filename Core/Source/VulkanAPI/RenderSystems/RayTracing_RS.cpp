@@ -501,7 +501,6 @@ namespace VULKAN {
         std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
         std::string environmentPath=HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+"/Images/Env.hdr";
 		baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
-        environmentTexture = new VKTexture(environmentPath.c_str(), myRenderer.GetSwapchain());
 
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
@@ -653,6 +652,8 @@ namespace VULKAN {
 //        assert(false);
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 	}
+
+	
 
     void RayTracing_RS::CleanBuffers() {
 
@@ -867,6 +868,7 @@ namespace VULKAN {
 
         allSpheresBuffer.descriptor.buffer = allSpheresBuffer.buffer;
         allSpheresBuffer.descriptor.offset = 0;
+		
         if (!ModelHandler::GetInstance()->allSpheresOnApp.empty()){
             allSpheresBuffer.descriptor.range = sizeof(SphereUniform) * ModelHandler::GetInstance()->allSpheresOnApp.size();
         } else{
@@ -1556,6 +1558,7 @@ namespace VULKAN {
 		vkGetPhysicalDeviceFeatures2(myDevice.physicalDevice, &deviceFeatures2);
 		LoadFunctionsPointers();
 		//CreateTopLevelAccelerationStructure(topLevelObjBase);
+		LoadEnvironments();
 		CreateStorageImages();
 		CreateUniformBuffer();
 		CreateRTPipeline();
@@ -1616,6 +1619,27 @@ namespace VULKAN {
         vkDestroyBuffer(myDevice.device(), accelerationStructure.buffer, nullptr);
     }
 
+    void RayTracing_RS::LoadEnvironments()
+    {
+		std::vector<std::string>paths;
+		std::string envPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+ "/Images/";
+		for (auto& path : std::filesystem::directory_iterator(envPath))
+		{
+			if (path.path().extension() == ".hdr")
+			{
+				paths.push_back(path.path().string());
+			}
+			
+		}
+		environments.reserve(paths.size());
+		for (auto path : paths)
+		{
+			VKTexture* texture = new VKTexture(path.c_str(), myRenderer.GetSwapchain());
+			environments.push_back(texture);
+		}
+		environmentTexture = environments[0];
+		std::cout<< environments.size() <<" environments loaded\n";
+    }
 
 }
 

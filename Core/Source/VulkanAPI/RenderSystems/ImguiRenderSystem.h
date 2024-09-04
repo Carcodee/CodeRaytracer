@@ -56,6 +56,8 @@ namespace VULKAN
         void HandlePushConstantRangeRS(PushConstantBlock_RS& pushConstantBlockRs);
         void HandlePushConstantRangeBloom(PushConstantBlock_Bloom& pushConstantBlockBloom);
         void AddFramebufferReference(VKTexture* texture);
+        void AddEnvReference(VKTexture* texture);
+		void DisplayEnvironments();
         
 		bool transitionImage= false;
         
@@ -68,9 +70,9 @@ namespace VULKAN
 		VulkanRenderer* myRenderer;
 		VKTexture* fontTexture;
         VKTexture* viewportTexture;
-        
-        std::vector<VKTexture*>frameBuffers;
-
+        std::vector<VKTexture*> frameBuffers;
+        std::vector<VKTexture*> environments;
+		VKTexture* environmentSelected;
         
         bool show_demo_window = true;
 		bool UseDynamicRendering = false;

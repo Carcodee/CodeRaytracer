@@ -573,6 +573,7 @@ namespace VULKAN
         ResourcesUIHandler::GetInstance()->DisplayTexturesTab();
         ResourcesUIHandler::GetInstance()->DisplayBLASesInfo();
         ResourcesUIHandler::GetInstance()->DisplayViewportFrameBuffers(frameBuffers);
+        ResourcesUIHandler::GetInstance()->DisplayEnvironments(environments, environmentSelected);
         
         
         
@@ -759,17 +760,6 @@ namespace VULKAN
 
 		bool open = true;
 		ImGui::ShowDemoWindow(&open);
-		// Make the window full-screen and set the dock space
-
-
-		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-		// and handle the pass-thru hole, so we ask Begin() to not render a background.
-		//if (ImGui::Begin("DockSpace Demo", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking))
-		//{
-		//	ImGui::DockSpace(ImGui::GetID("MyDockSpace"));
-		//}
-		//	ImGui::End(); 
-
 
 	}
 
@@ -870,5 +860,14 @@ namespace VULKAN
         frameBuffers.push_back(texture);
     }
 
+    void ImguiRenderSystem::AddEnvReference(VKTexture* texture)
+    {
+    	environments.push_back(texture);
+    }
 
+    void ImguiRenderSystem::DisplayEnvironments()
+    {
+    	std::string path = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath();
+    	
+    }
 }

@@ -528,6 +528,22 @@ namespace VULKAN
         DisplayMatInfo(material, ImVec2{50, 50});
     }
 
+    void ResourcesUIHandler::DisplayEnvironments(std::vector<VKTexture*>& environments, VKTexture*& selectedEnv)
+    {
+        assert(!environments.empty()&&"It must be at least one framebuffer to display");
+        ImGui::SetWindowSize(ImVec2(400, 400));
+        ImGui::Begin("Environments");
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        float ySize = size.y/static_cast<float>(environments.size());
+        for (auto& env: environments) {
+            ImguiRenderSystem::GetInstance()->HandleTextureCreation(env);
+            if (ImGui::ImageButton((ImTextureID) env->textureDescriptor, ImVec2{size.x,ySize})){
+                selectedEnv = env;
+            };
+        }
+        ImGui::End();
+    }
+
     void ResourcesUIHandler::DisplayViewportFrameBuffers(std::vector<VKTexture *> framebuffers) {
 
         assert(!framebuffers.empty()&&"It must be at least one framebuffer to display");
