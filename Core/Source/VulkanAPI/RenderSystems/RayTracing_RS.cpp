@@ -476,7 +476,10 @@ namespace VULKAN {
             Sphere& currentSphere = ModelHandler::GetInstance()->allSpheresOnApp[i];
             CreateBottomLevelAccelerationStructureSpheres(currentSphere);
         }
-        CreateTopLevelAccelerationStructure(topLevelObjBase);
+		if (!modelsOnScene.empty() || !ModelHandler::GetInstance()->allSpheresOnApp.empty())
+		{
+			CreateTopLevelAccelerationStructure(topLevelObjBase);
+		}
 
     }
 	void RayTracing_RS::CreateDescriptorSets()
@@ -709,7 +712,10 @@ namespace VULKAN {
             allAABBBuffer.destroy();
         }
 
-        DestroyAccelerationStructure(topLevelObjBase.TopLevelAsData);
+		if (topLevelObjBase.TopLevelAsData.buffer != nullptr)
+		{
+			DestroyAccelerationStructure(topLevelObjBase.TopLevelAsData);
+		}
         for (auto& model: ModelHandler::GetInstance()->allModelsOnApp) {
             if (model.second->bottomLevelObjRef != nullptr){
                 if (model.second->bottomLevelObjRef->BottomLevelAs.handle != nullptr){
@@ -776,20 +782,31 @@ namespace VULKAN {
 			throw std::runtime_error("Unable to create descriptorAllocateInfo");
 		}
         
-        
-		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
-		descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
-		descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
 
-		descriptorAccelerationStructureInfo.pAccelerationStructures = &topLevelObjBase.TopLevelAsData.handle;
-		VkWriteDescriptorSet accelerationStructureWrite{};
-		accelerationStructureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		// The specialized acceleration structure descriptor has to be chained
-		accelerationStructureWrite.pNext = &descriptorAccelerationStructureInfo;
-		accelerationStructureWrite.dstSet = descriptorSet;
-		accelerationStructureWrite.dstBinding = 0;
-		accelerationStructureWrite.descriptorCount = 1;
-		accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
+        if (!modelsOnScene.empty() || !ModelHandler::GetInstance()->allSpheresOnApp.empty())
+        {
+	        descriptorAccelerationStructureInfo.sType =
+		        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+	        descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+	        descriptorAccelerationStructureInfo.pAccelerationStructures = &topLevelObjBase.TopLevelAsData.handle;
+        }
+        else
+        {
+	        VkAccelerationStructureKHR nullAccelerationStructure = VK_NULL_HANDLE;
+	        descriptorAccelerationStructureInfo.sType =
+		        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+	        descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+	        descriptorAccelerationStructureInfo.pAccelerationStructures = &nullAccelerationStructure;
+        }
+        VkWriteDescriptorSet accelerationStructureWrite{};
+        accelerationStructureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        // The specialized acceleration structure descriptor has to be chained
+        accelerationStructureWrite.pNext = &descriptorAccelerationStructureInfo;
+        accelerationStructureWrite.dstSet = descriptorSet;
+        accelerationStructureWrite.dstBinding = 0;
+        accelerationStructureWrite.descriptorCount = 1;
+        accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 
 		VkDescriptorImageInfo storageImageDescriptor{};
 		storageImageDescriptor.imageView = storageImage->textureImageView;
