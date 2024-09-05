@@ -200,7 +200,38 @@ float EvaluateDisneyDiffuse(MaterialData material, vec3 wo, vec3 wl, vec3 wi, bo
     return INV_PI * ( retro + submaterialApprox * (1.0f - 0.5f * fl) * (1.0f - 0.5f * fv));
 }
 
+vec3 EvaluateDisneySpecTransmission(MaterialData material, vec3 wo, vec3 wl,
+                                    vec3 wi, float ax, float ay, bool thin)
+{
+    float relativeIor = 1.0f;
+    float n2 = relativeIor * relativeIor;
 
+    float absDotNL = AbsCosTheta(wi);
+    float absDotNV = AbsCosTheta(wo);
+    float dotHL = dot(wl, wi);
+    float dotHV = dot(wl, wo);
+    float absDotHL = abs(dotHL);
+    float absDotHV = abs(dotHV);
+
+    float d = GgxAnisotropicD(wl, ax, ay);
+    float gl = SeparableSmithGGXG1(wi, wl, ax, ay);
+    float gv = SeparableSmithGGXG1(wo, wl, ax, ay);
+
+    float f = Dielectric(dotHV, 1.0f, material.ior);
+
+    vec3 color;
+    if(thin)
+    color = sqrt(material.diffuseColor.xyz);
+    else
+    color = material.diffuseColor.xyz;
+
+    // Note that we are intentionally leaving out the 1/n2 spreading factor since for VCM we will be evaluating particles with
+    // this. That means we'll need to model the air-[other medium] transmission if we ever place the camera inside a non-air
+    // medium.
+    float c = (absDotHL * absDotHV) / (absDotNL * absDotNV);
+    float t = (n2 / pow(dotHL + relativeIor * dotHV, 2.0f));
+    return color * c * t * (1.0f - f) * gl * gv * d;
+}
 //===================================================================================================================
 vec3 EvaluateDisney(MaterialData material, vec3 view, vec3 light, mat3 inverseTBN,bool thin, inout float forwardPdf, inout float reversePdf)
 {
@@ -306,7 +337,57 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
     reversePdf *= (1.0f / (4 * AbsCosThetaWS(wi, wl)));
 
 }
+//=============================================================================================================================
+void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf)
+{
+    vec3 wo = inverseTBN * v;
 
+    float sign = sign(CosTheta(wo));
+
+    // -- Sample cosine lobe
+    float r0 = NextFloat(seed);
+    float r1 = NextFloat(seed);
+    vec3 wi = sign * CosineSampleHemisphere(vec2(r0, r1));
+    vec3 wm = normalize(wi + wo);
+
+    float dotNL = CosTheta(wi);
+    if(dotNL == 0.0f) {
+        forwardPdf = 0.0f;
+        reversePdf = 0.0f;
+        l = vec3(0.0f);
+        return;
+    }
+
+    float dotNV = CosTheta(wo);
+
+    float pdf;
+
+    vec3 color = material.diffuseColor.xyz;
+
+    float p = NextFloat(seed);
+//    if(p <= surface.diffTrans) {
+//        wi = -wi;
+//        pdf = surface.diffTrans;
+//        if(thin)
+//        color = sqrt(color);
+//        else {
+            //sample.medium.phaseFunction = MediumPhaseFunction::eIsotropic;
+            //sample.medium.extinction = CalculateExtinction(surface.transmittanceColor, surface.scatterDistance);
+//        }
+//    }
+//    else {
+//        pdf = (1.0f - surface.diffTrans);
+//    }
+
+    vec3 sheen = EvaluateSheen(material, wo, wm, wi);
+
+    float diffuse = EvaluateDisneyDiffuse(material, wo, wm, wi, thin);
+
+//    sample.reflectance = sheen + color * (diffuse / pdf);
+    l = normalize(transpose(inverseTBN) * wi);
+    forwardPdf = abs(dotNL) * pdf;
+    reversePdf = abs(dotNV) * pdf;
+}
 
 
 
