@@ -402,7 +402,7 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
 
 
 
-/////////////////////////////Different implementation from  
+/////////////////////////////Different implementation//////////////////////////////////////////////////// 
 
 vec3 EvalDielectricReflection(in MaterialData material, vec3 V, vec3 N, vec3 L, vec3 H, inout float pdf)
 {
