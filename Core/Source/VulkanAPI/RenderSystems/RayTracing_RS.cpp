@@ -845,6 +845,7 @@ namespace VULKAN {
             BLAsInstanceOffsetBuffer.descriptor.range = sizeof(uint32_t) * instancesGeometryOffsets.size();
             
         }else{
+        	
             vertexBuffer.descriptor.buffer = vertexBuffer.buffer;
             vertexBuffer.descriptor.offset = 0;
             vertexBuffer.descriptor.range = VK_WHOLE_SIZE;

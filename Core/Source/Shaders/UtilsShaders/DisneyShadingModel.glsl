@@ -12,16 +12,6 @@ vec2 GetAnisotropic(float roughness, float anisotropic) {
     return vec2(max(0.001, roughness_sqr / aspect), max(0.001, roughness_sqr * aspect));
 }
 
-float GgxAnisotropicD(vec3 wl, float ax, float ay)
-{
-    float dotHX2 = pow(wl.x, 2.0f);
-    float dotHY2 = pow(wl.z, 2.0f);
-    float cos2Theta = pow(CosTheta(wl), 2.0f);
-    float ax2 = pow(ax, 2.0f);
-    float ay2 = pow(ay, 2.0f);
-
-    return 1.0f / (PI * ax * ay * pow(dotHX2 / ax2 + dotHY2 / ay2 + cos2Theta, 2.0f));
-}
 vec3 CalculateTint(vec3 baseColor)
 {
     float luminance = dot(vec3(0.3f, 0.6f, 1.0f), baseColor);
@@ -95,15 +85,6 @@ float GTR1(float absDotHL, float a)
 }
 
 //===================================================================================================================
-float SeparableSmithGGXG1(vec3 w, float a)
-{
-    float a2 = a * a;
-    float absDotNV = AbsCosTheta(w);
-
-    return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
-}
-
-//===================================================================================================================
 float EvaluateDisneyClearcoat(float clearcoat, float alpha, vec3 wo, vec3 wl, vec3 wi, inout float fPdfW, inout float rPdfW){
     if(clearcoat <= 0.0f){
         return 0.0f;
@@ -126,22 +107,7 @@ float EvaluateDisneyClearcoat(float clearcoat, float alpha, vec3 wo, vec3 wl, ve
 
 //spec brdf
 //===================================================================================================================
-float SeparableSmithGGXG1(vec3 w, vec3 wl, float ax, float ay)
-{
-    float dotHW = dot(w, wl);
-    if (dotHW <= 0.0f) {
-        return 0.0f;
-    }
-    float absTanTheta = abs(TanTheta(w));
-    if(isinf(absTanTheta)) {
-        return 0.0f;
-    }
-    float a = sqrt(Cos2Phi(w) * ax * ax + Sin2Phi(w) * ay * ay);
-    float a2Tan2Theta = pow(a * absTanTheta, 2.0f);
 
-    float lambda = 0.5f * (-1.0f + sqrt(1.0f + a2Tan2Theta));
-    return 1.0f / (1.0f + lambda);
-}
 
 //===================================================================================================================
 float AnisotropicGgxDistribution(vec3 wl, float ax, float ay) {
@@ -160,16 +126,7 @@ float AnisotropicGgxDistribution(vec3 wl, float ax, float ay) {
 
     return D;
 }
-//===================================================================================================================
-void GgxVndfAnisotropicPdf(vec3 wi, vec3 wl, vec3 wo, float ax, float ay, out float fPdf, out float rPdf) {
-    float dotNL = max(dot(wl, wi), 0.0);
-    float dotNV = max(dot(wl, wo), 0.0);
 
-    float D = AnisotropicGgxDistribution(wl, ax, ay); 
-
-    fPdf = (dotNL > 0.0) ? D * dotNL / (4.0 * abs(dot(wi, wl))) : 0.0;
-    rPdf = (dotNV > 0.0) ? D * dotNV / (4.0 * abs(dot(wo, wl))) : 0.0;
-}
 
 //===================================================================================================================
 vec3 EvaluateDisneyBRDF(MaterialData material, vec3 wo, vec3 wl, vec3 wi, inout float fPdf,inout float rPdf)
@@ -310,7 +267,61 @@ vec3 EvaluateDisney(MaterialData material, vec3 view, vec3 light, mat3 inverseTB
     return reflectance;
 }
 
-///////////////////////////// another test
+//Samples
+//=============================================================================================================================
+void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf)
+{
+    vec3 wo = normalize(inverseTBN * v);
+
+    // -- Calculate Anisotropic params
+    vec2 axy;
+    axy = GetAnisotropic(material.roughnessIntensity, material.anisotropic);
+
+    // -- Sample visible distribution of normals
+    float r0 = NextFloat(seed);
+    float r1 = NextFloat(seed);
+    vec3 wl = SampleGgxVndfAnisotropic(wo, axy.x, axy.y, r0, r1);
+
+    // -- Reflect over wl
+    vec3 wi = normalize(reflect(wl, wo));
+    if(CosTheta(wi) <= 0.0f) {
+        l = vec3(0.0f);
+        return;
+    }
+
+    // -- Fresnel term for this lobe is complicated since we're blending with both the metallic and the specularTint
+    // -- parameters plus we must take the IOR into account for dielectrics
+    vec3 F = DisneyFresnel(material, wo, wl, wi);
+
+    // -- Since we're sampling the distribution of visible normals the pdf cancels out with a number of other terms.
+    // -- We are left with the weight G2(wi, wo, wl) / G1(wi, wl) and since Disney uses a separable masking function
+    // -- we get G1(wi, wl) * G1(wo, wl) / G1(wi, wl) = G1(wo, wl) as our weight.
+    float G1v = SeparableSmithGGXG1(wo, wl, axy.x, axy.y);
+    vec3 specular = G1v * F;
+
+    l = normalize(transpose(inverseTBN) * wi);
+    GgxVndfAnisotropicPdf(wi, wl, wo, axy.x, axy.y, forwardPdf, reversePdf);
+
+    forwardPdf *= (1.0f / (4 * AbsCosThetaWS(wo, wl)));
+    reversePdf *= (1.0f / (4 * AbsCosThetaWS(wi, wl)));
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////Different implementation from  
 
 vec3 EvalDielectricReflection(in MaterialData material, vec3 V, vec3 N, vec3 L, vec3 H, inout float pdf)
 {

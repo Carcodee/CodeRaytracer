@@ -171,7 +171,7 @@ void main()
     
   mat3 inverseTBN = transpose(TBN);
                                     
-  vec3 pbrLitDirect= GetBRDF(finalNormal* material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
+  vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
   halfway = normalize((-rayPayload.sampleDir) + view);
                                         
@@ -179,7 +179,7 @@ void main()
   float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
 
   float pdfI;
-  vec3 indirectSample= DisneySample(material, rayPayload.frameSeed, view, normal, lightDir, pdfI);
+  vec3 indirectSample= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
   
   vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
@@ -187,7 +187,6 @@ void main()
   float forwardPdfI;
   bool thin = true;
   vec3 disneyDirect= DisneyEval(material, view, lightDir, finalNormal,  forwardPdfD);
-  //vec3 disneyIndirect= DisneyEval(material, view, lightDir, finalNormal, forwardPdfI);
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -201,6 +200,7 @@ void main()
   if(configs.useDisneyBSDF){
     rayPayload.color = disneyDirect * myLight.col  * myLight.intensity; 
     rayPayload.colorLit = indirectSample; 
+    
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 

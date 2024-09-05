@@ -81,6 +81,32 @@ float SchlickFresnel(float cosTheta) {
     float F0 = 0.04; // or some constant value
     return F0 + (1.0f - F0) * pow(1.0f - cosTheta, 5.0f);
 }
+
+//===================================================================================================================
+float SeparableSmithGGXG1(vec3 w, float a)
+{
+    float a2 = a * a;
+    float absDotNV = AbsCosTheta(w);
+
+    return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
+}
+
+float SeparableSmithGGXG1(vec3 w, vec3 wl, float ax, float ay)
+{
+    float dotHW = dot(w, wl);
+    if (dotHW <= 0.0f) {
+        return 0.0f;
+    }
+    float absTanTheta = abs(TanTheta(w));
+    if(isinf(absTanTheta)) {
+        return 0.0f;
+    }
+    float a = sqrt(Cos2Phi(w) * ax * ax + Sin2Phi(w) * ay * ay);
+    float a2Tan2Theta = pow(a * absTanTheta, 2.0f);
+
+    float lambda = 0.5f * (-1.0f + sqrt(1.0f + a2Tan2Theta));
+    return 1.0f / (1.0f + lambda);
+}
 float Dielectric(float cosThetaI, float ni, float nt)
 {
     // Copied from PBRT. This function calculates the full Fresnel term for a dielectric material.
@@ -147,5 +173,54 @@ vec3 ImportanceSampleGTR1(float alpha, float r1, float r2) {
     H.z = cosTheta;
 
     return normalize(H);
+}
+//=========================================================================================================================
+float GgxAnisotropicD(vec3 wm, float ax, float ay)
+{
+    float dotHX2 = (wm.x, 2.0f);
+    float dotHY2 = (wm.z, 2.0f);
+    float cos2Theta = pow(CosTheta(wm),2.0f);
+    float ax2 = (ax, 2.0f);
+    float ay2 = (ay, 2.0f);
+
+    return 1.0f / (PI * ax * ay * pow(dotHX2 / ax2 + dotHY2 / ay2 + cos2Theta, 2.0f));
+}
+
+//=========================================================================================================================
+vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
+{
+    // -- Stretch the view vector so we are sampling as though roughness==1
+    vec3 v = normalize(vec3(wo.x * ax, wo.y, wo.z * ay));
+
+    // -- Build an orthonormal basis with v, t1, and t2
+    vec3 t1 = (v.y < 0.9999f) ? normalize(cross(v, vec3(0, 1.0f, 0.0f))) : vec3(1.0f, 0.0f, 0.0f);
+    vec3 t2 = cross(t1, v);
+
+    // -- Choose a point on a disk with each half of the disk weighted proportionally to its projection onto direction v
+    float a = 1.0f / (1.0f + v.y);
+    float r = sqrt(u1);
+    float phi = (u2 < a) ? (u2 / a) * PI : PI + (u2 - a) / (1.0f - a) * PI;
+    float p1 = r * cos(phi);
+    float p2 = r * sin(phi) * ((u2 < a) ? 1.0f : v.y);
+
+    // -- Calculate the normal in this stretched tangent space
+    vec3 n = p1 * t1 + p2 * t2 + sqrt(max(1.0f - p1 * p1 - p2 * p2, 0.0f)) * v;
+
+    // -- unstretch and normalize the normal
+    return normalize(vec3(ax * n.x, n.y, ay * n.z));
+}
+void GgxVndfAnisotropicPdf(vec3 wi, vec3 wm, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
+{
+    float D = GgxAnisotropicD(wm, ax, ay);
+
+    float absDotNL = AbsCosTheta(wi);
+    float absDotHL = abs(dot(wm, wi));
+    float G1v = SeparableSmithGGXG1(wo, wm, ax, ay);
+    forwardPdfW = G1v * absDotHL * D / absDotNL;
+
+    float absDotNV = AbsCosTheta(wo);
+    float absDotHV = abs(dot(wm, wo));
+    float G1l = SeparableSmithGGXG1(wi, wm, ax, ay);
+    reversePdfW = G1l * absDotHV * D / absDotNV;
 }
 #endif 

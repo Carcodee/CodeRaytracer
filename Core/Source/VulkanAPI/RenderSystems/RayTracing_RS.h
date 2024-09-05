@@ -72,7 +72,6 @@ namespace VULKAN {
 
 		std::vector<std::shared_ptr<ModelData>>modelsOnScene;
         std::vector<uint32_t> instancesGeometryOffsets;
-		//helpers
 		void LoadEnvironments();
         void CleanBuffers();
 		void SetupBottomLevelObj(std::shared_ptr<ModelData> modelData);
@@ -131,8 +130,6 @@ namespace VULKAN {
         //ubo
 		Buffer ubo;
 		Buffer lightBuffer;
-
-
 
 		VkShaderModule rHitShaderModule;
 		VkShaderModule rMissShaderModule;
