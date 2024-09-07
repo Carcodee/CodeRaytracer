@@ -256,7 +256,7 @@ vec3 GetDisneyBSDF(MaterialData material, vec3 view, vec3 lightDir, vec3 normal,
     vec3 halfway = normalize(view + lightDir);
     vec3 hl = inverseTBN * halfway; 
     vec3 fd = DisneyDiffuse(material.diffuseColor.xyz, normal, halfway, view, lightDir, material.roughnessIntensity, material.subSurface);
-    vec3 fm = DisneyMetallic(material.diffuseColor.xyz, material.specularTint, material.roughnessIntensity, material.anisotropic, material.metallicIntensity,material.ior, material.specularIntensity, halfway, view, lightDir, normal,hl,wlIn, wlOut);
+    vec3 fm = DisneyMetallic(material.diffuseColor.xyz, material.specularTint, material.roughnessIntensity, material.anisotropic, material.metallicIntensity,material.ior, material.specular, halfway, view, lightDir, normal,hl,wlIn, wlOut);
     float fc = DisneyClearcoat(halfway, view, hl, wlIn, wlOut, normal, lightDir, material.clearcoatGloss, material.ior);
     vec3 fs = DisneySheen(material.diffuseColor.xyz, material.sheenTint, halfway, view, normal);
     vec3 fg = DisneyGlass(material.diffuseColor.xyz, material.roughnessIntensity, material.anisotropic, material.ior, halfway, view, lightDir, normal,hl,wlIn, wlOut);

@@ -9,7 +9,7 @@
 vec2 GetAnisotropic(float roughness, float anisotropic) {
     float aspect = sqrt(1.0 - 0.9 * anisotropic);
     float roughness_sqr = roughness * roughness;
-    return vec2(max(0.001, roughness_sqr / aspect), max(0.001, roughness_sqr * aspect));
+    return vec2(max(roughness_sqr / aspect, 0.001), max( roughness_sqr * aspect, 0.001));
 }
 
 vec3 CalculateTint(vec3 baseColor)
@@ -20,14 +20,14 @@ vec3 CalculateTint(vec3 baseColor)
 
 vec3 DisneyFresnel(MaterialData material, vec3 wo, vec3 wl, vec3 wi)
 {
-    float dotHV = abs(dot(wl, wo));
+    float dotHV = dot(wl, wo);
 
     vec3 tint = CalculateTint(material.diffuseColor.xyz);
 
     // -- See section 3.1 and 3.2 of the 2015 PBR presentation + the Disney BRDF explorer (which does their
     // -- 2012 remapping rather than the SchlickR0FromRelativeIOR seen here but they mentioned the switch in 3.2).
     //relative ior is goignt to be 1.0f so it will be the ior (ior/ior surrounding medium)
-    vec3 R0 = SchlickR0FromRelativeIOR(material.ior) * Lerp(vec3(1.0f), tint, material.specularTint);
+    vec3 R0 = SchlickR0FromRelativeIOR(material.relativeIOR) * Lerp(vec3(1.0f), tint, material.specularTint);
     R0 = Lerp(R0, material.diffuseColor.xyz, material.metallicIntensity);
 
     float dielectricFresnel = Dielectric(dotHV, 1.0f, material.ior);
@@ -38,7 +38,7 @@ vec3 DisneyFresnel(MaterialData material, vec3 wo, vec3 wl, vec3 wi)
 }
 
 //=============================================================================================================================
-void CalculateLobePdfs(MaterialData material,float pSpecular, float pDiffuse, float pClearcoat, float pSpecTrans)
+void CalculateLobePdfs(MaterialData material,inout float pSpecular,inout  float pDiffuse,inout  float pClearcoat,inout  float pSpecTrans)
 {
     float metallicBRDF   = material.metallicIntensity;
     float specularBSDF   = (1.0f - material.metallicIntensity) * material.specularTransmission;
@@ -154,7 +154,6 @@ vec3 EvaluateDisneyBRDF(MaterialData material, vec3 wo, vec3 wl, vec3 wi, inout 
     return d * gl * gv * f / (4.0f * dotNL * dotNV);
 }
 
-//retro not used for now
 //===================================================================================================================
 float EvaluateDisneyRetroDiffuse(MaterialData material, vec3 wo, vec3 wl, vec3 wi){
 
@@ -180,7 +179,7 @@ float EvaluateDisneyDiffuse(MaterialData material, vec3 wo, vec3 wl, vec3 wi, bo
     float hanrahanKrueger = 0.0f;
 
     //no thins implementatioon now
-    if(thin /*&& material.flatness > 0.0f*/) {
+    if(thin && material.flatness > 0.0f) {
         float roughness = material.roughnessIntensity * material.roughnessIntensity;
 
         float dotHL = dot(wl, wi);
@@ -195,9 +194,9 @@ float EvaluateDisneyDiffuse(MaterialData material, vec3 wo, vec3 wl, vec3 wi, bo
     
     float retro = EvaluateDisneyRetroDiffuse(material, wo, wl, wi);
     //no flatness for now
-    float submaterialApprox = Lerp(lambert, hanrahanKrueger, thin ? 0.5f : 0.0f);
+    float subsurfaceApprox = Lerp(lambert, hanrahanKrueger, thin ? material.flatness : 0.0f);
 
-    return INV_PI * ( retro + submaterialApprox * (1.0f - 0.5f * fl) * (1.0f - 0.5f * fv));
+    return INV_PI * ( retro + subsurfaceApprox * (1.0f - 0.5f * fl) * (1.0f - 0.5f * fv));
 }
 
 vec3 EvaluateDisneySpecTransmission(MaterialData material, vec3 wo, vec3 wl,
@@ -259,20 +258,20 @@ vec3 EvaluateDisney(MaterialData material, vec3 view, vec3 light, mat3 inverseTB
     float transWeight   = (1.0f - metallic) * specTrans;
     // -- Clearcoat
     bool upperHemisphere = bool(dotNL > 0.0f) && bool(dotNV > 0.0f);
-    
-    if(upperHemisphere && (material.clearcoat > 0.0f)) {
-
-        float forwardClearcoatPdfW;
-        float reverseClearcoatPdfW;
-
-        float clearcoat = EvaluateDisneyClearcoat(material.clearcoat, material.clearcoatGloss, wo, wl, wi,
-                                                  forwardClearcoatPdfW, reverseClearcoatPdfW);
-        reflectance += vec3(clearcoat);
-        forwardPdf += pClearcoat * forwardClearcoatPdfW;
-        reversePdf += pClearcoat * reverseClearcoatPdfW;
-    }
-    
-    // -- Diffuse
+//    
+//    if(upperHemisphere && (material.clearcoat > 0.0f)) {
+//
+//        float forwardClearcoatPdfW;
+//        float reverseClearcoatPdfW;
+//
+//        float clearcoat = EvaluateDisneyClearcoat(material.clearcoat, material.clearcoatGloss, wo, wl, wi,
+//                                                  forwardClearcoatPdfW, reverseClearcoatPdfW);
+//        reflectance += vec3(clearcoat);
+//        forwardPdf += pClearcoat * forwardClearcoatPdfW;
+//        reversePdf += pClearcoat * reverseClearcoatPdfW;
+//    }
+//    
+//  -- Diffuse
     if(diffuseWeight > 0.0f) {
         float forwardDiffusePdfW = AbsCosTheta(wi);
         float reverseDiffusePdfW = AbsCosTheta(wo);
@@ -285,22 +284,45 @@ vec3 EvaluateDisney(MaterialData material, vec3 view, vec3 light, mat3 inverseTB
         forwardPdf += pDiffuse * forwardDiffusePdfW;
         reversePdf += pDiffuse * reverseDiffusePdfW;
     }
-    
-    // -- specular
-        float forwardMetallicPdfW;
-        float reverseMetallicPdfW;
-        vec3 specular = EvaluateDisneyBRDF(material, wo, wl, wi, forwardMetallicPdfW, reverseMetallicPdfW);
+//    // -- transmission
+    if(transWeight > 0.0f) {
 
-        reflectance += specular;
-        forwardPdf += pBRDF * forwardMetallicPdfW / (4 * AbsCosThetaWS(wo, wl));
-        reversePdf += pBRDF * reverseMetallicPdfW / (4 * AbsCosThetaWS(wi, wl));
+        // Scale roughness based on IOR (Burley 2015, Figure 15).
+        float rscaled = thin ? ThinTransmissionRoughness(material.ior, material.roughnessIntensity) : material.roughnessIntensity;
+        vec2 taxy = GetAnisotropic(material.roughnessIntensity, material.anisotropic);
+
+        vec3 transmission = EvaluateDisneySpecTransmission(material, wo, wl, wi, taxy.x, taxy.y, thin);
+        reflectance += transWeight * transmission;
+
+        float forwardTransmissivePdfW;
+        float reverseTransmissivePdfW;
+        GgxVndfAnisotropicPdf(wi, wl, wo, taxy.x, taxy.y, forwardTransmissivePdfW, reverseTransmissivePdfW);
+
+        float dotLH = dot(wl, wi);
+        float dotVH = dot(wl, wo);
+        //1.0f is the relative ior for now
+        float relativeIOR = material.relativeIOR;
+        forwardPdf += pSpecTrans * forwardTransmissivePdfW / (pow(dotLH + relativeIOR * dotVH, 2.0f));
+        reversePdf += pSpecTrans * reverseTransmissivePdfW / (pow(dotVH + relativeIOR * dotLH, 2.0f));
+    } 
+//    if(upperHemisphere){
+//        // -- specular
+//        float forwardMetallicPdfW;
+//        float reverseMetallicPdfW;
+//        vec3 specular = EvaluateDisneyBRDF(material, wo, wl, wi, forwardMetallicPdfW, reverseMetallicPdfW);
+//
+//        reflectance += specular;
+//        forwardPdf += pBRDF * forwardMetallicPdfW / (4 * AbsCosThetaWS(wo, wl));
+//        reversePdf += pBRDF * reverseMetallicPdfW / (4 * AbsCosThetaWS(wi, wl));    
+//    }
+    
 
     return reflectance;
 }
 
 //Samples
 //=============================================================================================================================
-void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf)
+void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
 {
     vec3 wo = normalize(inverseTBN * v);
 
@@ -317,6 +339,9 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
     vec3 wi = normalize(reflect(wl, wo));
     if(CosTheta(wi) <= 0.0f) {
         l = vec3(0.0f);
+        reflectance = vec3(0.0f);
+        forwardPdf = 0.0f;
+        reversePdf = 0.0f;
         return;
     }
 
@@ -329,8 +354,10 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
     // -- we get G1(wi, wl) * G1(wo, wl) / G1(wi, wl) = G1(wo, wl) as our weight.
     float G1v = SeparableSmithGGXG1(wo, wl, axy.x, axy.y);
     vec3 specular = G1v * F;
+    
+    reflectance = specular;
 
-    l = normalize(transpose(inverseTBN) * wi);
+    l = normalize(inverse(inverseTBN) * wi);
     GgxVndfAnisotropicPdf(wi, wl, wo, axy.x, axy.y, forwardPdf, reversePdf);
 
     forwardPdf *= (1.0f / (4 * AbsCosThetaWS(wo, wl)));
@@ -338,7 +365,7 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
 
 }
 //=============================================================================================================================
-void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf)
+void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
 {
     vec3 wo = inverseTBN * v;
 
@@ -354,6 +381,7 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
     if(dotNL == 0.0f) {
         forwardPdf = 0.0f;
         reversePdf = 0.0f;
+        reflectance = vec3(0.0f);
         l = vec3(0.0f);
         return;
     }
@@ -383,10 +411,150 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
 
     float diffuse = EvaluateDisneyDiffuse(material, wo, wm, wi, thin);
 
-//    sample.reflectance = sheen + color * (diffuse / pdf);
-    l = normalize(transpose(inverseTBN) * wi);
+    reflectance = sheen + color * (diffuse / pdf);
+    l = normalize(inverse(inverseTBN) * wi);
     forwardPdf = abs(dotNL) * pdf;
     reversePdf = abs(dotNV) * pdf;
+}
+
+void SampleDisneyClearcoat(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
+{
+    vec3 wo = normalize(inverseTBN * v);
+    float a = 0.25f;
+    float a2 = a * a;
+
+    float r0 = NextFloat(seed);
+    float r1 = NextFloat(seed);
+    float cosTheta = sqrt(max((1.0f - pow(1.0f - r0, a2)) / (1.0f - a2), 0.0f));
+    float sinTheta = sqrt(max(1.0f - cosTheta * cosTheta, 0.0f));
+    float phi = (PI*2) * r1;
+
+    vec3 wm = vec3(sinTheta * cos(phi), cosTheta, sinTheta * sin(phi));
+    if(dot(wm, wo) < 0.0f) {
+        wm = -wm;
+    }
+
+    vec3 wi = reflect(wm, wo);
+    if(dot(wi, wo) < 0.0f) {
+        return;
+    }
+
+    float clearcoatWeight = material.clearcoat;
+    float clearcoatGloss = material.clearcoatGloss;
+
+    float dotNH = CosTheta(wm);
+    float dotLH = dot(wm, wi);
+
+    float d = GTR1(abs(dotNH), Lerp(0.1f, 0.001f, clearcoatGloss));
+    float f = Schlick(0.04f, dotLH);
+    float g = SeparableSmithGGXG1(wi, 0.25f) * SeparableSmithGGXG1(wo, 0.25f);
+
+    float fPdf = d / (4.0f * dot(wo, wm));
+
+    reflectance = vec3(0.25f * clearcoatWeight * g * f * d) / fPdf;
+    l = normalize(inverse(inverseTBN) * wi);
+    forwardPdf = fPdf;
+    reversePdf = d / (4.0f * dot(wi, wm));
+
+}
+
+void SampleDisneySpecTransmission(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l, mat3 inverseTBN, inout float forwardPdf,
+inout float reversePdf, inout vec3 reflectance)
+{
+    vec3 wo = normalize(inverseTBN * v);
+    if(CosTheta(wo) == 0.0) {
+        forwardPdf = 0.0f;
+        reversePdf = 0.0f;
+        reflectance = vec3(0.0f);
+        l = vec3(0.0f);
+        return;
+    }
+
+    // -- Scale roughness based on IOR
+    float rscaled = thin ? ThinTransmissionRoughness(material.ior, material.roughnessIntensity) : material.roughnessIntensity;
+
+    vec2 taxy = GetAnisotropic(rscaled, material.anisotropic);
+
+    // -- Sample visible distribution of normals
+    float r0 = NextFloat(seed);
+    float r1 = NextFloat(seed);
+    vec3 wm = SampleGgxVndfAnisotropic(wo, taxy.x, taxy.y, r0, r1);
+
+    float dotVH = dot(wo, wm);
+    if(wm.y < 0.0f) {
+        dotVH = -dotVH;
+    }
+
+    float ni = wo.y > 0.0f ? 1.0f : material.ior;
+    float nt = wo.y > 0.0f ? material.ior : 1.0f;
+    float relativeIOR = ni / nt;
+
+// -- Disney uses the full dielectric Fresnel equation for transmission. We also importance sample F to switch between
+// -- refraction and reflection at glancing angles.
+    float F = Dielectric(dotVH, 1.0f, material.ior);
+
+// -- Since we're sampling the distribution of visible normals the pdf cancels out with a number of other terms.
+// -- We are left with the weight G2(wi, wo, wm) / G1(wi, wm) and since Disney uses a separable masking function
+// -- we get G1(wi, wm) * G1(wo, wm) / G1(wi, wm) = G1(wo, wm) as our weight.
+    float G1v = SeparableSmithGGXG1(wo, wm, taxy.x, taxy.y);
+
+    float pdf;
+
+    vec3 wi;
+    if(NextFloat(seed) <= F) {
+        wi = normalize(reflect(wm, wo));
+
+        reflectance = G1v * material.diffuseColor.xyz;
+
+        float jacobian = (4 * AbsCosThetaWS(wo, wm));
+        pdf = F / jacobian;
+    }
+    else {
+        if(thin) {
+            // -- When the surface is thin so it refracts into and then out of the surface during this shading event.
+            // -- So the ray is just reflected then flipped and we use the sqrt of the surface color.
+            wi = reflect(wm, wo);
+            wi.y = -wi.y;
+            reflectance = G1v * sqrt(material.diffuseColor.xyz);
+
+// -- Since this is a thin surface we are not ending up inside of a volume so we treat this as a scatter event.
+        }
+        else {
+//            if(Transmit(wm, wo, relativeIOR, wi)) {
+//             sample.medium.phaseFunction = dotVH > 0.0f ? MediumPhaseFunction::eIsotropic : MediumPhaseFunction::eVacuum;
+//            sample.medium.extinction = CalculateExtinction(surface.transmittanceColor, surface.scatterDistance);
+//            }
+//            else {
+//            }
+            wi = reflect(wm, wo);
+            reflectance = G1v * material.diffuseColor.xyz;
+        }
+
+        wi = normalize(wi);
+
+        float dotLH = abs(dot(wi, wm));
+        float jacobian = dotLH / (pow(dotLH + /*material.relativeIOR*/ 1.0f * dotVH, 2.0f));
+        pdf = (1.0f - F) / jacobian;
+    }
+
+    if(CosTheta(wi) == 0.0f) {
+        forwardPdf = 0.0f;
+        reversePdf = 0.0f;
+        reflectance = vec3(0.0f);
+        l = vec3(0.0f);
+        return;
+    }
+
+    if(material.roughnessIntensity < 0.01f) {
+//        sample.flags |= SurfaceEventFlags::eDiracEvent;
+    }
+
+    // -- calculate pdf terms
+    //    GgxVndfAnisotropicPdf(wi, wm, wo, tax, tay, sample.forwardPdfW, sample.reversePdfW);
+    forwardPdf *= pdf;
+    reversePdf *= pdf;
+    // -- convert wi back to world space
+    l = normalize(inverse(inverseTBN) * wi);
 }
 
 
@@ -394,9 +562,50 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
 
 
 
-
-
-
+void SampleDisney(uvec2 seed, MaterialData material, bool thin, vec3 v,inout vec3 l, mat3 inverseTBN, inout float forwardPdf, inout float reversePdf,inout vec3 reflectance)
+{
+    float pSpecular;
+    float pDiffuse;
+    float pClearcoat;
+    float pTransmission;
+    CalculateLobePdfs(material, pSpecular, pDiffuse, pClearcoat, pTransmission);
+//
+//    float pLobe = 0.0f;
+//    float p = NextFloat(seed);
+//    if(p <= pSpecular) {
+//        SampleDisneyBRDF(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+//        pLobe = pSpecular;
+//    }
+//    else if(p > pSpecular && p <= (pSpecular + pClearcoat)) {
+//        SampleDisneyClearcoat(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+//        pLobe = pClearcoat;
+//    }
+//    else if(p > pSpecular + pClearcoat && p <= (pSpecular + pClearcoat + pDiffuse)) {
+//        SampleDisneyDiffuse(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+//        pLobe = pDiffuse;
+//    }
+//    else if(pTransmission >= 0.0f) {
+//        SampleDisneySpecTransmission(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+//        pLobe = pTransmission;
+//    }
+//    else {
+//        // -- Make sure we notice if this is occurring.
+//        reflectance = vec3(1000000.0f, 0.0f, 0.0f);
+//        forwardPdf = 0.000000001f;
+//        reversePdf = 0.000000001f;
+//    }
+//
+//    if(pLobe > 0.0f) {
+//        reflectance = reflectance * (1.0f / pLobe);
+//        forwardPdf *= pLobe;
+//        reversePdf *= pLobe;
+//    }
+    // debuging
+    vec3 wo = inverseTBN * v;
+    float sign = sign(CosTheta(wo));
+    vec3 wi = sign * CosineSampleHemisphere(NextVec2(seed));
+    l = inverse(inverseTBN) * wi;
+}
 
 
 

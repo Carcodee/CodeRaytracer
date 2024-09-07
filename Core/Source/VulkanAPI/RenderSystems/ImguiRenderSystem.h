@@ -83,12 +83,12 @@ namespace VULKAN
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
 		float lightCol[3] = { 1.0f, 1.0f, 1.0f };
 		float lightIntensity = 1.0f;
-        float roughnessAllMaterials = 1.0f;
         float reflectivityAllMaterials = 1.0f;
         float normalAllMaterials = 1.0f;
         float allMaterialsAlpha = 1.0f;
         float allMaterialsEmissive = 1.0f;
         float allMaterialsAlbedo = 1.0f;
+        float roughnessAllMaterials = 1.0f;
         float metallicAllMaterials = 1.0f;
         //disney bsdf
         float anisotropicAllMaterials = 1.0f;
@@ -96,6 +96,8 @@ namespace VULKAN
         float clearcoatAllMaterials = 1.0f;
         float clearcoatGlossAllMaterials = 1.0f;
         float refractionAllMaterials = 1.5f;
+        float relativeRefractionAllMaterials = 1.0f;
+        float flatnessAllMaterials = 0.5f;
         float specularAllMaterials = 0.5f;
         float specularTintAllMaterials = 0.5f;
         float sheenAllMaterials = 0.5f;

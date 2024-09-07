@@ -42,4 +42,56 @@ void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
     }
     B = cross(N, T);
 }
+float CosTheta(vec3 x, vec3 y){
+    return dot(x,y);
+}
+
+float CosTheta(vec3 x){
+    return x.z;
+}
+float Cos2Theta(vec3 w)
+{
+    return w.z * w.z;
+}
+float Sin2Theta(vec3 w)
+{
+    return max(1.0f - Cos2Theta(w), 0.0f);
+}
+
+float SinTheta(vec3 w)
+{
+    return sqrt(Sin2Theta(w));
+}
+
+float TanTheta(vec3 w)
+{
+    return SinTheta(w) / CosTheta(w);
+}
+
+float Tan2Theta(vec3 w)
+{
+    return Sin2Theta(w) / Cos2Theta(w);
+}
+
+float CosPhi(vec3 w)
+{
+    float sinTheta = SinTheta(w);
+    return (sinTheta == 0) ? 1.0f : clamp(w.x / sinTheta, -1.0f, 1.0f);
+}
+float SinPhi(vec3 w)
+{
+    float sinTheta = SinTheta(w);
+    return (sinTheta == 0) ? 1.0f : clamp(w.z / sinTheta, -1.0f, 1.0f);
+}
+
+float Cos2Phi(vec3 w)
+{
+    float cosPhi = CosPhi(w);
+    return cosPhi * cosPhi;
+}
+float Sin2Phi(vec3 w)
+{
+    float sinPhi = SinPhi(w);
+    return sinPhi * sinPhi;
+}
 #endif 

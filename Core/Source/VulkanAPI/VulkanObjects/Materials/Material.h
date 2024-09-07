@@ -32,7 +32,6 @@ namespace VULKAN{
     {
         float albedoIntensity = 1;
         float normalIntensity = 1;
-        float specularIntensity = 1;
         float roughnessIntensity = 0.5f;
         glm::vec4 diffuseColor = glm::vec4 (1.0f);
         float reflectivityIntensity = 0.5f;
@@ -57,6 +56,8 @@ namespace VULKAN{
         float clearcoatGlossIntensity = 0.5f;
         float specularTransmissionIntensity= 0.999f;
         float refraction = 1.5f;
+        float relativeRefraction = 1.0f;
+        float flatness = 0.5f;
         float sheen = 0.0f;
         float specular = 0.5f;
         float specularTint = 1.0f;

@@ -13,25 +13,8 @@ float AbsCosTheta(vec3 x){
 }
 
 
-float CosTheta(vec3 x, vec3 y){
-    return dot(x,y);
-}
 
-float CosTheta(vec3 x){
-    return x.z;
-}
-float Sin2Phi(vec3 w) {
-    float sinPhi = w.y / sqrt(w.x * w.x + w.y * w.y);
-    return sinPhi * sinPhi;
-}
 
-float Cos2Phi(vec3 w) {
-    float cosPhi = w.x / sqrt(w.x * w.x + w.y * w.y);
-    return cosPhi * cosPhi;
-}
-float TanTheta(vec3 w) {
-    return sqrt(1.0 - w.z * w.z) / w.z;
-}
 
 vec3 Schlick(vec3 r0, float radians)
 {
@@ -93,10 +76,6 @@ float SeparableSmithGGXG1(vec3 w, float a)
 
 float SeparableSmithGGXG1(vec3 w, vec3 wl, float ax, float ay)
 {
-    float dotHW = dot(w, wl);
-    if (dotHW <= 0.0f) {
-        return 0.0f;
-    }
     float absTanTheta = abs(TanTheta(w));
     if(isinf(absTanTheta)) {
         return 0.0f;
@@ -223,4 +202,28 @@ void GgxVndfAnisotropicPdf(vec3 wi, vec3 wm, vec3 wo, float ax, float ay, inout 
     float G1l = SeparableSmithGGXG1(wi, wm, ax, ay);
     reversePdfW = G1l * absDotHV * D / absDotNV;
 }
+
+bool Transmit(vec3 wm, vec3 wi, float n, vec3 wo)
+{
+    float c = dot(wi, wm);
+    if(c < 0.0f) {
+        c = -c;
+        wm = -wm;
+    }
+
+    float root = 1.0f - n * n * (1.0f - c * c);
+    if(root <= 0)
+    return false;
+
+    wo = (n * c - sqrt(root)) * wm - n * wi;
+    return true;
+}
+float ThinTransmissionRoughness(float ior, float roughness)
+{
+    // -- Disney scales by (.65 * eta - .35) based on figure 15 of the 2015 PBR course notes. Based on their figure the results
+    // -- match a geometrically thin solid fairly well but it is odd to me that roughness is decreased until an IOR of just
+    // -- over 2.
+    return Saturate((0.65f * ior - 0.35f) * roughness);
+}
+
 #endif 

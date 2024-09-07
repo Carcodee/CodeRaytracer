@@ -71,7 +71,6 @@ struct Material{
 struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
-	float specularIntensity;
 	float roughnessIntensity;
 	vec4 diffuseColor;
 	float reflectivityIntensity;
@@ -93,6 +92,8 @@ struct MaterialData {
 	float clearcoatGloss;
 	float specularTransmission;
 	float ior;
+	float relativeIOR;
+	float flatness;
 	float sheen;
 	float specular;
     float specularTint;
