@@ -108,21 +108,6 @@ void main()
             
             const vec4 hitPos = origin + direction * rayPayload.distance;
             origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
-            vec3 reflectedDir= reflect(direction.xyz, rayPayload.normal);
-            vec2 vec2Rand= NextVec2(seed);
-            vec3 randomDir =  CosineSampleHemisphere(vec2Rand);
-            vec3 sampledDir =randomDir;
-            if(rayPayload.tangent == vec3(0.0f)){
-            }else{
-                sampledDir = TangentToWorldWithTangent(randomDir, rayPayload.normal, rayPayload.tangent);
-            }
-            sampledDir = TangentToWorld(randomDir,rayPayload.normal);
-            direction.xyz = GetReflection(reflectedDir, sampledDir, rayPayload.roughness);
-            //rayPayload.direction = direction.xyz;
-            if(NextFloat(seed) < rayPayload.reflectivity){
-                    direction.xyz = reflectedDir;
-            }
-           
             direction.xyz = rayPayload.sampleDir;
             float lightPdf = 1/LIGHT_SOURCES; 
             rayPdf = 1 * MAX_RECURSION;  

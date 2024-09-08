@@ -2,6 +2,7 @@
 
 #include "../UtilsShaders/Random.glsl"
 #include "../UtilsShaders/Functions.glsl"
+#include "../UtilsShaders/Shading.glsl"
 
 #ifndef Utils 
 #define Utils 
@@ -160,12 +161,7 @@ float G(float alpha, vec3 N, vec3 V, vec3 L){
 	return G1(alpha,  N, V) * G1(alpha,  N, L);
 }
 
-vec3 FresnelShilck(vec3 halfway, vec3 view, vec3 FO){
-	float powPart= 1- max(dot(view, halfway),0.0001);
-	powPart =pow(powPart,5);
-	vec3 vecPow = powPart * (vec3(1.0)-FO);
-	return FO + vecPow;
-}
+
 vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float metallic,  float roughness){
 
 	float D = D_GGX(roughness, normal, wh);

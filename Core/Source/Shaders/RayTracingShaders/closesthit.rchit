@@ -186,6 +186,8 @@ void main()
  float forwardPdfW;
  float reversePdfW;
 
+ float forwardPdfWI;
+ float reversePdfWI;
  //test
  vec3 result;
  vec3 FT, FB;
@@ -197,7 +199,7 @@ void main()
  //vec3 indirectSample= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
  //setas sample
  SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfW, reversePdfW, result);
- vec3 indirectD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
+ vec3 indirectD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfWI, reversePdfWI);
   
   ///////////////////DISNEY
   vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
@@ -218,16 +220,12 @@ void main()
   
   if(configs.useDisneyBSDF){
     //rayPayload.color = disneyDirect * myLight.col  * myLight.intensity; 
-    rayPayload.color = directD /* myLight.col  * myLight.intensity*/; 
-    rayPayload.colorLit = directD;
+    rayPayload.color = pbrLitDirect * myLight.col  * myLight.intensity; 
+    rayPayload.colorLit = result;
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
     rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
   }
-  
-  //rayPayload.color = worldNormal; 
-  //rayPayload.color = vec3(diffuseInMat.a); 
-  //rayPayload.colorLit = vec3(0.0f); 
   
   if(emissionInMat == vec4(0)){
        if(material.emissionIntensity>0){

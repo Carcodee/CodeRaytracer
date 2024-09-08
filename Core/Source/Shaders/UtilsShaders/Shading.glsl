@@ -19,7 +19,7 @@ float AbsCosTheta(vec3 x){
 vec3 Schlick(vec3 r0, float radians)
 {
     float exponential = pow(1.0f - radians, 5.0f);
-    return r0 + (vec3(1.0f) - r0) * exponential;
+    return r0 + ((vec3(1.0f) - r0) * exponential);
 }
 
 //=============================================================================================================================
@@ -117,6 +117,12 @@ float Dielectric(float cosThetaI, float ni, float nt)
     return (rParallel * rParallel + rPerpendicuar * rPerpendicuar) / 2;
 }
 
+vec3 FresnelShilck(vec3 halfway, vec3 view, vec3 FO){
+    float powPart= 1- max(dot(view, halfway),0.0001);
+    powPart =pow(powPart,5);
+    vec3 vecPow = powPart * (vec3(1.0)-FO);
+    return FO + vecPow;
+}
 float GTR2(float NdotH, float alpha) {
     float alpha2 = alpha * alpha;
     float NdotH2 = NdotH * NdotH;
@@ -154,22 +160,23 @@ vec3 ImportanceSampleGTR1(float alpha, float r1, float r2) {
     return normalize(H);
 }
 //=========================================================================================================================
-float GgxAnisotropicD(vec3 wm, float ax, float ay)
+float GgxAnisotropicD(vec3 wl, float ax, float ay)
 {
-    float dotHX2 = (wm.x, 2.0f);
-    float dotHY2 = (wm.z, 2.0f);
-    float cos2Theta = pow(CosTheta(wm),2.0f);
+    float dotHX2 = (wl.x, 2.0f);
+    float dotHY2 = (wl.z, 2.0f);
+    float cos2Theta = Cos2Theta(wl);
     float ax2 = (ax, 2.0f);
     float ay2 = (ay, 2.0f);
 
     return 1.0f / (PI * ax * ay * pow(dotHX2 / ax2 + dotHY2 / ay2 + cos2Theta, 2.0f));
 }
 
+//nchanged
 //=========================================================================================================================
 vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
 {
     // -- Stretch the view vector so we are sampling as though roughness==1
-    vec3 v = normalize(vec3(wo.x * ax, wo.y, wo.z * ay));
+    vec3 v = normalize(vec3(wo.x * ax, wo.z, wo.y * ay));
 
     // -- Build an orthonormal basis with v, t1, and t2
     vec3 t1 = (v.y < 0.9999f) ? normalize(cross(v, vec3(0, 1.0f, 0.0f))) : vec3(1.0f, 0.0f, 0.0f);
@@ -186,7 +193,7 @@ vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
     vec3 n = p1 * t1 + p2 * t2 + sqrt(max(1.0f - p1 * p1 - p2 * p2, 0.0f)) * v;
 
     // -- unstretch and normalize the normal
-    return normalize(vec3(ax * n.x, n.y, ay * n.z));
+    return normalize(vec3(ax * n.x, n.y, ay * n.y));
 }
 void GgxVndfAnisotropicPdf(vec3 wi, vec3 wm, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
 {
