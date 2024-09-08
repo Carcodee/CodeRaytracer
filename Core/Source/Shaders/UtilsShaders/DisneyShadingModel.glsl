@@ -865,11 +865,9 @@ vec3 DisneySample(in MaterialData material,uvec2 seed,vec3 V, vec3 N, inout vec3
                 pdf *= (1.0 - primarySpecRatio) * (1.0 - diffuseRatio);
             }
         }
-
     }
     f *= (1.0 - transWeight);
     pdf *= (1.0 - transWeight);
-
     return f;
 }
 #endif 

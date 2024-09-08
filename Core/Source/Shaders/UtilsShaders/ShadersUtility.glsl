@@ -11,18 +11,17 @@ struct RayPayload{
 	vec3 color;
 	vec3 colorLit;
 	vec3 emissionColor;
+	float pdf;
 	float distance;
 	vec3 normal;
-	vec3 tangent;
 	vec3 origin;
 	vec3 direction;
 	vec3 sampleDir;
-	float roughness;
-	float reflectivity;
 	float hitT;
     uvec2 frameSeed;	
 	bool shadow;
 	bool isMiss;
+	bool stop;
 };
 struct MeshData {
 	int materialIndexOnShape;

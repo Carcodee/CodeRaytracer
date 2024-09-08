@@ -156,58 +156,52 @@ void main()
   }
 
   
-  vec4 diffuse=diffuseInMat;
-  vec3 view = normalize(-rayPayload.direction);
-  vec3 lightDir= normalize(myLight.pos - pos); 
-  vec3 halfway =normalize(view + lightDir);
+ vec4 diffuse=diffuseInMat;
+ vec3 view = normalize(-rayPayload.direction);
+ vec3 lightDir= normalize(myLight.pos - pos); 
+ vec3 halfway =normalize(view + lightDir);
   
-  vec3 lightDirTangSpace = lightDir * TBN;
-  vec3 finalNormalTangSpace = finalNormal * TBN;
-  vec3 rayDirWi = normalize(pos - rayPayload.origin);
-  vec3 rayDirTangentSpace = rayDirWi * TBN;
-  
-  float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
-  float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
+ vec3 lightDirTangSpace = lightDir * transpose(TBN);
+ vec3 finalNormalTangSpace = finalNormal * transpose(TBN);
+ 
+ float cosThetaTangent = max(dot(lightDir, finalNormal), 0.001);
     
-  mat3 inverseTBN = transpose(TBN);
+ mat3 inverseTBN = transpose(TBN);
                                     
-  vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
   
-  halfway = normalize((-rayPayload.sampleDir) + view);
+ halfway = normalize((-rayPayload.sampleDir) + view);
                                         
-  ////////////////////////DISNEY
+ ////////////////////////DISNEY
   
-  material.diffuseColor =diffuseInMat; 
-  float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
-  float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
+ material.diffuseColor =diffuseInMat; 
 
+ vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
  float pdfI;
  
  float forwardPdfW;
  float reversePdfW;
-
  float forwardPdfWI;
  float reversePdfWI;
  //test
- vec3 result;
  vec3 FT, FB;
  CreateOrthonormalBasis(finalNormal, FT, FB);
  mat3 inverseFinalTBN = transpose(mat3(FT, FB, finalNormal));
- vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
 
  //not full sample
- //vec3 indirectSample= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
+ //vec3 lightReflectance= DisneyEval(material, view, lightDir, finalNormal, pdfI);
+ //vec3 indirectReflectance= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
  //setas sample
- SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfW, reversePdfW, result);
- vec3 indirectD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfWI, reversePdfWI);
-  
-  ///////////////////DISNEY
-  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
-  
-  float forwardPdfD;
-  float forwardPdfI;
-  bool thin = true;
-  vec3 disneyDirect= DisneyEval(material, view, lightDir, finalNormal, forwardPdfD);
+ vec3 indirectD;
+ vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
+ SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD);
+ 
+  ///////////////////DISNEY END
+ 
+  float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);
+  float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
+  float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
+
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness); 
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -219,12 +213,11 @@ void main()
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
-    //rayPayload.color = disneyDirect * myLight.col  * myLight.intensity; 
-    rayPayload.color = pbrLitDirect * myLight.col  * myLight.intensity; 
-    rayPayload.colorLit = result;
+    rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity / forwardPdfW; 
+    rayPayload.colorLit = indirectD * cosThetaTangent/ forwardPdfWI;
   }else{
-    rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-    rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
+    rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/* pdfDirect*/; 
+    rayPayload.colorLit = (pbrLitIndirect) *  cosThetaTangent/pdf; 
   }
   
   if(emissionInMat == vec4(0)){
@@ -241,10 +234,7 @@ void main()
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;
-  rayPayload.tangent = tangent;
-  rayPayload.roughness = material.roughnessIntensity;
-  rayPayload.reflectivity = material.reflectivityIntensity;
-    
+  rayPayload.pdf = forwardPdfWI;
   
 }
 

@@ -121,8 +121,6 @@ void main()
   rayPayload.colorLit = sampleIndirect; 
   rayPayload.sampleDir = lightDir; 
   rayPayload.normal = normal;
-  rayPayload.roughness = roughness;
-  rayPayload.reflectivity = material.reflectivityIntensity; 
   rayPayload.distance = gl_RayTmaxEXT;
   
   if(emissionInMat == vec4(0)){

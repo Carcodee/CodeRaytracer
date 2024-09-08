@@ -42,6 +42,7 @@ layout(push_constant) uniform pushConstantVariables{
 
 #define SAMPLE_COUNT 1 
 #define LIGHT_SOURCES 1 
+#define MAX_IRRADIANCE 8.0f 
 
 Material currentMaterial;
 
@@ -69,10 +70,11 @@ void main()
         rayPayload.origin= origin.xyz;
         rayPayload.shadow = false;
         rayPayload.emissionColor = vec3(0.0f);
+        rayPayload.pdf = 0.0f;
         rayPayload.isMiss = false;
+        rayPayload.stop = false;
         rayPayload.direction = direction.xyz;
         rayPayload.sampleDir = direction.xyz;
-        rayPayload.tangent = vec3(0.0f);
         rayPayload.hitT = 0.0f;
         rayPayload.frameSeed = seed;
         vec3 rayThroughput = vec3(1.0f);
@@ -85,6 +87,10 @@ void main()
             
             traceRayEXT(topLevelAS, 0, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
             vec3 directLightContrib = rayPayload.color;
+            if(rayPayload.stop){
+                irradiance += directLightContrib * rayThroughput / rayPdf; 
+                break;
+            }
             if(rayPayload.isMiss){
                 irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput / rayPdf; 
                 if(sampleShadowed){
@@ -109,11 +115,9 @@ void main()
             const vec4 hitPos = origin + direction * rayPayload.distance;
             origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
             direction.xyz = rayPayload.sampleDir;
-            float lightPdf = 1/LIGHT_SOURCES; 
-            rayPdf = 1 * MAX_RECURSION;  
-            irradiance += directLightContrib * rayThroughput; 
-            rayThroughput *= rayPayload.colorLit; 
-            
+            rayPdf *= MAX_RECURSION;  
+            irradiance += directLightContrib * rayThroughput ; 
+            rayThroughput *= rayPayload.colorLit ; 
             if(i >= pc.minBounceForIndirect){
                 float threshold = max(0.05f,1.0f-MaxComponent(rayThroughput));
                 if(threshold > NextFloat(seed) + pc.rayTerminationBias){
@@ -127,6 +131,7 @@ void main()
 
         }
         
+        irradiance = clamp(irradiance, 0.0f, MAX_IRRADIANCE);
         AOResult += vec3(aoSample);
         result += irradiance; 
     }

@@ -595,7 +595,7 @@ namespace VULKAN
             if(ImGui::ColorEdit3("light Col", lightCol, 0.0f)){
                 InputHandler::editingGraphics= true;
             }
-            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,1.0f,"%.3f")){
+            if(ImGui::SliderFloat("light Intensity", &lightIntensity, 0.0f,15.0f,"%.3f")){
                 InputHandler::editingGraphics= true;
             }
             ImGui::SeparatorText("All Materials Configs");
