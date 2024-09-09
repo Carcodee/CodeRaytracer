@@ -193,9 +193,16 @@ void main()
  //setas sample
  vec3 indirectD;
  vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
- bool stop = false;
- SampleDisney(rayPayload.frameSeed ,material, true, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
- 
+ bool stop = true;
+ int maxSamples = 5;
+ int currentSample = 0;
+ while(stop){
+     SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+     currentSample++;
+     if(currentSample>maxSamples){
+        break;
+     }
+ }
   ///////////////////DISNEY END
  
   float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);

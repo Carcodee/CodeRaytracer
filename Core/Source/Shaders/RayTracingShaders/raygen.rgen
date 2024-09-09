@@ -113,7 +113,7 @@ void main()
                 break;
             }
             if(rayPayload.stop){
-                irradiance += directLightContrib * rayThroughput / rayPdf; 
+                //irradiance += directLightContrib * rayThroughput / rayPdf; 
                 break;
             }
             
@@ -142,7 +142,7 @@ void main()
         result += min(irradiance, MAX_IRRADIANCE); 
     }
     result = result/SAMPLE_COUNT;
-    result = pow(result, vec3(1.0/2.2));
+    //result = pow(result, vec3(1.0/2.2));
     
     AOResult = AOResult/SAMPLE_COUNT;
     
