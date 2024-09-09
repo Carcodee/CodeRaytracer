@@ -141,6 +141,10 @@ float D_GGX(float roughness, vec3 normal, vec3 halfway){
 	float denom = PI* pow(((dot * roughnessPart)+1), 2.0);
 	return pow(roughness,2.0)/denom;
 }
+bool IsBlack(vec3 color)
+{
+	return dot(color, color) < EPSILON;
+}
 float PDF_GGX(vec3 normal, vec3 halfWay, vec3 view, float roughness) {
 	float D = D_GGX(roughness, normal, halfWay);
 	float cosThetaH = max(dot(normal, halfWay), 0.0001);

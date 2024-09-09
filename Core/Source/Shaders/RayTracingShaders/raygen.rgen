@@ -87,10 +87,7 @@ void main()
             
             traceRayEXT(topLevelAS, 0, 0xff, 0, 0, 0, origin.xyz, tmin, direction.xyz, tmax, 0);
             vec3 directLightContrib = rayPayload.color;
-            if(rayPayload.stop){
-                irradiance += directLightContrib * rayThroughput / rayPdf; 
-                break;
-            }
+            
             if(rayPayload.isMiss){
                 irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput / rayPdf; 
                 if(sampleShadowed){
@@ -103,7 +100,7 @@ void main()
                 aoSample = min(1.0f, aoSample);
             }
             
-            irradiance += rayPayload.emissionColor * rayThroughput/ rayPdf; 
+            irradiance += rayPayload.emissionColor * rayThroughput / rayPdf; 
             if(i==0){
                 imageStore(emissiveImage, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.emissionColor, 1.0f));
             }
@@ -112,12 +109,22 @@ void main()
                 sampleShadowed = true;
             }
             
+            if(rayPayload.pdf < EPSILON || IsBlack(rayPayload.colorLit)){
+                break;
+            }
+            if(rayPayload.stop){
+                irradiance += directLightContrib * rayThroughput / rayPdf; 
+                break;
+            }
+            
+            irradiance += directLightContrib * rayThroughput / rayPdf; 
+            
             const vec4 hitPos = origin + direction * rayPayload.distance;
             origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
             direction.xyz = rayPayload.sampleDir;
-            rayPdf *= MAX_RECURSION;  
-            irradiance += directLightContrib * rayThroughput ; 
-            rayThroughput *= rayPayload.colorLit ; 
+            rayThroughput *= rayPayload.colorLit; 
+            rayPdf *= rayPayload.pdf;  
+            
             if(i >= pc.minBounceForIndirect){
                 float threshold = max(0.05f,1.0f-MaxComponent(rayThroughput));
                 if(threshold > NextFloat(seed) + pc.rayTerminationBias){
@@ -131,12 +138,11 @@ void main()
 
         }
         
-        irradiance = clamp(irradiance, 0.0f, MAX_IRRADIANCE);
         AOResult += vec3(aoSample);
-        result += irradiance; 
+        result += min(irradiance, MAX_IRRADIANCE); 
     }
     result = result/SAMPLE_COUNT;
-    //result = pow(result, vec3(1.0/2.2));
+    result = pow(result, vec3(1.0/2.2));
     
     AOResult = AOResult/SAMPLE_COUNT;
     

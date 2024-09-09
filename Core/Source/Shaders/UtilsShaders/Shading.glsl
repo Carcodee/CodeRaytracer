@@ -179,50 +179,49 @@ vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
     vec3 v = normalize(vec3(wo.x * ax, wo.z, wo.y * ay));
 
     // -- Build an orthonormal basis with v, t1, and t2
-    vec3 t1 = (v.y < 0.9999f) ? normalize(cross(v, vec3(0, 1.0f, 0.0f))) : vec3(1.0f, 0.0f, 0.0f);
+    vec3 t1 = (v.z < 0.9999f) ? normalize(cross(v, vec3(0, 1.0f, 0.0f))) : vec3(1.0f, 0.0f, 0.0f);
     vec3 t2 = cross(t1, v);
 
     // -- Choose a point on a disk with each half of the disk weighted proportionally to its projection onto direction v
-    float a = 1.0f / (1.0f + v.y);
+    float a = 1.0f / (1.0f + v.z);
     float r = sqrt(u1);
     float phi = (u2 < a) ? (u2 / a) * PI : PI + (u2 - a) / (1.0f - a) * PI;
     float p1 = r * cos(phi);
-    float p2 = r * sin(phi) * ((u2 < a) ? 1.0f : v.y);
+    float p2 = r * sin(phi) * ((u2 < a) ? 1.0f : v.z);
 
     // -- Calculate the normal in this stretched tangent space
     vec3 n = p1 * t1 + p2 * t2 + sqrt(max(1.0f - p1 * p1 - p2 * p2, 0.0f)) * v;
 
     // -- unstretch and normalize the normal
-    return normalize(vec3(ax * n.x, n.y, ay * n.y));
+    return normalize(vec3(ax * n.x, n.z, ay * n.y));
 }
-void GgxVndfAnisotropicPdf(vec3 wi, vec3 wm, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
+void GgxVndfAnisotropicPdf(vec3 wi, vec3 wl, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
 {
-    float D = GgxAnisotropicD(wm, ax, ay);
-
+    float D = GgxAnisotropicD(wl, ax, ay);
     float absDotNL = AbsCosTheta(wi);
-    float absDotHL = abs(dot(wm, wi));
-    float G1v = SeparableSmithGGXG1(wo, wm, ax, ay);
+    float absDotHL = abs(dot(wl, wi));
+    float G1v = SeparableSmithGGXG1(wo, wl, ax, ay);
     forwardPdfW = G1v * absDotHL * D / absDotNL;
 
     float absDotNV = AbsCosTheta(wo);
-    float absDotHV = abs(dot(wm, wo));
-    float G1l = SeparableSmithGGXG1(wi, wm, ax, ay);
+    float absDotHV = abs(dot(wl, wo));
+    float G1l = SeparableSmithGGXG1(wi, wl, ax, ay);
     reversePdfW = G1l * absDotHV * D / absDotNV;
 }
 
-bool Transmit(vec3 wm, vec3 wi, float n, vec3 wo)
+bool Transmit(vec3 wl, vec3 wi, float n, vec3 wo)
 {
-    float c = dot(wi, wm);
+    float c = dot(wi, wl);
     if(c < 0.0f) {
         c = -c;
-        wm = -wm;
+        wl = -wl;
     }
 
     float root = 1.0f - n * n * (1.0f - c * c);
     if(root <= 0)
     return false;
 
-    wo = (n * c - sqrt(root)) * wm - n * wi;
+    wo = (n * c - sqrt(root)) * wl - n * wi;
     return true;
 }
 float ThinTransmissionRoughness(float ior, float roughness)

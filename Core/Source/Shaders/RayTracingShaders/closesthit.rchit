@@ -193,7 +193,8 @@ void main()
  //setas sample
  vec3 indirectD;
  vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
- SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD);
+ bool stop = false;
+ SampleDisney(rayPayload.frameSeed ,material, true, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
  
   ///////////////////DISNEY END
  
@@ -213,11 +214,13 @@ void main()
   GetMatConfigs(material.configurations, configs);
   
   if(configs.useDisneyBSDF){
-    rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity / forwardPdfW; 
-    rayPayload.colorLit = indirectD * cosThetaTangent/ forwardPdfWI;
+    rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity; 
+    rayPayload.colorLit = indirectD * cosThetaTangentIndirect;
+    rayPayload.pdf = forwardPdfWI;
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/* pdfDirect*/; 
-    rayPayload.colorLit = (pbrLitIndirect) *  cosThetaTangent/pdf; 
+    rayPayload.colorLit = (pbrLitIndirect) *  cosThetaTangentIndirect; 
+    rayPayload.pdf = pdf;
   }
   
   if(emissionInMat == vec4(0)){
@@ -230,11 +233,11 @@ void main()
        rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
   
+  rayPayload.stop = stop;
   rayPayload.sampleDir = lightDir;
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;
-  rayPayload.pdf = forwardPdfWI;
   
 }
 

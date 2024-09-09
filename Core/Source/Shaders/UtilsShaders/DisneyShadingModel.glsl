@@ -320,7 +320,7 @@ vec3 EvaluateDisney(MaterialData material, vec3 view, vec3 light, mat3 inverseTB
 
 //Samples
 //=============================================================================================================================
-void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
+void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
 {
     vec3 wo = normalize(inverseTBN * v);
 
@@ -340,6 +340,7 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
         reflectance = vec3(0.0f);
         forwardPdf = 0.0f;
         reversePdf = 0.0f;
+        stopSample = true;
         return;
     }
 
@@ -360,10 +361,11 @@ void SampleDisneyBRDF(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , m
 
     forwardPdf *= (1.0f / (4 * AbsCosThetaWS(wo, wm)));
     reversePdf *= (1.0f / (4 * AbsCosThetaWS(wi, wm)));
+    stopSample = false;
 
 }
 //=============================================================================================================================
-void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
+void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
 {
     vec3 wo = inverseTBN * v;
 
@@ -381,6 +383,7 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
         reversePdf = 0.0f;
         reflectance = vec3(0.0f);
         l = vec3(0.0f);
+        stopSample = true;
         return;
     }
 
@@ -410,12 +413,13 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
     float diffuse = EvaluateDisneyDiffuse(material, wo, wm, wi, thin);
 
     reflectance = sheen + color * (diffuse / pdf);
-    l = normalize(inverse(inverseTBN) * wi);
+    l = normalize(transpose(inverseTBN) * wi);
     forwardPdf = abs(dotNL) * pdf;
     reversePdf = abs(dotNV) * pdf;
+    stopSample = false;
 }
 
-void SampleDisneyClearcoat(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance)
+void SampleDisneyClearcoat(uvec2 seed, MaterialData material, vec3 v,inout vec3 l , mat3 inverseTBN, inout float forwardPdf, inout float reversePdf, inout vec3 reflectance,inout bool stopSample)
 {
     vec3 wo = normalize(inverseTBN * v);
     float a = 0.25f;
@@ -434,6 +438,7 @@ void SampleDisneyClearcoat(uvec2 seed, MaterialData material, vec3 v,inout vec3 
 
     vec3 wi = reflect(wm, wo);
     if(dot(wi, wo) < 0.0f) {
+        stopSample = true;
         return;
     }
 
@@ -450,14 +455,15 @@ void SampleDisneyClearcoat(uvec2 seed, MaterialData material, vec3 v,inout vec3 
     float fPdf = d / (4.0f * dot(wo, wm));
 
     reflectance = vec3(0.25f * clearcoatWeight * g * f * d) / fPdf;
-    l = normalize(inverse(inverseTBN) * wi);
+    l = normalize(transpose(inverseTBN) * wi);
     forwardPdf = fPdf;
     reversePdf = d / (4.0f * dot(wi, wm));
+    stopSample = false;
 
 }
 
 void SampleDisneySpecTransmission(uvec2 seed, MaterialData material, vec3 v, bool thin, inout vec3 l, mat3 inverseTBN, inout float forwardPdf,
-inout float reversePdf, inout vec3 reflectance)
+inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
 {
     vec3 wo = normalize(inverseTBN * v);
     if(CosTheta(wo) == 0.0) {
@@ -465,6 +471,7 @@ inout float reversePdf, inout vec3 reflectance)
         reversePdf = 0.0f;
         reflectance = vec3(0.0f);
         l = vec3(0.0f);
+        stopSample = true;
         return;
     }
 
@@ -540,6 +547,7 @@ inout float reversePdf, inout vec3 reflectance)
         reversePdf = 0.0f;
         reflectance = vec3(0.0f);
         l = vec3(0.0f);
+        stopSample = true;
         return;
     }
 
@@ -548,11 +556,12 @@ inout float reversePdf, inout vec3 reflectance)
     }
 
     // -- calculate pdf terms
-   //    GgxVndfAnisotropicPdf(wi, wm, wo, tax, tay, sample.forwardPdfW, sample.reversePdfW);
+    GgxVndfAnisotropicPdf(wi, wm, wo, taxy.x, taxy.y,forwardPdf, reversePdf);
     forwardPdf *= pdf;
     reversePdf *= pdf;
     // -- convert wi back to world space
     l = normalize(inverse(inverseTBN) * wi);
+    stopSample = false;
 }
 
 
@@ -560,7 +569,7 @@ inout float reversePdf, inout vec3 reflectance)
 
 
 
-void SampleDisney(uvec2 seed, MaterialData material, bool thin, vec3 v,inout vec3 l, mat3 inverseTBN, inout float forwardPdf, inout float reversePdf,inout vec3 reflectance)
+void SampleDisney(uvec2 seed, MaterialData material, bool thin, vec3 v,inout vec3 l, mat3 inverseTBN, inout float forwardPdf, inout float reversePdf,inout vec3 reflectance, inout bool stopSample)
 {
     float pSpecular;
     float pDiffuse;
@@ -571,19 +580,19 @@ void SampleDisney(uvec2 seed, MaterialData material, bool thin, vec3 v,inout vec
     float pLobe = 0.0f;
     float p = NextFloat(seed);
     if(p <= pSpecular) {
-        SampleDisneyBRDF(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+        SampleDisneyBRDF(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance, stopSample);
         pLobe = pSpecular;
     }
     else if(p > pSpecular && p <= (pSpecular + pClearcoat)) {
-        SampleDisneyClearcoat(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+        SampleDisneyClearcoat(seed, material, v, l, inverseTBN, forwardPdf, reversePdf, reflectance, stopSample);
         pLobe = pClearcoat;
     }
     else if(p > pSpecular + pClearcoat && p <= (pSpecular + pClearcoat + pDiffuse)) {
-        SampleDisneyDiffuse(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+        SampleDisneyDiffuse(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance, stopSample);
         pLobe = pDiffuse;
     }
     else if(pTransmission >= 0.0f) {
-        SampleDisneySpecTransmission(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance);
+        SampleDisneySpecTransmission(seed, material, v, thin, l, inverseTBN, forwardPdf, reversePdf, reflectance, stopSample);
         pLobe = pTransmission;
     }
     else {

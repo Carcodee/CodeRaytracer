@@ -30,6 +30,9 @@ vec3 Lerp(vec3 x, vec3 y, float t){
                 x.y * (1 - t) + (y.y * t),
                 x.z * (1 - t) + (y.z * t));
 }
+
+
+
 void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
 {
     if (abs(N.z) > 0.999)
@@ -81,7 +84,7 @@ float CosPhi(vec3 w)
 float SinPhi(vec3 w)
 {
     float sinTheta = SinTheta(w);
-    return (sinTheta == 0) ? 1.0f : clamp(w.z / sinTheta, -1.0f, 1.0f);
+    return (sinTheta == 0) ? 1.0f : clamp(w.y / sinTheta, -1.0f, 1.0f);
 }
 
 float Cos2Phi(vec3 w)

@@ -3,8 +3,9 @@
 #ifndef RANDOM 
 #define RANDOM 
 
-#define PI 3.1415
-#define INV_PI 0.3183
+#define EPSILON 0.000001
+#define PI 3.141592654
+#define INV_PI 0.31830988618
 
 float CosinePdfHemisphere(float cosTheta)
 {
