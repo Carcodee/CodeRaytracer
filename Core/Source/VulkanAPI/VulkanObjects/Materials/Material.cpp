@@ -235,6 +235,9 @@ namespace VULKAN{
             case USE_DISNEY_BSDF:
                 val = (currentConfigs & (1 << 3)) != 0;
                 break;
+            case THIN:
+                val = (currentConfigs & (1 << 4)) != 0;
+                break;
             default:
                 val = false;
                 assert(val && "Provide a valid configuration type");
@@ -256,6 +259,9 @@ namespace VULKAN{
                 break;
             case USE_DISNEY_BSDF:
                 maskValue  = 1 << 3;
+                break;
+            case THIN:
+                maskValue  = 1 << 4;
                 break;
         }
         if (value){

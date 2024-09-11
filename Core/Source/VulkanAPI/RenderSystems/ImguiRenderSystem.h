@@ -88,8 +88,8 @@ namespace VULKAN
         float allMaterialsAlpha = 1.0f;
         float allMaterialsEmissive = 1.0f;
         float allMaterialsAlbedo = 1.0f;
-        float roughnessAllMaterials = 1.0f;
-        float metallicAllMaterials = 1.0f;
+        float roughnessAllMaterials = 0.5f;
+        float metallicAllMaterials = 0.3f;
         //disney bsdf
         float anisotropicAllMaterials = 1.0f;
         float subSurfaceAllMaterials = 1.0f;
@@ -103,7 +103,10 @@ namespace VULKAN
         float sheenAllMaterials = 0.5f;
         float sheenTintAllMaterials = 0.5f;
         float specularTransmissionAllMaterials = 1.0f;
+        float diffTransmissionAllMaterials = 0.01f;
+        float scatterDistance = 0.01f;
         bool UseDisneyBSDF = false;
+        bool thinMaterials = false;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];
@@ -113,6 +116,7 @@ namespace VULKAN
 	private:
         void AddTexture(VKTexture* vkTexture);
 		void SetStyle(uint32_t index);
+		void DisplayAllMaterialsConfigs();
         
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
         std::vector<VkBuffer> uniformBuffers;

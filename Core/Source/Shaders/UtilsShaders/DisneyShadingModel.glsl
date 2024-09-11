@@ -394,25 +394,27 @@ void SampleDisneyDiffuse(uvec2 seed, MaterialData material, vec3 v, bool thin, i
     vec3 color = material.diffuseColor.xyz;
 
     float p = NextFloat(seed);
-//    if(p <= surface.diffTrans) {
-//        wi = -wi;
-//        pdf = surface.diffTrans;
-//        if(thin)
-//        color = sqrt(color);
-//        else {
+    vec3 extinction = vec3(1.0f);
+    if(p <= material.diffTransmission) {
+        wi = -wi;
+        pdf = material.diffTransmission;
+        if(thin){
+            color = sqrt(color);
+        }
+        else {
             //sample.medium.phaseFunction = MediumPhaseFunction::eIsotropic;
-            //sample.medium.extinction = CalculateExtinction(surface.transmittanceColor, surface.scatterDistance);
-//        }
-//    }
-//    else {
-//        pdf = (1.0f - surface.diffTrans);
-//    }
+            extinction = CalculateExtinction(material.transColor, material.scatterDistance);
+        }
+    }
+    else {
+        pdf = (1.0f - material.diffTransmission);
+    }
 
     vec3 sheen = EvaluateSheen(material, wo, wm, wi);
 
     float diffuse = EvaluateDisneyDiffuse(material, wo, wm, wi, thin);
 
-    reflectance = sheen + color * (diffuse / pdf);
+    reflectance = sheen + color* extinction * (diffuse / pdf);
     l = normalize(transpose(inverseTBN) * wi);
     forwardPdf = abs(dotNL) * pdf;
     reversePdf = abs(dotNV) * pdf;
@@ -525,14 +527,23 @@ inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
 // -- Since this is a thin surface we are not ending up inside of a volume so we treat this as a scatter event.
         }
         else {
-//            if(Transmit(wm, wo, relativeIOR, wi)) {
-//             sample.medium.phaseFunction = dotVH > 0.0f ? MediumPhaseFunction::eIsotropic : MediumPhaseFunction::eVacuum;
-//            sample.medium.extinction = CalculateExtinction(surface.transmittanceColor, surface.scatterDistance);
-//            }
-//            else {
-//            }
-            wi = reflect(wm, wo);
-            reflectance = G1v * material.diffuseColor.xyz;
+            vec3 extinction = vec3(1.0f);
+            if(Transmit(wm, wo, relativeIOR, wi)) {
+               //sample.flags = SurfaceEventFlags::eTransmissionEvent;
+               //sample.medium.phaseFunction = dotVH > 0.0f ? MediumPhaseFunction::eIsotropic : MediumPhaseFunction::eVacuum;
+
+//               wi = normalize(refract(wm, wo, relativeIOR));
+               extinction = CalculateExtinction(material.transColor, material.scatterDistance);
+//               reflectance = G1v * material.diffuseColor.xyz * extinction;
+                
+            }
+            else {
+                //sample.flags = SurfaceEventFlags::eScatterEvent;
+                wi = reflect(wm, wo);
+//                reflectance = G1v * material.diffuseColor.xyz;
+            }
+
+            reflectance = G1v * material.diffuseColor.xyz * extinction;
         }
 
         wi = normalize(wi);

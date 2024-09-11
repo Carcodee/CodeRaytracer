@@ -124,6 +124,9 @@ void main()
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
   MaterialData material = materials[materialIndex];
+ 
+  MaterialConfigurations configs;
+  GetMatConfigs(material.configurations, configs); 
   
   vec4 diffuseInMat = TryGetTex(material.diffuseOffset, uv) * material.diffuseColor * material.albedoIntensity;
   vec4 normalInMat = TryGetTex(material.normalOffset, uv);
@@ -159,15 +162,13 @@ void main()
  vec4 diffuse=diffuseInMat;
  vec3 view = normalize(-rayPayload.direction);
  vec3 lightDir= normalize(myLight.pos - pos); 
- vec3 halfway =normalize(view + lightDir);
-  
- vec3 lightDirTangSpace = lightDir * transpose(TBN);
- vec3 finalNormalTangSpace = finalNormal * transpose(TBN);
+ vec3 halfway = normalize(view + lightDir);
  
+
  float cosThetaTangent = max(dot(lightDir, finalNormal), 0.001);
     
  mat3 inverseTBN = transpose(TBN);
-                                    
+                                   
   
  halfway = normalize((-rayPayload.sampleDir) + view);
                                         
@@ -182,8 +183,11 @@ void main()
  float reversePdfW;
  float forwardPdfWI;
  float reversePdfWI;
+ float forwardPdfWIEval;
+ float reversePdfWIEval;
  //test
  vec3 FT, FB;
+
  CreateOrthonormalBasis(finalNormal, FT, FB);
  mat3 inverseFinalTBN = transpose(mat3(FT, FB, finalNormal));
 
@@ -192,17 +196,33 @@ void main()
  //vec3 indirectReflectance= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, pdfI);
  //setas sample
  vec3 indirectD;
- vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, false,forwardPdfW, reversePdfW);
+ vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, configs.thin,forwardPdfW, reversePdfW);
  bool stop = true;
- int maxSamples = 5;
+ int maxSamples =100;
  int currentSample = 0;
- while(stop){
-     SampleDisney(rayPayload.frameSeed ,material, false, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
-     currentSample++;
-     if(currentSample>maxSamples){
-        break;
-     }
- }
+ float bestWeight = 0;
+ float lastPdf = 0;
+ float bestPdf = 0;
+ vec3 bestLightDir;
+ 
+  while(true){
+      currentSample++;
+      SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+      float weight =powerHeuristic(forwardPdfW, lastPdf);
+      lastPdf = forwardPdfWI;
+      if(weight > bestWeight){
+         bestPdf = forwardPdfWI;
+         bestLightDir = lightDir;
+      }
+      if(currentSample>maxSamples || !stop){
+         break;
+      }
+      if(dot(indirectD, vec3(1.0f))<EPSILON || MaxComponent(indirectD) > 1.0f){
+         stop = true;
+      }
+  }
+  forwardPdfWI = bestPdf;
+  vec3 indirectDEval= EvaluateDisney(material, view, bestLightDir, inverseFinalTBN, configs.thin,forwardPdfWIEval, reversePdfWIEval);
   ///////////////////DISNEY END
  
   float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);
@@ -216,18 +236,16 @@ void main()
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
-  
-  MaterialConfigurations configs;
-  GetMatConfigs(material.configurations, configs);
+  float weight =powerHeuristic(forwardPdfW * myLight.intensity, forwardPdfWIEval);
   
   if(configs.useDisneyBSDF){
     rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity; 
-    rayPayload.colorLit = indirectD * cosThetaTangentIndirect;
-    rayPayload.pdf = forwardPdfWI;
+    rayPayload.colorLit = indirectDEval * cosThetaTangentIndirect;
+    rayPayload.pdf =Lerp(forwardPdfWIEval, forwardPdfW, weight);
   }else{
     rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/* pdfDirect*/; 
     rayPayload.colorLit = (pbrLitIndirect) *  cosThetaTangentIndirect; 
-    rayPayload.pdf = pdf;
+    rayPayload.pdf = forwardPdfWI;
   }
   
   if(emissionInMat == vec4(0)){
@@ -241,7 +259,7 @@ void main()
   }
   
   rayPayload.stop = stop;
-  rayPayload.sampleDir = lightDir;
+  rayPayload.sampleDir = bestLightDir;
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;

@@ -34,6 +34,7 @@ struct MaterialConfigurations{
 	bool useAlphaChannel;
 	bool useDiffuseColorAlpha;
 	bool useDisneyBSDF;
+	bool thin;
 };
 
 struct Vertex {
@@ -73,6 +74,7 @@ struct MaterialData {
 	float normalIntensity;
 	float roughnessIntensity;
 	vec4 diffuseColor;
+	vec3 transColor;
 	float reflectivityIntensity;
 	vec3 baseReflection;
 	float metallicIntensity;
@@ -91,6 +93,8 @@ struct MaterialData {
 	float clearcoat;
 	float clearcoatGloss;
 	float specularTransmission;
+	float diffTransmission;
+	float scatterDistance;
 	float ior;
 	float relativeIOR;
 	float flatness;
@@ -118,6 +122,7 @@ void GetMatConfigs(uint configs, out MaterialConfigurations materialConfiguratio
 	materialConfigurations.useAlphaChannel = (configs & (1 << 1)) != 0;
 	materialConfigurations.useDiffuseColorAlpha = (configs & (1 << 2)) != 0;
 	materialConfigurations.useDisneyBSDF = (configs & (1 << 3)) != 0;
+	materialConfigurations.thin = (configs & (1 << 4)) != 0;
 }
 
 vec3 LambertDiffuse(vec3 col){

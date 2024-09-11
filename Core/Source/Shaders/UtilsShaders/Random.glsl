@@ -12,25 +12,25 @@ float CosinePdfHemisphere(float cosTheta)
     return cosTheta / PI;
 }
 //
-vec3 CosineSampleHemisphere(vec2 E)
-{
-    const float phi = 2.0 * PI * E.x;
-    const float cosTheta = sqrt(E.y);
-    const float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-    vec3 H;
-    H.x = sinTheta * cos(phi);
-    H.y = sinTheta * sin(phi);
-    H.z = cosTheta;
-    return H;
-}
 //vec3 CosineSampleHemisphere(vec2 E)
 //{
-//    float r = sqrt(E.x);
-//    float theta = 2* PI * E.x;
-//    return vec3(r * cos(theta), sqrt(max( 1 - E.x, 0.0f)), r * sin(theta));
-//}
+//    const float phi = 2.0 * PI * E.x;
+//    const float cosTheta = sqrt(E.y);
+//    const float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 //
+//    vec3 H;
+//    H.x = sinTheta * cos(phi);
+//    H.y = sinTheta * sin(phi);
+//    H.z = cosTheta;
+//    return H;
+//}
+vec3 CosineSampleHemisphere(vec2 E)
+{
+    float r = sqrt(E.x);
+    float theta = 2* PI * E.x;
+    return vec3(r * cos(theta), sqrt(max(1 - E.x, 0.0f)), r * sin(theta));
+}
+
 
 uint GetHash(uint seed)
 {
