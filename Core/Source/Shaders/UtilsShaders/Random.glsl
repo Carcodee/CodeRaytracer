@@ -20,14 +20,14 @@ float CosinePdfHemisphere(float cosTheta)
 //
 //    vec3 H;
 //    H.x = sinTheta * cos(phi);
-//    H.y = sinTheta * sin(phi);
-//    H.z = cosTheta;
+//    H.y = cosTheta * sin(phi);
+//    H.z = sinTheta;
 //    return H;
 //}
 vec3 CosineSampleHemisphere(vec2 E)
 {
     float r = sqrt(E.x);
-    float theta = 2* PI * E.x;
+    float theta = 2* PI * E.y;
     return vec3(r * cos(theta), sqrt(max(1 - E.x, 0.0f)), r * sin(theta));
 }
 

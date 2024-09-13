@@ -33,17 +33,27 @@ vec3 Lerp(vec3 x, vec3 y, float t){
 float powerHeuristic(float pdfA, float pdfB) {
     return (pdfA * pdfA) / (pdfA * pdfA + pdfB * pdfB);
 }
+void swapYZ(inout vec3 val){
+    float valY = val.y;
+    val.y = val.z;
+    val.z = valY;
+}
+void swapYX(inout vec3 val){
+    float valY = val.y;
+    val.y = val.x;
+    val.x = valY;
+}
 void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
 {
-    if (abs(N.y) > 0.999)
+    if (abs(N.z) < 0.999)
     {
-        T = vec3(1.0, 0.0, 0.0);
+        T = normalize(cross(N,vec3(0.0, 0.0, 1.0)));
     }
     else
     {
-        T = normalize(cross(vec3(0.0, 1.0, 0.0), N));
+        T = vec3(1.0, 0.0, 0.0);
     }
-    B = cross(N, T);
+    B = cross(T, N);
 }
 
 float CosTheta(vec3 x, vec3 y)

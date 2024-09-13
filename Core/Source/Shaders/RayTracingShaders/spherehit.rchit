@@ -99,7 +99,7 @@ void main()
   bool thin = true;
   
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
-  vec3 disneyDirect= DisneyEval(material, view, lightDir, normal,  forwardPdfD);
+  vec3 disneyDirect= vec3(0.0f);
   
   float forwardPdfW;
   float reversePdfW;

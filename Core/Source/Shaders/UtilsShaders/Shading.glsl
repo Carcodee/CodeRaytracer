@@ -6,15 +6,11 @@
 #define SHADING 
 
 float AbsCosThetaWS(vec3 x, vec3 y){
-    return max(dot(x,y),0.001f);
+    return max(dot(x,y), 0.001f);
 }
 float AbsCosTheta(vec3 x){
-    return max(x.z,.001f);
+    return max(x.z, 0.001f);
 }
-
-
-
-
 
 vec3 Schlick(vec3 r0, float radians)
 {
@@ -22,7 +18,6 @@ vec3 Schlick(vec3 r0, float radians)
     return r0 + ((vec3(1.0f) - r0) * exponential);
 }
 
-//=============================================================================================================================
 vec3 CalculateExtinction(vec3 apparantColor, float scatterDistance)
 {
     vec3 a = apparantColor;
@@ -101,7 +96,7 @@ float Dielectric(float cosThetaI, float ni, float nt)
         cosThetaI = -cosThetaI;
     }
 
-    float sinThetaI = sqrt(max(1.0f - cosThetaI * cosThetaI, 0.0f));
+    float sinThetaI = sqrt(max(1.0f - (cosThetaI * cosThetaI), 0.0f));
     float sinThetaT = ni / nt * sinThetaI;
 
     // Check for total internal reflection
@@ -109,7 +104,7 @@ float Dielectric(float cosThetaI, float ni, float nt)
         return 1;
     }
 
-    float cosThetaT = sqrt(max(1.0f - sinThetaT * sinThetaT,0.0f));
+    float cosThetaT = sqrt(max(1.0f - (sinThetaT * sinThetaT),0.0f));
 
     float rParallel     = ((nt * cosThetaI) - (ni * cosThetaT)) / ((nt * cosThetaI) + (ni * cosThetaT));
     float rPerpendicuar = ((ni * cosThetaI) - (nt * cosThetaT)) / ((ni * cosThetaI) + (nt * cosThetaT));
@@ -129,39 +124,12 @@ float GTR2(float NdotH, float alpha) {
     float denom = NdotH2 * (alpha2 - 1.0f) + 1.0f;
     return alpha2 / (PI * denom * denom);
 }
-vec3 ImportanceSampleGTR2(float roughness, float r1, float r2) {
-    float a = roughness * roughness; // Square the roughness to get the distribution parameter
 
-    // Convert r1 and r2 (random values) to spherical coordinates
-    float phi = 2.0 * PI * r1; // r1 controls the azimuthal angle
-    float cosTheta = sqrt((1.0 - r2) / (1.0 + (a * a - 1.0) * r2)); // r2 controls the elevation angle
-    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-    // Spherical to Cartesian conversion
-    vec3 H;
-    H.x = sinTheta * cos(phi);
-    H.y = sinTheta * sin(phi);
-    H.z = cosTheta;
-
-    // Normalize H to ensure it's a unit vector
-    return normalize(H);
-}
-vec3 ImportanceSampleGTR1(float alpha, float r1, float r2) {
-    float phi = 2.0 * PI * r1; // Sample the azimuthal angle uniformly
-    float cosTheta = sqrt((1.0 - pow(alpha, 2.0)) / (1.0 + (pow(alpha, 2.0) - 1.0) * r2));
-    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-    vec3 H;
-    H.x = sinTheta * cos(phi);
-    H.y = sinTheta * sin(phi);
-    H.z = cosTheta;
-
-    return normalize(H);
-}
 float GgxAnisotropicD(vec3 wl, float ax, float ay)
 {
     float dotHX2 = (wl.x, 2.0f);
-    float dotHY2 = (wl.z, 2.0f);
+    float dotHY2 = (wl.y, 2.0f);
     float cos2Theta = Cos2Theta(wl);
     float ax2 = (ax, 2.0f);
     float ay2 = (ay, 2.0f);
@@ -169,25 +137,26 @@ float GgxAnisotropicD(vec3 wl, float ax, float ay)
     return 1.0f / (PI * ax * ay * pow(dotHX2 / ax2 + dotHY2 / ay2 + cos2Theta, 2.0f));
 }
 
+
 vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
 {
     // -- Stretch the view vector so we are sampling as though roughness==1
-    vec3 v = normalize(vec3(wo.x * ax, wo.y, wo.z * ay));
+    vec3 v = normalize(vec3(wo.x * ax, wo.y * ay, wo.z));
 
-    vec3 t1 = (v.y < 0.9999f) ? normalize(cross(vec3(0, 1.0f, 0.0f), v)) : vec3(1.0f, 0.0f, 0.0f);
-    vec3 t2 = cross(t1, v);
+    vec3 t1, t2;
+    CreateOrthonormalBasis(v, t1, t2);    
     // -- Choose a point on a disk with each half of the disk weighted proportionally to its projection onto direction v
-    float a = 1.0f / (1.0f + v.y);
+    float a = 1.0f / (1.0f + v.z);
     float r = sqrt(u1);
     float phi = (u2 < a) ? (u2 / a) * PI : PI + (u2 - a) / (1.0f - a) * PI;
     float p1 = r * cos(phi);
-    float p2 = r * sin(phi) * ((u2 < a) ? 1.0f : v.y);
+    float p2 = r * sin(phi) * ((u2 < a) ? 1.0f : v.z);
 
     // -- Calculate the normal in this stretched tangent space
     vec3 n = p1 * t1 + p2 * t2 + sqrt(max(1.0f - p1 * p1 - p2 * p2, 0.0f)) * v;
 
     // -- unstretch and normalize the normal
-    return normalize(vec3(ax * n.x, n.y, ay * n.z));
+    return normalize(vec3(ax * n.x, ay * n.y, n.z));
 }
 void GgxVndfAnisotropicPdf(vec3 wi, vec3 wl, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
 {

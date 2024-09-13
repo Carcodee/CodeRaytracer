@@ -91,7 +91,7 @@ namespace VULKAN
         float roughnessAllMaterials = 0.5f;
         float metallicAllMaterials = 0.3f;
         //disney bsdf
-        float anisotropicAllMaterials = 1.0f;
+        float anisotropicAllMaterials = 0.0f;
         float subSurfaceAllMaterials = 1.0f;
         float clearcoatAllMaterials = 1.0f;
         float clearcoatGlossAllMaterials = 1.0f;
@@ -102,7 +102,7 @@ namespace VULKAN
         float specularTintAllMaterials = 0.5f;
         float sheenAllMaterials = 0.5f;
         float sheenTintAllMaterials = 0.5f;
-        float specularTransmissionAllMaterials = 1.0f;
+        float specularTransmissionAllMaterials = 0.0f;
         float diffTransmissionAllMaterials = 0.01f;
         float scatterDistance = 0.01f;
         bool UseDisneyBSDF = false;

@@ -77,6 +77,7 @@ void main()
         rayPayload.sampleDir = direction.xyz;
         rayPayload.hitT = 0.0f;
         rayPayload.frameSeed = seed;
+        rayPayload.frame = pc.currentFrame;
         vec3 rayThroughput = vec3(1.0f);
         vec3 irradiance = vec3(0.0f);
         float rayPdf = 1.0f;
@@ -118,7 +119,6 @@ void main()
             }
             
             irradiance += directLightContrib * rayThroughput / rayPdf; 
-            
             const vec4 hitPos = origin + direction * rayPayload.distance;
             origin.xyz = hitPos.xyz + rayPayload.normal * 0.001f;
             direction.xyz = rayPayload.sampleDir;

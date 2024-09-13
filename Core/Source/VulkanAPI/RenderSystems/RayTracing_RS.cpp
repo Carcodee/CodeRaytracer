@@ -1589,8 +1589,8 @@ namespace VULKAN {
 
 	void RayTracing_RS::UpdateUniformbuffers()
 	{
-		uniformData.projInverse = glm::inverse(cam.matrices.perspective);
 		uniformData.viewInverse = glm::inverse(cam.matrices.view);
+		uniformData.projInverse = glm::inverse(cam.matrices.perspective);
 
 		memcpy(ubo.mapped, &uniformData,sizeof(UniformData));
 		memcpy(lightBuffer.mapped, &light,sizeof(Light));

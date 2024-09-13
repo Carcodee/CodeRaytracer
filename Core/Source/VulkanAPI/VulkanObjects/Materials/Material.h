@@ -56,7 +56,7 @@ namespace VULKAN{
         float subSurfaceIntensity = 1.0f;
         float clearcoatIntensity = 1.0f;
         float clearcoatGlossIntensity = 0.5f;
-        float specularTransmissionIntensity= 0.01f;
+        float specularTransmissionIntensity= 0.0f;
         float diffTransmission= 0.01f;
         float scatterDistance= 0.01f;
         float refraction = 1.5f;

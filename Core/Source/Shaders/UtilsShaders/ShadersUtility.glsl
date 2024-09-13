@@ -19,6 +19,7 @@ struct RayPayload{
 	vec3 sampleDir;
 	float hitT;
     uvec2 frameSeed;	
+	uint frame;
 	bool shadow;
 	bool isMiss;
 	bool stop;
@@ -195,37 +196,11 @@ vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,floa
 	
 	return BRDF;
 }
-float oldRand(float uvX, float uvY) {
-	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
-}
-
-vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
-
-	float r1 =oldRand(seed.x, seed.y);
-	float r2 =oldRand(seed.x, seed.y);
-	// Convert to spherical coordinates
-	float theta = acos(sqrt(1.0 - r1));
-	float phi = 2.0 * PI * r2;
-
-	// Convert spherical coordinates to Cartesian coordinates
-	float x = sin(theta) * cos(phi);
-	float y = sin(theta) * sin(phi);
-	float z = cos(theta);
-
-	vec3 tangent= cross(vec3(x,y,z), normal);
-	vec3 bitangent = cross(normal, tangent);
-	// Convert the sample to world coordinates
-	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
-	return normalize(sampleDir);
-}
-
-//pdf for brdf in my case
 
 float MaxComponent(vec3 v)
 {
 	return max(v.x, max(v.y, v.z));
 }
-
 
 void CreateOrthonormalBasisWithTangent(in vec3 N, in vec3 T, out vec3 B)
 {
