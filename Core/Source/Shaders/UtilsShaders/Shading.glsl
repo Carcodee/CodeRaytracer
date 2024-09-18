@@ -11,11 +11,21 @@ float AbsCosThetaWS(vec3 x, vec3 y){
 float AbsCosTheta(vec3 x){
     return max(x.z, 0.001f);
 }
-
+float SchlickWeight(float u)
+{
+    float m = Saturate(1.0f - u);
+    float m2 = m * m;
+    return m * m2 * m2;
+}
 vec3 Schlick(vec3 r0, float radians)
 {
     float exponential = pow(1.0f - radians, 5.0f);
-    return r0 + ((vec3(1.0f) - r0) * exponential);
+    return r0 + (vec3(1.0f) - r0) * exponential;
+}
+
+float SchlickF(float r0, float radians)
+{
+    return Lerp(1.0f, SchlickWeight(radians), r0);
 }
 
 vec3 CalculateExtinction(vec3 apparantColor, float scatterDistance)
@@ -34,22 +44,14 @@ float SmithGGX(float NdotX, float roughness) {
     float denom = NdotX * (1.0 - k) + k;
     return NdotX / denom;
 }
-float SchlickWeight(float u)
-{
-    float m = Saturate(1.0f - u);
-    float m2 = m * m;
-    return m * m2 * m2;
-}
+
 
 float SchlickR0FromRelativeIOR(float eta)
 {
     return pow(eta - 1.0f, 2.0f) / pow(eta + 1.0f, 2.0f);
 }
 
-float Schlick(float r0, float radians)
-{
-    return Lerp(1.0f, SchlickWeight(radians), r0);
-}
+
 float SchlickDielectic(float cosThetaI, float relativeIor)
 {
     float r0 = SchlickR0FromRelativeIOR(relativeIor);
@@ -68,12 +70,13 @@ float SeparableSmithGGXG1(vec3 w, float a)
     return 2.0f / (1.0f + sqrt(a2 + (1 - a2) * absDotNV * absDotNV));
 }
 
-float SeparableSmithGGXG1(vec3 w, vec3 wl, float ax, float ay)
+float SeparableSmithGGXG1(vec3 w, vec3 wm, float ax, float ay)
 {
     float absTanTheta = abs(TanTheta(w));
     if(isinf(absTanTheta)) {
         return 0.0f;
     }
+    
     float a = sqrt(Cos2Phi(w) * ax * ax + Sin2Phi(w) * ay * ay);
     float a2Tan2Theta = pow(a * absTanTheta, 2.0f);
 
@@ -104,7 +107,7 @@ float Dielectric(float cosThetaI, float ni, float nt)
         return 1;
     }
 
-    float cosThetaT = sqrt(max(1.0f - (sinThetaT * sinThetaT),0.0f));
+    float cosThetaT = sqrt(max(1.0f - sinThetaT * sinThetaT,0.0f));
 
     float rParallel     = ((nt * cosThetaI) - (ni * cosThetaT)) / ((nt * cosThetaI) + (ni * cosThetaT));
     float rPerpendicuar = ((ni * cosThetaI) - (nt * cosThetaT)) / ((ni * cosThetaI) + (nt * cosThetaT));
@@ -124,20 +127,32 @@ float GTR2(float NdotH, float alpha) {
     float denom = NdotH2 * (alpha2 - 1.0f) + 1.0f;
     return alpha2 / (PI * denom * denom);
 }
-
-
-float GgxAnisotropicD(vec3 wl, float ax, float ay)
+float GGXMine(float clearcoatGloss, vec3 wm)
 {
-    float dotHX2 = (wl.x, 2.0f);
-    float dotHY2 = (wl.y, 2.0f);
-    float cos2Theta = Cos2Theta(wl);
-    float ax2 = (ax, 2.0f);
-    float ay2 = (ay, 2.0f);
+    float ag2 =pow (((1 -clearcoatGloss)* 0.1f) + (clearcoatGloss* 0.001f),2.0f); 
+    
+    float denom = PI * log2(ag2) * (1 + ((ag2 - 1) * pow(wm.z, 2.0f)));
 
-    return 1.0f / (PI * ax * ay * pow(dotHX2 / ax2 + dotHY2 / ay2 + cos2Theta, 2.0f));
+    return (1 - ag2) / denom;
 }
 
+float D_GGXTest(float roughness, vec3 halfway){
+    float dot = AbsCosTheta(halfway);
+    dot = pow(dot,2.0);
+    float roughnessPart = pow(roughness,2.0)-1;
+    float denom = PI* pow(((dot * roughnessPart)+1), 2.0);
+    return pow(roughness,2.0)/denom;
+}
+float GgxAnisotropicD(vec3 wm, float ax, float ay)
+{
+    float dotHX2 = pow(wm.x, 2.0f);
+    float dotHY2 = pow(wm.y, 2.0f);
+    float cos2Theta = Cos2Theta(wm);
+    float ax2 = pow(ax, 2.0f);
+    float ay2 = pow(ay, 2.0f);
 
+    return 1.0f / (PI * ax * ay * pow((dotHX2 / ax2) + (dotHY2 / ay2) + cos2Theta, 2.0f));
+}
 vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
 {
     // -- Stretch the view vector so we are sampling as though roughness==1
@@ -158,26 +173,25 @@ vec3 SampleGgxVndfAnisotropic(vec3 wo, float ax, float ay, float u1, float u2)
     // -- unstretch and normalize the normal
     return normalize(vec3(ax * n.x, ay * n.y, n.z));
 }
-void GgxVndfAnisotropicPdf(vec3 wi, vec3 wl, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
+void GgxVndfAnisotropicPdf(vec3 wi, vec3 wm, vec3 wo, float ax, float ay, inout float forwardPdfW, inout float reversePdfW)
 {
-    float D = GgxAnisotropicD(wl, ax, ay);
+    float D = GgxAnisotropicD(wm, ax, ay);
     float absDotNL = AbsCosTheta(wi);
-    float absDotHL = abs(dot(wl, wi));
-    float G1v = SeparableSmithGGXG1(wo, wl, ax, ay);
+    float absDotHL = abs(dot(wm, wi));
+    float G1v = SeparableSmithGGXG1(wo, wm, ax, ay);
     forwardPdfW = G1v * absDotHL * D / absDotNL;
 
     float absDotNV = AbsCosTheta(wo);
-    float absDotHV = abs(dot(wl, wo));
-    float G1l = SeparableSmithGGXG1(wi, wl, ax, ay);
+    float absDotHV = abs(dot(wm, wo));
+    float G1l = SeparableSmithGGXG1(wi, wm, ax, ay);
     reversePdfW = G1l * absDotHV * D / absDotNV;
 }
-
-bool Transmit(vec3 wl, vec3 wi, float n, vec3 wo)
+bool Transmit(vec3 wm, vec3 wi, float n, vec3 wo)
 {
-    float c = dot(wi, wl);
+    float c = dot(wi, wm);
     if(c < 0.0f) {
         c = -c;
-        wl = -wl;
+        wm = -wm;
     }
 
     float root = 1.0f - n * n * (1.0f - c * c);
@@ -185,7 +199,7 @@ bool Transmit(vec3 wl, vec3 wi, float n, vec3 wo)
         return false;
     }
 
-    wo = (n * c - sqrt(root)) * wl - n * wi;
+    wo = (n * c - sqrt(root)) * wm - n * wi;
     return true;
 }
 float ThinTransmissionRoughness(float ior, float roughness)

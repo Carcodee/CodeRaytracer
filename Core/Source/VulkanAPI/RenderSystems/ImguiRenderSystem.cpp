@@ -461,7 +461,7 @@ namespace VULKAN
 			InputHandler::editingGraphics = true;
 		}
 
-		if (ImGui::SliderFloat("materials Scatter Distance", &scatterDistance, 0.0f, 1.0f,
+		if (ImGui::SliderFloat("materials Scatter Distance", &scatterDistance, 0.0f, 0.2f,
 		                       "%.3f"))
 		{
 			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)

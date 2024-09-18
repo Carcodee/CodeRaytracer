@@ -205,7 +205,7 @@ void main()
  float totalPdf = 0.0f;
  float totalWeight = 0.0f;
  float probabilitySurvival = 1.0f;
-  while(true){
+  /*while(true){
       currentSample++;
       SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
       
@@ -221,12 +221,12 @@ void main()
       }
       if(dot(indirectD, vec3(1.0f))<EPSILON || MaxComponent(indirectD) > 1.0f){
       }
-  }
+  }*/
   
-  //SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
-  indirectD = accumReflectance / totalWeight;
-  lightDir = accumSample / totalWeight;
-  forwardPdfWI = totalPdf / totalWeight; 
+  SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+  //indirectD = accumReflectance / totalWeight;
+  //lightDir = accumSample / totalWeight;
+  //forwardPdfWI = totalPdf / totalWeight; 
   ///////////////////DISNEY END
  
   float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);

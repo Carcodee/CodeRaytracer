@@ -43,6 +43,7 @@ layout(push_constant) uniform pushConstantVariables{
 #define SAMPLE_COUNT 1 
 #define LIGHT_SOURCES 1 
 #define MAX_IRRADIANCE 8.0f 
+#define GAMMA 2.2f
 
 Material currentMaterial;
 
@@ -90,7 +91,8 @@ void main()
             vec3 directLightContrib = rayPayload.color;
             
             if(rayPayload.isMiss){
-                irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput / rayPdf; 
+            // pdf on miss is giving weird values
+                irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput / 4 * PI; 
                 if(sampleShadowed){
                     //irradiance *= 0.7f;   
                 }
@@ -101,7 +103,7 @@ void main()
                 aoSample = min(1.0f, aoSample);
             }
             
-            irradiance += rayPayload.emissionColor * rayThroughput / rayPdf; 
+            irradiance += rayPayload.emissionColor * rayThroughput ; 
             if(i==0){
                 imageStore(emissiveImage, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.emissionColor, 1.0f));
             }
@@ -142,7 +144,7 @@ void main()
         result += min(irradiance, MAX_IRRADIANCE); 
     }
     result = result/SAMPLE_COUNT;
-    //result = pow(result, vec3(1.0/2.2));
+    result = pow(result, vec3(1.0/GAMMA));
     
     AOResult = AOResult/SAMPLE_COUNT;
     
