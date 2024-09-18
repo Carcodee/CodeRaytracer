@@ -1428,7 +1428,11 @@ namespace VULKAN {
 	}
 
     void RayTracing_RS::UpdateMaterialInfo() {
-        
+
+		if (allMaterialsBuffer.mapped == nullptr)
+		{
+			return;
+		}
         std::vector<MaterialUniformData> materialDatas{};
         for (auto& mat:ModelHandler::GetInstance()->allMaterialsOnApp)
         {

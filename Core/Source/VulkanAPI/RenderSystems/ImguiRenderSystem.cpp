@@ -328,149 +328,164 @@ namespace VULKAN
 			ModelHandler::GetInstance()->updateMaterialData = true;
 			InputHandler::editingGraphics = true;
 		}
-		ImGui::SeparatorText("Disney BSDF");
-		if (ImGui::Checkbox("Thin Materials", &thinMaterials))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->SetConfigVal(THIN, thinMaterials);
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-		}
-		if (ImGui::SliderFloat("materials Anisotropic Intensity", &anisotropicAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.anisotropicIntensity = anisotropicAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Subsurface Intensity", &subSurfaceAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.subSurfaceIntensity = subSurfaceAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Clearcoat Intensity", &clearcoatAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.clearcoatIntensity = clearcoatAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials ClearcoatGloss Intensity", &clearcoatGlossAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.clearcoatGlossIntensity = clearcoatGlossAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Refraction Intensity", &refractionAllMaterials, 1.0f, 2.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.refraction = refractionAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials relative refraction Intensity", &relativeRefractionAllMaterials, 1.0f, 2.0f,
-		                       "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.relativeRefraction = relativeRefractionAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials flatness intensity", &flatnessAllMaterials, 1.0f,
-		                       2.0f,
-		                       "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.flatness = flatnessAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Specular Intensity", &specularAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.specular = specularAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Specular Tint Intensity", &specularTintAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.specularTint = specularTintAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Sheen Intensity", &sheenAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.sheen = sheenAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials Sheen Tint Intensity", &sheenTintAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.sheenTint = sheenTintAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
+    	if (UseDisneyBSDF)
+	    {
+		    ImGui::SeparatorText("Disney BSDF");
+		    if (ImGui::Checkbox("Thin Materials", &thinMaterials))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->SetConfigVal(THIN, thinMaterials);
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+		    }
+		    if (ImGui::SliderFloat("materials Anisotropic Intensity", &anisotropicAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.anisotropicIntensity = anisotropicAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Subsurface Intensity", &subSurfaceAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.subSurfaceIntensity = subSurfaceAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Clearcoat Intensity", &clearcoatAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.clearcoatIntensity = clearcoatAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials ClearcoatGloss Intensity", &clearcoatGlossAllMaterials, 0.0f, 1.0f,
+		                           "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.clearcoatGlossIntensity = clearcoatGlossAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Refraction Intensity", &refractionAllMaterials, 1.0f, 2.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.refraction = refractionAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials relative refraction Intensity", &relativeRefractionAllMaterials, 1.0f,
+		                           2.0f,
+		                           "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.relativeRefraction = relativeRefractionAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials flatness intensity", &flatnessAllMaterials, 1.0f,
+		                           2.0f,
+		                           "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.flatness = flatnessAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Specular Intensity", &specularAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.specular = specularAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Specular Tint Intensity", &specularTintAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.specularTint = specularTintAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Sheen Intensity", &sheenAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.sheen = sheenAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Sheen Tint Intensity", &sheenTintAllMaterials, 0.0f, 1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.sheenTint = sheenTintAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
 
-		if (ImGui::SliderFloat("materials SpecularTransmission Intensity", &specularTransmissionAllMaterials, 0.0f,
-		                       1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.specularTransmissionIntensity = specularTransmissionAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
-		if (ImGui::SliderFloat("materials DiffTransmission Intensity", &diffTransmissionAllMaterials, 0.0f, 1.0f,
-		                       "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.diffTransmission = diffTransmissionAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
+		    if (ImGui::SliderFloat("materials SpecularTransmission Intensity", &specularTransmissionAllMaterials, 0.0f,
+		                           1.0f, "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.specularTransmissionIntensity = specularTransmissionAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials Scatter Distance", &scatterDistance, 0.0f, 0.2f,
+		                           "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.scatterDistance = scatterDistance;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::SliderFloat("materials DiffTransmission Intensity", &diffTransmissionAllMaterials, 0.0f, 1.0f,
+		                           "%.3f"))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.diffTransmission = diffTransmissionAllMaterials;
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+		    if (ImGui::ColorEdit3("materials DiffTransmission Color", diffTransColAllMaterials))
+		    {
+			    for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
+			    {
+				    pair.second->materialUniform.transColor = glm::make_vec3(diffTransColAllMaterials);
+			    }
+			    ModelHandler::GetInstance()->updateMaterialData = true;
+			    InputHandler::editingGraphics = true;
+		    }
+	    }
+		
 
-		if (ImGui::SliderFloat("materials Scatter Distance", &scatterDistance, 0.0f, 0.2f,
-		                       "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.scatterDistance = scatterDistance;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
 	}
 
 	void ImguiRenderSystem::CreateFonts()

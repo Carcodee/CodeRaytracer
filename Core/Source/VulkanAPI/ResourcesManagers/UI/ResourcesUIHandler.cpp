@@ -237,25 +237,27 @@ namespace VULKAN
                     ModelHandler::GetInstance()->updateMaterialData= true;
                 }
             }
-
-            float baseReflection[3];
-            baseReflection[0]= mat.materialUniform.baseReflection.x;
-            baseReflection[1]= mat.materialUniform.baseReflection.y;
-            baseReflection[2]= mat.materialUniform.baseReflection.z;
-            if(ImGui::SliderFloat3("Base reflectivity",baseReflection, 0.0f, 1.0f,"%.3f")){
-                mat.materialUniform.baseReflection.x=baseReflection[0];
-                mat.materialUniform.baseReflection.y=baseReflection[1];
-                mat.materialUniform.baseReflection.z=baseReflection[2];
-                ModelHandler::GetInstance()->updateMaterialData= true;
+            bool useDisneyBSDF = mat.GetConfigVal(USE_DISNEY_BSDF);
+            if(ImGui::Checkbox( "Use Disney BSDF", &useDisneyBSDF)){
+                if(useDisneyBSDF){
+                    mat.SetConfigVal(USE_DISNEY_BSDF, true);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }else
+                {
+                    mat.SetConfigVal(USE_DISNEY_BSDF, false);
+                    ModelHandler::GetInstance()->updateMaterialData= true;
+                }
             }
 
-            float matCol[4];
-            matCol[0]= mat.materialUniform.diffuseColor.x;
-            matCol[1]= mat.materialUniform.diffuseColor.y;
-            matCol[2]= mat.materialUniform.diffuseColor.z;
-            matCol[3]= mat.materialUniform.diffuseColor.w;
-            if (ImGui::ColorEdit4("Diffuse", matCol)){
-                mat.materialUniform.diffuseColor = glm::make_vec4(matCol);
+            if (!useDisneyBSDF)
+            {
+                if (ImGui::SliderFloat3("Index Of Refraction", glm::value_ptr(mat.materialUniform.baseReflection), 0.0f, 1.0f))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }               
+            }
+
+            if (ImGui::ColorEdit4("Diffuse", glm::value_ptr(mat.materialUniform.diffuseColor))){
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
 
@@ -264,47 +266,77 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
 
-            ImGui::SeparatorText("Test");
-            if(ImGui::SliderFloat("Anisotropic",&mat.materialUniform.anisotropicIntensity, 0.0f, 1.0f,"%.3f")){
+            if (useDisneyBSDF)
+            {
+                ImGui::SeparatorText("Disney BSDF");
+                if (ImGui::SliderFloat("Anisotropic", &mat.materialUniform.anisotropicIntensity, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Subsurface", &mat.materialUniform.subSurfaceIntensity, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Clearcoat", &mat.materialUniform.clearcoatIntensity, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Clearcoat Gloss", &mat.materialUniform.clearcoatGlossIntensity, 0.0f, 1.0f,
+                                       "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
 
-                ModelHandler::GetInstance()->updateMaterialData= true;
+                if (ImGui::SliderFloat("index of refraction", &mat.materialUniform.refraction, 1.0f, 2.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("relative index of refraction", &mat.materialUniform.relativeRefraction, 1.0f,
+                                       2.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("flatness", &mat.materialUniform.flatness, 1.0f, 2.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Specular", &mat.materialUniform.specular, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Specular tint", &mat.materialUniform.specularTint, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Sheen", &mat.materialUniform.sheen, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Sheen tint", &mat.materialUniform.sheenTint, 0.0f, 1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("specularTransmission", &mat.materialUniform.specularTransmissionIntensity, 0.0f,
+                                       1.0f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Scatter distance", &mat.materialUniform.scatterDistance, 0.0f, 0.2f, "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::SliderFloat("Diffuse transmission", &mat.materialUniform.diffTransmission, 0.0f, 1.0f,
+                                       "%.3f"))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
+                if (ImGui::ColorEdit4("Diffuse transmission color", glm::value_ptr(mat.materialUniform.transColor)))
+                {
+                    ModelHandler::GetInstance()->updateMaterialData = true;
+                }
             }
-            if(ImGui::SliderFloat("Subsurface",&mat.materialUniform.subSurfaceIntensity, 0.0f, 1.0f,"%.3f")){
 
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Clearcoat",&mat.materialUniform.clearcoatIntensity, 0.0f, 1.0f,"%.3f")){
 
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Clearcoat Gloss",&mat.materialUniform.clearcoatGlossIntensity, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("specularTransmission",&mat.materialUniform.specularTransmissionIntensity, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("refraction",&mat.materialUniform.refraction, 1.0f, 2.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Sheen",&mat.materialUniform.sheen, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Sheen tint",&mat.materialUniform.sheenTint, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Specular",&mat.materialUniform.specular, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("Specular tint",&mat.materialUniform.specularTint, 0.0f, 1.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
 
 
 
