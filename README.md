@@ -34,13 +34,12 @@ there are examples Inside "Core/Source/Resources/Assets/models", just drag and d
 Right there is only support for cmake projects, soon I will load a easy to build visual studio solution
 
 ## Renders
-![Screenshot 2024-08-19 154754](https://github.com/user-attachments/assets/51e65995-0d81-4e79-8997-95b53958fa4b)
-![Screenshot 2024-08-19 233937](https://github.com/user-attachments/assets/2118514d-1cb8-44c1-91b4-dba49761d08a)
-![Screenshot 2024-08-19 212059](https://github.com/user-attachments/assets/3612c2e4-6018-4185-a6c0-6afbb6ba0c90)
-![Screenshot 2024-08-19 153044](https://github.com/user-attachments/assets/2a1f1125-61f8-427d-9a70-db24217cb924)
-![Screenshot 2024-08-19 152347](https://github.com/user-attachments/assets/fabbe3c3-5c5d-4c9e-881c-cdb76ae79a6d)
-![Screenshot 2024-08-12 000620](https://github.com/user-attachments/assets/01943b5c-ad47-4f3a-b2e9-fb375f5f8098)
-![Screenshot 2024-08-10 225416](https://github.com/user-attachments/assets/c8b5ca02-7b73-45a2-ad3b-f2a09f20a798)
-![Screenshot 2024-08-10 143658](https://github.com/user-attachments/assets/c3537c51-696d-4946-bc2e-d41d26c6ea73)
 
 
+![Screenshot 2024-09-19 171644](https://github.com/user-attachments/assets/002b5e95-c494-49a8-ae59-0e47a90c946e)
+![Screenshot 2024-09-19 171414](https://github.com/user-attachments/assets/9e191277-c535-4c51-9b5a-67e6be7b4904)
+![Screenshot 2024-09-19 173226](https://github.com/user-attachments/assets/08812224-47f4-4284-b920-1beae3528f82)
+![Screenshot 2024-09-19 174137](https://github.com/user-attachments/assets/c8748c4e-12b1-4240-8e75-aedec36f6df2)
+![Screenshot 2024-09-19 174438](https://github.com/user-attachments/assets/2b9ca34e-fe5e-460a-b65f-28764ed94a12)
+![Screenshot 2024-09-19 000507](https://github.com/user-attachments/assets/f899e887-6ec7-4d18-844c-c32291d9c622)
+![Screenshot 2024-09-19 170855](https://github.com/user-attachments/assets/90c946cb-af1a-47fa-8b58-ad12544cce94)
