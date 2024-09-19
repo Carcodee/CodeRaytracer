@@ -1,29 +1,28 @@
 
 
 #include "../UtilsShaders/Random.glsl"
-#include "../UtilsShaders/DisneyShadingModel.glsl"
-#define DIFFUSE_TEX 0 
-#define ALPHA_TEX 1 
-#define SPECULAR_TEX 2 
-#define BUMP_TEX 3 
-#define AMBIENT_TEX 4 
+#include "../UtilsShaders/Functions.glsl"
+#include "../UtilsShaders/Shading.glsl"
+
+#ifndef Utils 
+#define Utils 
 
 struct RayPayload{
 	vec3 color;
 	vec3 colorLit;
 	vec3 emissionColor;
+	float pdf;
 	float distance;
 	vec3 normal;
-	vec3 tangent;
 	vec3 origin;
 	vec3 direction;
 	vec3 sampleDir;
-	float roughness;
-	float reflectivity;
 	float hitT;
     uvec2 frameSeed;	
+	uint frame;
 	bool shadow;
 	bool isMiss;
+	bool stop;
 };
 struct MeshData {
 	int materialIndexOnShape;
@@ -35,6 +34,8 @@ struct MaterialConfigurations{
 	bool alphaAsDiffuse;
 	bool useAlphaChannel;
 	bool useDiffuseColorAlpha;
+	bool useDisneyBSDF;
+	bool thin;
 };
 
 struct Vertex {
@@ -72,9 +73,9 @@ struct Material{
 struct MaterialData {
 	float albedoIntensity;
 	float normalIntensity;
-	float specularIntensity;
 	float roughnessIntensity;
 	vec4 diffuseColor;
+	vec3 transColor;
 	float reflectivityIntensity;
 	vec3 baseReflection;
 	float metallicIntensity;
@@ -87,6 +88,21 @@ struct MaterialData {
 	int diffuseOffset;
 	int normalOffset;
 	uint configurations;
+	// disney bsdf
+	float anisotropic;
+	float subSurface;
+	float clearcoat;
+	float clearcoatGloss;
+	float specularTransmission;
+	float diffTransmission;
+	float scatterDistance;
+	float ior;
+	float relativeIOR;
+	float flatness;
+	float sheen;
+	float specular;
+    float specularTint;
+	float sheenTint;
 };
 MaterialFindInfo GetMatInfo(vec4 diffuse, vec4 normal){
 	
@@ -106,6 +122,8 @@ void GetMatConfigs(uint configs, out MaterialConfigurations materialConfiguratio
 	materialConfigurations.alphaAsDiffuse = (configs & 1) != 0;
 	materialConfigurations.useAlphaChannel = (configs & (1 << 1)) != 0;
 	materialConfigurations.useDiffuseColorAlpha = (configs & (1 << 2)) != 0;
+	materialConfigurations.useDisneyBSDF = (configs & (1 << 3)) != 0;
+	materialConfigurations.thin = (configs & (1 << 4)) != 0;
 }
 
 vec3 LambertDiffuse(vec3 col){
@@ -122,13 +140,16 @@ vec3 CookTorrance(vec3 normal, vec3 view,vec3 light, float D, float G, vec3 F){
 }
 
 
-
 float D_GGX(float roughness, vec3 normal, vec3 halfway){
 	float dot = max(dot(normal,halfway), 0.0001);
 	dot = pow(dot,2.0);
 	float roughnessPart = pow(roughness,2.0)-1;
 	float denom = PI* pow(((dot * roughnessPart)+1), 2.0);
 	return pow(roughness,2.0)/denom;
+}
+bool IsBlack(vec3 color)
+{
+	return dot(color, color) < EPSILON;
 }
 float PDF_GGX(vec3 normal, vec3 halfWay, vec3 view, float roughness) {
 	float D = D_GGX(roughness, normal, halfWay);
@@ -149,12 +170,7 @@ float G(float alpha, vec3 N, vec3 V, vec3 L){
 	return G1(alpha,  N, V) * G1(alpha,  N, L);
 }
 
-vec3 FresnelShilck(vec3 halfway, vec3 view, vec3 FO){
-	float powPart= 1- max(dot(view, halfway),0.0001);
-	powPart =pow(powPart,5);
-	vec3 vecPow = powPart * (vec3(1.0)-FO);
-	return FO + vecPow;
-}
+
 vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float metallic,  float roughness){
 
 	float D = D_GGX(roughness, normal, wh);
@@ -162,7 +178,6 @@ vec3 GetBRDF(vec3 normal, vec3 wo, vec3 wi,vec3 wh,vec3 col, vec3 FO, float meta
 	vec3 F = FresnelShilck(wh, wo, FO);
 	vec3 cookTorrence = CookTorrance(normal, wo, wi, D, G, F);
 	vec3 lambert= LambertDiffuse(col);
-	vec3 diffuse = DisneyDiffuse(col, normal, wh, wo, wi, roughness, 0.9f);
 	vec3 ks = F;
 	vec3 kd = (vec3(1.0) - ks) * (1 - metallic);
 	vec3 BRDF =  (kd * lambert) + cookTorrence;
@@ -181,53 +196,12 @@ vec3 GetPBRLit (vec3 col,vec3 lightCol, float emissiveMesh, float roughness,floa
 	
 	return BRDF;
 }
-float oldRand(float uvX, float uvY) {
-	return fract(sin(uvX * 12.9898 + uvY * 78.233) * 43758.5453123);
-}
-
-vec3 randomCosineWeightedDirection(vec3 normal, vec2 seed, uint frame) {
-
-	float r1 =oldRand(seed.x, seed.y);
-	float r2 =oldRand(seed.x, seed.y);
-	// Convert to spherical coordinates
-	float theta = acos(sqrt(1.0 - r1));
-	float phi = 2.0 * PI * r2;
-
-	// Convert spherical coordinates to Cartesian coordinates
-	float x = sin(theta) * cos(phi);
-	float y = sin(theta) * sin(phi);
-	float z = cos(theta);
-
-	vec3 tangent= cross(vec3(x,y,z), normal);
-	vec3 bitangent = cross(normal, tangent);
-	// Convert the sample to world coordinates
-	vec3 sampleDir = x * tangent + y * bitangent + z * normal;
-	return normalize(sampleDir);
-}
-
-//pdf for brdf in my case
-float CosinePdfHemisphere(float cosTheta)
-{
-	return cosTheta / PI;
-}
 
 float MaxComponent(vec3 v)
 {
 	return max(v.x, max(v.y, v.z));
 }
 
-void CreateOrthonormalBasis(in vec3 N, out vec3 T, out vec3 B)
-{
-	if (abs(N.z) > 0.999)
-	{
-		T = vec3(1.0, 0.0, 0.0);
-	}
-	else
-	{
-		T = normalize(cross(vec3(0.0, 0.0, 1.0), N));
-	}
-	B = cross(N, T);
-}
 void CreateOrthonormalBasisWithTangent(in vec3 N, in vec3 T, out vec3 B)
 {
 	B = cross(N, T);
@@ -257,3 +231,5 @@ vec3 TangentToWorldWithTangent(vec3 sampleVec, vec3 normal, vec3 tangent)
 vec3 GetReflection(vec3 reflectedDir, vec3 randomDir, float rougness){
 	return normalize(mix(reflectedDir, randomDir, rougness));
 }
+
+#endif 

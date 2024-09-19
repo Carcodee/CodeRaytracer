@@ -47,6 +47,8 @@ namespace VULKAN {
 		VKTexture* storageImage;
         VKTexture* emissiveStoreImage;
         VKTexture* aoStorageImage;
+        VKTexture* environmentTexture;
+		std::vector<VKTexture*> environments;
 		Camera cam{glm::vec3(1.0f, 1.0f, 1.0f)};
 		Light light{glm::vec3(0), glm::vec3(1.0f), 1.0f };
         PushConstantBlock_RS pc;
@@ -70,7 +72,7 @@ namespace VULKAN {
 
 		std::vector<std::shared_ptr<ModelData>>modelsOnScene;
         std::vector<uint32_t> instancesGeometryOffsets;
-		//helpers
+		void LoadEnvironments();
         void CleanBuffers();
 		void SetupBottomLevelObj(std::shared_ptr<ModelData> modelData);
 		void LoadFunctionsPointers();
@@ -129,14 +131,11 @@ namespace VULKAN {
 		Buffer ubo;
 		Buffer lightBuffer;
 
-
-
 		VkShaderModule rHitShaderModule;
 		VkShaderModule rMissShaderModule;
 		VkShaderModule rGenShaderModule;
         
         VKTexture* baseTexture;
-        VKTexture* environmentTexture;
         std::vector<AABB> aabbs;
         
 	};

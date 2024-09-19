@@ -108,7 +108,6 @@ namespace VULKAN{
         std::vector<float> baseReflection;
         this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
         this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
-        this->materialUniform.specularIntensity = jsonObj.at("SpecularIntensity");
         this->materialUniform.roughnessIntensity = jsonObj.at("RoughnessIntensity");
         //16
         diffuse = jsonObj.at("DiffuseColor").get<std::vector<float>>();
@@ -161,7 +160,6 @@ namespace VULKAN{
                 {"Name",this->name},
                 {"AlbedoIntensity",this->materialUniform.albedoIntensity},
                 {"NormalIntensity",this->materialUniform.normalIntensity},
-                {"SpecularIntensity",this->materialUniform.specularIntensity},
                 {"RoughnessIntensity",this->materialUniform.roughnessIntensity},
                 //16
                 {"DiffuseColor",diffuse},
@@ -234,6 +232,12 @@ namespace VULKAN{
             case USE_ALPHA_OF_DIFFUSE_COLOR:
                 val = (currentConfigs & (1 << 2)) != 0;
                 break;
+            case USE_DISNEY_BSDF:
+                val = (currentConfigs & (1 << 3)) != 0;
+                break;
+            case THIN:
+                val = (currentConfigs & (1 << 4)) != 0;
+                break;
             default:
                 val = false;
                 assert(val && "Provide a valid configuration type");
@@ -252,6 +256,12 @@ namespace VULKAN{
                 break;
             case USE_ALPHA_OF_DIFFUSE_COLOR:
                 maskValue  = 1 << 2;
+                break;
+            case USE_DISNEY_BSDF:
+                maskValue  = 1 << 3;
+                break;
+            case THIN:
+                maskValue  = 1 << 4;
                 break;
         }
         if (value){

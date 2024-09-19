@@ -476,7 +476,10 @@ namespace VULKAN {
             Sphere& currentSphere = ModelHandler::GetInstance()->allSpheresOnApp[i];
             CreateBottomLevelAccelerationStructureSpheres(currentSphere);
         }
-        CreateTopLevelAccelerationStructure(topLevelObjBase);
+		if (!modelsOnScene.empty() || !ModelHandler::GetInstance()->allSpheresOnApp.empty())
+		{
+			CreateTopLevelAccelerationStructure(topLevelObjBase);
+		}
 
     }
 	void RayTracing_RS::CreateDescriptorSets()
@@ -501,7 +504,6 @@ namespace VULKAN {
         std::string texPath=HELPERS::FileHandler::GetInstance()->GetAssetsPath()+"/Images/Solid_white.png";
         std::string environmentPath=HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+"/Images/Env.hdr";
 		baseTexture = new VKTexture(texPath.c_str(), myRenderer.GetSwapchain());
-        environmentTexture = new VKTexture(environmentPath.c_str(), myRenderer.GetSwapchain());
 
 
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = INITIALIZERS::descriptorPoolCreateInfo(poolSizes, 1);
@@ -654,6 +656,8 @@ namespace VULKAN {
 		vkUpdateDescriptorSets(myDevice.device(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, VK_NULL_HANDLE);
 	}
 
+	
+
     void RayTracing_RS::CleanBuffers() {
 
         if (!runningModels){
@@ -708,7 +712,10 @@ namespace VULKAN {
             allAABBBuffer.destroy();
         }
 
-        DestroyAccelerationStructure(topLevelObjBase.TopLevelAsData);
+		if (topLevelObjBase.TopLevelAsData.buffer != nullptr)
+		{
+			DestroyAccelerationStructure(topLevelObjBase.TopLevelAsData);
+		}
         for (auto& model: ModelHandler::GetInstance()->allModelsOnApp) {
             if (model.second->bottomLevelObjRef != nullptr){
                 if (model.second->bottomLevelObjRef->BottomLevelAs.handle != nullptr){
@@ -775,20 +782,31 @@ namespace VULKAN {
 			throw std::runtime_error("Unable to create descriptorAllocateInfo");
 		}
         
-        
-		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
-		descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
-		descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
 
-		descriptorAccelerationStructureInfo.pAccelerationStructures = &topLevelObjBase.TopLevelAsData.handle;
-		VkWriteDescriptorSet accelerationStructureWrite{};
-		accelerationStructureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		// The specialized acceleration structure descriptor has to be chained
-		accelerationStructureWrite.pNext = &descriptorAccelerationStructureInfo;
-		accelerationStructureWrite.dstSet = descriptorSet;
-		accelerationStructureWrite.dstBinding = 0;
-		accelerationStructureWrite.descriptorCount = 1;
-		accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
+        if (!modelsOnScene.empty() || !ModelHandler::GetInstance()->allSpheresOnApp.empty())
+        {
+	        descriptorAccelerationStructureInfo.sType =
+		        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+	        descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+	        descriptorAccelerationStructureInfo.pAccelerationStructures = &topLevelObjBase.TopLevelAsData.handle;
+        }
+        else
+        {
+	        VkAccelerationStructureKHR nullAccelerationStructure = VK_NULL_HANDLE;
+	        descriptorAccelerationStructureInfo.sType =
+		        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+	        descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+	        descriptorAccelerationStructureInfo.pAccelerationStructures = &nullAccelerationStructure;
+        }
+        VkWriteDescriptorSet accelerationStructureWrite{};
+        accelerationStructureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        // The specialized acceleration structure descriptor has to be chained
+        accelerationStructureWrite.pNext = &descriptorAccelerationStructureInfo;
+        accelerationStructureWrite.dstSet = descriptorSet;
+        accelerationStructureWrite.dstBinding = 0;
+        accelerationStructureWrite.descriptorCount = 1;
+        accelerationStructureWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 
 		VkDescriptorImageInfo storageImageDescriptor{};
 		storageImageDescriptor.imageView = storageImage->textureImageView;
@@ -827,6 +845,7 @@ namespace VULKAN {
             BLAsInstanceOffsetBuffer.descriptor.range = sizeof(uint32_t) * instancesGeometryOffsets.size();
             
         }else{
+        	
             vertexBuffer.descriptor.buffer = vertexBuffer.buffer;
             vertexBuffer.descriptor.offset = 0;
             vertexBuffer.descriptor.range = VK_WHOLE_SIZE;
@@ -867,6 +886,7 @@ namespace VULKAN {
 
         allSpheresBuffer.descriptor.buffer = allSpheresBuffer.buffer;
         allSpheresBuffer.descriptor.offset = 0;
+		
         if (!ModelHandler::GetInstance()->allSpheresOnApp.empty()){
             allSpheresBuffer.descriptor.range = sizeof(SphereUniform) * ModelHandler::GetInstance()->allSpheresOnApp.size();
         } else{
@@ -1408,7 +1428,11 @@ namespace VULKAN {
 	}
 
     void RayTracing_RS::UpdateMaterialInfo() {
-        
+
+		if (allMaterialsBuffer.mapped == nullptr)
+		{
+			return;
+		}
         std::vector<MaterialUniformData> materialDatas{};
         for (auto& mat:ModelHandler::GetInstance()->allMaterialsOnApp)
         {
@@ -1556,6 +1580,7 @@ namespace VULKAN {
 		vkGetPhysicalDeviceFeatures2(myDevice.physicalDevice, &deviceFeatures2);
 		LoadFunctionsPointers();
 		//CreateTopLevelAccelerationStructure(topLevelObjBase);
+		LoadEnvironments();
 		CreateStorageImages();
 		CreateUniformBuffer();
 		CreateRTPipeline();
@@ -1568,8 +1593,8 @@ namespace VULKAN {
 
 	void RayTracing_RS::UpdateUniformbuffers()
 	{
-		uniformData.projInverse = glm::inverse(cam.matrices.perspective);
 		uniformData.viewInverse = glm::inverse(cam.matrices.view);
+		uniformData.projInverse = glm::inverse(cam.matrices.perspective);
 
 		memcpy(ubo.mapped, &uniformData,sizeof(UniformData));
 		memcpy(lightBuffer.mapped, &light,sizeof(Light));
@@ -1616,6 +1641,27 @@ namespace VULKAN {
         vkDestroyBuffer(myDevice.device(), accelerationStructure.buffer, nullptr);
     }
 
+    void RayTracing_RS::LoadEnvironments()
+    {
+		std::vector<std::string>paths;
+		std::string envPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+ "/Images/";
+		for (auto& path : std::filesystem::directory_iterator(envPath))
+		{
+			if (path.path().extension() == ".hdr")
+			{
+				paths.push_back(path.path().string());
+			}
+			
+		}
+		environments.reserve(paths.size());
+		for (auto path : paths)
+		{
+			VKTexture* texture = new VKTexture(path.c_str(), myRenderer.GetSwapchain());
+			environments.push_back(texture);
+		}
+		environmentTexture = environments[0];
+		std::cout<< environments.size() <<" environments loaded\n";
+    }
 
 }
 

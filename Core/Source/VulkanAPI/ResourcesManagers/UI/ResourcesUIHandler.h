@@ -24,6 +24,7 @@ namespace VULKAN
         void DisplayMatTexture(Material& mat, TEXTURE_TYPE textureType, ImVec2& iconSize, std::string texName);
         void DisplayMeshInfo(ModelData& modelData);
         void DisplayMeshInfo(Sphere& sphereData);
+		void DisplayEnvironments(std::vector<VKTexture*>& environments, VKTexture*& selectedEnv);
         void DisplayViewportFrameBuffers(std::vector<VKTexture*> framebuffers);
         void HandleDrag(TEXTURE_TYPE textureType, Material& mat);
         void HandleDrag(VKTexture* texture);

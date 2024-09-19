@@ -7,6 +7,8 @@
 
 
 #include "../UtilsShaders/ShadersUtility.glsl"
+#include "../UtilsShaders/DisneyShadingModel.glsl"
+#include "../UtilsShaders/PersonalDisney.glsl"
 
 struct Sphere {
     vec3 center;
@@ -55,15 +57,17 @@ void main()
   MaterialData material = materials[sphere.matId];
   vec3 hitPos = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   
-  vec3 lightDir= normalize(myLight.pos - hitPos); 
+  MaterialConfigurations configs;
+  GetMatConfigs(material.configurations, configs); 
+  
   vec3 normal = normalize(hitPos - sphere.center);
   
   vec3 T;
   vec3 B;
   CreateOrthonormalBasis(normal, T, B);
-  mat3 TBN = mat3(T, B, normal);
-  vec3 view = normalize(rayPayload.direction);
-  
+  mat3 inverseTBN = transpose(mat3(T, B, normal));
+  vec3 view = normalize(-rayPayload.direction);
+  vec3 lightDir= normalize(myLight.pos - hitPos); 
   vec3 halfway =normalize(view + lightDir);
   vec3 rayDirWi = normalize(hitPos - rayPayload.origin);
   
@@ -84,11 +88,42 @@ void main()
     emissionInMat = vec4(0.0f);
   }
   
+  vec3 hl = inverseTBN * halfway;
+  vec3 wlIn = inverseTBN * lightDir;
+  vec3 wlOut = inverseTBN * view;
+  
+  
+                                   
+  float forwardPdfD;
+  float forwardPdfI;
+  bool thin = true;
+  
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
+  vec3 disneyDirect= vec3(0.0f);
   
-  halfway = normalize(rayPayload.sampleDir + view);
+  float forwardPdfW;
+  float reversePdfW;
   
-  vec3 pbrLitIndirect= GetBRDF(normal, view, rayPayload.sampleDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
+  float forwardPdfWI;
+  float reversePdfWI;
+  vec3 indirectD;
+  
+  vec3 directD= EvaluateDisney(material, view, lightDir, inverseTBN, configs.thin,forwardPdfW, reversePdfW);
+  bool stop = true;
+  int maxSamples = 5;
+  int currentSample = 0;
+  while(stop){
+      SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+      currentSample++;
+      if(currentSample>maxSamples){
+         break;
+      }
+  }
+                                   
+  float cosThetaTangentIndirect = max(dot(lightDir, normal), 0.001);
+  
+  halfway = normalize(lightDir + view);
+  vec3 pbrLitIndirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
   
   rayPayload.shadow = true;
   float tmin = 0.001;
@@ -97,12 +132,15 @@ void main()
   rayPayload.shadow = false;
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
-  rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
-  rayPayload.colorLit = pbrLitIndirect; 
+  //rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  //rayPayload.colorLit = pbrLitIndirect; 
+  rayPayload.color = (disneyDirect * cosThetaTangent * myLight.intensity * myLight.col); 
+  rayPayload.colorLit = indirectD; 
+  rayPayload.sampleDir = lightDir; 
   rayPayload.normal = normal;
-  rayPayload.roughness = roughness;
-  rayPayload.reflectivity = material.reflectivityIntensity; 
   rayPayload.distance = gl_RayTmaxEXT;
+  rayPayload.stop = stop;
+  rayPayload.pdf = forwardPdfWI;
   
   if(emissionInMat == vec4(0)){
     if(material.emissionIntensity>0){

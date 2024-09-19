@@ -1,5 +1,6 @@
 #include "InputHandler.h"
 
+#include <cfloat>
 #include <iostream>
 
 

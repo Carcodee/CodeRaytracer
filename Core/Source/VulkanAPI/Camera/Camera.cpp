@@ -36,7 +36,6 @@ namespace VULKAN
 
 	void Camera::SetPerspective(float fov, float aspect, float znear, float zfar)
 	{
-
 		matrices.perspective = glm::perspective(glm::radians(fov), aspect, znear, zfar);
 	}
 
@@ -46,14 +45,14 @@ namespace VULKAN
 		SetPosition();
 		matrices.view = glm::lookAt(position,
 			this->lookAt,
-			glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 	void Camera::SetPosition()
 	{
 		
 		matrices.view = glm::lookAt(position, position+forward, up);
-
+		
 		//matrices.view = glm::translate(glm::mat4(1.0f), position);
 	}
 

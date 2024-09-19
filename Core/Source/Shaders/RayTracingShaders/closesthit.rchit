@@ -7,6 +7,8 @@
 
 
 #include "../UtilsShaders/ShadersUtility.glsl"
+#include "../UtilsShaders/DisneyShadingModel.glsl"
+#include "../UtilsShaders/PersonalDisney.glsl"
 
 
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
@@ -104,7 +106,7 @@ void main()
     normal = -normal;
   }
     
-  vec3 bitangent = cross(normal, tangent);
+  vec3 bitangent = cross(tangent, normal);
   
   //todo fix transformation on shaders
   const mat3 normalTransform = mat3(gl_ObjectToWorld3x4EXT); 
@@ -113,99 +115,161 @@ void main()
   vec3 worldBitangent = normalize(normalTransform * bitangent); 
   mat3 TBN = mat3(tangent, bitangent, normal);
   
-  //normal=normalize(normal);
-  //tangent = normalize(tangent); 
-  //vec3 bitTangent =cross(normal, tangent); 
-  //mat3 TBN = mat3(tangent, bitTangent, normal); 
   
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
+  MaterialData material = materials[materialIndex];
+ 
+  MaterialConfigurations configs;
+  GetMatConfigs(material.configurations, configs); 
   
-  vec4 diffuseInMat = TryGetTex(materials[materialIndex].diffuseOffset, uv) * materials[materialIndex].diffuseColor * materials[materialIndex].albedoIntensity;
-  vec4 normalInMat = TryGetTex(materials[materialIndex].normalOffset, uv);
-  vec4 emissionInMat = TryGetTex(materials[materialIndex].emissionOffset, uv); 
-  vec4 metallicRoughness = TryGetTex(materials[materialIndex].metallicRouhgnessOffset, uv); 
+  vec4 diffuseInMat = TryGetTex(material.diffuseOffset, uv) * material.diffuseColor * material.albedoIntensity;
+  vec4 normalInMat = TryGetTex(material.normalOffset, uv);
+  vec4 emissionInMat = TryGetTex(material.emissionOffset, uv); 
+  vec4 metallicRoughness = TryGetTex(material.metallicRouhgnessOffset, uv); 
   float metallic = 0.0f;
   float roughness = 1.0f;
   
   MaterialFindInfo matInfo = GetMatInfo(diffuseInMat, normalInMat);
   
   if(!matInfo.hasDiffuse){
-     diffuseInMat =vec4(materials[materialIndex].diffuseColor.xyz, 1.0) * materials[materialIndex].albedoIntensity;
+     diffuseInMat =vec4(material.diffuseColor.xyz, 1.0) * material.albedoIntensity;
   }
   if(emissionInMat == vec4(1.0f)){
     emissionInMat = vec4(0.0f);
   }
   if(metallicRoughness == vec4(1.0f)){
-    metallic =TryGetFloatFromTex(materials[materialIndex].metallicOffset ,uv, materials[materialIndex].metallicIntensity);
-    roughness =TryGetFloatFromTex(materials[materialIndex].roughnessOffset ,uv, materials[materialIndex].roughnessIntensity);
+    metallic =TryGetFloatFromTex(material.metallicOffset ,uv, material.metallicIntensity);
+    roughness =TryGetFloatFromTex(material.roughnessOffset ,uv, material.roughnessIntensity);
   }else{
-    metallic = 0.0f;
-    roughness = metallicRoughness.g * materials[materialIndex].roughnessIntensity;
+    //metallic = 0.0f;
+    metallic = metallicRoughness.r * material.metallicIntensity;
+    roughness = metallicRoughness.g * material.roughnessIntensity;
   }
 
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
       //mat3 inverseTBN = inverse(TBN);
-      //tang space to world space cus is a orthonormal basis and no transpose is needed :D
       finalNormal = normalize(TBN * normalInMat.xyz); 
+      finalNormal = normalize(vec3(finalNormal.x  * material.normalIntensity, finalNormal.y * material.normalIntensity, finalNormal.z ));
   }
 
   
-  vec4 diffuse=diffuseInMat;
-  vec3 view = normalize(-rayPayload.direction);
-  vec3 lightDir= normalize(myLight.pos - pos); 
-  vec3 halfway =normalize(view + lightDir);
+ material.diffuseColor = diffuseInMat; 
+ material.roughnessIntensity = roughness; 
+ material.metallicIntensity = metallic; 
   
-  vec3 lightDirTangSpace = lightDir * TBN;
-  vec3 finalNormalTangSpace = finalNormal * TBN;
-  vec3 rayDirWi = normalize(pos - rayPayload.origin);
-  vec3 rayDirTangentSpace = rayDirWi * TBN;
-  
-  float cosThetaTangent = max(dot(lightDirTangSpace, finalNormalTangSpace), 0.001);
-  float cosThetaTangentIndirect = max(dot(rayPayload.sampleDir, finalNormal * TBN), 0.001);
-  
-  
-  
-  vec3 pbrLitDirect= GetBRDF(finalNormal* materials[materialIndex].normalIntensity, view, lightDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
-  
-  halfway = normalize((-rayPayload.sampleDir) + view);
+ vec4 diffuse=diffuseInMat;
+ vec3 view = normalize(-rayPayload.direction);
+ vec3 lightDir= normalize(myLight.pos - pos); 
+ vec3 halfway = normalize(view + lightDir);
+ 
+
+ float cosThetaTangent = max(dot(lightDir, finalNormal), 0.001);
     
-  float pdfDirect = CosinePdfHemisphere(cosThetaTangent);
-  float pdf = CosinePdfHemisphere(cosThetaTangentIndirect);
-  vec3 pbrLitIndirect= GetBRDF(finalNormal * materials[materialIndex].normalIntensity, view, rayPayload.sampleDir, halfway, diffuse.xyz, materials[materialIndex].baseReflection ,metallic, roughness);
+ mat3 inverseTBN = transpose(TBN);
+                                   
+  
+ halfway = normalize(lightDir + view);
+                                        
+ ////////////////////////DISNEY
+
+
+ vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
+ float pdfI;
+ 
+ float forwardPdfW;
+ float reversePdfW;
+ float forwardPdfWI;
+ float reversePdfWI;
+ //test
+
+ vec3 FT, FB;
+ CreateOrthonormalBasis(finalNormal, FT, FB);
+ 
+ mat3 inverseFinalTBN = transpose(mat3(FT, FB, finalNormal));
+
+ //not full sample
+ //vec3 directD= DisneyEval(material, view, lightDir, finalNormal, forwardPdfW);
+ //indirectD= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, forwardPdfWI);
+ 
+ //setas sample
+ vec3 indirectD;
+ vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, configs.thin,forwardPdfW, reversePdfW);
+ //float dWeight = forwardPdfW / (forwardPdfW + reversePdfW);
+ //directD = dWeight * directD;
+ 
+ bool stop = true;
+ int maxSamples =100;
+ int currentSample = 0;
+ 
+ vec3 accumSample= vec3(0.0f);
+ vec3 accumReflectance = vec3(0.0f);
+ float totalPdf = 0.0f;
+ float totalWeight = 0.0f;
+ float probabilitySurvival = 1.0f;
+  /*while(true){
+      currentSample++;
+      SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+      
+      float misWeight = forwardPdfWI / (forwardPdfWI + reversePdfWI);
+      float weight = misWeight / currentSample; 
+      
+      accumReflectance += weight * indirectD;
+      accumSample += weight * lightDir;
+      totalPdf += weight * forwardPdfWI;
+      totalWeight += weight;
+      if(currentSample>maxSamples){
+         break;
+      }
+      if(dot(indirectD, vec3(1.0f))<EPSILON || MaxComponent(indirectD) > 1.0f){
+      }
+  }*/
+  
+  SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
+  //indirectD = accumReflectance / totalWeight;
+  //lightDir = accumSample / totalWeight;
+  //forwardPdfWI = totalPdf / totalWeight; 
+  ///////////////////DISNEY END
+ 
+  float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);
+
+  halfway = normalize(lightDir + view);
+  vec3 pbrLitIndirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness); 
   
   rayPayload.shadow = true;
   float tmin = 0.001;
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+  float weight =powerHeuristic(forwardPdfW * myLight.intensity, forwardPdfWI);
   
-  rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity/ pdfDirect; 
-  rayPayload.colorLit = (pbrLitIndirect * cosThetaTangentIndirect) /pdf; 
-  
-  //rayPayload.color = worldNormal; 
-  //rayPayload.color = vec3(diffuseInMat.a); 
-  //rayPayload.colorLit = vec3(0.0f); 
+  if(configs.useDisneyBSDF){
+    rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity; 
+    rayPayload.colorLit = indirectD * cosThetaTangentIndirect;
+    rayPayload.pdf =Lerp(forwardPdfWI, forwardPdfW, weight);
+  }else{
+    rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
+    rayPayload.colorLit = pbrLitIndirect *  cosThetaTangentIndirect; 
+    rayPayload.pdf =Lerp(forwardPdfWI, forwardPdfW, weight);
+  }
   
   if(emissionInMat == vec4(0)){
-       if(materials[materialIndex].emissionIntensity>0){
+       if(material.emissionIntensity>0){
            rayPayload.shadow = false;
-           rayPayload.emissionColor = (pbrLitDirect * materials[materialIndex].diffuseColor.xyz * materials[materialIndex].emissionIntensity); 
+           rayPayload.emissionColor = (pbrLitDirect * material.diffuseColor.xyz * material.emissionIntensity); 
        }
   }else{
        rayPayload.shadow = false;
-       rayPayload.emissionColor = (emissionInMat.xyz * materials[materialIndex].emissionIntensity); 
+       rayPayload.emissionColor = (emissionInMat.xyz * material.emissionIntensity); 
   }
   
+  rayPayload.stop = stop;
+  rayPayload.sampleDir = lightDir;
   rayPayload.hitT = gl_HitTEXT;
   rayPayload.distance = gl_RayTmaxEXT;
   rayPayload.normal = finalNormal;
-  rayPayload.tangent = tangent;
-  rayPayload.roughness = materials[materialIndex].roughnessIntensity;
-  rayPayload.reflectivity = materials[materialIndex].reflectivityIntensity;
-    
   
 }
 
@@ -216,7 +280,6 @@ vec4 TryGetTex(int texOffset, vec2 uv){
     vec4 texture = texture(textures[texOffset],uv);
     return texture;
 }
-
 float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 	if (texOffset== -1){
 		return intensity;
@@ -225,16 +288,11 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 	float texVal = MaxComponent(textureCol.xyz);
 	return texVal * intensity;
 }
-
 vec3 GetDiffuseColor(int materialIndex){
-
    vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
    return diffuse;
 }
-
-
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
-
     float idNormalized = float(primitiveId) / primitiveCount; 
     vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
     return debugColor;

@@ -1,18 +1,34 @@
 
 
-#define PI 3.1415
+#ifndef RANDOM 
+#define RANDOM 
 
+#define EPSILON 0.000001
+#define PI 3.141592654
+#define INV_PI 0.31830988618
+
+float CosinePdfHemisphere(float cosTheta)
+{
+    return cosTheta / PI;
+}
+//
+//vec3 CosineSampleHemisphere(vec2 E)
+//{
+//    const float phi = 2.0 * PI * E.x;
+//    const float cosTheta = sqrt(E.y);
+//    const float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+//
+//    vec3 H;
+//    H.x = sinTheta * cos(phi);
+//    H.y = cosTheta * sin(phi);
+//    H.z = sinTheta;
+//    return H;
+//}
 vec3 CosineSampleHemisphere(vec2 E)
 {
-    const float phi = 2.0 * PI * E.x;
-    const float cosTheta = sqrt(E.y);
-    const float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
-
-    vec3 H;
-    H.x = sinTheta * cos(phi);
-    H.y = sinTheta * sin(phi);
-    H.z = cosTheta;
-    return H;
+    float r = sqrt(E.x);
+    float theta = 2* PI * E.y;
+    return vec3(r * cos(theta), sqrt(max(1 - E.x, 0.0f)), r * sin(theta));
 }
 
 
@@ -64,3 +80,5 @@ vec3 NextVec3(inout uvec2 seed)
 {
     return vec3(NextFloat(seed), NextFloat(seed), NextFloat(seed));
 }
+
+#endif 

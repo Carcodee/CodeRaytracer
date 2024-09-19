@@ -56,6 +56,8 @@ namespace VULKAN
         void HandlePushConstantRangeRS(PushConstantBlock_RS& pushConstantBlockRs);
         void HandlePushConstantRangeBloom(PushConstantBlock_Bloom& pushConstantBlockBloom);
         void AddFramebufferReference(VKTexture* texture);
+        void AddEnvReference(VKTexture* texture);
+		void DisplayEnvironments();
         
 		bool transitionImage= false;
         
@@ -68,9 +70,9 @@ namespace VULKAN
 		VulkanRenderer* myRenderer;
 		VKTexture* fontTexture;
         VKTexture* viewportTexture;
-        
-        std::vector<VKTexture*>frameBuffers;
-
+        std::vector<VKTexture*> frameBuffers;
+        std::vector<VKTexture*> environments;
+		VKTexture* environmentSelected;
         
         bool show_demo_window = true;
 		bool UseDynamicRendering = false;
@@ -81,13 +83,31 @@ namespace VULKAN
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
 		float lightCol[3] = { 1.0f, 1.0f, 1.0f };
 		float lightIntensity = 1.0f;
-        float roughnessAllMaterials = 1.0f;
         float reflectivityAllMaterials = 1.0f;
         float normalAllMaterials = 1.0f;
         float allMaterialsAlpha = 1.0f;
         float allMaterialsEmissive = 1.0f;
         float allMaterialsAlbedo = 1.0f;
-        float metallicAllMaterials = 1.0f;
+        float roughnessAllMaterials = 0.5f;
+        float metallicAllMaterials = 0.3f;
+        //disney bsdf
+        float anisotropicAllMaterials = 0.0f;
+        float subSurfaceAllMaterials = 1.0f;
+        float clearcoatAllMaterials = 0.0f;
+        float clearcoatGlossAllMaterials = 1.0f;
+        float refractionAllMaterials = 1.5f;
+        float relativeRefractionAllMaterials = 1.0f;
+        float flatnessAllMaterials = 0.5f;
+        float specularAllMaterials = 0.5f;
+        float specularTintAllMaterials = 0.5f;
+        float sheenAllMaterials = 0.5f;
+        float sheenTintAllMaterials = 0.5f;
+        float specularTransmissionAllMaterials = 0.0f;
+        float diffTransmissionAllMaterials = 0.01f;
+        float scatterDistance = 0.01f;
+        float  diffTransColAllMaterials [3] = {1.0f, 1.0f, 1.0f};
+        bool UseDisneyBSDF = false;
+        bool thinMaterials = false;
         PushConstantBlock_RS* pushConstantBlockRsRef = nullptr;
         PushConstantBlock_Bloom* pushConstantBlockBloom = nullptr;
 		char modelImporterText[128];
@@ -97,6 +117,7 @@ namespace VULKAN
 	private:
         void AddTexture(VKTexture* vkTexture);
 		void SetStyle(uint32_t index);
+		void DisplayAllMaterialsConfigs();
         
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
         std::vector<VkBuffer> uniformBuffers;
