@@ -152,8 +152,13 @@ void main()
   if(matInfo.hasNormals){
       //mat3 inverseTBN = inverse(TBN);
       finalNormal = normalize(TBN * normalInMat.xyz); 
+      finalNormal = normalize(vec3(finalNormal.x  * material.normalIntensity, finalNormal.y * material.normalIntensity, finalNormal.z ));
   }
 
+  
+ material.diffuseColor = diffuseInMat; 
+ material.roughnessIntensity = roughness; 
+ material.metallicIntensity = metallic; 
   
  vec4 diffuse=diffuseInMat;
  vec3 view = normalize(-rayPayload.direction);
@@ -169,8 +174,7 @@ void main()
  halfway = normalize(lightDir + view);
                                         
  ////////////////////////DISNEY
-  
- material.diffuseColor =diffuseInMat; 
+
 
  vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
  float pdfI;
