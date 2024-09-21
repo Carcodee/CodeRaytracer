@@ -15,7 +15,6 @@ layout(binding = 2, set = 0) uniform CameraProperties
 	mat4 projInverse;
 } cam;
 
-
 layout(location = 0) rayPayloadEXT RayPayload rayPayload;
 
 layout (constant_id = 0) const int MAX_RECURSION = 0;

@@ -73,15 +73,16 @@ void main (){
     diffuseCol = currentMaterial.diffuseColor;
   } 
   if (configs.alphaAsDiffuse){
-    alpha *= MaxComponent(diffuseCol.xyz);
+    alpha = MaxComponent(diffuseCol.xyz);
   }
   if(configs.useAlphaChannel){
-    alpha *= diffuseCol.a;
+    alpha = diffuseCol.a;
   }
   if(configs.useDiffuseColorAlpha){
-    alpha *= currentMaterial.diffuseColor.a;
+    alpha = currentMaterial.diffuseColor.a;
   }
-  if(rand > alpha){
+  //alpha not working as desire
+  if(alpha < currentMaterial.alphaCutoff){
       ignoreIntersectionEXT;
   }
 

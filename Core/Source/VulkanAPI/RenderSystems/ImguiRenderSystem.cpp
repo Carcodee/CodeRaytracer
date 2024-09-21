@@ -283,7 +283,7 @@ namespace VULKAN
 			ModelHandler::GetInstance()->updateMaterialData = true;
 			InputHandler::editingGraphics = true;
 		}
-		if (ImGui::SliderFloat("materials Alpha Intensity", &allMaterialsAlpha, 0.0f, 1.0f, "%.3f"))
+		if (ImGui::SliderFloat("materials Alpha cutoff", &allMaterialsAlpha, 0.0f, 1.0f, "%.3f"))
 		{
 			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
 			{
@@ -933,9 +933,9 @@ namespace VULKAN
         if (ImGui::SliderInt("Min bounce for Indirect", &pushConstantBlockRs.minBounceForIndirect, 0, 5)){
             InputHandler::GetInstance()->editingGraphics = true;
         }
-        if (ImGui::SliderFloat("Ambient Oclussion Intensity", &pushConstantBlockRs.AOIntensity, 0.0f, 2.0f)){
-            InputHandler::GetInstance()->editingGraphics = true;
-        }
+        // if (ImGui::SliderFloat("Ambient Oclussion Intensity", &pushConstantBlockRs.AOIntensity, 0.0f, 2.0f)){
+            // InputHandler::GetInstance()->editingGraphics = true;
+        // }
         if (ImGui::SliderFloat("Ambient Oclussion Size", &pushConstantBlockRs.AOSize, 0.0f, 2.0f)){
             InputHandler::GetInstance()->editingGraphics = true;
         }

@@ -201,7 +201,7 @@ namespace VULKAN
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
            
-            if(ImGui::SliderFloat("Alpha",&mat.materialUniform.alphaCutoff, 0.0f, 1.0f,"%.3f")){
+            if(ImGui::SliderFloat("Alpha Cutoff",&mat.materialUniform.alphaCutoff, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }

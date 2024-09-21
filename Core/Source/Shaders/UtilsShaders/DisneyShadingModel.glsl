@@ -535,16 +535,12 @@ inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
         else {
             vec3 extinction = vec3(1.0f);
             if(Transmit(wm, wo, relativeIOR, wi)) {
-               //sample.flags = SurfaceEventFlags::eTransmissionEvent;
-               //sample.medium.phaseFunction = dotVH > 0.0f ? MediumPhaseFunction::eIsotropic : MediumPhaseFunction::eVacuum;
-
                wi = normalize(refract(-wo, wm, relativeIOR));
                extinction = CalculateExtinction(material.transColor, material.scatterDistance);
 //               reflectance = G1v * material.diffuseColor.xyz * extinction;
                 
             }
             else {
-                //sample.flags = SurfaceEventFlags::eScatterEvent;
                 wi = reflect(-wo, wm);
 //                reflectance = G1v * material.diffuseColor.xyz;
             }
@@ -567,11 +563,6 @@ inout float reversePdf, inout vec3 reflectance, inout bool stopSample)
         stopSample = true;
         return;
     }
-
-    if(material.roughnessIntensity < 0.01f) {
-//        sample.flags |= SurfaceEventFlags::eDiracEvent;
-    }
-
     // -- calculate pdf terms
     GgxVndfAnisotropicPdf(wi, wm, wo, taxy.x, taxy.y,forwardPdf, reversePdf);
     forwardPdf *= pdf;
@@ -615,17 +606,12 @@ void SampleDisney(uvec2 seed, MaterialData material, bool thin, vec3 v,inout vec
         reversePdf = 0.000000001f;
     }
 
-//
     if(pLobe > 0.0f) {
         reflectance = reflectance * (1.0f / pLobe);
         forwardPdf *= pLobe;
         reversePdf *= pLobe;
     }
-//     debuging
-//   vec3 wo = inverseTBN * v;
-//    float sign = sign(CosTheta(wo));
-//    vec3 wi = sign * CosineSampleHemisphere(NextVec2(seed));
-//    l = inverse(inverseTBN) * wi;
+
 }
 
 #endif 

@@ -95,6 +95,7 @@ namespace VULKAN{
                 }
                 materialUniform.metallicRoughnessOffset = texture->id;
                 break;
+            
         }
         ModelHandler::GetInstance()->updateMaterialData = true;
         ModelHandler::GetInstance()->updateBottomLevelObj = true;

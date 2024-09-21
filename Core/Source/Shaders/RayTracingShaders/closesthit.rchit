@@ -163,6 +163,7 @@ void main()
  vec3 indirectD;
  vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, configs.thin,forwardPdfW, reversePdfW);
  
+ 
  bool stop = true;
  int currentSample = 0;
  int maxSamples = 5;

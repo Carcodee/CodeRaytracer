@@ -1,7 +1,4 @@
 //TODO: Change this to be relative to the project
-C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\base_shader.vert -o ..\Shaders\base_shader.vert.spv
-C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\base_shader.frag -o ..\Shaders\base_shader.frag.spv
-
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\Imgui\imgui_shader.vert -o ..\Shaders\Imgui\imgui_shader.vert.spv
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\Imgui\imgui_shader.frag -o ..\Shaders\Imgui\imgui_shader.frag.spv
 
@@ -12,8 +9,6 @@ C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\PostPro\DownSample.frag -o ..\Sh
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\PostPro\UpSample.frag -o ..\Shaders\PostPro\UpSample.frag.spv
 
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\OutputShader\outputshader.frag -o ..\Shaders\OutputShader\outputshader.frag.spv
-
-C:\VulkanSDK\1.3.290.0\Bin\glslc.exe ..\Shaders\ComputeShaders\compute.comp -o ..\Shaders\ComputeShaders\compute.comp.spv
 
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe --target-env=vulkan1.3 ..\Shaders\RayTracingShaders\sphereint.rint -o  ..\Shaders\RayTracingShaders\sphereint.rint.spv
 C:\VulkanSDK\1.3.290.0\Bin\glslc.exe --target-env=vulkan1.3 ..\Shaders\RayTracingShaders\spherehit.rchit -o  ..\Shaders\RayTracingShaders\spherehit.rchit.spv
