@@ -32,6 +32,11 @@ Build the solution inside "VStudio_Build/ALL_BUILD.vcxproj" and after the build 
 
 there are examples Inside "Core/Source/Resources/Assets/models", just drag and drop the model file inside the app and the model will be loaded
 
+## Issues 
+
+When a .gltf or .obj file is drop into the engine it generates metadata files for the save system, however they can lead to some bugs, if you see a bug after dropping many models try deleting all the .CODE and .MATCODE. T_T
+
+
 ## Renders
 
 
