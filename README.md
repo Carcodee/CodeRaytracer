@@ -25,13 +25,14 @@ It haves the capability of adding postprocessing renderpasses easily with a cust
 Path tracing is based on the Vulkan ray tracing pipeline, which is provided by VK_KHR_ray_tracing_pipeline extension.
 Currently, path tracing doesn't have any runtime denosing, there is just a simple result accumulation when camera the doesn't move.
 
+
+##Running The project for visual studio users
+
+Build the solution inside "VStudio_Build" and after the build is done set editor as stardup project
+
 ## Examples
 
 there are examples Inside "Core/Source/Resources/Assets/models", just drag and drop the model file inside the app and the model will be loaded
-
-##Running The project
-
-Right there is only support for cmake projects, soon I will load a easy to build visual studio solution
 
 ## Renders
 
