@@ -1,0 +1,11 @@
+# Directories
+.vs/
+Binaries/
+
+# Files
+
+*.log
+Makefile
+
+# Exclude
+!Vendor/Binaries
