@@ -1644,7 +1644,7 @@ namespace VULKAN {
     void RayTracing_RS::LoadEnvironments()
     {
 		std::vector<std::string>paths;
-		std::string envPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+ "/Images/";
+		std::string envPath = HELPERS::FileHandler::GetInstance()->GetEngineResourcesPath()+ "\\Images\\";
 		for (auto& path : std::filesystem::directory_iterator(envPath))
 		{
 			if (path.path().extension() == ".hdr")

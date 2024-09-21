@@ -40,6 +40,7 @@ namespace HELPERS
 
 	private:
 
+		std::filesystem::path GetProjectPath(std::filesystem::path& workDir);
 		std::filesystem::path workingDir;
 		std::filesystem::path projectPath;
 		std::filesystem::path assetPath;

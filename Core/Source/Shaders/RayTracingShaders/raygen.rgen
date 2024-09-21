@@ -61,7 +61,7 @@ void main()
         vec2 d = inUV * 2.0 - 1.0;
         vec4 origin = cam.viewInverse * vec4(0,0,0,1);
         vec4 target = cam.projInverse * vec4(d.x, d.y, 1, 1) ;
-        vec4 direction = cam.viewInverse*vec4(normalize(target.xyz), 0);
+        vec4 direction = cam.viewInverse * vec4(normalize(target.xyz), 0);
         uint rayFlags = gl_RayFlagsOpaqueEXT;
         float tmin = 0.01;
         float tmax = 1000.0;
@@ -79,6 +79,7 @@ void main()
         rayPayload.hitT = 0.0f;
         rayPayload.frameSeed = seed;
         rayPayload.frame = pc.currentFrame;
+        
         vec3 rayThroughput = vec3(1.0f);
         vec3 irradiance = vec3(0.0f);
         float rayPdf = 1.0f;
@@ -91,10 +92,9 @@ void main()
             vec3 directLightContrib = rayPayload.color;
             
             if(rayPayload.isMiss){
-            // pdf on miss is giving weird values
-                irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput / 4 * PI; 
+                irradiance += (directLightContrib * pc.environmentMapIntensity) * rayThroughput; 
                 if(sampleShadowed){
-                    //irradiance *= 0.7f;   
+                    irradiance *= 0.7f;   
                 }
                 break;
             }
@@ -116,7 +116,6 @@ void main()
                 break;
             }
             if(rayPayload.stop){
-                //irradiance += directLightContrib * rayThroughput / rayPdf; 
                 break;
             }
             
@@ -136,10 +135,7 @@ void main()
                 rayThroughput = min(vec3(pc.maxVariance), rayThroughput);
             
             }
-    //
-
         }
-        
         AOResult += vec3(aoSample);
         result += min(irradiance, MAX_IRRADIANCE); 
     }

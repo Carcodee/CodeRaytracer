@@ -274,15 +274,6 @@ namespace VULKAN
 			ModelHandler::GetInstance()->updateMaterialData = true;
 			InputHandler::editingGraphics = true;
 		}
-		if (ImGui::SliderFloat("materials Reflectivity", &reflectivityAllMaterials, 0.0f, 1.0f, "%.3f"))
-		{
-			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)
-			{
-				pair.second->materialUniform.reflectivityIntensity = reflectivityAllMaterials;
-			}
-			ModelHandler::GetInstance()->updateMaterialData = true;
-			InputHandler::editingGraphics = true;
-		}
 		if (ImGui::SliderFloat("materials Normal Intensity", &normalAllMaterials, 0.0f, 2.0f, "%.3f"))
 		{
 			for (auto& pair : ModelHandler::GetInstance()->allMaterialsOnApp)

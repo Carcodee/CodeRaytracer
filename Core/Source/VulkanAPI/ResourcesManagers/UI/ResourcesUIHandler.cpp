@@ -188,15 +188,11 @@ namespace VULKAN
             if(ImGui::SliderFloat("roughness",&mat.materialUniform.roughnessIntensity, 0.0f, 1.0f,"%.3f")){
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
-            if(ImGui::SliderFloat("reflectivity",&mat.materialUniform.reflectivityIntensity, 0.0f, 1.0f,"%.3f")){
+            if(ImGui::SliderFloat("metalness",&mat.materialUniform.metallicIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }
             if(ImGui::SliderFloat("Normal",&mat.materialUniform.normalIntensity, 0.0f, 2.0f,"%.3f")){
-
-                ModelHandler::GetInstance()->updateMaterialData= true;
-            }
-            if(ImGui::SliderFloat("metalness",&mat.materialUniform.metallicIntensity, 0.0f, 1.0f,"%.3f")){
 
                 ModelHandler::GetInstance()->updateMaterialData= true;
             }

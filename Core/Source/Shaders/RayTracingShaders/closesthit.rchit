@@ -5,23 +5,13 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-
 #include "../UtilsShaders/ShadersUtility.glsl"
 #include "../UtilsShaders/DisneyShadingModel.glsl"
 #include "../UtilsShaders/PersonalDisney.glsl"
 
-
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;
 
 hitAttributeEXT vec2 attribs;
-
-struct TexturesFinded{
-    vec4 diffuse;
-    vec4 alpha;
-    vec4 specular;
-    vec4 bump;
-    vec4 ambient;
-};
 
 layout(binding=6) uniform light{
     vec3 pos;
@@ -29,11 +19,9 @@ layout(binding=6) uniform light{
     float intensity;
 }myLight;
 
-
 layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 
 layout(set=0, binding=3) uniform sampler2D mySampler;
-
 
 layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
     Vertex vertices[];
@@ -42,7 +30,6 @@ layout(set = 0, binding = 4, scalar) buffer VertexBuffer {
 layout(set = 0, binding = 5, scalar) buffer IndexBuffer {
     Indices indices[];
 };
-
 
 layout(set = 0, binding = 7, scalar) buffer Materials {
     MaterialData materials[];
@@ -56,19 +43,12 @@ layout(set = 0, binding = 9, scalar) buffer GeometriesOffsets {
     uint geometryOffset[];
 };
 
-
 layout(set = 0,binding = 14) uniform sampler2D textures[];
 
-#define MAX_TEXTURES 5
-
-vec4 CurrentMaterialTextures[MAX_TEXTURES];
-int texturesOnMaterialCount = 0;
-
-vec3 GetDiffuseColor(int materialIndex);
 vec4 TryGetTex(int texOffset, vec2 uv);
 float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity);
 vec3 GetDebugCol(uint primitiveId, float primitiveCount);
-float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal);
+
 void main()
 {
     
@@ -115,7 +95,6 @@ void main()
   vec3 worldBitangent = normalize(normalTransform * bitangent); 
   mat3 TBN = mat3(tangent, bitangent, normal);
   
-  
   //materials
 
   int materialIndex= meshesData[realGeometryOffset].materialIndexOnShape;
@@ -150,9 +129,7 @@ void main()
 
   vec3 finalNormal = normal;
   if(matInfo.hasNormals){
-      //mat3 inverseTBN = inverse(TBN);
       finalNormal = normalize(TBN * normalInMat.xyz); 
-      finalNormal = normalize(vec3(finalNormal.x  * material.normalIntensity, finalNormal.y * material.normalIntensity, finalNormal.z ));
   }
 
   
@@ -165,61 +142,32 @@ void main()
  vec3 lightDir= normalize(myLight.pos - pos); 
  vec3 halfway = normalize(view + lightDir);
  
-
  float cosThetaTangent = max(dot(lightDir, finalNormal), 0.001);
     
  mat3 inverseTBN = transpose(TBN);
-                                   
-  
- halfway = normalize(lightDir + view);
                                         
+ vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
+ 
  ////////////////////////DISNEY
 
-
- vec3 pbrLitDirect= GetBRDF(finalNormal * material.normalIntensity, view, lightDir, halfway, diffuse.xyz, material.baseReflection ,metallic, roughness);
- float pdfI;
- 
  float forwardPdfW;
  float reversePdfW;
  float forwardPdfWI;
  float reversePdfWI;
- //test
 
  vec3 FT, FB;
  CreateOrthonormalBasis(finalNormal, FT, FB);
  
  mat3 inverseFinalTBN = transpose(mat3(FT, FB, finalNormal));
 
- //not full sample
- //vec3 directD= DisneyEval(material, view, lightDir, finalNormal, forwardPdfW);
- //indirectD= DisneySample(material, rayPayload.frameSeed, view, finalNormal, lightDir, forwardPdfWI);
- 
- //setas sample
  vec3 indirectD;
  vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, configs.thin,forwardPdfW, reversePdfW);
- //float dWeight = forwardPdfW / (forwardPdfW + reversePdfW);
- //directD = dWeight * directD;
  
  bool stop = true;
- int maxSamples =100;
- int currentSample = 0;
  
- vec3 accumSample= vec3(0.0f);
- vec3 accumReflectance = vec3(0.0f);
- float totalPdf = 0.0f;
- float totalWeight = 0.0f;
- float probabilitySurvival = 1.0f;
   /*while(true){
       currentSample++;
       SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
-      
-      float misWeight = forwardPdfWI / (forwardPdfWI + reversePdfWI);
-      float weight = misWeight / currentSample; 
-      
-      accumReflectance += weight * indirectD;
-      accumSample += weight * lightDir;
-      totalPdf += weight * forwardPdfWI;
-      totalWeight += weight;
       if(currentSample>maxSamples){
          break;
       }
@@ -228,10 +176,6 @@ void main()
   }*/
   
   SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseFinalTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
-  //indirectD = accumReflectance / totalWeight;
-  //lightDir = accumSample / totalWeight;
-  //forwardPdfWI = totalPdf / totalWeight; 
-  ///////////////////DISNEY END
  
   float cosThetaTangentIndirect = max(dot(lightDir, finalNormal), 0.001);
 
@@ -288,19 +232,10 @@ float TryGetFloatFromTex(int texOffset, vec2 uv, float intensity){
 	float texVal = MaxComponent(textureCol.xyz);
 	return texVal * intensity;
 }
-vec3 GetDiffuseColor(int materialIndex){
-   vec3 diffuse= materials[materialIndex].diffuseColor.xyz;
-   return diffuse;
-}
 vec3 GetDebugCol(uint primitiveId, float primitiveCount){
     float idNormalized = float(primitiveId) / primitiveCount; 
     vec3 debugColor = vec3(idNormalized, 1.0 - idNormalized, 0.5 * idNormalized);
     return debugColor;
 }
-float GetLightShadingIntensity(vec3 fragPos, vec3 lightPos, vec3 normal){
-    vec3 dir= fragPos-lightPos; 
-    dir= normalize(dir);
-    float colorShading=max(dot(dir, normal),0.2);
-    return colorShading;
-}
+
 

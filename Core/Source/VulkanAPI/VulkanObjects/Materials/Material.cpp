@@ -109,32 +109,24 @@ namespace VULKAN{
         this->materialUniform.albedoIntensity = jsonObj.at("AlbedoIntensity");
         this->materialUniform.normalIntensity = jsonObj.at("NormalIntensity");
         this->materialUniform.roughnessIntensity = jsonObj.at("RoughnessIntensity");
-        //16
         diffuse = jsonObj.at("DiffuseColor").get<std::vector<float>>();
         this->materialUniform.diffuseColor.x = diffuse[0];
         this->materialUniform.diffuseColor.y = diffuse[1];
         this->materialUniform.diffuseColor.z = diffuse[2];
         this->materialUniform.diffuseColor.w = diffuse[3];
-        this->materialUniform.reflectivityIntensity = jsonObj.at("ReflectivityIntensity");
-        //32
-
-        //base reflection
         baseReflection = jsonObj.at("BaseReflection").get<std::vector<float>>();
         this->materialUniform.baseReflection.x = baseReflection[0];
         this->materialUniform.baseReflection.y = baseReflection[1];
         this->materialUniform.baseReflection.z = baseReflection[2];
         this->materialUniform.metallicIntensity=jsonObj.at("MetallicIntensity");
-        //48
         this->materialUniform.emissionIntensity = jsonObj.at("EmissionIntensity");
         this->materialUniform.roughnessOffset = jsonObj.at("RoughnessOffset");
         this->materialUniform.metallicOffset = jsonObj.at("MetallicOffset");
         this->materialUniform.emissionOffset= jsonObj.at("EmissionOffset");
-        //60
         this->materialUniform.metallicRoughnessOffset=jsonObj.at("MetallicRoughnessOffset");
         this->materialUniform.alphaCutoff = jsonObj.at("AlphaCutoff");
         this->materialUniform.diffuseOffset = jsonObj.at("DiffuseOffset");
         this->materialUniform.normalOffset = jsonObj.at("NormalOffset");
-        //80
         this->materialUniform.configurations = jsonObj.at("Configurations");
 
         this->paths = jsonObj.at("Paths").get<std::map<TEXTURE_TYPE,std::string>>();
@@ -161,23 +153,17 @@ namespace VULKAN{
                 {"AlbedoIntensity",this->materialUniform.albedoIntensity},
                 {"NormalIntensity",this->materialUniform.normalIntensity},
                 {"RoughnessIntensity",this->materialUniform.roughnessIntensity},
-                //16
                 {"DiffuseColor",diffuse},
-                {"ReflectivityIntensity", this->materialUniform.reflectivityIntensity},
-                //32
                 {"BaseReflection",baseReflection},
                 {"MetallicIntensity",this->materialUniform.metallicIntensity},
-                //48
                 {"EmissionIntensity",this->materialUniform.emissionIntensity},
                 {"RoughnessOffset",this->materialUniform.roughnessOffset},
                 {"MetallicOffset",this->materialUniform.metallicOffset},
                 {"EmissionOffset",this->materialUniform.emissionOffset},
-                //60
                 {"MetallicRoughnessOffset",this->materialUniform.metallicRoughnessOffset},
                 {"AlphaCutoff",this->materialUniform.alphaCutoff},
                 {"DiffuseOffset",this->materialUniform.diffuseOffset},
                 {"NormalOffset",this->materialUniform.normalOffset},
-                //80
                 {"Configurations",this->materialUniform.configurations},
                 {"Paths",this->paths},
                 {"TextureReferencePath",this->textureReferencePath},

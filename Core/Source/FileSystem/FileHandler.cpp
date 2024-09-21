@@ -14,8 +14,7 @@ namespace HELPERS
 	{
 
 		workingDir = std::filesystem::current_path();
-        //TODO: fix this when is launched from exe
-		projectPath = workingDir.parent_path();
+		projectPath = GetProjectPath(workingDir);
 		assetPath = projectPath / "Core"/"Source" / "Resources" / "Assets";
         engineResourcesPath = projectPath / "Core"/"Source" / "Resources" / "EngineResources";
 		shadersPath = projectPath / "Core"/ "Source" / "Shaders";
@@ -125,6 +124,39 @@ namespace HELPERS
 		return data;
 		
 	}
+
+	std::filesystem::path FileHandler::GetProjectPath(std::filesystem::path& workDir)
+	{
+		std::filesystem::path projectPath = workDir;
+		bool solutionPathFind = false;
+		while (!solutionPathFind)
+		{
+			for (auto element : std::filesystem::directory_iterator(projectPath))
+			{
+				if (element.path().filename()== ".gitignore")
+				{
+					solutionPathFind = true;
+					break;
+				}
+				
+			}
+			if (solutionPathFind)
+			{
+				break;
+			}
+			
+			projectPath = projectPath.parent_path();
+			if (projectPath == workDir.root_path())
+			{
+				break;
+			}
+		}
+		assert(solutionPathFind && "The project dir was not find");
+		
+		return projectPath;
+		
+	}
+
 
 	bool FileHandler::IsPathInAssets(std::string path)
 	{

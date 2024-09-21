@@ -83,7 +83,6 @@ namespace VULKAN
 		float lightPos[3] = { 0.0f, 0.0f, 0.0f };
 		float lightCol[3] = { 1.0f, 1.0f, 1.0f };
 		float lightIntensity = 1.0f;
-        float reflectivityAllMaterials = 1.0f;
         float normalAllMaterials = 1.0f;
         float allMaterialsAlpha = 1.0f;
         float allMaterialsEmissive = 1.0f;
