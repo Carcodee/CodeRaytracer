@@ -28,7 +28,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added some configs in the materials" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="vstudio build">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Build.lua" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -382,23 +385,7 @@
       <workItem from="1726764210579" duration="2095000" />
       <workItem from="1726779649869" duration="3613000" />
       <workItem from="1726940805787" duration="5878000" />
-      <workItem from="1726956080424" duration="1117000" />
-    </task>
-    <task id="LOCAL-00035" summary="Emission configs added">
-      <option name="closed" value="true" />
-      <created>1723233340230</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1723233340230</updated>
-    </task>
-    <task id="LOCAL-00036" summary="AO image">
-      <option name="closed" value="true" />
-      <created>1723305691123</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1723305691123</updated>
+      <workItem from="1726956080424" duration="1761000" />
     </task>
     <task id="LOCAL-00037" summary="AO debuging and framebuffers viewports">
       <option name="closed" value="true" />
@@ -776,7 +763,23 @@
       <option name="project" value="LOCAL" />
       <updated>1726956854841</updated>
     </task>
-    <option name="localTasksCounter" value="84" />
+    <task id="LOCAL-00084" summary="vstudio build">
+      <option name="closed" value="true" />
+      <created>1726957475770</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1726957475770</updated>
+    </task>
+    <task id="LOCAL-00085" summary="vstudio build">
+      <option name="closed" value="true" />
+      <created>1726957642750</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1726957642750</updated>
+    </task>
+    <option name="localTasksCounter" value="86" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -832,7 +835,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed the remove texture bug, gltf loading still have normals broken" />
     <MESSAGE value="normal space on gltf loading is very broken :D" />
     <MESSAGE value="fixed tangent loading, todo normal transformation" />
     <MESSAGE value="move norm transformation to device" />
@@ -857,6 +859,7 @@
     <MESSAGE value="fixed some inconsistencies in the brdf sampling" />
     <MESSAGE value="Fixed the specular and spectrans lobes" />
     <MESSAGE value="added some configs in the materials" />
-    <option name="LAST_COMMIT_MESSAGE" value="added some configs in the materials" />
+    <MESSAGE value="vstudio build" />
+    <option name="LAST_COMMIT_MESSAGE" value="vstudio build" />
   </component>
 </project>
