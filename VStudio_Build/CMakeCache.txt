@@ -14,9 +14,6 @@
 # EXTERNAL cache entries
 ########################
 
-//Build the App project
-BUILD_APP:BOOL=OFF
-
 //Build the Editor project
 BUILD_EDITOR:BOOL=ON
 

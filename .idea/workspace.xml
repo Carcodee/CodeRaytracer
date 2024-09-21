@@ -28,10 +28,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="vstudio build">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build.lua" beforeDir="false" />
-    </list>
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="removed unused folders" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,6 +55,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -385,31 +383,7 @@
       <workItem from="1726764210579" duration="2095000" />
       <workItem from="1726779649869" duration="3613000" />
       <workItem from="1726940805787" duration="5878000" />
-      <workItem from="1726956080424" duration="1761000" />
-    </task>
-    <task id="LOCAL-00037" summary="AO debuging and framebuffers viewports">
-      <option name="closed" value="true" />
-      <created>1723313475577</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1723313475577</updated>
-    </task>
-    <task id="LOCAL-00038" summary="AO debuging and framebuffers viewports">
-      <option name="closed" value="true" />
-      <created>1723315042438</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1723315042438</updated>
-    </task>
-    <task id="LOCAL-00039" summary="fixing a bit the sample dir generated">
-      <option name="closed" value="true" />
-      <created>1723343849093</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1723343849093</updated>
+      <workItem from="1726956080424" duration="2072000" />
     </task>
     <task id="LOCAL-00040" summary="some changes in the raytracing pipeline">
       <option name="closed" value="true" />
@@ -779,7 +753,31 @@
       <option name="project" value="LOCAL" />
       <updated>1726957642750</updated>
     </task>
-    <option name="localTasksCounter" value="86" />
+    <task id="LOCAL-00086" summary="vstudio build">
+      <option name="closed" value="true" />
+      <created>1726957891621</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1726957891621</updated>
+    </task>
+    <task id="LOCAL-00087" summary="removed unused folders">
+      <option name="closed" value="true" />
+      <created>1726958011869</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1726958011869</updated>
+    </task>
+    <task id="LOCAL-00088" summary="removed unused folders">
+      <option name="closed" value="true" />
+      <created>1726958165094</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1726958165094</updated>
+    </task>
+    <option name="localTasksCounter" value="89" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -835,7 +833,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="normal space on gltf loading is very broken :D" />
     <MESSAGE value="fixed tangent loading, todo normal transformation" />
     <MESSAGE value="move norm transformation to device" />
     <MESSAGE value="any hit shader added" />
@@ -860,6 +857,7 @@
     <MESSAGE value="Fixed the specular and spectrans lobes" />
     <MESSAGE value="added some configs in the materials" />
     <MESSAGE value="vstudio build" />
-    <option name="LAST_COMMIT_MESSAGE" value="vstudio build" />
+    <MESSAGE value="removed unused folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed unused folders" />
   </component>
 </project>
