@@ -26,7 +26,7 @@ Path tracing is based on the Vulkan ray tracing pipeline, which is provided by V
 Currently, path tracing doesn't have any runtime denosing, there is just a simple result accumulation when camera the doesn't move.
 
 
-##Running The project for visual studio users
+## Running The project for visual studio users
 
 Build the solution inside "VStudio_Build" and after the build is done set editor as stardup project
 
