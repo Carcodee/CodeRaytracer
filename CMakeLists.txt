@@ -12,7 +12,6 @@ set_target_properties(Editor PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
-option(BUILD_APP "Build the App project" OFF)
 option(BUILD_EDITOR "Build the Editor project" ON)
 
 set(SOLUTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
