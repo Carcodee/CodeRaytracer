@@ -4,8 +4,6 @@
 
 This is a path tracer for self-education with the Vulkan raytracing pipeline.
 
-It haves the capability of adding postprocessing renderpasses easily with a custom postprocessing pipeline.
-
 ## Features
 
 - Global illumination through frame accumulation.
