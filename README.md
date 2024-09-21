@@ -26,7 +26,7 @@ Currently, path tracing doesn't have any runtime denosing, there is just a simpl
 
 ## Running The project for visual studio users
 
-Build the solution inside "VStudio_Build" and after the build is done set editor as stardup project
+Build the solution inside "VStudio_Build/ALL_BUILD.vcxproj" and after the build is done set EDITOR as stardup project
 
 ## Examples
 
