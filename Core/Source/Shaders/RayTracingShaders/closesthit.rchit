@@ -164,6 +164,8 @@ void main()
  vec3 directD= EvaluateDisney(material, view, lightDir, inverseFinalTBN, configs.thin,forwardPdfW, reversePdfW);
  
  bool stop = true;
+ int currentSample = 0;
+ int maxSamples = 5;
  
   /*while(true){
       currentSample++;
@@ -187,6 +189,7 @@ void main()
   float tmax = 10000.0; 
   vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT; 
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
+  
   float weight =powerHeuristic(forwardPdfW * myLight.intensity, forwardPdfWI);
   
   if(configs.useDisneyBSDF){

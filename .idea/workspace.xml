@@ -28,7 +28,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="removed unused folders" />
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="update readme">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/closesthit.rchit.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit.spv" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Shaders/RayTracingShaders/spherehit.rchit.spv" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -383,31 +389,7 @@
       <workItem from="1726764210579" duration="2095000" />
       <workItem from="1726779649869" duration="3613000" />
       <workItem from="1726940805787" duration="5878000" />
-      <workItem from="1726956080424" duration="2072000" />
-    </task>
-    <task id="LOCAL-00040" summary="some changes in the raytracing pipeline">
-      <option name="closed" value="true" />
-      <created>1723348815713</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1723348815713</updated>
-    </task>
-    <task id="LOCAL-00041" summary="adding gltf support">
-      <option name="closed" value="true" />
-      <created>1723436662278</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1723436662278</updated>
-    </task>
-    <task id="LOCAL-00042" summary="adding gltf support">
-      <option name="closed" value="true" />
-      <created>1723490215218</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1723490215218</updated>
+      <workItem from="1726956080424" duration="3146000" />
     </task>
     <task id="LOCAL-00043" summary="fixed transformation when importing">
       <option name="closed" value="true" />
@@ -777,7 +759,31 @@
       <option name="project" value="LOCAL" />
       <updated>1726958165094</updated>
     </task>
-    <option name="localTasksCounter" value="89" />
+    <task id="LOCAL-00089" summary="removed unused folders">
+      <option name="closed" value="true" />
+      <created>1726958215542</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1726958215542</updated>
+    </task>
+    <task id="LOCAL-00090" summary="update readme">
+      <option name="closed" value="true" />
+      <created>1726958403554</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1726958403554</updated>
+    </task>
+    <task id="LOCAL-00091" summary="update readme">
+      <option name="closed" value="true" />
+      <created>1726958610433</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1726958610433</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -833,7 +839,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed tangent loading, todo normal transformation" />
     <MESSAGE value="move norm transformation to device" />
     <MESSAGE value="any hit shader added" />
     <MESSAGE value="adding bitmask configs for shaders" />
@@ -858,6 +863,7 @@
     <MESSAGE value="added some configs in the materials" />
     <MESSAGE value="vstudio build" />
     <MESSAGE value="removed unused folders" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed unused folders" />
+    <MESSAGE value="update readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="update readme" />
   </component>
 </project>

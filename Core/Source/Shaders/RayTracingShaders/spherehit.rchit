@@ -92,14 +92,15 @@ void main()
   vec3 wlIn = inverseTBN * lightDir;
   vec3 wlOut = inverseTBN * view;
   
+  material.diffuseColor = diffuseInMat;
+  material.roughnessIntensity = roughness;
+  material.metallicIntensity = metallic;
   
-                                   
   float forwardPdfD;
   float forwardPdfI;
   bool thin = true;
   
   vec3 pbrLitDirect= GetBRDF(normal, view, lightDir, halfway, diffuseInMat.xyz, material.baseReflection ,metallic, roughness);
-  vec3 disneyDirect= vec3(0.0f);
   
   float forwardPdfW;
   float reversePdfW;
@@ -112,6 +113,7 @@ void main()
   bool stop = true;
   int maxSamples = 5;
   int currentSample = 0;
+  
   while(stop){
       SampleDisney(rayPayload.frameSeed ,material, configs.thin, view, lightDir, inverseTBN,forwardPdfWI, reversePdfWI, indirectD, stop);
       currentSample++;
@@ -132,10 +134,19 @@ void main()
   rayPayload.shadow = false;
   traceRayEXT(topLevelAS, gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT , 0xff, 0, 0, 1, origin, tmin, lightDir, tmax, 0);
    
-  //rayPayload.color = (pbrLitDirect * cosThetaTangent * myLight.intensity * myLight.col); 
-  //rayPayload.colorLit = pbrLitIndirect; 
-  rayPayload.color = (disneyDirect * cosThetaTangent * myLight.intensity * myLight.col); 
-  rayPayload.colorLit = indirectD; 
+   
+  float weight =powerHeuristic(forwardPdfW * myLight.intensity, forwardPdfWI);
+  
+  if(configs.useDisneyBSDF){
+    rayPayload.color = directD * cosThetaTangent * myLight.col  * myLight.intensity; 
+    rayPayload.colorLit = indirectD * cosThetaTangentIndirect;
+    rayPayload.pdf =Lerp(forwardPdfWI, forwardPdfW, weight);
+  }else{
+    rayPayload.color = pbrLitDirect * myLight.col * cosThetaTangent * myLight.intensity; 
+    rayPayload.colorLit = pbrLitIndirect *  cosThetaTangentIndirect; 
+    rayPayload.pdf =Lerp(forwardPdfWI, forwardPdfW, weight);
+  }
+  
   rayPayload.sampleDir = lightDir; 
   rayPayload.normal = normal;
   rayPayload.distance = gl_RayTmaxEXT;
