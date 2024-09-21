@@ -1,0 +1,15 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.30/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/WriteBasicConfigVersionFile.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/CMakeLists.txt
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/FindASan.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/FindMSan.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/FindSanitizers.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/FindTSan.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/FindUBSan.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake/sanitizers/sanitize-helpers.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/cmake_uninstall.cmake.in
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/tinyobjloader-config.cmake.in
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinyobjloader-release/tinyobjloader.pc.in

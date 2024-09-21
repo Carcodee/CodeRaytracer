@@ -1,0 +1,6 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.30/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.30/Modules/WriteBasicConfigVersionFile.cmake
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinygltf-release/CMakeLists.txt
+C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/tinygltf-release/cmake/TinyGLTFConfig.cmake.in

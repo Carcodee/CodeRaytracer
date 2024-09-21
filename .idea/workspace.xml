@@ -28,13 +28,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added some configs in the materials">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/3d_pbr_curved_sofa/license.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/3d_pbr_curved_sofa/license.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/3d_pbr_curved_sofa/scene.gltf" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/3d_pbr_curved_sofa/scene.gltf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/modern_dining_room/license.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/modern_dining_room/license.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/modern_dining_room/scene.gltf" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Source/Resources/Assets/Models/GLTF_SAMPLES/modern_dining_room/scene.gltf" afterDir="false" />
-    </list>
+    <list default="true" id="fc6d1efa-eded-469a-9e00-81ac4afe7ede" name="Changes" comment="added some configs in the materials" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -388,15 +382,7 @@
       <workItem from="1726764210579" duration="2095000" />
       <workItem from="1726779649869" duration="3613000" />
       <workItem from="1726940805787" duration="5878000" />
-      <workItem from="1726956080424" duration="759000" />
-    </task>
-    <task id="LOCAL-00034" summary="Emission maps">
-      <option name="closed" value="true" />
-      <created>1723221479827</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1723221479827</updated>
+      <workItem from="1726956080424" duration="1117000" />
     </task>
     <task id="LOCAL-00035" summary="Emission configs added">
       <option name="closed" value="true" />
@@ -782,7 +768,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726678821851</updated>
     </task>
-    <option name="localTasksCounter" value="83" />
+    <task id="LOCAL-00083" summary="added some configs in the materials">
+      <option name="closed" value="true" />
+      <created>1726956854840</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1726956854841</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

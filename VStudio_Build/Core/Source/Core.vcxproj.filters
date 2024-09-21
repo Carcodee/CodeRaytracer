@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Core\Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\FileSystem\FileHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Camera\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DescriptorSetHandler\MyDescriptorSets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DevicePipeline\Vulkan_Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\ModelHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\MyModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ObjectLoader\ModelLoaderHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Renderer\VulkanRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Bloom_RS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Forward_RS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\ImguiRenderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\PostProcessing_RS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\RayTracing_RS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetThreat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetsHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\UI\ResourcesUIHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\SwapChain\VulkanSwap_chain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\InputSystem\InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanInit\VulkanInit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\VKBufferHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\ResourceInterface\IResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Textures\VKTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Materials\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanPipeline\PipelineReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Core\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\FileSystem\FileHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Camera\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DescriptorSetHandler\MyDescriptorSets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DevicePipeline\Vulkan_Device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Headers\HeadersFiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\ModelHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\MyModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ObjectLoader\ModelLoaderHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Renderer\VulkanRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Bloom_RS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Forward_RS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\ImguiRenderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\PostProcessing_RS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\RayTracing_RS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetThreat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetsHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\UI\ResourcesUIHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\ComputeShadersUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\ISerializable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\InputSystem\InputHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanInit\VulkanInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\VKBufferHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\ResourceInterface\IResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Textures\VKTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Materials\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanPipeline\PipelineReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DE98AE6F-1BC5-39A9-A656-F957E419A592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6EF4C01B-51F9-3021-9EBD-6A997564B140}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

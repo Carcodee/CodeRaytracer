@@ -1,0 +1,16 @@
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/CMakeFiles/Editor.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/CMakeFiles/INSTALL.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/CMakeFiles/ALL_BUILD.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/Core.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/INSTALL.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/ALL_BUILD.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/glm/CMakeFiles/INSTALL.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinyobjloader-release/CMakeFiles/tinyobjloader.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinyobjloader-release/CMakeFiles/uninstall.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinyobjloader-release/CMakeFiles/INSTALL.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinyobjloader-release/CMakeFiles/ALL_BUILD.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinygltf-release/CMakeFiles/loader_example.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinygltf-release/CMakeFiles/tinygltf.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinygltf-release/CMakeFiles/INSTALL.dir
+C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/Libraries/tinygltf-release/CMakeFiles/ALL_BUILD.dir

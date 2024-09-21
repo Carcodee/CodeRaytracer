@@ -1,0 +1,468 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D6167519-FC4C-378F-B048-DF883C66931D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>Core</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\bin\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Core.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Core</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\bin\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Core.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Core</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\bin\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Core.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Core</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\bin\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Core.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Core</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message>Shaders compiled.</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "Compiling shaders..."
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E chdir C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/VulkanAPI compile.bat
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022/glfw3.dll C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/bin/Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message>Shaders compiled.</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "Compiling shaders..."
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E chdir C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/VulkanAPI compile.bat
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022/glfw3.dll C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/bin/Release
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message>Shaders compiled.</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "Compiling shaders..."
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E chdir C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/VulkanAPI compile.bat
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022/glfw3.dll C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/bin/MinSizeRel
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\glfw-3.3.9.bin.WIN64\include;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\VulkanInclude;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\stb-master;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\nlohmann;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinyobjloader-release;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source;C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\tinygltf-release;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PreBuildEvent>
+      <Message>Shaders compiled.</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "Compiling shaders..."
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E chdir C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/VulkanAPI compile.bat
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/Libraries/glfw-3.3.9.bin.WIN64/lib-vc2022/glfw3.dll C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/bin/RelWithDebInfo
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/carlo/CLionProjects/CodeRT_Final -BC:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build --check-stamp-file C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/carlo/CLionProjects/CodeRT_Final -BC:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build --check-stamp-file C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/carlo/CLionProjects/CodeRT_Final -BC:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build --check-stamp-file C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/carlo/CLionProjects/CodeRT_Final/Core/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/carlo/CLionProjects/CodeRT_Final -BC:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build --check-stamp-file C:/Users/carlo/CLionProjects/CodeRT_Final/VStudio_Build/Core/Source/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.30\Modules\FindVulkan.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanApp.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanApp.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Core\Core.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Core\Core.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\FileSystem\FileHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\FileSystem\FileHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Camera\Camera.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Camera\Camera.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DescriptorSetHandler\MyDescriptorSets.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DescriptorSetHandler\MyDescriptorSets.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DevicePipeline\Vulkan_Device.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\DevicePipeline\Vulkan_Device.h" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Headers\HeadersFiles.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\ModelHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\ModelHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\MyModel.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Model\MyModel.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ObjectLoader\ModelLoaderHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ObjectLoader\ModelLoaderHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Renderer\VulkanRenderer.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Renderer\VulkanRenderer.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Bloom_RS.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Bloom_RS.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Forward_RS.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\Forward_RS.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\ImguiRenderSystem.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\ImguiRenderSystem.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\PostProcessing_RS.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\PostProcessing_RS.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\RayTracing_RS.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\RenderSystems\RayTracing_RS.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetThreat.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetThreat.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetsHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\Assets\AssetsHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\UI\ResourcesUIHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\ResourcesManagers\UI\ResourcesUIHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\SwapChain\VulkanSwap_chain.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\ComputeShadersUtils.h" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Globals.h" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\ISerializable.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\InputSystem\InputHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\InputSystem\InputHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Utility.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\Utility\Utility.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanInit\VulkanInit.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanInit\VulkanInit.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\Buffer.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\Buffer.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\VKBufferHandler.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Buffers\VKBufferHandler.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\ResourceInterface\IResource.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\ResourceInterface\IResource.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Textures\VKTexture.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Textures\VKTexture.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Materials\Material.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanObjects\Materials\Material.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanPipeline\PipelineReader.cpp" />
+    <ClInclude Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\VulkanAPI\VulkanPipeline\PipelineReader.h" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_demo.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_draw.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_tables.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_widgets.cpp" />
+    <ClCompile Include="C:\Users\carlo\CLionProjects\CodeRT_Final\Core\Source\Libraries\imgui-docking\imgui_impl_glfw.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\ZERO_CHECK.vcxproj">
+      <Project>{147D0050-A60E-32B5-82EF-571D5E3DAA98}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\Libraries\tinygltf-release\tinygltf.vcxproj">
+      <Project>{CE7858F9-CEFD-374A-82E0-B03C73F7043A}</Project>
+      <Name>tinygltf</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\carlo\CLionProjects\CodeRT_Final\VStudio_Build\Core\Source\Libraries\tinyobjloader-release\tinyobjloader.vcxproj">
+      <Project>{0C5EF34E-F2B4-3955-B5E1-7D284EE8132C}</Project>
+      <Name>tinyobjloader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
